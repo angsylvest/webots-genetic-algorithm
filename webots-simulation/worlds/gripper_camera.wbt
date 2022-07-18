@@ -50,6 +50,7 @@ DEF RED_STICK Solid {
     }
   ]
   name "red stick"
+  model "red-rod-1"
   contactMaterial "stick"
   boundingObject Box {
     size 0.013 0.013 0.06
@@ -57,6 +58,9 @@ DEF RED_STICK Solid {
   physics Physics {
     density 100
   }
+  recognitionColors [
+    0.8 0 0
+  ]
 }
 Khepera1 {
   translation 0.0245671 0 0.0045528
@@ -302,6 +306,8 @@ Khepera1 {
       physics Physics {
         density -1
         mass 0.02
+      }
+      recognition Recognition {
       }
     }
   ]

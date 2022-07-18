@@ -1,5 +1,10 @@
 """khepera_gripper controller."""
 
+"""
+Main Code Base 
+Angel Sylvester 2022
+"""
+
 # You may need to import some classes of the controller module. Ex:
 #  from controller import Robot, Motor, DistanceSensor
 from controller import Robot, Motor, DistanceSensor, Camera, CameraRecognitionObject 
@@ -74,9 +79,13 @@ while robot.step(timestep) != -1:
     dist_val = ds.getValue()
     
     # camera info 
-    firstObject = Camera.getRecognitionObjects()[0]
-    id = firstObject.get_id()
-    position = firstObject.get_position()
+    camera = robot.getDevice('camera')
+    camera.enable(timestep)
+    camera.recognitionEnable(timestep)
+    firstObject = camera.getRecognitionObjects()
+    print(firstObject)
+    # id = firstObject.get_id()
+    # position = firstObject.get_position()
     
     
     # detect obstacle 
