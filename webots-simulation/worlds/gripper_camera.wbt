@@ -24,18 +24,32 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.24084314302152665 0.1312012303743657 0.9616552488328471 2.1764838434326195
-  position 0.231127241299444 -0.2713428116240333 0.2116201995728304
+  orientation -0.06532915150027242 -0.027326592134981214 0.9974895284295183 3.9321964354940673
+  position 0.7263325417395761 0.7619470869361427 0.3828085638827284
 }
 TexturedBackground {
 }
 TexturedBackgroundLight {
 }
 RectangleArena {
+  translation 0 -0.07 0
   floorSize 2 2
+}
+DEF supervisor TinkerbotsBase {
+  translation -0.2 0 0
+  controller "ga_supervisor"
+  supervisor TRUE
+  extensionSlot [
+    Receiver {
+      channel 2
+    }
+    Emitter {
+    }
+  ]
 }
 DEF RED_STICK Solid {
   translation 0.08 0 0.03
+  rotation 0 1 0 4.6928e-06
   children [
     DEF STICK_SHAPE Shape {
       appearance PBRAppearance {
@@ -62,11 +76,21 @@ DEF RED_STICK Solid {
     0.8 0 0
   ]
 }
-Khepera1 {
+DEF khepera Khepera1 {
   translation 0.0245671 0 0.0045528
   name "khepera camera"
   controller "khepera_gripper"
+  supervisor TRUE
   extensionSlot [
+    DistanceSensor {
+    }
+    InertialUnit {
+    }
+    Receiver {
+      channel 1
+    }
+    Emitter {
+    }
     DEF LIFT_HINGE_JOINT HingeJoint {
       jointParameters HingeJointParameters {
         position -1.4
