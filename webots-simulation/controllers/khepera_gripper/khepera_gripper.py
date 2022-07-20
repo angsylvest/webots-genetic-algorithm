@@ -46,8 +46,10 @@ inertia = robot.getDevice("inertial unit")
 inertia.enable(timestep)
 
 # motor functions 
+
 def rotate_random():
-    directions = [0, pi/2, pi, -pi/2, 0] # more preference to move straight 
+    # will choose direction following biased random walk 
+    directions = [pi/2, pi, -pi/2, 0, 0, 0, 0] # more preference to move straight 
     chosen_direction = random.choice(directions)
     chosen_direction = round(chosen_direction, 2) 
     return chosen_direction 
@@ -105,15 +107,14 @@ chosen_direction = rotate_random()
 while robot.step(timestep) != -1:
 
     # biased random walk movement (each time step, cert prob of turning that direction) 
- 
-    # turn 90 degrees 
     roll, pitch, yaw = inertia.getRollPitchYaw()
     yaw = round(yaw, 2) 
+    
     
     if yaw != chosen_direction and orientation_found != True and object_encountered != True: 
         begin_rotating()
         
-    elif (i - prev_i == 200 and object_encountered != True):
+    elif (i - prev_i == 150 and object_encountered != True):
         orientation_found = False 
         chosen_direction = rotate_random()
         
