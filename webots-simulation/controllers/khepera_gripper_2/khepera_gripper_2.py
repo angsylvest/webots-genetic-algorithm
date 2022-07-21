@@ -50,13 +50,9 @@ camera = robot.getDevice('camera')
 camera.enable(timestep)
 camera.recognitionEnable(timestep)
 
-# gps info 
-gps = robot.getDevice('gps')
-gps.enable(timestep)
-
 # initial fitness 
-global fitness
-fitness = 0  
+global fitness 
+fitness = 0 
 
 global forward_speed 
 forward_speed = 2
@@ -82,12 +78,6 @@ def move_forward():
     rightMotor.setPosition(float('inf'))
     rightMotor.setVelocity(forward_speed)
     
-def move_back():
-    leftMotor.setPosition(float('inf'))
-    leftMotor.setVelocity(-forward_speed)
-    rightMotor.setPosition(float('inf'))
-    rightMotor.setVelocity(-forward_speed)
-    
 def stop():
     leftMotor.setPosition(float('inf'))
     leftMotor.setVelocity(0)
@@ -96,8 +86,7 @@ def stop():
     
 # gripper functions 
 def grab_object(curr_step, initial_step): 
-    global fitness
-     
+    global fitness 
     i = curr_step - initial_step 
     if (i == 0):
         # opens the gripper 
@@ -110,21 +99,20 @@ def grab_object(curr_step, initial_step):
         leftGrip.setPosition(closed_grip)
         rightGrip.setPosition(closed_grip) 
         fitness += 1 
-        print('fitness 1 increased', fitness) 
+        print('fitness 2 increased', fitness) 
     elif (i == 80):
         motor.setPosition(-1.4) # arm up
-        # emitter.send("k1-found".encode('utf-8'))
- 
+        emitter.send("k2-found".encode('utf-8'))
+        # delete object here 
     elif (i > 100): 
         # opens the gripper 
         leftGrip.setPosition(open_grip)
         rightGrip.setPosition(open_grip)
 
 
-def release_object():
-    leftGrip.setPosition(open_grip)
-    rightGrip.setPosition(open_grip)
-
+def release_object(curr_step, prev_step):
+    pass 
+    
 
 # Main loop:
 # - perform simulation steps until Webots is stopping the controller
@@ -134,7 +122,6 @@ holding_something = False
 prev_i = 0 # to keep track of timesteps elapsed before new direction 
 object_encountered = False 
 prev_object_i = 0 # keep track of timesteps elapsed for each pickup action
-global chosen_direction
 chosen_direction = rotate_random()
 
 while robot.step(timestep) != -1:
@@ -142,16 +129,16 @@ while robot.step(timestep) != -1:
     # biased random walk movement (each time step, cert prob of turning that direction) 
     roll, pitch, yaw = inertia.getRollPitchYaw()
     yaw = round(yaw, 2) 
-
+    
+    
     if yaw != chosen_direction and orientation_found != True and object_encountered != True: 
         begin_rotating()
         
-    elif (i - prev_i == 150 and object_encountered != True and holding_something == False):
+    elif (i - prev_i == 150 and object_encountered != True):
         orientation_found = False 
         chosen_direction = rotate_random()
-    
         
-    elif orientation_found == True and yaw == chosen_direction and object_encountered != True: 
+    elif orientation_found != True and yaw == chosen_direction and object_encountered != True: 
         orientation_found = True 
         prev_i = i
         move_forward()
@@ -160,8 +147,6 @@ while robot.step(timestep) != -1:
         pass
 
     # read distance sensor value 
-    # want to lower fitness for those that grab other robots 
-    
     dist_val = ds.getValue()
     if dist_val < 1000 and holding_something == False: 
         stop()
@@ -172,11 +157,8 @@ while robot.step(timestep) != -1:
            
         else: 
             grab_object(i, prev_object_i) 
-            if (i - prev_object_i > 100):
-                holding_something = False 
-                chosen_direction = rotate_random()
-                # release_object()
-        
+            if (i - prev_object_i > 80):
+                holding_something = True 
     else: 
          object_encountered = False
 
@@ -184,17 +166,15 @@ while robot.step(timestep) != -1:
         message = receiver.getData().decode('utf-8')
         
         if message[0] == "#":
-            print(message)
             message = list(message[1:].split(" "))
-            forward_speed = int(message[0]) 
+            forward_speed = int(message[1]) 
             
         receiver.nextPacket()
-    
-    
+
     # firstObject = camera.getRecognitionObjects()[0]
     
     # id = firstObject.get_id()
-    # id = firstObject
+    # id = firstObject.get_model()
     # print('identified object', id)
     # position = firstObject.get_position()
 

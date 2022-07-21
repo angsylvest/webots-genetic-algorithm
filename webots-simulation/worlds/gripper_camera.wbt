@@ -14,6 +14,7 @@ WorldInfo {
       coulombFriction [
         10
       ]
+      bounceVelocity 0.5
     }
     ContactProperties {
       material1 "khepera"
@@ -24,8 +25,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.1344709536226517 -0.08736983862363736 0.9870582930762977 4.282114045317681
-  position 0.2086873331672098 0.3239392670566047 0.17910578012843845
+  orientation -0.1141701462580363 0.12965376595398215 0.9849645063033331 1.4590266521161566
+  position 0.000979539334566834 -1.3325578048376725 0.6353359724928213
 }
 TexturedBackground {
 }
@@ -48,8 +49,8 @@ DEF supervisor TinkerbotsBase {
     }
   ]
 }
-DEF RED_STICK Solid {
-  translation 0.07 0 0.02
+DEF r1 Solid {
+  translation 0.48 -0.67 0.0199994
   rotation 0 1 0 4.6928e-06
   children [
     DEF STICK_SHAPE Shape {
@@ -77,10 +78,476 @@ DEF RED_STICK Solid {
     0.8 0 0
   ]
 }
+DEF r2 Solid {
+  translation 0.07 -0.59 0.02
+  rotation 0 1 0 4.6928e-06
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(1)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+}
+DEF r3 Solid {
+  translation 0.08 0.33 0.0199999
+  rotation 0 1 0 4.6928e-06
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(2)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+}
+DEF r4 Solid {
+  translation 0.12 -0.39 0.02
+  rotation 0 1 0 4.6928e-06
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(3)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+}
+DEF r5 Solid {
+  translation -0.64 -0.51 0.0200008
+  rotation 0 1 0 4.6928e-06
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(4)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+}
+DEF r6 Solid {
+  translation -0.72 -0.39 0.0200017
+  rotation 0 1 0 4.6928e-06
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(5)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+}
+DEF r7 Solid {
+  translation -0.6 -0.39 0.0200014
+  rotation 0 1 0 4.6928e-06
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(6)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+}
+DEF r8 Solid {
+  translation -0.65 -0.32 0.0200013
+  rotation 0 1 0 4.6928e-06
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(7)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+}
 DEF khepera Khepera1 {
   translation 0.0245671 0 0.0045528
   name "khepera camera"
   controller "khepera_gripper"
+  supervisor TRUE
+  extensionSlot [
+    GPS {
+    }
+    DistanceSensor {
+    }
+    InertialUnit {
+    }
+    Receiver {
+      channel 1
+    }
+    Emitter {
+      channel 2
+    }
+    DEF LIFT_HINGE_JOINT HingeJoint {
+      jointParameters HingeJointParameters {
+        position -1.4
+        axis 0 1 0
+        anchor -0.01 0 0.022
+      }
+      device [
+        RotationalMotor {
+          name "motor"
+        }
+      ]
+      endPoint Solid {
+        translation -0.01 0 0.022
+        rotation 0.7058148424148399 -0.7058148424148707 -0.060421986509761896 3.0208949999998924
+        children [
+          DEF RIGHT_GRIP SliderJoint {
+            jointParameters JointParameters {
+              axis 1 0 0
+            }
+            device [
+              LinearMotor {
+                name "right grip"
+                maxVelocity 0.1
+                maxPosition 0.029
+                maxForce 100
+              }
+            ]
+            endPoint Solid {
+              translation 0 0 -0.048
+              rotation 0 1 0 1.5708
+              children [
+                Shape {
+                  appearance PBRAppearance {
+                    baseColor 0.8 0.8 0.8
+                    roughness 1
+                    metalness 0
+                  }
+                  geometry IndexedFaceSet {
+                    coord Coordinate {
+                      point [
+                        0 -0.004 0.004
+                        0.03 -0.004 0.002
+                        0.03 -0.004 0.0001
+                        0 -0.004 0.0001
+                        0 -0.004 0.004
+                        0 0.004 0.004
+                        0.03 0.004 0.002
+                        0.03 0.004 0.0001
+                        0 0.004 0.0001
+                        0 0.004 0.004
+                      ]
+                    }
+                    coordIndex [
+                      4, 3, 2, 1, 0, -1, 5, 6, 7, 8, 9, -1, 0, 1, 6, 5, -1, 1, 2, 7, 6, -1, 2, 3, 8, 7, -1, 3, 4, 9, 8, -1
+                    ]
+                  }
+                }
+                DistanceSensor {
+                  translation 0.015 0 0
+                  rotation 0 1 0 1.5708
+                  name "ds"
+                  lookupTable [
+                    0 0 0
+                    0.05 1000 0
+                  ]
+                  type "infra-red"
+                }
+              ]
+              name "right grip"
+              contactMaterial "gripper"
+              boundingObject Transform {
+                translation 0.015 0 0.003
+                children [
+                  Box {
+                    size 0.028 0.007 0.005
+                  }
+                ]
+              }
+              physics Physics {
+                density 100
+                centerOfMass [
+                  0.01 0 0
+                ]
+              }
+            }
+          }
+          DEF LEFT_GRIP SliderJoint {
+            jointParameters JointParameters {
+              axis -1 0 0
+            }
+            device [
+              LinearMotor {
+                name "left grip"
+                maxVelocity 0.1
+                maxPosition 0.029
+                maxForce 100
+              }
+            ]
+            endPoint Solid {
+              translation 0 0 -0.048
+              rotation 0 1 0 -1.5708
+              children [
+                Shape {
+                  appearance PBRAppearance {
+                    baseColor 0.8 0.8 0.8
+                    roughness 1
+                    metalness 0
+                  }
+                  geometry IndexedFaceSet {
+                    coord Coordinate {
+                      point [
+                        0 -0.004 0.0001
+                        -0.03 -0.004 0.0001
+                        -0.03 -0.004 0.002
+                        0 -0.004 0.004
+                        0 -0.004 0.0001
+                        0 0.004 0.0001
+                        -0.03 0.004 0.0001
+                        -0.03 0.004 0.002
+                        0 0.004 0.004
+                        0 0.004 0.0001
+                      ]
+                    }
+                    coordIndex [
+                      4, 3, 2, 1, 0, -1, 5, 6, 7, 8, 9, -1, 0, 1, 6, 5, -1, 1, 2, 7, 6, -1, 2, 3, 8, 7, -1, 3, 4, 9, 8, -1
+                    ]
+                  }
+                }
+              ]
+              name "left grip"
+              contactMaterial "gripper"
+              boundingObject Transform {
+                translation -0.015 0 0.003
+                children [
+                  Box {
+                    size 0.028 0.007 0.005
+                  }
+                ]
+              }
+              physics Physics {
+                density 100
+                centerOfMass [
+                  -0.01 0 0
+                ]
+              }
+            }
+          }
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.8 0.8 0.8
+              roughness 1
+              metalness 0
+            }
+            geometry IndexedFaceSet {
+              coord Coordinate {
+                point [
+                  0.035 -0.004 0.006
+                  0.035 -0.004 -0.048
+                  -0.035 -0.004 -0.048
+                  -0.035 -0.004 0.006
+                  -0.025 -0.004 0.006
+                  -0.025 -0.004 -0.03
+                  -0.016 -0.004 -0.04
+                  0.016 -0.004 -0.04
+                  0.025 -0.004 -0.03
+                  0.025 -0.004 0.006
+                  0.035 -0.004 0.006
+                  0.035 0.004 0.006
+                  0.035 0.004 -0.048
+                  -0.035 0.004 -0.048
+                  -0.035 0.004 0.006
+                  -0.025 0.004 0.006
+                  -0.025 0.004 -0.03
+                  -0.016 0.004 -0.04
+                  0.016 0.004 -0.04
+                  0.025 0.004 -0.03
+                  0.025 0.004 0.006
+                  0.035 0.004 0.006
+                ]
+              }
+              coordIndex [
+                10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, -1, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, -1, 0, 1, 12, 11, -1, 1, 2, 13, 12, -1, 2, 3, 14, 13, -1, 3, 4, 15, 14, -1, 4, 5, 16, 15, -1, 5, 6, 17, 16, -1, 6, 7, 18, 17, -1, 7, 8, 19, 18, -1, 8, 9, 20, 19, -1, 9, 10, 21, 20, -1
+              ]
+            }
+          }
+        ]
+        boundingObject Transform {
+          translation 0 0 -0.021
+          children [
+            Box {
+              size 0.068 0.008 0.052
+            }
+          ]
+        }
+        physics Physics {
+          density 100
+          centerOfMass [
+            0 0 -0.02
+          ]
+        }
+      }
+    }
+    DEF GRIPPER_BASE Transform {
+      translation -0.01 0 0.023
+      rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.8 0.8 0.8
+            roughness 1
+            metalness 0
+          }
+          geometry Box {
+            size 0.05 0.01 0.01
+          }
+        }
+      ]
+    }
+    Camera {
+      translation -0.01 0 0.035
+      rotation -0.999759341318827 -0.016153505514822745 -0.014843305067519018 -5.307179586466759e-06
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.70632 0.70632 0.70632
+            roughness 1
+            metalness 0
+          }
+          geometry DEF CAMERA Box {
+            size 0.03 0.03 0.02
+          }
+        }
+      ]
+      boundingObject DEF CAMERA Box {
+        size 0.03 0.03 0.02
+      }
+      physics Physics {
+        density -1
+        mass 0.02
+      }
+      recognition Recognition {
+      }
+    }
+  ]
+}
+DEF khepera2 Khepera1 {
+  translation 0.124567 0.51 0.004553
+  name "khepera camera(1)"
+  controller "khepera_gripper_2"
   supervisor TRUE
   extensionSlot [
     DistanceSensor {
@@ -106,7 +573,268 @@ DEF khepera Khepera1 {
       ]
       endPoint Solid {
         translation -0.01 0 0.022
-        rotation 0.7058148424148399 -0.7058148424148708 -0.060421986509761966 3.0208949999998924
+        rotation 0.7058148424148399 -0.7058148424148707 -0.060421986509761896 3.0208949999998924
+        children [
+          DEF RIGHT_GRIP SliderJoint {
+            jointParameters JointParameters {
+              axis 1 0 0
+            }
+            device [
+              LinearMotor {
+                name "right grip"
+                maxVelocity 0.1
+                maxPosition 0.029
+                maxForce 100
+              }
+            ]
+            endPoint Solid {
+              translation 0 0 -0.048
+              rotation 0 1 0 1.5708
+              children [
+                Shape {
+                  appearance PBRAppearance {
+                    baseColor 0.8 0.8 0.8
+                    roughness 1
+                    metalness 0
+                  }
+                  geometry IndexedFaceSet {
+                    coord Coordinate {
+                      point [
+                        0 -0.004 0.004
+                        0.03 -0.004 0.002
+                        0.03 -0.004 0.0001
+                        0 -0.004 0.0001
+                        0 -0.004 0.004
+                        0 0.004 0.004
+                        0.03 0.004 0.002
+                        0.03 0.004 0.0001
+                        0 0.004 0.0001
+                        0 0.004 0.004
+                      ]
+                    }
+                    coordIndex [
+                      4, 3, 2, 1, 0, -1, 5, 6, 7, 8, 9, -1, 0, 1, 6, 5, -1, 1, 2, 7, 6, -1, 2, 3, 8, 7, -1, 3, 4, 9, 8, -1
+                    ]
+                  }
+                }
+                DistanceSensor {
+                  translation 0.015 0 0
+                  rotation 0 1 0 1.5708
+                  name "ds"
+                  lookupTable [
+                    0 0 0
+                    0.05 1000 0
+                  ]
+                  type "infra-red"
+                }
+              ]
+              name "right grip"
+              contactMaterial "gripper"
+              boundingObject Transform {
+                translation 0.015 0 0.003
+                children [
+                  Box {
+                    size 0.028 0.007 0.005
+                  }
+                ]
+              }
+              physics Physics {
+                density 100
+                centerOfMass [
+                  0.01 0 0
+                ]
+              }
+            }
+          }
+          DEF LEFT_GRIP SliderJoint {
+            jointParameters JointParameters {
+              axis -1 0 0
+            }
+            device [
+              LinearMotor {
+                name "left grip"
+                maxVelocity 0.1
+                maxPosition 0.029
+                maxForce 100
+              }
+            ]
+            endPoint Solid {
+              translation 0 0 -0.048
+              rotation 0 1 0 -1.5708
+              children [
+                Shape {
+                  appearance PBRAppearance {
+                    baseColor 0.8 0.8 0.8
+                    roughness 1
+                    metalness 0
+                  }
+                  geometry IndexedFaceSet {
+                    coord Coordinate {
+                      point [
+                        0 -0.004 0.0001
+                        -0.03 -0.004 0.0001
+                        -0.03 -0.004 0.002
+                        0 -0.004 0.004
+                        0 -0.004 0.0001
+                        0 0.004 0.0001
+                        -0.03 0.004 0.0001
+                        -0.03 0.004 0.002
+                        0 0.004 0.004
+                        0 0.004 0.0001
+                      ]
+                    }
+                    coordIndex [
+                      4, 3, 2, 1, 0, -1, 5, 6, 7, 8, 9, -1, 0, 1, 6, 5, -1, 1, 2, 7, 6, -1, 2, 3, 8, 7, -1, 3, 4, 9, 8, -1
+                    ]
+                  }
+                }
+              ]
+              name "left grip"
+              contactMaterial "gripper"
+              boundingObject Transform {
+                translation -0.015 0 0.003
+                children [
+                  Box {
+                    size 0.028 0.007 0.005
+                  }
+                ]
+              }
+              physics Physics {
+                density 100
+                centerOfMass [
+                  -0.01 0 0
+                ]
+              }
+            }
+          }
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.8 0.8 0.8
+              roughness 1
+              metalness 0
+            }
+            geometry IndexedFaceSet {
+              coord Coordinate {
+                point [
+                  0.035 -0.004 0.006
+                  0.035 -0.004 -0.048
+                  -0.035 -0.004 -0.048
+                  -0.035 -0.004 0.006
+                  -0.025 -0.004 0.006
+                  -0.025 -0.004 -0.03
+                  -0.016 -0.004 -0.04
+                  0.016 -0.004 -0.04
+                  0.025 -0.004 -0.03
+                  0.025 -0.004 0.006
+                  0.035 -0.004 0.006
+                  0.035 0.004 0.006
+                  0.035 0.004 -0.048
+                  -0.035 0.004 -0.048
+                  -0.035 0.004 0.006
+                  -0.025 0.004 0.006
+                  -0.025 0.004 -0.03
+                  -0.016 0.004 -0.04
+                  0.016 0.004 -0.04
+                  0.025 0.004 -0.03
+                  0.025 0.004 0.006
+                  0.035 0.004 0.006
+                ]
+              }
+              coordIndex [
+                10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, -1, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, -1, 0, 1, 12, 11, -1, 1, 2, 13, 12, -1, 2, 3, 14, 13, -1, 3, 4, 15, 14, -1, 4, 5, 16, 15, -1, 5, 6, 17, 16, -1, 6, 7, 18, 17, -1, 7, 8, 19, 18, -1, 8, 9, 20, 19, -1, 9, 10, 21, 20, -1
+              ]
+            }
+          }
+        ]
+        boundingObject Transform {
+          translation 0 0 -0.021
+          children [
+            Box {
+              size 0.068 0.008 0.052
+            }
+          ]
+        }
+        physics Physics {
+          density 100
+          centerOfMass [
+            0 0 -0.02
+          ]
+        }
+      }
+    }
+    DEF GRIPPER_BASE Transform {
+      translation -0.01 0 0.023
+      rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.8 0.8 0.8
+            roughness 1
+            metalness 0
+          }
+          geometry Box {
+            size 0.05 0.01 0.01
+          }
+        }
+      ]
+    }
+    Camera {
+      translation -0.01 0 0.035
+      rotation -0.999759341318827 -0.016153505514822745 -0.014843305067519018 -5.307179586466759e-06
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.70632 0.70632 0.70632
+            roughness 1
+            metalness 0
+          }
+          geometry DEF CAMERA Box {
+            size 0.03 0.03 0.02
+          }
+        }
+      ]
+      boundingObject DEF CAMERA Box {
+        size 0.03 0.03 0.02
+      }
+      physics Physics {
+        density -1
+        mass 0.02
+      }
+      recognition Recognition {
+      }
+    }
+  ]
+}
+DEF khepera3 Khepera1 {
+  translation 0.404567 0 0.004553
+  name "khepera camera(2)"
+  controller "khepera_gripper_3"
+  supervisor TRUE
+  extensionSlot [
+    DistanceSensor {
+    }
+    InertialUnit {
+    }
+    Receiver {
+      channel 1
+    }
+    Emitter {
+      channel 2
+    }
+    DEF LIFT_HINGE_JOINT HingeJoint {
+      jointParameters HingeJointParameters {
+        position -1.4
+        axis 0 1 0
+        anchor -0.01 0 0.022
+      }
+      device [
+        RotationalMotor {
+          name "motor"
+        }
+      ]
+      endPoint Solid {
+        translation -0.01 0 0.022
+        rotation 0.7058148424148402 -0.7058148424148706 -0.060421986509761966 3.0208949999998924
         children [
           DEF RIGHT_GRIP SliderJoint {
             jointParameters JointParameters {
