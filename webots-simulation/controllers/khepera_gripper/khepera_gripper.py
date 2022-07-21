@@ -87,9 +87,10 @@ def grab_object(curr_step, initial_step):
         rightGrip.setPosition(closed_grip) 
     elif (i > 80):
         motor.setPosition(-1.4) # arm up
-        
-   
-    
+        print('arm up')
+        emitter.send("delete".encode('utf-8'))
+
+
 def release_object(curr_step, prev_step):
     pass 
     
@@ -147,9 +148,11 @@ while robot.step(timestep) != -1:
     camera = robot.getDevice('camera')
     camera.enable(timestep)
     camera.recognitionEnable(timestep)
-    firstObject = camera.getRecognitionObjects()
+    firstObject = camera.getRecognitionObjects()[0]
     
     # id = firstObject.get_id()
+    id = firstObject.get_model()
+    print('identified object', id)
     # position = firstObject.get_position()
 
     # Process sensor data here.
