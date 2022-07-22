@@ -177,6 +177,10 @@ while robot.step(timestep) != -1:
         if message[0] == "#":
             message = list(message[1:].split(" "))
             forward_speed = int(message[2]) 
+            
+        elif message == "return_fitness":
+            response = "k1-fitness" + str(fitness)
+            emitter.send(response.encode('utf-8'))
   
         receiver.nextPacket()
 

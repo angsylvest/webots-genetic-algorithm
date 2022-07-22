@@ -177,6 +177,10 @@ while robot.step(timestep) != -1:
             message = list(message[1:].split(" "))
             forward_speed = int(message[1]) 
             
+        elif message == "return_fitness":
+            response = "k1-fitness" + str(fitness)
+            emitter.send(response.encode('utf-8'))
+            
         receiver.nextPacket()
 
     # firstObject = camera.getRecognitionObjects()[0]

@@ -58,14 +58,17 @@ def run_seconds(t,reset_position=False):
         # assuming only getting messages about removing nodes 
         if receiver.getQueueLength()>0:
             message = receiver.getData().decode('utf-8')
-            if message == 'k1-found': # ideally would have name of node getting deleted
-                # translation_field_1.setSFVec3f([0,0,0])
+            if 'k1-fitness' in message: 
+                k1_fitness = message[10:]
+                
                 receiver.nextPacket()
-            elif message == 'k2-found': # ideally would have name of node getting deleted
-                # translation_field_2.setSFVec3f([0,0,0])
+            elif 'k2-fitness' in message: 
+                k2_fitness = message[10:]
+                
                 receiver.nextPacket()
-            elif message == 'k3-found': # ideally would have name of node getting deleted
-                # translation_field_3.setSFVec3f([0,0,0])
+            elif 'k3-fitness' in message:
+                k2_fitness = message[10:]
+                
                 receiver.nextPacket()
                 
             elif message[0] == "$": # handles deletion of objects when grabbed

@@ -182,7 +182,6 @@ while robot.step(timestep) != -1:
             grab_object(i, prev_object_i) 
             if (i - prev_object_i == 85):
                 id = str(firstObject.get_id())
-                print('found id')
                 id = "$" + id # indication that it is a object to be deleted 
                 emitter.send(str(id).encode('utf-8'))
            
@@ -198,9 +197,12 @@ while robot.step(timestep) != -1:
         message = receiver.getData().decode('utf-8')
         
         if message[0] == "#":
-            print(message)
             message = list(message[1:].split(" "))
             forward_speed = int(message[0]) 
+            
+        elif message == "return_fitness":
+            response = "k1-fitness" + str(fitness)
+            emitter.send(response.encode('utf-8'))
             
         receiver.nextPacket()
     
