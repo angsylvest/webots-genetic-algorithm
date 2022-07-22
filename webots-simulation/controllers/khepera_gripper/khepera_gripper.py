@@ -138,12 +138,14 @@ object_encountered = False
 prev_object_i = 0 # keep track of timesteps elapsed for each pickup action
 global chosen_direction
 chosen_direction = rotate_random()
+print('initial direction --', chosen_direction) 
 
 while robot.step(timestep) != -1:
 
     # biased random walk movement (each time step, cert prob of turning that direction) 
     roll, pitch, yaw = inertia.getRollPitchYaw()
     yaw = round(yaw, 2) 
+    print('current yaw', yaw, 'vs', chosen_direction)
 
     if yaw != chosen_direction and orientation_found != True and object_encountered != True: 
         begin_rotating()
@@ -153,7 +155,7 @@ while robot.step(timestep) != -1:
         chosen_direction = rotate_random()
     
         
-    elif orientation_found == True and yaw == chosen_direction and object_encountered != True: 
+    elif orientation_found != True and yaw == chosen_direction and object_encountered != True: 
         orientation_found = True 
         prev_i = i
         move_forward()
