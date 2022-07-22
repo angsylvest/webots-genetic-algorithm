@@ -120,8 +120,6 @@ def grab_object(curr_step, initial_step):
         # leftGrip.setPosition(open_grip)
         # rightGrip.setPosition(open_grip)
         
-    
-
 
 def release_object():
     leftGrip.setPosition(open_grip)
@@ -138,14 +136,29 @@ object_encountered = False
 prev_object_i = 0 # keep track of timesteps elapsed for each pickup action
 global chosen_direction
 chosen_direction = rotate_random()
-print('initial direction --', chosen_direction) 
 
 while robot.step(timestep) != -1:
+
+    if receiver.getQueueLength()>0:
+        message = receiver.getData().decode('utf-8')
+        
+        print('messages so far', message)
+        
+        if message[0] == "#":
+            print('robot one genotype', message[1:].split(" "))
+            message = message[1:].split(" ")
+            forward_speed = int(message[0]) 
+            receiver.nextPacket()
+            
+        elif message == "return_fitness":
+            response = "k1-fitness" + str(fitness)
+            emitter.send(response.encode('utf-8'))
+            receiver.nextPacket()
+
 
     # biased random walk movement (each time step, cert prob of turning that direction) 
     roll, pitch, yaw = inertia.getRollPitchYaw()
     yaw = round(yaw, 2) 
-    print('current yaw', yaw, 'vs', chosen_direction)
 
     if yaw != chosen_direction and orientation_found != True and object_encountered != True: 
         begin_rotating()
@@ -195,19 +208,6 @@ while robot.step(timestep) != -1:
     else: 
          object_encountered = False
 
-    if receiver.getQueueLength()>0:
-        message = receiver.getData().decode('utf-8')
-        
-        if message[0] == "#":
-            message = list(message[1:].split(" "))
-            forward_speed = int(message[0]) 
-            
-        elif message == "return_fitness":
-            response = "k1-fitness" + str(fitness)
-            emitter.send(response.encode('utf-8'))
-            
-        receiver.nextPacket()
-    
     
     
     # id = firstObject

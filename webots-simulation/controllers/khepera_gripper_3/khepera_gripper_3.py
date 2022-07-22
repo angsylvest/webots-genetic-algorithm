@@ -155,6 +155,10 @@ while robot.step(timestep) != -1:
             prev_object_i = i
             grab_object(i, prev_object_i)
             object_encountered = True
+            
+            list = camera.getRecognitionObjects()
+            if len(list) != 0: 
+                firstObject = camera.getRecognitionObjects()[0]
            
         else: 
             grab_object(i, prev_object_i) 
@@ -175,14 +179,15 @@ while robot.step(timestep) != -1:
         message = receiver.getData().decode('utf-8')
         
         if message[0] == "#":
-            message = list(message[1:].split(" "))
+            print('robot three genotype', message[1:].split(" "))
+            message = message[1:].split(" ")
             forward_speed = int(message[2]) 
+            receiver.nextPacket()
             
         elif message == "return_fitness":
             response = "k1-fitness" + str(fitness)
             emitter.send(response.encode('utf-8'))
-  
-        receiver.nextPacket()
+            receiver.nextPacket()
 
     
     # firstObject = camera.getRecognitionObjects()[0]

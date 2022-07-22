@@ -43,45 +43,47 @@ global k3_fitness
 
 def restore_positions():
     pass 
+    
 
 # runs simulation for designated amount of time 
-def run_seconds(t,reset_position=False):
+def run_seconds(t,waiting=False):
     n = TIME_STEP / 1000*32 # convert ms to s 
     start = robot.getTime()
     
-    
+    new_t = round(t, 1)
     
     while robot.step(TIME_STEP) != -1:
         # run robot simulation for 30 seconds (if t = 30)
         increments = TIME_STEP / 1000
-        if robot.getTime() - start > t: 
-            eval_fitness()
+        if robot.getTime() - start > new_t: 
+            # eval_fitness()
             break 
-        if reset_position: 
-            restore_positions()
-            
-        # assuming only getting messages about removing nodes 
-        if receiver.getQueueLength()>0:
-            message = receiver.getData().decode('utf-8')
-            if 'k1-fitness' in message: 
-                k1_fitness = message[10:]
-                
-                receiver.nextPacket()
-            elif 'k2-fitness' in message: 
-                k2_fitness = message[10:]
-                
-                receiver.nextPacket()
-            elif 'k3-fitness' in message:
-                k2_fitness = message[10:]
-                
-                receiver.nextPacket()
-                
-            elif message[0] == "$": # handles deletion of objects when grabbed
-                message = int(message[1:])
-                receiver.nextPacket()
-                obj_node = robot.getFromId(message)
-                if obj_node is not None: 
-                    obj_node.remove()
+        # if reset_position: 
+            # restore_positions()
+        
+        if not waiting: 
+            # assuming only getting messages about removing nodes 
+            if receiver.getQueueLength()>0:
+                message = receiver.getData().decode('utf-8')
+                if 'k1-fitness' in message: 
+                    k1_fitness = message[10:]
+                    
+                    receiver.nextPacket()
+                elif 'k2-fitness' in message: 
+                    k2_fitness = message[10:]
+                    
+                    receiver.nextPacket()
+                elif 'k3-fitness' in message:
+                    k2_fitness = message[10:]
+                    
+                    receiver.nextPacket()
+                    
+                elif message[0] == "$": # handles deletion of objects when grabbed
+                    message = int(message[1:])
+                    receiver.nextPacket()
+                    obj_node = robot.getFromId(message)
+                    if obj_node is not None: 
+                        obj_node.remove()
                 
             
     return 
@@ -91,19 +93,21 @@ def reproduce(robot_node):
     # potential changes: speed
     return 
     
-def send_genotype(r_node_genotype):
-    genotype_string = [str(g) for g in r_node_genotype]
-    genotype_string = ','.join(genotype_string)
+# def send_genotype(r_node_genotype):
+    # genotype_string = [str(g) for g in r_node_genotype]
+    # genotype_string = ','.join(genotype_string)
     
-    emitter.send(genotype_string.encode('utf-8'))
+    # emitter.send(genotype_string.encode('utf-8'))
     
 
 # fitness function for each individual robot 
 def eval_fitness():
     # send_genotype()
-    run_seconds(60)
+    # run_seconds(60)
+    
     emitter.send('return_fitness'.encode('utf-8'))
     # fitness = 0 
+    
     
     # while robot.step(TIME_STEP) != -1: 
         # if receiver.getQueueLength() > 0: 
@@ -122,7 +126,7 @@ def run_optimization():
         pop_genotypes = create_random_population(len(population), 1)
         emitter.send(str("#" + str(pop_genotypes)).encode('utf-8'))
         
-        run_seconds(5) 
+        run_seconds(2) 
         
         # for robot in population: 
             # retrieves info about robots 
@@ -136,6 +140,9 @@ def run_optimization():
                 # reproduce(robot)
                 
         print('new generation starting -')
+        
+        
+        
                 
     return 
         
@@ -150,7 +157,6 @@ def main():
     # rotation_field.setSFRotation([0, 0, 1, 0])
     # khepera_node.resetPhysics()
    
-    print('new generation starting')
 
     
 
