@@ -104,10 +104,11 @@ def grab_object(curr_step, initial_step):
         motor.setPosition(-1.4) # arm up
         emitter.send("k3-found".encode('utf-8'))
         # delete object here 
-    elif (i > 100): 
+        
+    # elif (i > 100): 
         # opens the gripper 
-        leftGrip.setPosition(open_grip)
-        rightGrip.setPosition(open_grip)
+        # leftGrip.setPosition(open_grip)
+        # rightGrip.setPosition(open_grip)
 
 
 def release_object(curr_step, prev_step):
@@ -157,8 +158,15 @@ while robot.step(timestep) != -1:
            
         else: 
             grab_object(i, prev_object_i) 
-            if (i - prev_object_i > 80):
-                holding_something = True 
+            if (i - prev_object_i == 85):
+                id = str(firstObject.get_id())
+                print('found id')
+                id = "$" + id # indication that it is a object to be deleted 
+                emitter.send(str(id).encode('utf-8'))
+           
+                holding_something = False 
+                chosen_direction = rotate_random()
+                prev_object_i = i
     else: 
          object_encountered = False
          

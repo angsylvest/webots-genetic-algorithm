@@ -115,10 +115,12 @@ def grab_object(curr_step, initial_step):
         motor.setPosition(-1.4) # arm up
         # emitter.send("k1-found".encode('utf-8'))
  
-    elif (i > 100): 
+    # elif (i == 100): 
         # opens the gripper 
-        leftGrip.setPosition(open_grip)
-        rightGrip.setPosition(open_grip)
+        # leftGrip.setPosition(open_grip)
+        # rightGrip.setPosition(open_grip)
+        
+    
 
 
 def release_object():
@@ -169,12 +171,24 @@ while robot.step(timestep) != -1:
             prev_object_i = i
             grab_object(i, prev_object_i)
             object_encountered = True
-           
+            
+            # attempt to get object detected 
+            
+            list = camera.getRecognitionObjects()
+            if len(list) != 0: 
+                firstObject = camera.getRecognitionObjects()[0]
+        
         else: 
             grab_object(i, prev_object_i) 
-            if (i - prev_object_i > 100):
+            if (i - prev_object_i == 85):
+                id = str(firstObject.get_id())
+                print('found id')
+                id = "$" + id # indication that it is a object to be deleted 
+                emitter.send(str(id).encode('utf-8'))
+           
                 holding_something = False 
                 chosen_direction = rotate_random()
+                prev_object_i = i
                 # release_object()
         
     else: 
@@ -191,11 +205,9 @@ while robot.step(timestep) != -1:
         receiver.nextPacket()
     
     
-    # firstObject = camera.getRecognitionObjects()[0]
     
-    # id = firstObject.get_id()
     # id = firstObject
-    # print('identified object', id)
+    # print('identified object', id, firstObject.get_colors())
     # position = firstObject.get_position()
 
     # Process sensor data here.

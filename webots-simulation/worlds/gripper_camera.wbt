@@ -25,15 +25,15 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.1141701462580363 0.12965376595398215 0.9849645063033331 1.4590266521161566
-  position 0.000979539334566834 -1.3325578048376725 0.6353359724928213
+  orientation -0.015849274526814866 0.015261188400924393 -0.99975791901118 4.674523645362836
+  position 0.21267449304723463 -1.7855943663261888 0.3104879043893505
 }
 TexturedBackground {
 }
 TexturedBackgroundLight {
 }
 RectangleArena {
-  translation 0 -0.07 0
+  translation -0.04 -0.07 0
   floorSize 2 2
 }
 DEF supervisor TinkerbotsBase {
@@ -108,8 +108,8 @@ DEF r2 Solid {
   ]
 }
 DEF r3 Solid {
-  translation 0.08 0.33 0.0199999
-  rotation 0 1 0 4.6928e-06
+  translation 0.0796531 0.00866032 0.0306125
+  rotation 0.707106781186401 0.707106781186401 -6.43783800781644e-07 -3.1415853071795863
   children [
     DEF STICK_SHAPE Shape {
       appearance PBRAppearance {

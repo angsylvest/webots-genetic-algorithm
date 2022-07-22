@@ -68,8 +68,13 @@ def run_seconds(t,reset_position=False):
                 # translation_field_3.setSFVec3f([0,0,0])
                 receiver.nextPacket()
                 
-                # object = robot.getFromDef("RED_STICK")
-                # object.remove()
+            elif message[0] == "$": # handles deletion of objects when grabbed
+                message = int(message[1:])
+                receiver.nextPacket()
+                obj_node = robot.getFromId(message)
+                if obj_node is not None: 
+                    obj_node.remove()
+                
             
     return 
             
