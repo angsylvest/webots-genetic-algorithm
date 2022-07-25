@@ -10,9 +10,9 @@ Angel Sylvester 2022
 """
 
 # sets up csv for reference 
-k1_df = pd.DataFrame(columns = [''])
-k2_df = pd.DataFrame(columns = [''])
-k3_df = pd.DataFrame(columns = [''])
+k1_df = pd.DataFrame(columns = ['genotype', 'fitness'])
+k2_df = pd.DataFrame(columns = ['genotype', 'fitness'])
+k3_df = pd.DataFrame(columns = ['genotype', 'fitness'])
 
 TIME_STEP = 32
 
@@ -76,18 +76,28 @@ def run_seconds(t,waiting=False):
                 if 'k1-fitness' in message: 
                     k1_fitness = int(message[10:])
                     k1_geno = pop_genotypes.split(" ")[0]
+                    
+                    new_row = {'genotype': k1_geno, 'fitness': k1_fitness}
+                    k1_df.append(new_row)
+                    
                     print('k1 fitness', k1_fitness)
                     
                     receiver.nextPacket()
                 elif 'k2-fitness' in message: 
                     k2_fitness = int(message[10:])
                     k2_geno = pop_genotypes.split(" ")[1]
+                    
+                    new_row = {'genotype': k2_geno, 'fitness': k2_fitness}
+                    k2_df.append(new_row)
                     print('k2 fitness', k2_fitness)
                     
                     receiver.nextPacket()
                 elif 'k3-fitness' in message:
                     k3_fitness = int(message[10:])
                     k3_geno = pop_genotypes.split(" ")[2]
+                    
+                    new_row = {'genotype': k3_geno, 'fitness': k3_fitness}
+                    k3_df.append(new_row)
                     print('k3 fitness', k3_fitness)
                     
                     receiver.nextPacket()
