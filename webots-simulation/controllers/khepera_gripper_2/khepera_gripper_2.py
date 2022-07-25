@@ -153,7 +153,7 @@ while robot.step(timestep) != -1:
         
     elif (i - prev_i == 150 and object_encountered != True):
         orientation_found = False 
-        chosen_direction = rotate_random()
+        chosen_direction = correlated_random(chosen_direction)
         
     elif orientation_found != True and yaw == chosen_direction and object_encountered != True: 
         orientation_found = True 
@@ -185,14 +185,14 @@ while robot.step(timestep) != -1:
            
         else: 
             grab_object(i, prev_object_i) 
-            if (i - prev_object_i == 85):
+            if (i - prev_object_i == 85) and (len(list) != 0):
                 id = str(firstObject.get_id())
                 print('found id')
                 id = "$" + id # indication that it is a object to be deleted 
                 emitter.send(str(id).encode('utf-8'))
            
                 holding_something = False 
-                chosen_direction = rotate_random()
+                chosen_direction = correlated_random(chosen_direction)
                 prev_object_i = i
     else: 
          object_encountered = False
