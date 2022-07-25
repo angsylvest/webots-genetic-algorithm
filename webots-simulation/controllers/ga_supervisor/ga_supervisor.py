@@ -9,6 +9,11 @@ Optimization algorithm - Collaboration-oriented
 Angel Sylvester 2022
 """
 
+# sets up csv for reference 
+k1_df = pd.DataFrame(columns = [''])
+k2_df = pd.DataFrame(columns = [''])
+k3_df = pd.DataFrame(columns = [''])
+
 TIME_STEP = 32
 
 robot = Supervisor()  # create Supervisor instance
@@ -40,6 +45,7 @@ population = [k1, k2, k3]
 global k1_fitness
 global k2_fitness
 global k3_fitness
+global pop_genotypes 
 
 def restore_positions():
     pass 
@@ -47,6 +53,8 @@ def restore_positions():
 
 # runs simulation for designated amount of time 
 def run_seconds(t,waiting=False):
+    global pop_genotypes
+    
     n = TIME_STEP / 1000*32 # convert ms to s 
     start = robot.getTime()
     
@@ -67,16 +75,19 @@ def run_seconds(t,waiting=False):
                 message = receiver.getData().decode('utf-8')
                 if 'k1-fitness' in message: 
                     k1_fitness = int(message[10:])
+                    k1_geno = pop_genotypes.split(" ")[0]
                     print('k1 fitness', k1_fitness)
                     
                     receiver.nextPacket()
                 elif 'k2-fitness' in message: 
                     k2_fitness = int(message[10:])
+                    k2_geno = pop_genotypes.split(" ")[1]
                     print('k2 fitness', k2_fitness)
                     
                     receiver.nextPacket()
                 elif 'k3-fitness' in message:
                     k3_fitness = int(message[10:])
+                    k3_geno = pop_genotypes.split(" ")[2]
                     print('k3 fitness', k3_fitness)
                     
                     receiver.nextPacket()
@@ -122,6 +133,8 @@ def eval_fitness():
     # return fitness # will eventually return fitness calculation  
     
 def run_optimization():
+    global pop_genotypes 
+    
     for gen in range(num_generations): 
         
         pop_fitness = [] 
