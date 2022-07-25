@@ -69,10 +69,17 @@ forward_speed = 2
 
 def rotate_random():
     # will choose direction following biased random walk 
-    directions = [pi/2, pi, -pi/2, 0, 0, 0, 0] # more preference to move straight 
+    directions = [pi/2, -pi/2, 0, 0] # more preference to move straight 
     chosen_direction = random.choice(directions)
     chosen_direction = round(chosen_direction, 2) 
     return chosen_direction 
+    
+# def rotate_correlated(curr_dir):
+    # if (curr_dir == 0): # 50% probability to continue going straight 
+    
+    # elif (curr_dir == round(pi/2,2): 
+    
+    # elif (curr_dir == round(-pi/2,2):
     
 def begin_rotating():
     leftMotor.setPosition(float('inf'))
