@@ -107,35 +107,6 @@ DEF r2 Solid {
     0.8 0 0
   ]
 }
-DEF r3 Solid {
-  translation 0.0796531 0.00866032 0.0306125
-  rotation 0.707106781186401 0.707106781186401 -6.43783800781644e-07 -3.1415853071795863
-  children [
-    DEF STICK_SHAPE Shape {
-      appearance PBRAppearance {
-        baseColor 1 0.155604 0.246125
-        roughness 0.783569247
-        metalness 0
-      }
-      geometry Cylinder {
-        height 0.06
-        radius 0.008
-      }
-    }
-  ]
-  name "red stick(2)"
-  model "red-rod-1"
-  contactMaterial "stick"
-  boundingObject Box {
-    size 0.013 0.013 0.06
-  }
-  physics Physics {
-    density 100
-  }
-  recognitionColors [
-    0.8 0 0
-  ]
-}
 DEF r4 Solid {
   translation 0.12 -0.39 0.02
   rotation 0 1 0 4.6928e-06
@@ -287,6 +258,8 @@ DEF khepera Khepera1 {
   controller "khepera_gripper"
   supervisor TRUE
   extensionSlot [
+    TouchSensor {
+    }
     GPS {
     }
     DistanceSensor {
@@ -540,6 +513,7 @@ DEF khepera Khepera1 {
         mass 0.02
       }
       recognition Recognition {
+        maxRange 30
       }
     }
   ]
@@ -550,6 +524,8 @@ DEF khepera2 Khepera1 {
   controller "khepera_gripper_2"
   supervisor TRUE
   extensionSlot [
+    TouchSensor {
+    }
     DistanceSensor {
     }
     InertialUnit {
@@ -811,6 +787,8 @@ DEF khepera3 Khepera1 {
   controller "khepera_gripper_3"
   supervisor TRUE
   extensionSlot [
+    TouchSensor {
+    }
     DistanceSensor {
     }
     InertialUnit {

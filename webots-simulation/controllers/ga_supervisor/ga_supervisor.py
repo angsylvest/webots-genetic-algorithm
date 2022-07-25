@@ -56,7 +56,7 @@ def run_seconds(t,waiting=False):
         # run robot simulation for 30 seconds (if t = 30)
         increments = TIME_STEP / 1000
         if robot.getTime() - start > new_t: 
-            # eval_fitness()
+            eval_fitness()
             break 
         # if reset_position: 
             # restore_positions()
@@ -66,15 +66,18 @@ def run_seconds(t,waiting=False):
             if receiver.getQueueLength()>0:
                 message = receiver.getData().decode('utf-8')
                 if 'k1-fitness' in message: 
-                    k1_fitness = message[10:]
+                    k1_fitness = int(message[10:])
+                    print('k1 fitness', k1_fitness)
                     
                     receiver.nextPacket()
                 elif 'k2-fitness' in message: 
-                    k2_fitness = message[10:]
+                    k2_fitness = int(message[10:])
+                    print('k2 fitness', k2_fitness)
                     
                     receiver.nextPacket()
                 elif 'k3-fitness' in message:
-                    k2_fitness = message[10:]
+                    k3_fitness = int(message[10:])
+                    print('k3 fitness', k3_fitness)
                     
                     receiver.nextPacket()
                     
@@ -105,6 +108,7 @@ def eval_fitness():
     # send_genotype()
     # run_seconds(60)
     
+    # sent the same number of times each robot appears in sim
     emitter.send('return_fitness'.encode('utf-8'))
     # fitness = 0 
     

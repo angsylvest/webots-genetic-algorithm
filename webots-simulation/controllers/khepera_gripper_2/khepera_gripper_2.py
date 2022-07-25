@@ -50,6 +50,10 @@ camera = robot.getDevice('camera')
 camera.enable(timestep)
 camera.recognitionEnable(timestep)
 
+# collision info 
+collision = robot.getDevice('touch sensor')
+collision.enable(timestep)
+
 # initial fitness 
 global fitness 
 fitness = 0 
@@ -148,6 +152,14 @@ while robot.step(timestep) != -1:
         pass
 
     # read distance sensor value 
+    
+    # check for collisions with other robot 
+    list = camera.getRecognitionObjects()
+    
+    collision_status = collision.getValue()
+    if collision_status == 1:
+        fitness -= 1 
+        
     dist_val = ds.getValue()
     if dist_val < 1000 and holding_something == False: 
         stop()
@@ -156,7 +168,6 @@ while robot.step(timestep) != -1:
             grab_object(i, prev_object_i)
             object_encountered = True
             
-            list = camera.getRecognitionObjects()
             if len(list) != 0: 
                 firstObject = camera.getRecognitionObjects()[0]
            
@@ -178,13 +189,12 @@ while robot.step(timestep) != -1:
         message = receiver.getData().decode('utf-8')
         
         if message[0] == "#":
-            print('robot two genotype', message[1:].split(" "))
             message = message[1:].split(" ")
             forward_speed = int(message[1]) 
             receiver.nextPacket()
             
         elif message == "return_fitness":
-            response = "k1-fitness" + str(fitness)
+            response = "k2-fitness" + str(fitness)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
 

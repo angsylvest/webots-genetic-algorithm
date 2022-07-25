@@ -54,6 +54,10 @@ camera.recognitionEnable(timestep)
 gps = robot.getDevice('gps')
 gps.enable(timestep)
 
+# collision info 
+collision = robot.getDevice('touch sensor')
+collision.enable(timestep)
+
 # initial fitness 
 global fitness
 fitness = 0  
@@ -142,10 +146,8 @@ while robot.step(timestep) != -1:
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
         
-        print('messages so far', message)
         
         if message[0] == "#":
-            print('robot one genotype', message[1:].split(" "))
             message = message[1:].split(" ")
             forward_speed = int(message[0]) 
             receiver.nextPacket()
@@ -179,6 +181,14 @@ while robot.step(timestep) != -1:
     # read distance sensor value 
     # want to lower fitness for those that grab other robots 
     
+    # check for collisions with other robot 
+    list = camera.getRecognitionObjects()
+    
+    collision_status = collision.getValue()
+    if collision_status == 1:
+        fitness -= 1 
+    
+    
     dist_val = ds.getValue()
     if dist_val < 1000 and holding_something == False: 
         stop()
@@ -189,9 +199,9 @@ while robot.step(timestep) != -1:
             
             # attempt to get object detected 
             
-            list = camera.getRecognitionObjects()
             if len(list) != 0: 
                 firstObject = camera.getRecognitionObjects()[0]
+                
         
         else: 
             grab_object(i, prev_object_i) 
