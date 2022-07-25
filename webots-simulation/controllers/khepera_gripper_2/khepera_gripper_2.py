@@ -70,6 +70,18 @@ def rotate_random():
     chosen_direction = round(chosen_direction, 2) 
     return chosen_direction 
     
+def correlated_random(curr_dir): 
+    # follows a markov chain (persistence) 
+    # short-term straight line adherence (very simple) 
+    if curr_dir == 0: 
+        return random.choice([0,0, pi/2, -pi/2])
+    
+    elif curr_dir == round(pi/2, 2):
+        return random.choice([0, pi/2, pi/2, -pi/2])
+    
+    elif curr_dir == round(-pi/2): 
+        return random.choice([0, pi/2, -pi/2, -pi/2])
+    
 def begin_rotating():
     leftMotor.setPosition(float('inf'))
     leftMotor.setVelocity(-2)
