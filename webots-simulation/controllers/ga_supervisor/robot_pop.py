@@ -43,20 +43,20 @@ def reproduce(r1, r2):
     mom = r1.split("*")
     dad = r2.split("*")
         
-    for i in range(len(r1)): # assuming this is a list of genotypes 
+    for i in range(len(mom)-1): # assuming this is a list of genotypes 
         
-        child = crossover(mom, dad) 
-        child = mutate(child) + "*"
+        child = crossover(mom[i], dad[i]) 
+        child = mutate(child, 0.2) + "*"
         new_genotype += child 
     
     return new_genotype 
     
-def crossover(m, d): 
+def crossover(m, d):
     new_child = ""
     
-    random_start = random.randint(len(m))
+    random_start = random.randint(0,len(m)-1)
     
-    new_child += m[:random_start] + d[random_start] 
+    new_child += m[:random_start] + d[random_start:] 
     
     return new_child 
 
@@ -67,22 +67,22 @@ def mutate(c, mut_prob):
         if random.random() < mut_prob: 
             if i == 0: 
                 # choose random position 
-                p = random.randint(len(c)/2)
+                p = random.randint(0,len(c)/2)
                 # switch to different val 
-                if c[p] == 1:
-                    c[p] = 0
+                if c[p] == str(1):
+                    c = c[:p] + "0" + c[p+1:]
                 else: 
-                    c[p] = 1 
+                    c = c[:p] + "1" + c[p+1:]
             
             
             elif i == 1: 
                 # choose random position 
-                p = random.randint(len(c)/2, len(c))
+                p = random.randint(len(c)/2, len(c)-1)
                 # switch to different val 
-                if c[p] == 1:
-                    c[p] = 0
+                if c[p] == str(1):
+                    c = c[:p] + "0" + c[p+1:] 
                 else: 
-                    c[p] = 1 
+                    c = c[:p] + "1" + c[p+1:] 
             
             else: 
                 pass 

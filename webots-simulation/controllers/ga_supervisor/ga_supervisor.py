@@ -92,6 +92,8 @@ def update_geno_list(genotype_list):
     global fitness_scores
     global pop_genotypes 
     global gene_list 
+    
+    print('fitness list', fitness_scores)
         
     if max(fitness_scores) == 0:
         # update all genotypes 
@@ -106,7 +108,7 @@ def update_geno_list(genotype_list):
 
     else: 
         # only update lowest two genotypes 
-        max_index = fitness_scores.index(max(fitness))
+        max_index = fitness_scores.index(max(fitness_scores))
         max_geno = pop_genotypes[max_index]
         cp_genotypes = pop_genotypes.copy()
         
@@ -114,7 +116,7 @@ def update_geno_list(genotype_list):
         child = reproduce(cp_genotypes[0], cp_genotypes[1])
         
         # replace genotypes of one of parents 
-        min_index = fitness_scores.index(min(fitness))
+        min_index = fitness_scores.index(min(fitness_scores))
         pop_genotypes[min_index] = child 
                      
     # update parameters to hopefully improve performance 
@@ -137,41 +139,40 @@ def eval_fitness():
     
     # fitness = 0 
     
-    while "!" in fitness_scores:
-        print('here')
-        if receiver.getQueueLength()>0:
-            message = receiver.getData().decode('utf-8')
-            if 'k1-fitness' in message: 
-                k1_fitness = int(message[10:])
-                fitness_scores[0] = k1_fitness
-                
-                # new_row = {'genotype': k1_geno, 'fitness': k1_fitness}
-                # k1_df.append(new_row)
-                
-                print('k1 fitness', k1_fitness)
-                
-                receiver.nextPacket()
-            elif 'k2-fitness' in message: 
-                k2_fitness = int(message[10:])
-                fitness_scores[1] = k2_fitness
-                
-                # new_row = {'genotype': k2_geno, 'fitness': k2_fitness}
-                # k2_df.append(new_row)
-                print('k2 fitness', k2_fitness)
-                
-                receiver.nextPacket()
-            elif 'k3-fitness' in message:
-                k3_fitness = int(message[10:])
-                fitness_scores[2] = k3_fitness
-                
-                # new_row = {'genotype': k3_geno, 'fitness': k3_fitness}
-                # k3_df.append(new_row)
-                print('k3 fitness', k3_fitness)
-                
-                receiver.nextPacket()
+    if receiver.getQueueLength()>0:
+        message = receiver.getData().decode('utf-8')
+        if 'k1-fitness' in message: 
+            k1_fitness = int(message[10:])
+            fitness_scores[0] = k1_fitness
             
-    print('will update gene pool --')
-    update_geno_list(pop_genotypes)
+            # new_row = {'genotype': k1_geno, 'fitness': k1_fitness}
+            # k1_df.append(new_row)
+            
+            print('k1 fitness', k1_fitness)
+            
+            receiver.nextPacket()
+        elif 'k2-fitness' in message: 
+            k2_fitness = int(message[10:])
+            fitness_scores[1] = k2_fitness
+            
+            # new_row = {'genotype': k2_geno, 'fitness': k2_fitness}
+            # k2_df.append(new_row)
+            print('k2 fitness', k2_fitness)
+            
+            receiver.nextPacket()
+        elif 'k3-fitness' in message:
+            k3_fitness = int(message[10:])
+            fitness_scores[2] = k3_fitness
+            
+            # new_row = {'genotype': k3_geno, 'fitness': k3_fitness}
+            # k3_df.append(new_row)
+            print('k3 fitness', k3_fitness)
+            
+            receiver.nextPacket()
+            
+    if '!' not in fitness_scores: 
+        print('will update gene pool --')
+        update_geno_list(pop_genotypes)
     
     
     # while robot.step(TIME_STEP) != -1: 
@@ -205,9 +206,9 @@ def run_optimization():
         
         index = 0 
         for i in range(len(population)):
-            index +=1 
             emitter.send(str("#"+ str(index) + str(pop_genotypes[index])).encode('utf-8'))
-       
+            index +=1 
+            
         run_seconds(2) 
         
         # for robot in population: 
