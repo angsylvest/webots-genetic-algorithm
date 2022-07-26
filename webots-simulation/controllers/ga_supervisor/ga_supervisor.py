@@ -113,7 +113,6 @@ def eval_fitness():
     # fitness = 0 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
-        print('incoming message', message)
         if 'k1-fitness' in message: 
             k1_fitness = int(message[10:])
             k1_geno = pop_genotypes.split(" ")[0]
