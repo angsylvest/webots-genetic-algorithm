@@ -45,7 +45,10 @@ population = [k1, k2, k3]
 global k1_fitness
 global k2_fitness
 global k3_fitness
+global fitness_scores
+fitness_scores = ["!","!","!"]
 global pop_genotypes 
+pop_genotypes = []
 
 global gene_list 
 gene_list = ['control speed 10', 'detection threshold 1000', 'time switch 200']
@@ -81,25 +84,50 @@ def run_seconds(t,waiting=False):
                     receiver.nextPacket()
                     obj_node = robot.getFromId(message)
                     if obj_node is not None: 
-                        obj_node.remove()
-                
+                        obj_node.remove()             
             
     return 
             
-def reproduce(robot_node): 
+def update_geno_list(genotype_list): 
+    global fitness_scores
+    global pop_genotypes 
+    global gene_list 
+        
+    if max(fitness_scores) == 0:
+        # update all genotypes 
+        pop_genotypes = []
+        
+        g1 = create_individal_genotype(gene_list)
+        g2 = create_individal_genotype(gene_list)
+        g3 = create_individal_genotype(gene_list)
+        pop_genotypes.append(g1)
+        pop_genotypes.append(g2)
+        pop_genotypes.append(g3)
+
+    else: 
+        # only update lowest two genotypes 
+        max_index = fitness_scores.index(max(fitness))
+        max_geno = pop_genotypes[max_index]
+        cp_genotypes = pop_genotypes.copy()
+        
+        cp_genotypes.remove(pop_genotypes[max_index])
+        child = reproduce(cp_genotypes[0], cp_genotypes[1])
+        
+        # replace genotypes of one of parents 
+        min_index = fitness_scores.index(min(fitness))
+        pop_genotypes[min_index] = child 
+                     
     # update parameters to hopefully improve performance 
-    # potential changes: speed
-    return 
     
-# def send_genotype(r_node_genotype):
-    # genotype_string = [str(g) for g in r_node_genotype]
-    # genotype_string = ','.join(genotype_string)
+    fitness_scores = ["!","!","!"]
     
-    # emitter.send(genotype_string.encode('utf-8'))
+ 
     
 
 # fitness function for each individual robot 
 def eval_fitness():
+    global pop_genotypes 
+    global fitness_scores 
     # send_genotype()
     # run_seconds(60)
     
@@ -107,40 +135,43 @@ def eval_fitness():
     emitter.send('return_fitness'.encode('utf-8'))
     print('requesting fitness')
     
-    # add time 
-    
-    
     # fitness = 0 
-    if receiver.getQueueLength()>0:
-        message = receiver.getData().decode('utf-8')
-        if 'k1-fitness' in message: 
-            k1_fitness = int(message[10:])
-            k1_geno = pop_genotypes.split(" ")[0]
+    
+    while "!" in fitness_scores:
+        print('here')
+        if receiver.getQueueLength()>0:
+            message = receiver.getData().decode('utf-8')
+            if 'k1-fitness' in message: 
+                k1_fitness = int(message[10:])
+                fitness_scores[0] = k1_fitness
+                
+                # new_row = {'genotype': k1_geno, 'fitness': k1_fitness}
+                # k1_df.append(new_row)
+                
+                print('k1 fitness', k1_fitness)
+                
+                receiver.nextPacket()
+            elif 'k2-fitness' in message: 
+                k2_fitness = int(message[10:])
+                fitness_scores[1] = k2_fitness
+                
+                # new_row = {'genotype': k2_geno, 'fitness': k2_fitness}
+                # k2_df.append(new_row)
+                print('k2 fitness', k2_fitness)
+                
+                receiver.nextPacket()
+            elif 'k3-fitness' in message:
+                k3_fitness = int(message[10:])
+                fitness_scores[2] = k3_fitness
+                
+                # new_row = {'genotype': k3_geno, 'fitness': k3_fitness}
+                # k3_df.append(new_row)
+                print('k3 fitness', k3_fitness)
+                
+                receiver.nextPacket()
             
-            # new_row = {'genotype': k1_geno, 'fitness': k1_fitness}
-            # k1_df.append(new_row)
-            
-            print('k1 fitness', k1_fitness)
-            
-            receiver.nextPacket()
-        elif 'k2-fitness' in message: 
-            k2_fitness = int(message[10:])
-            k2_geno = pop_genotypes.split(" ")[1]
-            
-            # new_row = {'genotype': k2_geno, 'fitness': k2_fitness}
-            # k2_df.append(new_row)
-            print('k2 fitness', k2_fitness)
-            
-            receiver.nextPacket()
-        elif 'k3-fitness' in message:
-            k3_fitness = int(message[10:])
-            k3_geno = pop_genotypes.split(" ")[2]
-            
-            # new_row = {'genotype': k3_geno, 'fitness': k3_fitness}
-            # k3_df.append(new_row)
-            print('k3 fitness', k3_fitness)
-            
-            receiver.nextPacket()
+    print('will update gene pool --')
+    update_geno_list(pop_genotypes)
     
     
     # while robot.step(TIME_STEP) != -1: 
@@ -155,18 +186,28 @@ def run_optimization():
     global pop_genotypes 
     global gene_list 
     
-    for gen in range(num_generations): 
+    # initialize genotypes 
+    index = 0 
+    for i in range(len(population)):
+        genotype = create_individal_genotype(gene_list)
+        pop_genotypes.append(genotype)
+        emitter.send(str("#"+ str(index) + str(genotype)).encode('utf-8'))
+        index +=1 
+        
+    run_seconds(2) 
+    
+    
+    for gen in range(num_generations-1): 
         
         pop_fitness = [] 
         
         # send relevant genotypes to each robot, handler
         
-        index = 1 
+        index = 0 
         for i in range(len(population)):
-            genotype = create_individal_genotype(gene_list)
-            emitter.send(str("#"+ str(index) + str(genotype)).encode('utf-8'))
             index +=1 
-        
+            emitter.send(str("#"+ str(index) + str(pop_genotypes[index])).encode('utf-8'))
+       
         run_seconds(2) 
         
         # for robot in population: 

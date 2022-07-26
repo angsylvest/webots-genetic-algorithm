@@ -174,8 +174,7 @@ while robot.step(timestep) != -1:
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
         
-        
-        if message[0:2] == "#1":
+        if message[0:2] == "#0":
             message = message[1:].split("*")
             parse_genotype(message)
             receiver.nextPacket()
@@ -183,6 +182,8 @@ while robot.step(timestep) != -1:
         elif message == "return_fitness":
             response = "k1-fitness" + str(fitness)
             emitter.send(response.encode('utf-8'))
+            receiver.nextPacket()
+        else: 
             receiver.nextPacket()
 
 

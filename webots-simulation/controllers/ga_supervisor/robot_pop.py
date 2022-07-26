@@ -39,15 +39,15 @@ def reproduce(r1, r2):
     # smaller amount 
     
     # if below, resample again 
-    new_genotype = []
-    
+    new_genotype = ""
+    mom = r1.split("*")
+    dad = r2.split("*")
+        
     for i in range(len(r1)): # assuming this is a list of genotypes 
-        mom = r1[i]
-        dad = r2[i]
         
         child = crossover(mom, dad) 
         child = mutate(child) + "*"
-        new_genotype.append(child) 
+        new_genotype += child 
     
     return new_genotype 
     

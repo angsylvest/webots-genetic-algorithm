@@ -211,7 +211,7 @@ while robot.step(timestep) != -1:
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
         
-        if message[0:2] == "#3":
+        if message[0:2] == "#2":
             message = message[2:].split("*")
             parse_genotype(message)
             receiver.nextPacket()
@@ -220,6 +220,9 @@ while robot.step(timestep) != -1:
             response = "k3-fitness" + str(fitness)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
+        else: 
+            receiver.nextPacket()
+
 
     
     # firstObject = camera.getRecognitionObjects()[0]
