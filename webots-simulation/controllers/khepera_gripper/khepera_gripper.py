@@ -58,12 +58,15 @@ gps.enable(timestep)
 collision = robot.getDevice('touch sensor')
 collision.enable(timestep)
 
-# initial fitness 
+# initial genotype parameters
 global fitness
 fitness = 0  
-
 global forward_speed 
 forward_speed = 2
+global detect_thres 
+detect_thres = 1000
+global time_switch
+time_switch = 150
 
 # motor functions 
 
@@ -143,7 +146,16 @@ def grab_object(curr_step, initial_step):
 def release_object():
     leftGrip.setPosition(open_grip)
     rightGrip.setPosition(open_grip)
-
+    
+def parse_genotype(gen):
+    global forward_speed 
+    global detect_thres 
+    global time_switch
+    
+    forward_speed = gen[0].count('1')
+    detect_thres = gen[1].count('1')
+    time_switch = gen[2].count('1')
+ 
 
 # Main loop:
 # - perform simulation steps until Webots is stopping the controller
@@ -156,15 +168,16 @@ prev_object_i = 0 # keep track of timesteps elapsed for each pickup action
 global chosen_direction
 chosen_direction = rotate_random()
 
+
 while robot.step(timestep) != -1:
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
         
         
-        if message[0] == "#":
-            message = message[1:].split(" ")
-            forward_speed = int(message[0]) 
+        if message[0:2] == "#1":
+            message = message[1:].split("*")
+            parse_genotype(message)
             receiver.nextPacket()
             
         elif message == "return_fitness":
@@ -180,11 +193,10 @@ while robot.step(timestep) != -1:
     if yaw != chosen_direction and orientation_found != True and object_encountered != True: 
         begin_rotating()
         
-    elif (i - prev_i == 150 and object_encountered != True and holding_something == False):
+    elif (i - prev_i == time_switch and object_encountered != True and holding_something == False):
         orientation_found = False 
         chosen_direction = correlated_random(chosen_direction)
     
-        
     elif orientation_found != True and yaw == chosen_direction and object_encountered != True: 
         orientation_found = True 
         prev_i = i
@@ -205,7 +217,7 @@ while robot.step(timestep) != -1:
     
     
     dist_val = ds.getValue()
-    if dist_val < 1000 and holding_something == False: 
+    if dist_val < detect_thres and holding_something == False: 
         stop()
         if (object_encountered == False):
             prev_object_i = i

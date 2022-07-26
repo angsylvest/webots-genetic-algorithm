@@ -47,6 +47,9 @@ global k2_fitness
 global k3_fitness
 global pop_genotypes 
 
+global gene_list 
+gene_list = ['control speed 10', 'detection threshold 1000', 'time switch 200']
+
 def restore_positions():
     pass 
     
@@ -70,39 +73,10 @@ def run_seconds(t,waiting=False):
             # restore_positions()
         
         if not waiting: 
-            # assuming only getting messages about removing nodes 
             if receiver.getQueueLength()>0:
                 message = receiver.getData().decode('utf-8')
-                if 'k1-fitness' in message: 
-                    k1_fitness = int(message[10:])
-                    k1_geno = pop_genotypes.split(" ")[0]
-                    
-                    new_row = {'genotype': k1_geno, 'fitness': k1_fitness}
-                    k1_df.append(new_row)
-                    
-                    print('k1 fitness', k1_fitness)
-                    
-                    receiver.nextPacket()
-                elif 'k2-fitness' in message: 
-                    k2_fitness = int(message[10:])
-                    k2_geno = pop_genotypes.split(" ")[1]
-                    
-                    new_row = {'genotype': k2_geno, 'fitness': k2_fitness}
-                    k2_df.append(new_row)
-                    print('k2 fitness', k2_fitness)
-                    
-                    receiver.nextPacket()
-                elif 'k3-fitness' in message:
-                    k3_fitness = int(message[10:])
-                    k3_geno = pop_genotypes.split(" ")[2]
-                    
-                    new_row = {'genotype': k3_geno, 'fitness': k3_fitness}
-                    k3_df.append(new_row)
-                    print('k3 fitness', k3_fitness)
-                    
-                    receiver.nextPacket()
-                    
-                elif message[0] == "$": # handles deletion of objects when grabbed
+                # assuming only getting messages about removing nodes
+                if message[0] == "$": # handles deletion of objects when grabbed
                     message = int(message[1:])
                     receiver.nextPacket()
                     obj_node = robot.getFromId(message)
@@ -131,7 +105,43 @@ def eval_fitness():
     
     # sent the same number of times each robot appears in sim
     emitter.send('return_fitness'.encode('utf-8'))
+    print('requesting fitness')
+    
+    # add time 
+    
+    
     # fitness = 0 
+    if receiver.getQueueLength()>0:
+        message = receiver.getData().decode('utf-8')
+        print('incoming message', message)
+        if 'k1-fitness' in message: 
+            k1_fitness = int(message[10:])
+            k1_geno = pop_genotypes.split(" ")[0]
+            
+            # new_row = {'genotype': k1_geno, 'fitness': k1_fitness}
+            # k1_df.append(new_row)
+            
+            print('k1 fitness', k1_fitness)
+            
+            receiver.nextPacket()
+        elif 'k2-fitness' in message: 
+            k2_fitness = int(message[10:])
+            k2_geno = pop_genotypes.split(" ")[1]
+            
+            # new_row = {'genotype': k2_geno, 'fitness': k2_fitness}
+            # k2_df.append(new_row)
+            print('k2 fitness', k2_fitness)
+            
+            receiver.nextPacket()
+        elif 'k3-fitness' in message:
+            k3_fitness = int(message[10:])
+            k3_geno = pop_genotypes.split(" ")[2]
+            
+            # new_row = {'genotype': k3_geno, 'fitness': k3_fitness}
+            # k3_df.append(new_row)
+            print('k3 fitness', k3_fitness)
+            
+            receiver.nextPacket()
     
     
     # while robot.step(TIME_STEP) != -1: 
@@ -144,14 +154,19 @@ def eval_fitness():
     
 def run_optimization():
     global pop_genotypes 
+    global gene_list 
     
     for gen in range(num_generations): 
         
         pop_fitness = [] 
         
         # send relevant genotypes to each robot, handler
-        pop_genotypes = create_random_population(len(population), 1)
-        emitter.send(str("#" + str(pop_genotypes)).encode('utf-8'))
+        
+        index = 1 
+        for i in range(len(population)):
+            genotype = create_individal_genotype(gene_list)
+            emitter.send(str("#"+ str(index) + str(genotype)).encode('utf-8'))
+            index +=1 
         
         run_seconds(2) 
         

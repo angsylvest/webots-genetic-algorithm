@@ -11,19 +11,27 @@ def create_random_population(size, gene_list):
     # rule-set generated for each robot 
     
     ruleset = ""
-    pop = ""
+    pop_set = ""
     for pop in range(size): 
         for gene in gene_list:
-            length_gene = gene[-1]
-            ruleset += generate_random_act(length_gene) + "*"
-        pop += ruleset + " " 
-    
-    return pop         
+            g_count = int(gene.split(" ")[-1])
+            ruleset += generate_random_act(g_count) + "*"
+        pop_set += ruleset + " "
+    return pop_set         
         
-    # return str(random.randint(3, 6)) + " " + str(random.randint(3, 6)) + " " + str(random.randint(3, 6)) 
-    
+        
+def create_individal_genotype(gene_list):
+    ruleset = ""
+    for gene in gene_list:
+        g_count = int(gene.split(" ")[-1])
+        ruleset += generate_random_act(g_count) + "*"
+    return ruleset
+     
+# will generate binary encoding for corresponding feature 
 def generate_random_act(length):
-    return np.random.randint(2, size = length)
+    np_binary = np.random.randint(2, size = length)
+    list_binary = ''.join([",".join(item) for item in np_binary.astype(str)])
+    return list_binary
     
     
 def reproduce(r1, r2): 
@@ -38,7 +46,7 @@ def reproduce(r1, r2):
         dad = r2[i]
         
         child = crossover(mom, dad) 
-        child = mutate(child) 
+        child = mutate(child) + "*"
         new_genotype.append(child) 
     
     return new_genotype 
