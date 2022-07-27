@@ -25,8 +25,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.015849274526814866 0.015261188400924393 -0.99975791901118 4.674523645362836
-  position 0.21267449304723463 -1.7855943663261888 0.3104879043893505
+  orientation 0.22176965906190546 -0.09996005208569032 -0.9699619612678593 3.965895256088618
+  position 2.0654341073142395 -2.232675826238217 1.5450649935952425
 }
 TexturedBackground {
 }
@@ -50,7 +50,7 @@ DEF supervisor TinkerbotsBase {
   ]
 }
 DEF r1 Solid {
-  translation 0.48 -0.67 0.0199994
+  translation 0.32 -0.67 0.0199994
   rotation 0 1 0 4.6928e-06
   children [
     DEF STICK_SHAPE Shape {
@@ -78,8 +78,37 @@ DEF r1 Solid {
     0.8 0 0
   ]
 }
+DEF r9 Solid {
+  translation 0.58 -0.67 0.0199989
+  rotation 0 1 0 4.6928e-06
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(2)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+}
 DEF r2 Solid {
-  translation 0.07 -0.59 0.02
+  translation 0.07 -0.42 0.019999
   rotation 0 1 0 4.6928e-06
   children [
     DEF STICK_SHAPE Shape {
@@ -108,7 +137,7 @@ DEF r2 Solid {
   ]
 }
 DEF r4 Solid {
-  translation 0.12 -0.39 0.02
+  translation 0.59 -0.43 0.0199991
   rotation 0 1 0 4.6928e-06
   children [
     DEF STICK_SHAPE Shape {
@@ -137,7 +166,7 @@ DEF r4 Solid {
   ]
 }
 DEF r5 Solid {
-  translation -0.64 -0.51 0.0200008
+  translation -0.19 -0.43 0.0199996
   rotation 0 1 0 4.6928e-06
   children [
     DEF STICK_SHAPE Shape {
@@ -166,7 +195,7 @@ DEF r5 Solid {
   ]
 }
 DEF r6 Solid {
-  translation -0.72 -0.39 0.0200017
+  translation 0.06 -0.66 0.019999
   rotation 0 1 0 4.6928e-06
   children [
     DEF STICK_SHAPE Shape {
@@ -195,7 +224,7 @@ DEF r6 Solid {
   ]
 }
 DEF r7 Solid {
-  translation -0.6 -0.39 0.0200014
+  translation -0.17 -0.68 0.0200005
   rotation 0 1 0 4.6928e-06
   children [
     DEF STICK_SHAPE Shape {
@@ -224,7 +253,7 @@ DEF r7 Solid {
   ]
 }
 DEF r8 Solid {
-  translation -0.65 -0.32 0.0200013
+  translation 0.31 -0.41 0.0199972
   rotation 0 1 0 4.6928e-06
   children [
     DEF STICK_SHAPE Shape {
@@ -519,7 +548,7 @@ DEF khepera Khepera1 {
   ]
 }
 DEF khepera2 Khepera1 {
-  translation 0.124567 0.51 0.004553
+  translation 0.314567 0 0.004553
   name "khepera camera(1)"
   controller "khepera_gripper_2"
   supervisor TRUE
@@ -782,7 +811,7 @@ DEF khepera2 Khepera1 {
   ]
 }
 DEF khepera3 Khepera1 {
-  translation 0.404567 0 0.004553
+  translation 0.574567 0 0.004553
   name "khepera camera(2)"
   controller "khepera_gripper_3"
   supervisor TRUE

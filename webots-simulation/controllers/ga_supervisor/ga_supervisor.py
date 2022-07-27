@@ -56,7 +56,14 @@ gene_list = ['control speed 10', 'detection threshold 1000', 'time switch 200']
 def restore_positions():
     pass 
     
-
+def save_progress():
+    
+    k1_df.to_csv('k1_results.csv')
+    k2_df.to_csv('k2_results.csv') 
+    k3_df.to_csv('k3_results.csv') 
+    
+    print('progress saved to csv')
+    
 # runs simulation for designated amount of time 
 def run_seconds(t,waiting=False):
     global pop_genotypes
@@ -145,8 +152,8 @@ def eval_fitness():
             k1_fitness = int(message[10:])
             fitness_scores[0] = k1_fitness
             
-            # new_row = {'genotype': k1_geno, 'fitness': k1_fitness}
-            # k1_df.append(new_row)
+            new_row = {'genotype': k1_geno, 'fitness': k1_fitness}
+            k1_df.append(new_row)
             
             print('k1 fitness', k1_fitness)
             
@@ -155,8 +162,8 @@ def eval_fitness():
             k2_fitness = int(message[10:])
             fitness_scores[1] = k2_fitness
             
-            # new_row = {'genotype': k2_geno, 'fitness': k2_fitness}
-            # k2_df.append(new_row)
+            new_row = {'genotype': k2_geno, 'fitness': k2_fitness}
+            k2_df.append(new_row)
             print('k2 fitness', k2_fitness)
             
             receiver.nextPacket()
@@ -164,8 +171,8 @@ def eval_fitness():
             k3_fitness = int(message[10:])
             fitness_scores[2] = k3_fitness
             
-            # new_row = {'genotype': k3_geno, 'fitness': k3_fitness}
-            # k3_df.append(new_row)
+            new_row = {'genotype': k3_geno, 'fitness': k3_fitness}
+            k3_df.append(new_row)
             print('k3 fitness', k3_fitness)
             
             receiver.nextPacket()
@@ -200,7 +207,7 @@ def run_optimization():
     
     for gen in range(num_generations-1): 
         
-        pop_fitness = [] 
+        # pop_fitness = [] 
         
         # send relevant genotypes to each robot, handler
         
@@ -228,6 +235,7 @@ def run_optimization():
         
                 
     return 
+   
         
             
 def main(): 
@@ -236,6 +244,8 @@ def main():
     restore_positions()
    
     run_optimization()
+    
+    save_fitness()
     # translation_field.setSFVec3f([0,0,0]) # reset robot position
     # rotation_field.setSFRotation([0, 0, 1, 0])
     # khepera_node.resetPhysics()
