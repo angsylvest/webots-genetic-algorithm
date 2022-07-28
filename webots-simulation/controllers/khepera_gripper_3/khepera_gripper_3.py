@@ -76,13 +76,13 @@ def correlated_random(curr_dir):
     # follows a markov chain (persistence) 
     # short-term straight line adherence (very simple) 
     if curr_dir == 0: 
-        return random.choice([0,0, pi/2, -pi/2])
+        return round(random.choice([0,0, pi/2, -pi/2]),2)
     
     elif curr_dir == round(pi/2, 2):
-        return random.choice([0, pi/2, pi/2, -pi/2])
+        return round(random.choice([0, pi/2, pi/2, -pi/2]),2)
     
     elif curr_dir == round(-pi/2): 
-        return random.choice([0, pi/2, -pi/2, -pi/2])
+        return round(random.choice([0, pi/2, -pi/2, -pi/2]),2)
     
 def begin_rotating():
     leftMotor.setPosition(float('inf'))
@@ -120,7 +120,7 @@ def grab_object(curr_step, initial_step):
         print('fitness 3 increased', fitness) 
     elif (i == 80):
         motor.setPosition(-1.4) # arm up
-        emitter.send("k3-found".encode('utf-8'))
+        # emitter.send("k3-found".encode('utf-8'))
         # delete object here 
         
     # elif (i > 100): 
@@ -138,6 +138,8 @@ def parse_genotype(gen):
     global time_switch
     
     forward_speed = gen[0].count('1')
+    if forward_speed < 3: 
+        forward_speed = 3
     detect_thres = gen[1].count('1')
     time_switch = gen[2].count('1')
     
@@ -192,18 +194,26 @@ while robot.step(timestep) != -1:
             
             if len(list) != 0: 
                 firstObject = camera.getRecognitionObjects()[0]
-           
-        else: 
-            grab_object(i, prev_object_i) 
-            if (i - prev_object_i == 85) and (len(list) != 0):
+                print('found object', firstObject)
                 id = str(firstObject.get_id())
-                print('found id')
                 id = "$" + id # indication that it is a object to be deleted 
                 emitter.send(str(id).encode('utf-8'))
-           
                 holding_something = False 
                 chosen_direction = correlated_random(chosen_direction)
-                prev_object_i = i
+        else: 
+            # grab_object(i, prev_object_i) 
+           
+            pass
+            # if (i - prev_object_i == 85) and (len(list) != 0):
+            
+                # id = str(firstObject.get_id())
+                # print('found id')
+                # id = "$" + id # indication that it is a object to be deleted 
+                # emitter.send(str(id).encode('utf-8'))
+           
+                # holding_something = False 
+                # chosen_direction = correlated_random(chosen_direction)
+                # prev_object_i = i
     else: 
          object_encountered = False
          

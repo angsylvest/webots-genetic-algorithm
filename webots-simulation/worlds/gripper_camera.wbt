@@ -25,8 +25,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation 0.22176965906190546 -0.09996005208569032 -0.9699619612678593 3.965895256088618
-  position 2.0654341073142395 -2.232675826238217 1.5450649935952425
+  orientation 0.2595558473945187 -0.5018264085298205 -0.8251066705495569 5.163309907863054
+  position 0.0034758701222141752 -0.6215791189425813 0.7023144221048506
 }
 TexturedBackground {
 }
@@ -50,7 +50,7 @@ DEF supervisor TinkerbotsBase {
   ]
 }
 DEF r1 Solid {
-  translation 0.32 -0.67 0.0199994
+  translation 0.32 0.28 0.0199994
   rotation 0 1 0 4.6928e-06
   children [
     DEF STICK_SHAPE Shape {
@@ -79,7 +79,7 @@ DEF r1 Solid {
   ]
 }
 DEF r9 Solid {
-  translation 0.58 -0.67 0.0199989
+  translation 0.58 0.28 0.0199989
   rotation 0 1 0 4.6928e-06
   children [
     DEF STICK_SHAPE Shape {
@@ -108,7 +108,7 @@ DEF r9 Solid {
   ]
 }
 DEF r2 Solid {
-  translation 0.07 -0.42 0.019999
+  translation 0.07 -0.24 0.019999
   rotation 0 1 0 4.6928e-06
   children [
     DEF STICK_SHAPE Shape {
@@ -137,8 +137,8 @@ DEF r2 Solid {
   ]
 }
 DEF r4 Solid {
-  translation 0.59 -0.43 0.0199991
-  rotation 0 1 0 4.6928e-06
+  translation 0.65 6.48909e-17 0.0199985
+  rotation 0.004086988562297277 -0.9999916482273697 -9.589706626575503e-09 -5.307179586466759e-06
   children [
     DEF STICK_SHAPE Shape {
       appearance PBRAppearance {
@@ -166,7 +166,7 @@ DEF r4 Solid {
   ]
 }
 DEF r5 Solid {
-  translation -0.19 -0.43 0.0199996
+  translation 0.04 0.3 0.0199983
   rotation 0 1 0 4.6928e-06
   children [
     DEF STICK_SHAPE Shape {
@@ -195,7 +195,7 @@ DEF r5 Solid {
   ]
 }
 DEF r6 Solid {
-  translation 0.06 -0.66 0.019999
+  translation 0.54 -0.61 0.0199983
   rotation 0 1 0 4.6928e-06
   children [
     DEF STICK_SHAPE Shape {
@@ -224,7 +224,7 @@ DEF r6 Solid {
   ]
 }
 DEF r7 Solid {
-  translation -0.17 -0.68 0.0200005
+  translation 0.14 -0.6 0.0199998
   rotation 0 1 0 4.6928e-06
   children [
     DEF STICK_SHAPE Shape {
@@ -253,7 +253,7 @@ DEF r7 Solid {
   ]
 }
 DEF r8 Solid {
-  translation 0.31 -0.41 0.0199972
+  translation 0.31 -0.23 0.0199972
   rotation 0 1 0 4.6928e-06
   children [
     DEF STICK_SHAPE Shape {

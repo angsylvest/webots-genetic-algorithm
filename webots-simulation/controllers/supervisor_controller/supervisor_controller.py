@@ -93,7 +93,7 @@ def run_seconds(t,waiting=False):
  
 
 # fitness function for each individual robot 
-def eval_fitness():
+def eval_fitness(time_step):
     global pop_genotypes 
     global fitness_scores 
     # send_genotype()
@@ -111,8 +111,8 @@ def eval_fitness():
             k1_fitness = int(message[10:])
             fitness_scores[0] = k1_fitness
             
-            new_row = {'genotype': k1_geno, 'fitness': k1_fitness}
-            k1_df.append(new_row)
+            new_row = {'time step': time_step, 'fitness': k1_fitness}
+            k1_df.append(new_row, ignore_index=True)
             
             print('k1 fitness', k1_fitness)
             
@@ -121,8 +121,8 @@ def eval_fitness():
             k2_fitness = int(message[10:])
             fitness_scores[1] = k2_fitness
             
-            new_row = {'genotype': k2_geno, 'fitness': k2_fitness}
-            k2_df.append(new_row)
+            new_row = {'time step': time_step, 'fitness': k2_fitness}
+            k2_df.append(new_row, ignore_index=True)
             print('k2 fitness', k2_fitness)
             
             receiver.nextPacket()
@@ -130,8 +130,8 @@ def eval_fitness():
             k3_fitness = int(message[10:])
             fitness_scores[2] = k3_fitness
             
-            new_row = {'genotype': k3_geno, 'fitness': k3_fitness}
-            k3_df.append(new_row)
+            new_row = {'time step': time_step, 'fitness': k3_fitness}
+            k3_df.append(new_row, ignore_index=True)
             print('k3 fitness', k3_fitness)
             
             receiver.nextPacket()
@@ -154,7 +154,7 @@ def run_optimization():
         
         # send relevant genotypes to each robot, handler
         
-        run_seconds(2) 
+        run_seconds(10) 
         
         # for robot in population: 
             # retrieves info about robots 
