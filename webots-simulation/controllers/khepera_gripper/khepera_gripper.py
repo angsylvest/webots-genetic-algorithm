@@ -81,14 +81,17 @@ def rotate_random():
 def correlated_random(curr_dir): 
     # follows a markov chain (persistence) 
     # short-term straight line adherence (very simple) 
-    if curr_dir == 0: 
+    if round(curr_dir,2) == -0.00: 
         return round(random.choice([0,0, pi/2, -pi/2]),2)
     
-    elif curr_dir == round(pi/2, 2):
+    elif round(curr_dir,2) == round(pi/2, 2):
         return round(random.choice([0, pi/2, pi/2, -pi/2]),2)
     
-    elif curr_dir == round(-pi/2): 
+    elif round(curr_dir,2) == round(-pi/2): 
         return round(random.choice([0, pi/2, -pi/2, -pi/2]),2)
+        
+    else: 
+        return round(random.choice([0,0, pi/2, -pi/2]),2)
     
  
 
@@ -224,6 +227,8 @@ while robot.step(timestep) != -1:
     collision_status = collision.getValue()
     if collision_status == 1:
         fitness -= 1 
+        print('collision encountered')
+        move_backwards()
     
     
     dist_val = ds.getValue()
@@ -245,9 +250,11 @@ while robot.step(timestep) != -1:
                 fitness += 1 
                 holding_something = False 
                 chosen_direction = correlated_random(chosen_direction)
-            # elif dist_val < 40:
-                # chosen_direction = correlated_random(chosen_direction) 
-                # move_backwards()
+            elif dist_val == 0:
+                fitness -= 1 
+                print('collision encountered')
+                chosen_direction = rotate_random()
+                move_backwards()
         else: 
         
             # grab_object(i, prev_object_i) 

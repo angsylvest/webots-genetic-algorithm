@@ -39,7 +39,7 @@ receiver = robot.getDevice("receiver")
 receiver.enable(TIME_STEP)
 receiver.setChannel(2) 
 
-num_generations = 50
+num_generations = 10
 population = [k1, k2, k3]
 
 global initial_genotypes 
@@ -217,6 +217,16 @@ def eval_fitness(time_step):
             
             receiver.nextPacket()
             
+        elif '$' == message[0]:
+            message = int(message[1:])
+            receiver.nextPacket()
+            print('removing object')
+            obj_node = robot.getFromId(message)
+            print(obj_node)
+            if obj_node is not None: 
+                obj_node.remove()  
+            
+            
     if '!' not in fitness_scores: 
         # receiver.nextPacket()
         print('will update gene pool --')
@@ -264,7 +274,7 @@ def run_optimization():
             
         run_seconds(10) 
         
-        # run_seconds(5, True)x # is waiting until got genotypes
+        run_seconds(5, True) # is waiting until got genotypes
         
         
         # for robot in population: 
