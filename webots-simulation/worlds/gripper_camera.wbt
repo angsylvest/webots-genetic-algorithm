@@ -26,7 +26,7 @@ WorldInfo {
 }
 Viewpoint {
   orientation 0.2595558473945187 -0.5018264085298205 -0.8251066705495569 5.163309907863054
-  position 0.0034758701222141752 -0.6215791189425813 0.7023144221048506
+  position -0.7144340333214199 -1.635469419926933 1.5697644544602685
 }
 TexturedBackground {
 }
@@ -37,7 +37,7 @@ RectangleArena {
   floorSize 2 2
 }
 DEF supervisor TinkerbotsBase {
-  translation -0.2 0 0
+  translation -0.41 0 0
   controller "ga_supervisor"
   supervisor TRUE
   extensionSlot [
@@ -50,35 +50,6 @@ DEF supervisor TinkerbotsBase {
   ]
 }
 DEF r1 Solid {
-  translation 0.32 0.28 0.0199994
-  rotation 0 1 0 4.6928e-06
-  children [
-    DEF STICK_SHAPE Shape {
-      appearance PBRAppearance {
-        baseColor 1 0.155604 0.246125
-        roughness 0.783569247
-        metalness 0
-      }
-      geometry Cylinder {
-        height 0.06
-        radius 0.008
-      }
-    }
-  ]
-  name "red stick"
-  model "red-rod-1"
-  contactMaterial "stick"
-  boundingObject Box {
-    size 0.013 0.013 0.06
-  }
-  physics Physics {
-    density 100
-  }
-  recognitionColors [
-    0.8 0 0
-  ]
-}
-DEF r9 Solid {
   translation 0.58 0.28 0.0199989
   rotation 0 1 0 4.6928e-06
   children [
@@ -108,7 +79,7 @@ DEF r9 Solid {
   ]
 }
 DEF r2 Solid {
-  translation 0.07 -0.24 0.019999
+  translation 0.05 -0.23 0.019999
   rotation 0 1 0 4.6928e-06
   children [
     DEF STICK_SHAPE Shape {
@@ -136,36 +107,7 @@ DEF r2 Solid {
     0.8 0 0
   ]
 }
-DEF r4 Solid {
-  translation 0.65 6.48909e-17 0.0199985
-  rotation 0.004086988562297277 -0.9999916482273697 -9.589706626575503e-09 -5.307179586466759e-06
-  children [
-    DEF STICK_SHAPE Shape {
-      appearance PBRAppearance {
-        baseColor 1 0.155604 0.246125
-        roughness 0.783569247
-        metalness 0
-      }
-      geometry Cylinder {
-        height 0.06
-        radius 0.008
-      }
-    }
-  ]
-  name "red stick(3)"
-  model "red-rod-1"
-  contactMaterial "stick"
-  boundingObject Box {
-    size 0.013 0.013 0.06
-  }
-  physics Physics {
-    density 100
-  }
-  recognitionColors [
-    0.8 0 0
-  ]
-}
-DEF r5 Solid {
+DEF r3 Solid {
   translation 0.04 0.3 0.0199983
   rotation 0 1 0 4.6928e-06
   children [
@@ -194,37 +136,8 @@ DEF r5 Solid {
     0.8 0 0
   ]
 }
-DEF r6 Solid {
-  translation 0.54 -0.61 0.0199983
-  rotation 0 1 0 4.6928e-06
-  children [
-    DEF STICK_SHAPE Shape {
-      appearance PBRAppearance {
-        baseColor 1 0.155604 0.246125
-        roughness 0.783569247
-        metalness 0
-      }
-      geometry Cylinder {
-        height 0.06
-        radius 0.008
-      }
-    }
-  ]
-  name "red stick(5)"
-  model "red-rod-1"
-  contactMaterial "stick"
-  boundingObject Box {
-    size 0.013 0.013 0.06
-  }
-  physics Physics {
-    density 100
-  }
-  recognitionColors [
-    0.8 0 0
-  ]
-}
-DEF r7 Solid {
-  translation 0.14 -0.6 0.0199998
+DEF r4 Solid {
+  translation -0.18 -0.41 0.0199999
   rotation 0 1 0 4.6928e-06
   children [
     DEF STICK_SHAPE Shape {
@@ -252,7 +165,7 @@ DEF r7 Solid {
     0.8 0 0
   ]
 }
-DEF r8 Solid {
+DEF r5 Solid {
   translation 0.31 -0.23 0.0199972
   rotation 0 1 0 4.6928e-06
   children [
@@ -281,8 +194,95 @@ DEF r8 Solid {
     0.8 0 0
   ]
 }
+DEF r6 Solid {
+  translation 0.6 -0.23 0.0199971
+  rotation 0 1 0 4.6928e-06
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(3)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+}
+DEF r7 Solid {
+  translation 0.8 -0.41 0.0199969
+  rotation 0 1 0 4.6928e-06
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(5)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+}
+DEF r8 Solid {
+  translation 0.31 0.27 0.0199972
+  rotation 0 1 0 4.6928e-06
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(8)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+}
 DEF khepera Khepera1 {
-  translation 0.0245671 0 0.0045528
+  translation -0.115433 0 0.0045528
   name "khepera camera"
   controller "khepera_gripper"
   supervisor TRUE
@@ -548,7 +548,7 @@ DEF khepera Khepera1 {
   ]
 }
 DEF khepera2 Khepera1 {
-  translation 0.314567 0 0.004553
+  translation 0.244567 0 0.004553
   name "khepera camera(1)"
   controller "khepera_gripper_2"
   supervisor TRUE
@@ -811,7 +811,7 @@ DEF khepera2 Khepera1 {
   ]
 }
 DEF khepera3 Khepera1 {
-  translation 0.574567 0 0.004553
+  translation 0.604567 0 0.004553
   name "khepera camera(2)"
   controller "khepera_gripper_3"
   supervisor TRUE

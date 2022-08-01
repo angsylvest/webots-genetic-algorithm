@@ -48,6 +48,9 @@ global k3_fitness
 global fitness_scores
 fitness_scores = ["!","!","!"]
 
+global total_found 
+total_found = 0
+
 
 def restore_positions():
     pass 
@@ -73,7 +76,7 @@ def run_seconds(t,waiting=False):
         # run robot simulation for 30 seconds (if t = 30)
         increments = TIME_STEP / 1000
         if robot.getTime() - start > new_t: 
-            eval_fitness()
+            eval_fitness(robot.getTime())
             break 
         # if reset_position: 
             # restore_positions()
@@ -87,7 +90,15 @@ def run_seconds(t,waiting=False):
                     receiver.nextPacket()
                     obj_node = robot.getFromId(message)
                     if obj_node is not None: 
-                        obj_node.remove()             
+                        obj_node.remove()
+                        total_found += 1
+            if total_found == 8:
+            
+                new_row = {'time step': robot.getTime(), 'fitness': 0} # this is just here to record time to finish task  
+                k1_df.append(new_row, ignore_index=True)
+                break 
+             
+                                     
             
     return 
  
@@ -154,7 +165,7 @@ def run_optimization():
         
         # send relevant genotypes to each robot, handler
         
-        run_seconds(10) 
+        run_seconds(20) 
         
         # for robot in population: 
             # retrieves info about robots 

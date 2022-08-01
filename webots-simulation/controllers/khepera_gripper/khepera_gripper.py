@@ -104,6 +104,12 @@ def move_forward():
     rightMotor.setPosition(float('inf'))
     rightMotor.setVelocity(forward_speed)
     
+def move_backwards(): 
+    leftMotor.setPosition(float('inf'))
+    leftMotor.setVelocity(-forward_speed)
+    rightMotor.setPosition(float('inf'))
+    rightMotor.setVelocity(-forward_speed)
+    
 def move_back():
     leftMotor.setPosition(float('inf'))
     leftMotor.setVelocity(-forward_speed)
@@ -185,6 +191,7 @@ while robot.step(timestep) != -1:
             response = "k1-fitness" + str(fitness)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
+            fitness = 0
         else: 
             receiver.nextPacket()
 
@@ -229,15 +236,20 @@ while robot.step(timestep) != -1:
             
             # attempt to get object detected 
             
-            if len(list) != 0: 
+            if len(list) != 0 and dist_val < 40: 
                 firstObject = camera.getRecognitionObjects()[0]
-                print('found object', firstObject)
+                print('found object 1', firstObject)
                 id = str(firstObject.get_id())
                 id = "$" + id # indication that it is a object to be deleted 
                 emitter.send(str(id).encode('utf-8'))
+                fitness += 1 
                 holding_something = False 
                 chosen_direction = correlated_random(chosen_direction)
+            # elif dist_val < 40:
+                # chosen_direction = correlated_random(chosen_direction) 
+                # move_backwards()
         else: 
+        
             # grab_object(i, prev_object_i) 
            
             pass
