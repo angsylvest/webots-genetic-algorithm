@@ -26,7 +26,7 @@ WorldInfo {
 }
 Viewpoint {
   orientation -0.16131972546416454 -0.5317556627226309 0.8313915210889405 5.583435703760554
-  position -1.2859571760059265 0.8400490585973028 0.8543644352142519
+  position -1.4672011117118315 0.9611603725365371 0.9422652810613599
 }
 TexturedBackground {
 }
@@ -47,35 +47,6 @@ DEF supervisor TinkerbotsBase {
     Emitter {
       channel 1
     }
-  ]
-}
-DEF r1 Solid {
-  translation 0.58 0.28 0.0199989
-  rotation 0 1 0 4.6928e-06
-  children [
-    DEF STICK_SHAPE Shape {
-      appearance PBRAppearance {
-        baseColor 1 0.155604 0.246125
-        roughness 0.783569247
-        metalness 0
-      }
-      geometry Cylinder {
-        height 0.06
-        radius 0.008
-      }
-    }
-  ]
-  name "red stick(2)"
-  model "red-rod-1"
-  contactMaterial "stick"
-  boundingObject Box {
-    size 0.013 0.013 0.06
-  }
-  physics Physics {
-    density 100
-  }
-  recognitionColors [
-    0.8 0 0
   ]
 }
 DEF r2 Solid {
@@ -182,35 +153,6 @@ DEF r5 Solid {
     }
   ]
   name "red stick(7)"
-  model "red-rod-1"
-  contactMaterial "stick"
-  boundingObject Box {
-    size 0.013 0.013 0.06
-  }
-  physics Physics {
-    density 100
-  }
-  recognitionColors [
-    0.8 0 0
-  ]
-}
-DEF r6 Solid {
-  translation 0.6 -0.23 0.0199971
-  rotation 0 1 0 4.6928e-06
-  children [
-    DEF STICK_SHAPE Shape {
-      appearance PBRAppearance {
-        baseColor 1 0.155604 0.246125
-        roughness 0.783569247
-        metalness 0
-      }
-      geometry Cylinder {
-        height 0.06
-        radius 0.008
-      }
-    }
-  ]
-  name "red stick(3)"
   model "red-rod-1"
   contactMaterial "stick"
   boundingObject Box {

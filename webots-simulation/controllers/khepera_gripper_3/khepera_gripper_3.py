@@ -166,7 +166,7 @@ def interpret():
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
     
-        if message[0:2] == "#0":
+        if message[0:2] == "#2":
             message = message[1:].split("*")
             parse_genotype(message)
             receiver.nextPacket()
@@ -273,6 +273,11 @@ while robot.step(timestep) != -1:
                 fitness += 1 
                 holding_something = False 
                 chosen_direction = correlated_random(chosen_direction)
+            elif dist_val == 0:
+                fitness -= 1 
+                print('collision encountered')
+                chosen_direction = rotate_random() 
+                move_backwards()
                 
         else: 
             # grab_object(i, prev_object_i) 

@@ -41,7 +41,7 @@ receiver = robot.getDevice("receiver")
 receiver.enable(TIME_STEP)
 receiver.setChannel(2) 
 
-num_generations = 3
+num_generations = 10
 population = [k1, k2, k3]
 
 global initial_genotypes 
@@ -71,7 +71,7 @@ global fit_update
 fit_update = False 
 
 global simulation_time
-simulation_time = 1
+simulation_time = 15
 
 def initialize_genotypes():
     global initial_genotypes

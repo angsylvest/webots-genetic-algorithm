@@ -54,6 +54,14 @@ camera.recognitionEnable(timestep)
 collision = robot.getDevice('touch sensor')
 collision.enable(timestep)
 
+# led 
+led = robot.getDevice('led')
+led.set(1) # led to turned on 
+
+# light sensor 
+light_sensor = robot.getDevice('light sensor')
+light_sensor.enable(timestep)
+
 # initial fitness 
 global fitness 
 fitness = 0 
@@ -158,7 +166,7 @@ def interpret():
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
     
-        if message[0:2] == "#0":
+        if message[0:2] == "#1":
             message = message[1:].split("*")
             parse_genotype(message)
             receiver.nextPacket()
@@ -208,11 +216,11 @@ while robot.step(timestep) != -1:
     # check for collisions with other robot 
     list = camera.getRecognitionObjects()
     
-    collision_status = collision.getValue()
-    if collision_status == 1:
-        fitness -= 1 
-        print('collision encountered')
-        move_backwards()
+    # collision_status = collision.getValue()
+    # if collision_status == 1:
+        # fitness -= 1 
+        # print('collision encountered')
+        # move_backwards()
         
     dist_val = ds.getValue()
     

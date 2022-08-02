@@ -58,6 +58,14 @@ gps.enable(timestep)
 collision = robot.getDevice('touch sensor')
 collision.enable(timestep)
 
+# led 
+led = robot.getDevice('led')
+led.set(1) # led to turned on 
+
+# light sensor 
+light_sensor = robot.getDevice('light sensor')
+light_sensor.enable(timestep)
+
 # initial genotype parameters
 global fitness
 fitness = 0  
