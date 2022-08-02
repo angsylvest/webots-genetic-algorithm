@@ -116,8 +116,11 @@ def run_seconds(t,waiting=False):
         elif robot.getTime() - start > new_t: 
             emitter.send('return_fitness'.encode('utf-8'))
             print('requesting fitness')
+            # fit_update = False
             eval_fitness(robot.getTime())
-            break 
+            
+            if fit_update:
+                break 
                 
         # if reset_position: 
             # restore_positions()
@@ -199,6 +202,9 @@ def eval_fitness(time_step):
     global pop_genotypes 
     global fitness_scores 
     global fit_update
+    global k1_df 
+    global k2_df 
+    global k3_df
     # send_genotype()
     # run_seconds(60)
     
@@ -216,7 +222,9 @@ def eval_fitness(time_step):
             fitness_scores[0] = k1_fitness
             
             new_row = {'time step': time_step, 'fitness': k1_fitness}
-            k1_df.append(new_row, ignore_index=True)
+            k1_df = k1_df.append(new_row, ignore_index=True)
+            
+            print(k1_df)
             
             print('k1 fitness', k1_fitness)
             
@@ -226,7 +234,7 @@ def eval_fitness(time_step):
             fitness_scores[1] = k2_fitness
             
             new_row = {'time step': time_step, 'fitness': k2_fitness}
-            k2_df.append(new_row, ignore_index=True)
+            k2_df = k2_df.append(new_row, ignore_index=True)
             print('k2 fitness', k2_fitness)
             
             receiver.nextPacket()
@@ -235,7 +243,7 @@ def eval_fitness(time_step):
             fitness_scores[2] = k3_fitness
             
             new_row = {'time step': time_step, 'fitness': k3_fitness}
-            k3_df.append(new_row, ignore_index=True)
+            k3_df = k3_df.append(new_row, ignore_index=True)
             print('k3 fitness', k3_fitness)
             
             receiver.nextPacket()
