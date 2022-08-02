@@ -196,8 +196,15 @@ while robot.step(timestep) != -1:
         move_backwards()
         
     dist_val = ds.getValue()
+    
+    if round(dist_val) == 283: # wall detection 
+        fitness -= 1 
+        print('collision encountered')
+        chosen_direction = rotate_random() 
+        move_backwards()
+        
     if dist_val < detect_thres and holding_something == False: 
-        stop()
+        # stop()
         if (object_encountered == False):
             prev_object_i = i
             grab_object(i, prev_object_i)

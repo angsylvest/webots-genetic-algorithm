@@ -39,7 +39,7 @@ receiver = robot.getDevice("receiver")
 receiver.enable(TIME_STEP)
 receiver.setChannel(2) 
 
-num_generations = 10
+num_generations = 1
 population = [k1, k2, k3]
 
 global initial_genotypes 
@@ -63,11 +63,20 @@ gene_list = ['control speed 10', 'detection threshold 1000', 'time switch 550']
 global total_found 
 total_found = 0
 
+global updated # regarding genepool 
+updated = False
+
+global fit_update
+fit_update = False 
+
 def restore_positions():
     pass 
     
 def save_progress():
-    
+    # way to save total number of blocks found 
+    new_row = {'time step': 0, 'fitness': total_found}
+    k1_df.append(new_row, ignore_index=True)
+            
     k1_df.to_csv('k1_results.csv')
     k2_df.to_csv('k2_results.csv') 
     k3_df.to_csv('k3_results.csv') 
@@ -79,6 +88,8 @@ def save_progress():
 def run_seconds(t,waiting=False):
     global pop_genotypes
     global fitness_scores
+    global updated
+    global fit_update 
     
     n = TIME_STEP / 1000*32 # convert ms to s 
     start = robot.getTime()
@@ -90,10 +101,17 @@ def run_seconds(t,waiting=False):
         increments = TIME_STEP / 1000
         
         if waiting:
-            if '!' not in fitness_scores:
-                break 
-            else: 
+            if not updated:
                 eval_fitness(robot.getTime())
+                continue 
+            elif not fit_update: 
+                continue  
+            else: 
+                break 
+            # if '!' not in fitness_scores:
+                # break 
+            # else: 
+                # eval_fitness(robot.getTime())
         
         elif robot.getTime() - start > new_t: 
             emitter.send('return_fitness'.encode('utf-8'))
@@ -131,6 +149,7 @@ def update_geno_list(genotype_list):
     global pop_genotypes 
     global gene_list
     global taken 
+    global updated 
         
     if max(fitness_scores) == 0:
         # update all genotypes 
@@ -168,6 +187,9 @@ def update_geno_list(genotype_list):
     # update parameters to hopefully improve performance 
     
     fitness_scores = ["!","!","!"]
+    fit_update = False 
+    print('gene pool updated') 
+    updated = True
     
  
     
@@ -176,6 +198,7 @@ def update_geno_list(genotype_list):
 def eval_fitness(time_step):
     global pop_genotypes 
     global fitness_scores 
+    global fit_update
     # send_genotype()
     # run_seconds(60)
     
@@ -230,7 +253,9 @@ def eval_fitness(time_step):
     if '!' not in fitness_scores: 
         # receiver.nextPacket()
         print('will update gene pool --')
+        fit_update = True 
         update_geno_list(pop_genotypes)
+        
     
     
     # while robot.step(TIME_STEP) != -1: 
@@ -244,6 +269,7 @@ def eval_fitness(time_step):
 def run_optimization():
     global pop_genotypes 
     global gene_list 
+    global updated 
     
     # initialize genotypes 
     # will be same genotype as normal (for comparison purposes) 
@@ -257,7 +283,7 @@ def run_optimization():
         emitter.send(str("#"+ str(index) + str(genotype)).encode('utf-8'))
         index +=1 
         
-    run_seconds(10) # runs generation for that given amount of time  
+    run_seconds(1) # runs generation for that given amount of time  
     print('new generation beginning')
     
     
@@ -266,16 +292,20 @@ def run_optimization():
         # pop_fitness = [] 
         
         # send relevant genotypes to each robot, handler
+        updated = False 
         
         index = 0 
         for i in range(len(population)):
             emitter.send(str("#"+ str(index) + str(pop_genotypes[index])).encode('utf-8'))
             index +=1 
             
-        run_seconds(10) 
+        run_seconds(1) 
         
-        run_seconds(5, True) # is waiting until got genotypes
+        print('waiting for genotypes')
         
+        run_seconds(1, True) # is waiting until got genotypes
+        
+        print('found genotypes')
         
         # for robot in population: 
             # retrieves info about robots 
@@ -304,7 +334,7 @@ def main():
    
     run_optimization()
     
-    save_fitness()
+    save_progress()
     # translation_field.setSFVec3f([0,0,0]) # reset robot position
     # rotation_field.setSFRotation([0, 0, 1, 0])
     # khepera_node.resetPhysics()
