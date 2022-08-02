@@ -145,12 +145,6 @@ def grab_object(curr_step, initial_step):
     elif (i == 80):
         motor.setPosition(-1.4) # arm up
         # emitter.send("k1-found".encode('utf-8'))
- 
-    # elif (i == 100): 
-        # opens the gripper 
-        # leftGrip.setPosition(open_grip)
-        # rightGrip.setPosition(open_grip)
-        
 
 def release_object():
     leftGrip.setPosition(open_grip)
@@ -166,6 +160,24 @@ def parse_genotype(gen):
         forward_speed = 2
     detect_thres = gen[1].count('1')
     time_switch = gen[2].count('1')
+    
+def interpret(): 
+    global fitness
+    if receiver.getQueueLength()>0:
+        message = receiver.getData().decode('utf-8')
+    
+        if message[0:2] == "#0":
+            message = message[1:].split("*")
+            parse_genotype(message)
+            receiver.nextPacket()
+            
+        elif message == "return_fitness":
+            response = "k1-fitness" + str(fitness)
+            emitter.send(response.encode('utf-8'))
+            receiver.nextPacket()
+            fitness = 0
+        else: 
+            receiver.nextPacket()
  
 
 # Main loop:
@@ -182,22 +194,7 @@ chosen_direction = rotate_random()
 
 while robot.step(timestep) != -1:
 
-    if receiver.getQueueLength()>0:
-        message = receiver.getData().decode('utf-8')
-        
-        if message[0:2] == "#0":
-            message = message[1:].split("*")
-            parse_genotype(message)
-            receiver.nextPacket()
-            
-        elif message == "return_fitness":
-            response = "k1-fitness" + str(fitness)
-            emitter.send(response.encode('utf-8'))
-            receiver.nextPacket()
-            fitness = 0
-        else: 
-            receiver.nextPacket()
-
+    interpret()
 
     # biased random walk movement (each time step, cert prob of turning that direction) 
     roll, pitch, yaw = inertia.getRollPitchYaw()

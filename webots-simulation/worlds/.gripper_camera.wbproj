@@ -6,7 +6,7 @@ minimizedPerspectives: 000000ff00000000fd000000030000000000000087000002ecfc01000
 maximizedDockId: -1
 centralWidgetVisible: 1
 orthographicViewHeight: 1
-textFiles: 3 "controllers/khepera_gripper/khepera_gripper.py" "controllers/khepera_gripper_2/khepera_gripper_2.py" "controllers/khepera_gripper_3/khepera_gripper_3.py" "controllers/ga_supervisor/ga_supervisor.py" "controllers/ga_supervisor/robot_pop.py" "controllers/supervisor_controller/supervisor_controller.py" "controllers/generic_crw_foraging/generic_crw_foraging.py"
+textFiles: 2 "controllers/khepera_gripper/khepera_gripper.py" "controllers/khepera_gripper_2/khepera_gripper_2.py" "controllers/khepera_gripper_3/khepera_gripper_3.py" "controllers/ga_supervisor/ga_supervisor.py" "controllers/ga_supervisor/robot_pop.py" "controllers/supervisor_controller/supervisor_controller.py" "controllers/generic_crw_foraging/generic_crw_foraging.py"
 consoles: Console:All:All
 renderingDevicePerspectives: khepera camera(1):camera;0;8.59375;0;0
 renderingDevicePerspectives: khepera camera(2):camera;0;8.59375;0;0

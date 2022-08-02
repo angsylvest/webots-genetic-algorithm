@@ -153,6 +153,24 @@ def parse_genotype(gen):
     detect_thres = gen[1].count('1')
     time_switch = gen[2].count('1')
     
+def interpret(): 
+    global fitness
+    if receiver.getQueueLength()>0:
+        message = receiver.getData().decode('utf-8')
+    
+        if message[0:2] == "#0":
+            message = message[1:].split("*")
+            parse_genotype(message)
+            receiver.nextPacket()
+            
+        elif message == "return_fitness":
+            response = "k2-fitness" + str(fitness)
+            emitter.send(response.encode('utf-8'))
+            receiver.nextPacket()
+            fitness = 0
+        else: 
+            receiver.nextPacket()
+    
 # Main loop:
 # - perform simulation steps until Webots is stopping the controller
 i = 0 
@@ -165,6 +183,7 @@ chosen_direction = rotate_random()
 
 while robot.step(timestep) != -1:
 
+    interpret()
     # biased random walk movement (each time step, cert prob of turning that direction) 
     roll, pitch, yaw = inertia.getRollPitchYaw()
     yaw = round(yaw, 2) 
@@ -230,22 +249,6 @@ while robot.step(timestep) != -1:
             pass
     else: 
          object_encountered = False
-
-    if receiver.getQueueLength()>0:
-        message = receiver.getData().decode('utf-8')
-        
-        if message[0:2] == "#1":
-            message = message[2:].split("*")
-            parse_genotype(message)
-            receiver.nextPacket()
-            
-        elif message == "return_fitness":
-            response = "k2-fitness" + str(fitness)
-            emitter.send(response.encode('utf-8'))
-            receiver.nextPacket()
-            fitness = 0
-        else: 
-            receiver.nextPacket()
 
 
     # firstObject = camera.getRecognitionObjects()[0]

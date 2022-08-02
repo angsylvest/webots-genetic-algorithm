@@ -54,6 +54,14 @@ camera.recognitionEnable(timestep)
 collision = robot.getDevice('touch sensor')
 collision.enable(timestep)
 
+# led 
+led = robot.getDevice('led')
+led.set(1) # led to turned on 
+
+# light sensor 
+light_sensor = robot.getDevice('light sensor')
+light_sensor.enable(timestep)
+
 # initial fitness 
 global fitness
 fitness = 0 
@@ -153,7 +161,36 @@ def parse_genotype(gen):
     detect_thres = gen[1].count('1')
     time_switch = gen[2].count('1')
     
-
+def interpret(): 
+    global fitness
+    if receiver.getQueueLength()>0:
+        message = receiver.getData().decode('utf-8')
+    
+        if message[0:2] == "#0":
+            message = message[1:].split("*")
+            parse_genotype(message)
+            receiver.nextPacket()
+            
+        elif message == "return_fitness":
+            response = "k3-fitness" + str(fitness)
+            emitter.send(response.encode('utf-8'))
+            receiver.nextPacket()
+            fitness = 0
+        else: 
+            receiver.nextPacket()
+    
+def identify_object():
+    # using camera, can identify other robots, retrievable objects, and foreign objects 
+    
+    # identifies retrievable object 
+    
+    # identifies robot 
+    
+    # identifies foreign object 
+    
+    
+    pass 
+    
 # Main loop:
 # - perform simulation steps until Webots is stopping the controller
 i = 0 
@@ -164,8 +201,11 @@ object_encountered = False
 prev_object_i = 0 # keep track of timesteps elapsed for each pickup action
 chosen_direction = rotate_random()
 
+
 while robot.step(timestep) != -1:
 
+    interpret()
+    light_sensor_value = light_sensor.getValue()
     # biased random walk movement (each time step, cert prob of turning that direction) 
     roll, pitch, yaw = inertia.getRollPitchYaw()
     yaw = round(yaw, 2) 
@@ -189,17 +229,18 @@ while robot.step(timestep) != -1:
     # check for collisions with other robot 
     list = camera.getRecognitionObjects()
     
-    collision_status = collision.getValue()
-    if collision_status == 1:
-        fitness -= 1 
-        print('collision encountered')
-        move_backwards()
-        chosen_direction = rotate_random()
+    # collision_status = collision.getValue()
+    # if collision_status == 1:
+        # fitness -= 1 
+        # print('collision encountered')
+        # move_backwards()
+        # chosen_direction = rotate_random()
         
     # read distance sensor value 
     dist_val = ds.getValue()
     
-    if round(dist_val) == 283: # wall detection 
+    # wall avoidance 
+    if round(dist_val) == 283:
         fitness -= 1 
         print('collision encountered')
         chosen_direction = rotate_random() 
@@ -207,12 +248,22 @@ while robot.step(timestep) != -1:
         
     # handles other obstacles     
     if dist_val < detect_thres and holding_something == False: 
+        # behavior in response to stimuli in front of robot 
+        
+        # if led equipped, assume it's another robot  
+        
+        # if detected, but not recognized, most likely a wall (or foreign obj) 
+            # initiate obstacle avoidance strategies  
+        
+        # if recognized, is a retrievable obj
+        
         # stop()
         if (object_encountered == False):
-            prev_object_i = i
-            grab_object(i, prev_object_i)
-            object_encountered = True
+            # prev_object_i = i
+            # grab_object(i, prev_object_i)
+            # object_encountered = True
             
+            # if retrievable object within range, gets picked up 
             if len(list) != 0 and dist_val < 40: 
                 firstObject = camera.getRecognitionObjects()[0]
                 print('found object 3', firstObject)
@@ -239,24 +290,6 @@ while robot.step(timestep) != -1:
                 # prev_object_i = i
     else: 
          object_encountered = False
-         
-         
-    if receiver.getQueueLength()>0:
-        message = receiver.getData().decode('utf-8')
-        
-        if message[0:2] == "#2":
-            message = message[2:].split("*")
-            parse_genotype(message)
-            receiver.nextPacket()
-            
-        elif message == "return_fitness":
-            response = "k3-fitness" + str(fitness)
-            emitter.send(response.encode('utf-8'))
-            receiver.nextPacket()
-            fitness = 0
-        else: 
-            receiver.nextPacket()
-
 
     
     # firstObject = camera.getRecognitionObjects()[0]

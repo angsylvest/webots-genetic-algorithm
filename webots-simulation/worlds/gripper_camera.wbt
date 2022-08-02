@@ -25,8 +25,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation 0.2595558473945187 -0.5018264085298205 -0.8251066705495569 5.163309907863054
-  position -0.7144340333214199 -1.635469419926933 1.5697644544602685
+  orientation -0.16131972546416454 -0.5317556627226309 0.8313915210889405 5.583435703760554
+  position -1.2859571760059265 0.8400490585973028 0.8543644352142519
 }
 TexturedBackground {
 }
@@ -287,6 +287,10 @@ DEF khepera Khepera1 {
   controller "khepera_gripper"
   supervisor TRUE
   extensionSlot [
+    LightSensor {
+    }
+    LED {
+    }
     TouchSensor {
     }
     GPS {
@@ -541,8 +545,9 @@ DEF khepera Khepera1 {
         density -1
         mass 0.02
       }
+      fieldOfView 0.785401
       recognition Recognition {
-        maxRange 30
+        maxRange 50
       }
     }
   ]
@@ -553,6 +558,10 @@ DEF khepera2 Khepera1 {
   controller "khepera_gripper_2"
   supervisor TRUE
   extensionSlot [
+    LED {
+    }
+    LightSensor {
+    }
     TouchSensor {
     }
     DistanceSensor {
@@ -816,6 +825,10 @@ DEF khepera3 Khepera1 {
   controller "khepera_gripper_3"
   supervisor TRUE
   extensionSlot [
+    LED {
+    }
+    LightSensor {
+    }
     TouchSensor {
     }
     DistanceSensor {
