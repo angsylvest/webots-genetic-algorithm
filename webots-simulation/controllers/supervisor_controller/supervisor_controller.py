@@ -100,6 +100,7 @@ def message_listener(time_step):
     global k3_df
     global count 
     global k_gen_df
+    global total_found
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -114,6 +115,7 @@ def message_listener(time_step):
             print(obj_node)
             if obj_node is not None: 
                 obj_node.remove()
+                total_found += 1
             
         elif 'k-fitness' in message:
             print('message', message)
