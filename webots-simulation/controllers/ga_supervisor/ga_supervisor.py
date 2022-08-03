@@ -86,11 +86,12 @@ def save_progress():
     # way to save total number of blocks found 
     
     new_row = {'time': simulation_time*num_generations, 'objects retrieved': total_found}
-    overall_df.append(new_row, ignore_index=True)
+    overall_df = overall_df.append(new_row, ignore_index=True)
             
     k1_df.to_csv('k1_results.csv')
     k2_df.to_csv('k2_results.csv') 
     k3_df.to_csv('k3_results.csv') 
+    overall_df.to_csv('overall_results.csv')
     
     print('progress saved to csv')
 
