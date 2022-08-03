@@ -229,11 +229,11 @@ while robot.step(timestep) != -1:
     # check for collisions with other robot 
     list = camera.getRecognitionObjects()
     
-    collision_status = collision.getValue()
-    if collision_status == 1:
-        fitness -= 1 
-        print('collision encountered')
-        move_backwards()
+    # collision_status = collision.getValue()
+    # if collision_status == 1:
+        # fitness -= 1 
+        # print('collision encountered')
+        # move_backwards()
     
     
     dist_val = ds.getValue()

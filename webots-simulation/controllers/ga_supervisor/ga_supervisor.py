@@ -84,6 +84,10 @@ def restore_positions():
     
 def save_progress():
     # way to save total number of blocks found 
+    global overall_df
+    global k1_df
+    global k2_df 
+    global k3_df
     
     new_row = {'time': simulation_time*num_generations, 'objects retrieved': total_found}
     overall_df = overall_df.append(new_row, ignore_index=True)
@@ -99,6 +103,7 @@ def message_listener(time_step):
     global k1_df 
     global k2_df 
     global k3_df
+    global total_found 
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -113,8 +118,9 @@ def message_listener(time_step):
             print(obj_node)
             if obj_node is not None: 
                 obj_node.remove()
+                total_found += 1
             
-        if 'k1-fitness' in message: 
+        elif 'k1-fitness' in message: 
             k1_fitness = int(message[10:])
             fitness_scores[0] = k1_fitness
             
