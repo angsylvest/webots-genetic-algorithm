@@ -38,7 +38,7 @@ receiver = robot.getDevice("receiver")
 receiver.enable(TIME_STEP)
 receiver.setChannel(2) 
 
-num_generations = 10
+num_generations = 15
 population = [k1, k2, k3]
 
 global initial_genotypes 
@@ -68,7 +68,7 @@ global fit_update
 fit_update = False 
 
 global simulation_time
-simulation_time = 15
+simulation_time = 10
 
 global count 
 count = 0
@@ -96,6 +96,7 @@ def message_listener(time_step):
     global k2_df 
     global k3_df
     global count 
+    global k_gen_df
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -112,7 +113,8 @@ def message_listener(time_step):
                 obj_node.remove()
             
         elif 'k-fitness' in message:
-            k3_fitness = int(message[10:])
+            print('message', message)
+            k3_fitness = int(message[9:])
             fitness_scores[count] = k3_fitness
             count += 1
             
@@ -196,12 +198,13 @@ def eval_fitness(time_step):
     global pop_genotypes 
     global fitness_scores 
     global fit_update
+    global updated
             
     if '!' not in fitness_scores: 
         # receiver.nextPacket()
         print('will update gene pool --')
         fit_update = True 
-        # update_geno_list(pop_genotypes)
+        update_geno_list(pop_genotypes)
           
     
 def run_optimization():

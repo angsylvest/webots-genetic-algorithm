@@ -172,7 +172,9 @@ def interpret():
             receiver.nextPacket()
             
         elif message == "return_fitness":
+            print('request received') 
             response = "k-fitness" + str(fitness)
+            print('response is', response)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
             fitness = 0
