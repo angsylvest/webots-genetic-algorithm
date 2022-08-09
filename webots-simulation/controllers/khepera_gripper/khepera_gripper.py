@@ -101,8 +101,6 @@ def correlated_random(curr_dir):
     else: 
         return round(random.choice([0,0, pi/2, -pi/2]),2)
     
- 
-
 def begin_rotating():
     leftMotor.setPosition(float('inf'))
     leftMotor.setVelocity(-2)
@@ -194,8 +192,6 @@ def communicate_with_robot():
     response = "0-encounter"
     emitter.send(response.encode('utf-8'))
     
-    
-
 # Main loop:
 # - perform simulation steps until Webots is stopping the controller
 i = 0 
@@ -237,14 +233,6 @@ while robot.step(timestep) != -1:
     
     # check for collisions with other robot 
     list = camera.getRecognitionObjects()
-    
-    # collision_status = collision.getValue()
-    # if collision_status == 1:
-        # fitness -= 1 
-        # print('collision encountered')
-        # move_backwards()
-    
-    
     dist_val = ds.getValue()
     
     if round(dist_val) == 283: # wall detection 
@@ -280,8 +268,7 @@ while robot.step(timestep) != -1:
                 print('collision encountered')
                 chosen_direction = rotate_random()
                 move_backwards()
-        else: 
-        
+        else:
             # grab_object(i, prev_object_i) 
            
             pass
@@ -289,18 +276,6 @@ while robot.step(timestep) != -1:
     else: 
          object_encountered = False
 
-    
-    
-    # id = firstObject
-    # print('identified object', id, firstObject.get_colors())
-    # position = firstObject.get_position()
-
-    # Process sensor data here.
-
-    # Enter here functions to send actuator commands, like:
-    #  motor.setPosition(10.0)
-
-    
     i+=1
     
     pass

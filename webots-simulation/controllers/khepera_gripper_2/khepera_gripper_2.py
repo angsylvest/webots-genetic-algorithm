@@ -221,13 +221,6 @@ while robot.step(timestep) != -1:
     
     # check for collisions with other robot 
     list = camera.getRecognitionObjects()
-    
-    # collision_status = collision.getValue()
-    # if collision_status == 1:
-        # fitness -= 1 
-        # print('collision encountered')
-        # move_backwards()
-        
     dist_val = ds.getValue()
     
     if round(dist_val) == 283: # wall detection 
@@ -269,20 +262,6 @@ while robot.step(timestep) != -1:
     else: 
          object_encountered = False
 
-
-    # firstObject = camera.getRecognitionObjects()[0]
-    
-    # id = firstObject.get_id()
-    # id = firstObject.get_model()
-    # print('identified object', id)
-    # position = firstObject.get_position()
-
-    # Process sensor data here.
-
-    # Enter here functions to send actuator commands, like:
-    #  motor.setPosition(10.0)
-
-    
     i+=1
     
     pass
