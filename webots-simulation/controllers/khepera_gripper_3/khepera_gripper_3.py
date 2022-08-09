@@ -178,6 +178,11 @@ def interpret():
             fitness = 0
         else: 
             receiver.nextPacket()
+            
+def communicate_with_robot():
+    # print('able to see other robot') 
+    response = "2-encounter"
+    emitter.send(response.encode('utf-8'))
     
 def identify_object():
     # using camera, can identify other robots, retrievable objects, and foreign objects 

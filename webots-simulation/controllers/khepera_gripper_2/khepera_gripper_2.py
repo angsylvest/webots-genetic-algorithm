@@ -178,6 +178,11 @@ def interpret():
             fitness = 0
         else: 
             receiver.nextPacket()
+
+def communicate_with_robot():
+    # print('able to see other robot')    
+    response = "1-encounter"
+    emitter.send(response.encode('utf-8'))
     
 # Main loop:
 # - perform simulation steps until Webots is stopping the controller
@@ -192,6 +197,7 @@ chosen_direction = rotate_random()
 while robot.step(timestep) != -1:
 
     interpret()
+    communicate_with_robot()
     # biased random walk movement (each time step, cert prob of turning that direction) 
     roll, pitch, yaw = inertia.getRollPitchYaw()
     yaw = round(yaw, 2) 

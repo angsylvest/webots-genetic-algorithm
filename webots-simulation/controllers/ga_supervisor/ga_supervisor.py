@@ -1,5 +1,6 @@
 from controller import Supervisor, Node, Keyboard, Emitter, Receiver
 import statistics 
+import math 
 import pandas as pd
 from robot_pop import * 
 
@@ -71,7 +72,7 @@ global fit_update
 fit_update = False 
 
 global simulation_time
-simulation_time = 10
+simulation_time = 1000
 
 def initialize_genotypes():
     global initial_genotypes
@@ -81,6 +82,37 @@ def initialize_genotypes():
 
 def restore_positions():
     pass 
+    
+def find_nearest_robot_genotype(r_index):
+    global population 
+    closest_neigh = ""
+    curr_robot = population[r_index]
+    curr_dist = 400
+    curr_fitness = fitness_scores[r_index]
+    other_fitness = 0
+    
+    curr_pos = [curr_robot.getPosition()[0], curr_robot.getPosition()[1]]
+    other_index = r_index
+    
+    for i in range(len(population)):
+        if (i != r_index): 
+            other_pos = [population[i].getPosition()[0], population[i].getPosition()[0]]
+            dis = math.dist(curr_pos, other_pos)
+            if closest_neigh == "":
+                closest_neigh = population[i]
+                curr_dist = dis
+                other_fitness = fitness_scores[i]
+                other_index = i
+            elif dis < curr_dist: 
+                closest_neigh = population[i]
+                curr_dist = dis 
+                other_fitness = fitness_scores[i]
+                other_index = i
+    print('found closest neighbor', closest_neigh)
+    # use emitter to send genotype to corresponding robot if fitness is better and if nearby 
+    if other_fitness > curr_fitness: 
+        emitter.send(str("#"+ str(r_index) + str(pop_genotypes[i])).encode('utf-8'))
+                
     
 def save_progress():
     # way to save total number of blocks found 
@@ -150,7 +182,14 @@ def message_listener(time_step):
             print('k3 fitness', k3_fitness)
             
             receiver.nextPacket()
-
+            
+        elif 'encounter' in message: 
+            print('robot found -- checking genotype') 
+            robo_index = int(message.split('-')[0])
+            new_geno = find_nearest_robot_genotype(robo_index)
+            
+            receiver.nextPacket()
+            
     
     
 # runs simulation for designated amount of time 
