@@ -85,7 +85,7 @@ def restore_positions():
     
 def find_nearest_robot_genotype(r_index):
     global population 
-    closest_neigh = ""
+    closest_neigh = " "
     curr_robot = population[r_index]
     curr_dist = 400
     curr_fitness = fitness_scores[r_index]
@@ -98,8 +98,8 @@ def find_nearest_robot_genotype(r_index):
         if (i != r_index): 
             other_pos = [population[i].getPosition()[0], population[i].getPosition()[0]]
             dis = math.dist(curr_pos, other_pos)
-            if closest_neigh == "":
-                closest_neigh = population[i]
+            if closest_neigh == " ":
+                closest_neigh = population[i].getId()
                 curr_dist = dis
                 other_fitness = fitness_scores[i]
                 other_index = i
@@ -112,6 +112,7 @@ def find_nearest_robot_genotype(r_index):
     # use emitter to send genotype to corresponding robot if fitness is better and if nearby 
     if other_fitness > curr_fitness: 
         emitter.send(str("#"+ str(r_index) + str(pop_genotypes[i])).encode('utf-8'))
+        # will probably increase fitness between these two for communciation
                 
     
 def save_progress():

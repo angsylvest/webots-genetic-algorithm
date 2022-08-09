@@ -121,23 +121,23 @@ def stop():
     rightMotor.setVelocity(0)
     
 # gripper functions 
-def grab_object(curr_step, initial_step): 
-    global fitness 
-    i = curr_step - initial_step 
-    if (i == 0):
+# def grab_object(curr_step, initial_step): 
+    # global fitness 
+    # i = curr_step - initial_step 
+    # if (i == 0):
         # opens the gripper 
-        leftGrip.setPosition(open_grip)
-        rightGrip.setPosition(open_grip)
-    elif (i == 20):
-        motor.setPosition(0) # arm down 
-    elif (i == 40):
+        # leftGrip.setPosition(open_grip)
+        # rightGrip.setPosition(open_grip)
+    # elif (i == 20):
+        # motor.setPosition(0) # arm down 
+    # elif (i == 40):
         # closes the gripper 
-        leftGrip.setPosition(closed_grip)
-        rightGrip.setPosition(closed_grip) 
-        fitness += 1 
-        print('fitness 3 increased', fitness) 
-    elif (i == 80):
-        motor.setPosition(-1.4) # arm up
+        # leftGrip.setPosition(closed_grip)
+        # rightGrip.setPosition(closed_grip) 
+        # fitness += 1 
+        # print('fitness 3 increased', fitness) 
+    # elif (i == 80):
+        # motor.setPosition(-1.4) # arm up
         # emitter.send("k3-found".encode('utf-8'))
         # delete object here 
         
@@ -278,6 +278,11 @@ while robot.step(timestep) != -1:
                 fitness += 1 
                 holding_something = False 
                 chosen_direction = correlated_random(chosen_direction)
+                
+            elif dist_val < 20: 
+                fitness += 1
+                communicate_with_robot()
+                
             elif dist_val == 0:
                 fitness -= 1 
                 print('collision encountered')

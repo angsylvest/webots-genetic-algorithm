@@ -134,24 +134,24 @@ def stop():
     rightMotor.setVelocity(0)
     
 # gripper functions 
-def grab_object(curr_step, initial_step): 
-    global fitness
+# def grab_object(curr_step, initial_step): 
+    # global fitness
      
-    i = curr_step - initial_step 
-    if (i == 0):
+    # i = curr_step - initial_step 
+    # if (i == 0):
         # opens the gripper 
-        leftGrip.setPosition(open_grip)
-        rightGrip.setPosition(open_grip)
-    elif (i == 20):
-        motor.setPosition(0) # arm down 
-    elif (i == 40):
+        # leftGrip.setPosition(open_grip)
+        # rightGrip.setPosition(open_grip)
+    # elif (i == 20):
+        # motor.setPosition(0) # arm down 
+    # elif (i == 40):
         # closes the gripper 
-        leftGrip.setPosition(closed_grip)
-        rightGrip.setPosition(closed_grip) 
-        fitness += 1 
-        print('fitness 1 increased', fitness) 
-    elif (i == 80):
-        motor.setPosition(-1.4) # arm up
+        # leftGrip.setPosition(closed_grip)
+        # rightGrip.setPosition(closed_grip) 
+        # fitness += 1 
+        # print('fitness 1 increased', fitness) 
+    # elif (i == 80):
+        # motor.setPosition(-1.4) # arm up
         # emitter.send("k1-found".encode('utf-8'))
 
 def release_object():
@@ -211,7 +211,6 @@ chosen_direction = rotate_random()
 while robot.step(timestep) != -1:
 
     interpret() # checks for messages from supervisor 
-    communicate_with_robot()
     
 
     # biased random walk movement (each time step, cert prob of turning that direction) 
@@ -257,12 +256,11 @@ while robot.step(timestep) != -1:
     if dist_val < detect_thres and holding_something == False: 
         # stop()
         if (object_encountered == False):
-            prev_object_i = i
-            grab_object(i, prev_object_i)
-            object_encountered = True
-            
+            # prev_object_i = i
+            # grab_object(i, prev_object_i)
+            # object_encountered = True
+  
             # attempt to get object detected 
-            
             if len(list) != 0 and dist_val < 40: 
                 firstObject = camera.getRecognitionObjects()[0]
                 print('found object 1', firstObject)
@@ -272,6 +270,11 @@ while robot.step(timestep) != -1:
                 fitness += 1 
                 holding_something = False 
                 chosen_direction = correlated_random(chosen_direction)
+                
+            elif dist_val < 20: 
+                fitness += 1
+                communicate_with_robot()
+                
             elif dist_val == 0:
                 fitness -= 1 
                 print('collision encountered')
