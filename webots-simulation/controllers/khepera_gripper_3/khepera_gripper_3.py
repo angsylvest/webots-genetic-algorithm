@@ -71,6 +71,8 @@ global detect_thres
 detect_thres = 1000
 global time_switch
 time_switch = 150
+
+sim_complete = False
 # motor functions 
 
 def rotate_random():
@@ -163,6 +165,8 @@ def parse_genotype(gen):
     
 def interpret(): 
     global fitness
+    global sim_complete 
+    
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
     
@@ -176,6 +180,10 @@ def interpret():
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
             fitness = 0
+            
+        elif message == 'sim-complete':
+            sim_complete = True 
+            
         else: 
             receiver.nextPacket()
             
@@ -198,7 +206,7 @@ prev_object_i = 0 # keep track of timesteps elapsed for each pickup action
 chosen_direction = rotate_random()
 
 
-while robot.step(timestep) != -1:
+while robot.step(timestep) != -1 and sim_complete != True:
 
     interpret()
     light_sensor_value = light_sensor.getValue()
@@ -244,7 +252,7 @@ while robot.step(timestep) != -1:
             # if retrievable object within range, gets picked up 
             if len(list) != 0 and dist_val < 40: 
                 firstObject = camera.getRecognitionObjects()[0]
-                print('found object 3', firstObject)
+                # print('found object 3', firstObject)
                 id = str(firstObject.get_id())
                 id = "$" + id # indication that it is a object to be deleted 
                 emitter.send(str(id).encode('utf-8'))
@@ -252,7 +260,7 @@ while robot.step(timestep) != -1:
                 holding_something = False 
                 chosen_direction = correlated_random(chosen_direction)
                 
-            elif dist_val < 20: 
+            elif dist_val < 5: 
                 fitness += 1
                 communicate_with_robot()
                 

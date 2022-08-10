@@ -11,9 +11,9 @@ Angel Sylvester 2022
 """
 
 # sets up csv for reference 
-k1_df = pd.DataFrame(columns = ['time step', 'fitness'])
-k2_df = pd.DataFrame(columns = ['time step', 'fitness'])
-k3_df = pd.DataFrame(columns = ['time step', 'fitness'])
+k1_df = pd.DataFrame(columns = ['time step', 'fitness', 'xpos', 'ypos'])
+k2_df = pd.DataFrame(columns = ['time step', 'fitness', 'xpos', 'ypos'])
+k3_df = pd.DataFrame(columns = ['time step', 'fitness', 'xpos', 'ypos'])
 
 overall_df = pd.DataFrame(columns = ['time', 'objects retrieved'])
 
@@ -72,7 +72,7 @@ global fit_update
 fit_update = False 
 
 global simulation_time
-simulation_time = 1000
+simulation_time = 10
 
 def initialize_genotypes():
     global initial_genotypes
@@ -108,9 +108,9 @@ def find_nearest_robot_genotype(r_index):
                 curr_dist = dis 
                 other_fitness = fitness_scores[i]
                 other_index = i
-    print('found closest neighbor', closest_neigh)
+    # print('found closest neighbor', closest_neigh)
     # use emitter to send genotype to corresponding robot if fitness is better and if nearby 
-    if other_fitness > curr_fitness: 
+    if type(curr_fitness) == 'int' and type (other_fitness) == 'int' and other_fitness > (curr_fitness + 2): 
         emitter.send(str("#"+ str(r_index) + str(pop_genotypes[i])).encode('utf-8'))
         # will probably increase fitness between these two for communciation
                 
@@ -131,6 +131,7 @@ def save_progress():
     overall_df.to_csv('overall_results.csv')
     
     print('progress saved to csv')
+    emitter.send('sim-complete'.encode('utf-8'))
 
 def message_listener(time_step):
     global k1_df 
@@ -157,7 +158,7 @@ def message_listener(time_step):
             k1_fitness = int(message[10:])
             fitness_scores[0] = k1_fitness
             
-            new_row = {'time step': time_step, 'fitness': k1_fitness}
+            new_row = {'time step': time_step, 'fitness': k1_fitness, 'xpos': k1.getPosition()[0], 'ypos': k1.getPosition()[1]}
             k1_df = k1_df.append(new_row, ignore_index=True)
             
             print('k1 fitness', k1_fitness)
@@ -168,7 +169,7 @@ def message_listener(time_step):
             k2_fitness = int(message[10:])
             fitness_scores[1] = k2_fitness
             
-            new_row = {'time step': time_step, 'fitness': k2_fitness}
+            new_row = {'time step': time_step, 'fitness': k2_fitness, 'xpos': k2.getPosition()[0], 'ypos': k2.getPosition()[1]}
             k2_df = k2_df.append(new_row, ignore_index=True)
             print('k2 fitness', k2_fitness)
             
@@ -178,7 +179,7 @@ def message_listener(time_step):
             k3_fitness = int(message[10:])
             fitness_scores[2] = k3_fitness
             
-            new_row = {'time step': time_step, 'fitness': k3_fitness}
+            new_row = {'time step': time_step, 'fitness': k3_fitness, 'xpos': k3.getPosition()[0], 'ypos': k3.getPosition()[1]}
             k3_df = k3_df.append(new_row, ignore_index=True)
             print('k3 fitness', k3_fitness)
             
