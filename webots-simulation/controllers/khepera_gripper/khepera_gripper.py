@@ -267,9 +267,9 @@ while robot.step(timestep) != -1 and sim_complete != True:
                 holding_something = False 
                 chosen_direction = correlated_random(chosen_direction)
                 
-            if dist_val < 5: 
-                fitness += 1
-                communicate_with_robot()
+            # if dist_val < 5: 
+                # fitness += 1
+                # communicate_with_robot()
                 
             if dist_val == 0:
                 fitness -= 1 

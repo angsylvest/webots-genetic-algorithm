@@ -3,6 +3,7 @@ import statistics
 import math 
 import pandas as pd
 from robot_pop import * 
+from graph_generator import * 
 
 """
 Main supervisor base 
@@ -11,9 +12,13 @@ Angel Sylvester 2022
 """
 
 # sets up csv for reference 
-k1_df = pd.DataFrame(columns = ['time step', 'fitness', 'xpos', 'ypos'])
-k2_df = pd.DataFrame(columns = ['time step', 'fitness', 'xpos', 'ypos'])
-k3_df = pd.DataFrame(columns = ['time step', 'fitness', 'xpos', 'ypos'])
+k1_df = pd.DataFrame(columns = ['agent id' ,'time step', 'fitness', 'xpos', 'ypos'])
+k2_df = pd.DataFrame(columns = ['agent id', 'time step', 'fitness', 'xpos', 'ypos'])
+k3_df = pd.DataFrame(columns = ['agent id', 'time step', 'fitness', 'xpos', 'ypos'])
+## add more robot dfs here (be sure to keep num consistent) 
+
+global df_list
+df_list = [k1_df, k2_df, k3_df]
 
 overall_df = pd.DataFrame(columns = ['time', 'objects retrieved'])
 
@@ -25,13 +30,16 @@ robot = Supervisor()  # create Supervisor instance
 k1 = robot.getFromDef("khepera")
 k2 = robot.getFromDef("khepera2")
 k3 = robot.getFromDef("khepera3")
+## add more robots here (if defined, be sure to keep num consistent) 
 
-translation_field_1 = k1.getField('translation')
-rotation_field_1 = k1.getField('rotation')
-translation_field_2 = k2.getField('translation')
-rotation_field_2 = k2.getField('rotation')
-translation_field_3 = k3.getField('translation')
-rotation_field_3 = k3.getField('rotation')
+population = [k1, k2, k3] # add population here 
+
+# translation_field_1 = k1.getField('translation')
+# rotation_field_1 = k1.getField('rotation')
+# translation_field_2 = k2.getField('translation')
+# rotation_field_2 = k2.getField('rotation')
+# translation_field_3 = k3.getField('translation')
+# rotation_field_3 = k3.getField('rotation')
 
 # emitter to send info to robots 
 emitter = robot.getDevice("emitter")
@@ -42,8 +50,7 @@ receiver = robot.getDevice("receiver")
 receiver.enable(TIME_STEP)
 receiver.setChannel(2) 
 
-num_generations = 15
-population = [k1, k2, k3]
+num_generations = 2
 
 global initial_genotypes 
 initial_genotypes = []
@@ -72,7 +79,7 @@ global fit_update
 fit_update = False 
 
 global simulation_time
-simulation_time = 10
+simulation_time = 1
 
 def initialize_genotypes():
     global initial_genotypes
@@ -87,7 +94,7 @@ def find_nearest_robot_genotype(r_index):
     global population 
     closest_neigh = " "
     curr_robot = population[r_index]
-    curr_dist = 400
+    curr_dist = 400 # arbitrary value 
     curr_fitness = fitness_scores[r_index]
     other_fitness = 0
     
@@ -110,7 +117,7 @@ def find_nearest_robot_genotype(r_index):
                 other_index = i
     # print('found closest neighbor', closest_neigh)
     # use emitter to send genotype to corresponding robot if fitness is better and if nearby 
-    if type(curr_fitness) == 'int' and type (other_fitness) == 'int' and other_fitness > (curr_fitness + 2): 
+    if type(curr_fitness) == 'int' and type (other_fitness) == 'int' and other_fitness > (curr_fitness + 1): 
         emitter.send(str("#"+ str(r_index) + str(pop_genotypes[i])).encode('utf-8'))
         # will probably increase fitness between these two for communciation
                 
@@ -118,16 +125,25 @@ def find_nearest_robot_genotype(r_index):
 def save_progress():
     # way to save total number of blocks found 
     global overall_df
+    global df_list 
     global k1_df
     global k2_df 
     global k3_df
+   
+    
+    generate_fitness_csvs(df_list)
+    generate_fitness("summary-fitness.csv")
+ 
+    
+    # csv_list = []
     
     new_row = {'time': simulation_time*num_generations, 'objects retrieved': total_found}
     overall_df = overall_df.append(new_row, ignore_index=True)
             
-    k1_df.to_csv('k1_results.csv')
-    k2_df.to_csv('k2_results.csv') 
-    k3_df.to_csv('k3_results.csv') 
+    # k1_df.to_csv('k1_results.csv')
+    # k2_df.to_csv('k2_results.csv') 
+    # k3_df.to_csv('k3_results.csv') 
+    
     overall_df.to_csv('overall_results.csv')
     
     print('progress saved to csv')
@@ -138,6 +154,7 @@ def message_listener(time_step):
     global k2_df 
     global k3_df
     global total_found 
+    global df_list 
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -158,8 +175,9 @@ def message_listener(time_step):
             k1_fitness = int(message[10:])
             fitness_scores[0] = k1_fitness
             
-            new_row = {'time step': time_step, 'fitness': k1_fitness, 'xpos': k1.getPosition()[0], 'ypos': k1.getPosition()[1]}
+            new_row = {'agent id': 1, 'time step': time_step, 'fitness': k1_fitness, 'xpos': k1.getPosition()[0], 'ypos': k1.getPosition()[1]}
             k1_df = k1_df.append(new_row, ignore_index=True)
+            df_list[0] = k1_df
             
             print('k1 fitness', k1_fitness)
             
@@ -169,8 +187,10 @@ def message_listener(time_step):
             k2_fitness = int(message[10:])
             fitness_scores[1] = k2_fitness
             
-            new_row = {'time step': time_step, 'fitness': k2_fitness, 'xpos': k2.getPosition()[0], 'ypos': k2.getPosition()[1]}
+            new_row = {'agent id': 2,'time step': time_step, 'fitness': k2_fitness, 'xpos': k2.getPosition()[0], 'ypos': k2.getPosition()[1]}
             k2_df = k2_df.append(new_row, ignore_index=True)
+            df_list[1] = k2_df
+            
             print('k2 fitness', k2_fitness)
             
             receiver.nextPacket()
@@ -179,8 +199,10 @@ def message_listener(time_step):
             k3_fitness = int(message[10:])
             fitness_scores[2] = k3_fitness
             
-            new_row = {'time step': time_step, 'fitness': k3_fitness, 'xpos': k3.getPosition()[0], 'ypos': k3.getPosition()[1]}
+            new_row = {'agent id': 3,'time step': time_step, 'fitness': k3_fitness, 'xpos': k3.getPosition()[0], 'ypos': k3.getPosition()[1]}
             k3_df = k3_df.append(new_row, ignore_index=True)
+            df_list[2] = k3_df
+            
             print('k3 fitness', k3_fitness)
             
             receiver.nextPacket()
@@ -255,12 +277,16 @@ def update_geno_list(genotype_list):
         # update all genotypes 
         pop_genotypes = []
         
-        g1 = create_individal_genotype(gene_list)
-        g2 = create_individal_genotype(gene_list)
-        g3 = create_individal_genotype(gene_list)
-        pop_genotypes.append(g1)
-        pop_genotypes.append(g2)
-        pop_genotypes.append(g3)
+        for i in range(len(population)):
+            g = create_individal_genotype(gene_list)
+            pop_genotypes.append(g)
+        
+        # g1 = create_individal_genotype(gene_list)
+        # g2 = create_individal_genotype(gene_list)
+        # g3 = create_individal_genotype(gene_list)
+        # pop_genotypes.append(g1)
+        # pop_genotypes.append(g2)
+        # pop_genotypes.append(g3)
 
     else: 
         # only update lowest two genotypes 
