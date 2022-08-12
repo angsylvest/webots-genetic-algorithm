@@ -138,7 +138,7 @@ def save_progress():
     # csv_list = []
     
     new_row = {'time': simulation_time*num_generations, 'objects retrieved': total_found}
-    overall_df = overall_df.append(new_row, ignore_index=True)
+    overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)
             
     # k1_df.to_csv('k1_results.csv')
     # k2_df.to_csv('k2_results.csv') 
@@ -176,7 +176,7 @@ def message_listener(time_step):
             fitness_scores[0] = k1_fitness
             
             new_row = {'agent id': 1, 'time step': time_step, 'fitness': k1_fitness, 'xpos': k1.getPosition()[0], 'ypos': k1.getPosition()[1]}
-            k1_df = k1_df.append(new_row, ignore_index=True)
+            k1_df = pd.concat([k1_df, pd.DataFrame([new_row])], ignore_index=True)
             df_list[0] = k1_df
             
             print('k1 fitness', k1_fitness)
@@ -188,7 +188,7 @@ def message_listener(time_step):
             fitness_scores[1] = k2_fitness
             
             new_row = {'agent id': 2,'time step': time_step, 'fitness': k2_fitness, 'xpos': k2.getPosition()[0], 'ypos': k2.getPosition()[1]}
-            k2_df = k2_df.append(new_row, ignore_index=True)
+            k2_df = pd.concat([k2_df, pd.DataFrame([new_row])], ignore_index = True)
             df_list[1] = k2_df
             
             print('k2 fitness', k2_fitness)
@@ -200,7 +200,7 @@ def message_listener(time_step):
             fitness_scores[2] = k3_fitness
             
             new_row = {'agent id': 3,'time step': time_step, 'fitness': k3_fitness, 'xpos': k3.getPosition()[0], 'ypos': k3.getPosition()[1]}
-            k3_df = k3_df.append(new_row, ignore_index=True)
+            k3_df = pd.concat([k3_df, pd.DataFrame([new_row])], ignore_index = True)
             df_list[2] = k3_df
             
             print('k3 fitness', k3_fitness)
