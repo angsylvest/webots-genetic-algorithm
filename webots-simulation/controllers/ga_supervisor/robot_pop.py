@@ -23,6 +23,7 @@ def create_individal_genotype(gene_list):
     ruleset = ""
     for gene in gene_list:
         g_count = int(gene.split(" ")[-1])
+        print('num of bin ---', go_count)
         ruleset += generate_random_act(g_count) + "*"
     return ruleset
      

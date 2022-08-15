@@ -128,6 +128,7 @@ def restore_positions():
     r11.loadState('init')
         
     print('end of trial')
+    initialize_genotypes()
     
 def set_block_distribution():
     
@@ -327,7 +328,6 @@ def update_geno_list(genotype_list):
     global taken 
     global updated 
     
-    print('geno list --', genotype_list)
         
     if max(fitness_scores) == 0:
         # update all genotypes 
@@ -395,6 +395,7 @@ def reset_genotype():
         # genotype = create_individal_genotype(gene_list)
         # print('genotype', i, genotype)
         genotype = initial_genotypes[i]
+        print('resetted genotype', genotype)
         pop_genotypes.append(genotype)
         emitter.send(str("#"+ str(index) + str(genotype)).encode('utf-8'))
         index +=1   
