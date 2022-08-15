@@ -25,8 +25,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.16131972546416454 -0.5317556627226309 0.8313915210889407 5.583435703760554
-  position -1.4672011117118315 0.961160372536537 0.9422652810613599
+  orientation -0.1804908353460832 -0.8924821648269742 0.4133988918971974 5.373260562070233
+  position -1.2411297901305576 0.6279283877219468 1.2949539215035502
 }
 TexturedBackground {
 }
@@ -35,6 +35,66 @@ TexturedBackgroundLight {
 RectangleArena {
   translation -0.04 -0.07 0
   floorSize 2 2
+}
+DEF r6 Solid {
+  translation 0.56 -0.23 0.0199985
+  rotation 0 1 0 4.6928e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(11)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+}
+DEF r8 Solid {
+  translation 0.37 0.3 0.0199983
+  rotation 0 1 0 4.6928e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(10)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
 }
 DEF supervisor TinkerbotsBase {
   translation -0.41 0 0
@@ -52,6 +112,7 @@ DEF supervisor TinkerbotsBase {
 DEF r1 Solid {
   translation 0.56 0.29 0.0199984
   rotation 0 1 0 4.6928e-06
+  scale 2 2 2
   children [
     DEF STICK_SHAPE Shape {
       appearance PBRAppearance {
@@ -81,6 +142,7 @@ DEF r1 Solid {
 DEF r3 Solid {
   translation 0.13 0.3 0.0199993
   rotation 0 1 0 4.6928e-06
+  scale 2 2 2
   children [
     DEF STICK_SHAPE Shape {
       appearance PBRAppearance {
@@ -107,9 +169,10 @@ DEF r3 Solid {
     0.8 0 0
   ]
 }
-DEF r6 Solid {
+DEF r9 Solid {
   translation -0.14 0.3 0.0199993
   rotation 0 1 0 4.6928e-06
+  scale 2 2 2
   children [
     DEF STICK_SHAPE Shape {
       appearance PBRAppearance {
@@ -136,9 +199,70 @@ DEF r6 Solid {
     0.8 0 0
   ]
 }
+DEF r10 Solid {
+  translation -0.39 0.57 0.0199993
+  rotation 0 1 0 4.6928e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(8)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+}
+DEF r11 Solid {
+  translation 0.68 0.57 0.0199988
+  rotation 0 1 0 4.6928e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(9)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+}
 DEF r2 Solid {
   translation 0.05 -0.23 0.019999
   rotation 0 1 0 4.6928e-06
+  scale 2 2 2
   children [
     DEF STICK_SHAPE Shape {
       appearance PBRAppearance {
@@ -168,6 +292,7 @@ DEF r2 Solid {
 DEF r4 Solid {
   translation -0.18 -0.41 0.0199999
   rotation 0 1 0 4.6928e-06
+  scale 2 2 2
   children [
     DEF STICK_SHAPE Shape {
       appearance PBRAppearance {
@@ -197,6 +322,7 @@ DEF r4 Solid {
 DEF r5 Solid {
   translation 0.31 -0.23 0.0199972
   rotation 0 1 0 4.6928e-06
+  scale 2 2 2
   children [
     DEF STICK_SHAPE Shape {
       appearance PBRAppearance {
@@ -226,6 +352,7 @@ DEF r5 Solid {
 DEF r7 Solid {
   translation 0.8 -0.41 0.0199969
   rotation 0 1 0 4.6928e-06
+  scale 2 2 2
   children [
     DEF STICK_SHAPE Shape {
       appearance PBRAppearance {

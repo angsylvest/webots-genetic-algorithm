@@ -12,13 +12,16 @@ Angel Sylvester 2022
 """
 
 # sets up csv for reference 
-k1_df = pd.DataFrame(columns = ['agent id' ,'time step', 'fitness', 'xpos', 'ypos'])
-k2_df = pd.DataFrame(columns = ['agent id', 'time step', 'fitness', 'xpos', 'ypos'])
-k3_df = pd.DataFrame(columns = ['agent id', 'time step', 'fitness', 'xpos', 'ypos'])
+k1_df = pd.DataFrame(columns = ['agent id' ,'time step', 'fitness', 'xpos', 'ypos', 'num col'])
+k2_df = pd.DataFrame(columns = ['agent id', 'time step', 'fitness', 'xpos', 'ypos', 'num col'])
+k3_df = pd.DataFrame(columns = ['agent id', 'time step', 'fitness', 'xpos', 'ypos', 'num col'])
 ## add more robot dfs here (be sure to keep num consistent) 
 
 global df_list
 df_list = [k1_df, k2_df, k3_df]
+
+global collected_count 
+collected_count = [0, 0, 0]
 
 overall_df = pd.DataFrame(columns = ['time', 'objects retrieved'])
 
@@ -50,7 +53,7 @@ receiver = robot.getDevice("receiver")
 receiver.enable(TIME_STEP)
 receiver.setChannel(2) 
 
-num_generations = 2
+num_generations = 10
 
 global initial_genotypes 
 initial_genotypes = []
@@ -79,7 +82,22 @@ global fit_update
 fit_update = False 
 
 global simulation_time
-simulation_time = 1
+simulation_time = 15
+
+global trials 
+trials = 15
+
+r1 = robot.getFromDef("r1")
+r2 = robot.getFromDef("r2")
+r3 = robot.getFromDef("r3")
+r4 = robot.getFromDef("r4")
+r5 = robot.getFromDef("r5")
+r6 = robot.getFromDef("r6")
+r7 = robot.getFromDef("r7")
+r8 = robot.getFromDef("r8")
+r9 = robot.getFromDef("r9")
+r10 = robot.getFromDef("r10")
+r11 = robot.getFromDef("r11")
 
 def initialize_genotypes():
     global initial_genotypes
@@ -88,7 +106,43 @@ def initialize_genotypes():
             initial_genotypes.append(line)
 
 def restore_positions():
-    pass 
+        # clearing messages between each trial 
+    while receiver.getQueueLength()>0:
+        message = receiver.getData().decode('utf-8')
+        receiver.nextPacket()
+        
+    robot.simulationReset()   
+    for r in population: 
+        r.restartController()
+        
+    r1.loadState('init')
+    r2.loadState('init')
+    r3.loadState('init')
+    r4.loadState('init')
+    r5.loadState('init')
+    r6.loadState('init')
+    r7.loadState('init')
+    r8.loadState('init')
+    r9.loadState('init')
+    r10.loadState('init')
+    r11.loadState('init')
+        
+    print('end of trial')
+    
+def set_block_distribution():
+    
+    r1.saveState('init')
+    r2.saveState('init')
+    r3.saveState('init')
+    r4.saveState('init')
+    r5.saveState('init')
+    r6.saveState('init')
+    r7.saveState('init')
+    r8.saveState('init')
+    r9.saveState('init')
+    r10.saveState('init')
+    r11.saveState('init')
+     
     
 def find_nearest_robot_genotype(r_index):
     global population 
@@ -136,9 +190,6 @@ def save_progress():
  
     
     # csv_list = []
-    
-    new_row = {'time': simulation_time*num_generations, 'objects retrieved': total_found}
-    overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)
             
     # k1_df.to_csv('k1_results.csv')
     # k2_df.to_csv('k2_results.csv') 
@@ -155,6 +206,7 @@ def message_listener(time_step):
     global k3_df
     global total_found 
     global df_list 
+    global collected_count 
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -162,20 +214,22 @@ def message_listener(time_step):
         print('incoming messages', message) 
         
         if message[0] == "$": # handles deletion of objects when grabbed
-            message = int(message[1:])
-            receiver.nextPacket()
+            collected_count[int(message[1])] = collected_count[int(message[1])] + 1
             print('removing object')
-            obj_node = robot.getFromId(message)
+            message = message[2:]
+            print(message)
+            obj_node = robot.getFromId(int(message))
             print(obj_node)
             if obj_node is not None: 
                 obj_node.remove()
                 total_found += 1
+            receiver.nextPacket()
             
         elif 'k1-fitness' in message: 
             k1_fitness = int(message[10:])
             fitness_scores[0] = k1_fitness
             
-            new_row = {'agent id': 1, 'time step': time_step, 'fitness': k1_fitness, 'xpos': k1.getPosition()[0], 'ypos': k1.getPosition()[1]}
+            new_row = {'agent id': 1, 'time step': time_step, 'fitness': k1_fitness, 'xpos': k1.getPosition()[0], 'ypos': k1.getPosition()[1], 'num col': collected_count[0]}
             k1_df = pd.concat([k1_df, pd.DataFrame([new_row])], ignore_index=True)
             df_list[0] = k1_df
             
@@ -187,7 +241,7 @@ def message_listener(time_step):
             k2_fitness = int(message[10:])
             fitness_scores[1] = k2_fitness
             
-            new_row = {'agent id': 2,'time step': time_step, 'fitness': k2_fitness, 'xpos': k2.getPosition()[0], 'ypos': k2.getPosition()[1]}
+            new_row = {'agent id': 2,'time step': time_step, 'fitness': k2_fitness, 'xpos': k2.getPosition()[0], 'ypos': k2.getPosition()[1], 'num col': collected_count[1]}
             k2_df = pd.concat([k2_df, pd.DataFrame([new_row])], ignore_index = True)
             df_list[1] = k2_df
             
@@ -199,7 +253,7 @@ def message_listener(time_step):
             k3_fitness = int(message[10:])
             fitness_scores[2] = k3_fitness
             
-            new_row = {'agent id': 3,'time step': time_step, 'fitness': k3_fitness, 'xpos': k3.getPosition()[0], 'ypos': k3.getPosition()[1]}
+            new_row = {'agent id': 3,'time step': time_step, 'fitness': k3_fitness, 'xpos': k3.getPosition()[0], 'ypos': k3.getPosition()[1], 'num col': collected_count[2]}
             k3_df = pd.concat([k3_df, pd.DataFrame([new_row])], ignore_index = True)
             df_list[2] = k3_df
             
@@ -272,6 +326,8 @@ def update_geno_list(genotype_list):
     global gene_list
     global taken 
     global updated 
+    
+    print('geno list --', genotype_list)
         
     if max(fitness_scores) == 0:
         # update all genotypes 
@@ -332,17 +388,8 @@ def eval_fitness(time_step):
         print('will update gene pool --')
         fit_update = True 
         update_geno_list(pop_genotypes)
-          
-    
-def run_optimization():
-    global pop_genotypes 
-    global gene_list 
-    global updated
-    global simulation_time 
-    
-    # initialize genotypes 
-    # will be same genotype as normal (for comparison purposes) 
-    
+
+def reset_genotype():
     index = 0 
     for i in range(len(population)):
         # genotype = create_individal_genotype(gene_list)
@@ -350,40 +397,58 @@ def run_optimization():
         genotype = initial_genotypes[i]
         pop_genotypes.append(genotype)
         emitter.send(str("#"+ str(index) + str(genotype)).encode('utf-8'))
-        index +=1 
+        index +=1   
+    
+def run_optimization():
+    global pop_genotypes 
+    global gene_list 
+    global updated
+    global simulation_time 
+    global overall_df
+    
+    # initialize genotypes 
+    # will be same genotype as normal (for comparison purposes) 
+    
+    reset_genotype()
         
     run_seconds(simulation_time) # runs generation for that given amount of time  
     print('new generation beginning')
     run_seconds(5, True) # is waiting until got genotypes
     
     
-    for gen in range(num_generations-1): 
-        
-        # pop_fitness = [] 
-        
-        # send relevant genotypes to each robot, handler
-        updated = False 
-        
-        index = 0 
-        for i in range(len(population)):
-            emitter.send(str("#"+ str(index) + str(pop_genotypes[index])).encode('utf-8'))
-            index +=1 
+    for i in range(trials): 
+        for gen in range(num_generations-1): 
             
-        run_seconds(simulation_time) 
-        
-        print('waiting for genotypes')
-        
-        run_seconds(5, True) # is waiting until got genotypes
-        
-        print('found genotypes')
-        print('new generation starting -')
-                       
+            # pop_fitness = [] 
+            
+            # send relevant genotypes to each robot, handler
+            updated = False 
+            
+            index = 0 
+            for i in range(len(population)):
+                emitter.send(str("#"+ str(index) + str(pop_genotypes[index])).encode('utf-8'))
+                index +=1 
+                
+            run_seconds(simulation_time) 
+            
+            print('waiting for genotypes')
+            
+            run_seconds(5, True) # is waiting until got genotypes
+            
+            print('found genotypes')
+            print('new generation starting -')
+            
+        new_row = {'time': simulation_time*num_generations, 'objects retrieved': total_found}
+        overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)
+        restore_positions()   
+        reset_genotype()               
     return 
    
         
             
 def main(): 
-    restore_positions()
+    # restore_positions()
+    set_block_distribution()
     initialize_genotypes()
     run_optimization()
     save_progress()
