@@ -80,7 +80,7 @@ def mutate(c, mut_prob):
             
             elif i == 1: 
                 # choose random position 
-                p = random.randint(len(c)/2, len(c)-1)
+                p = random.randint(int(len(c)/2), len(c)-1)
                 # switch to different val 
                 if c[p] == str(1):
                     c = c[:p] + "0" + c[p+1:] 
