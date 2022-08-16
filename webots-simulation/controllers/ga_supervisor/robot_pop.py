@@ -9,8 +9,8 @@ def create_random_population(size, gene_list):
     # will control threshold of detection & speed 
     # rule-set generated for each robot 
     
-    ruleset = ""
-    pop_set = ""
+    ruleset = ''
+    pop_set = ''
     for pop in range(size): 
         for gene in gene_list:
             g_count = int(gene.split(" ")[-1])
@@ -20,10 +20,9 @@ def create_random_population(size, gene_list):
         
         
 def create_individal_genotype(gene_list):
-    ruleset = ""
+    ruleset = ''
     for gene in gene_list:
         g_count = int(gene.split(" ")[-1])
-        print('num of bin ---', go_count)
         ruleset += generate_random_act(g_count) + "*"
     return ruleset
      
@@ -39,20 +38,23 @@ def reproduce(r1, r2):
     # smaller amount 
     
     # if below, resample again 
-    new_genotype = ""
+    new_genotype = ''
     mom = r1.split("*")
     dad = r2.split("*")
         
     for i in range(len(mom)-1): # assuming this is a list of genotypes 
+        if i == 0:
+            mom[i] = mom[i][1:]
+            dad[i] = dad[i][1:]
         
         child = crossover(mom[i], dad[i]) 
         child = mutate(child, 0.2) + "*"
         new_genotype += child 
-    
+
     return new_genotype 
     
 def crossover(m, d):
-    new_child = ""
+    new_child = ''
     
     random_start = random.randint(0,len(m)-1)
     
@@ -68,7 +70,7 @@ def mutate(c, mut_prob):
         if random.random() < mut_prob: 
             if i == 0: 
                 # choose random position 
-                p = random.randint(0,len(c)/2)
+                p = random.randint(0,int(len(c)/2))
                 # switch to different val 
                 if c[p] == str(1):
                     c = c[:p] + "0" + c[p+1:]

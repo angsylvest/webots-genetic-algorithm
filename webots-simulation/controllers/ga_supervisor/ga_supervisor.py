@@ -112,37 +112,75 @@ def restore_positions():
         receiver.nextPacket()
         
     robot.simulationReset()   
-    for r in population: 
-        r.restartController()
+    
+    # manually resets arena configuration (will automate soon or save as csv) 
+    coordinates = [[-0.115, 0, 0.0045], [0.2445, 0, 0.0045], [0.6045, 0, 0.0045]]
+    for r in range(len(population)): 
+        population[r].restartController()
+        r.setSFVec3f(coordinates[r])
         
-    r1.loadState('init')
-    r2.loadState('init')
-    r3.loadState('init')
-    r4.loadState('init')
-    r5.loadState('init')
-    r6.loadState('init')
-    r7.loadState('init')
-    r8.loadState('init')
-    r9.loadState('init')
-    r10.loadState('init')
-    r11.loadState('init')
+    tf1 = r1.getField('translation')
+    tf1.setSFVec3f([0.56, 0.29, 0.019])
+    
+    tf2 = r2.getField('translation')
+    tf2.setSFVec3f([0.05, -0.23, 0.019])
+    
+    tf3 = r3.getField('translation')
+    tf3.setSFVec3f([0.13, 0.3, 0.019])
+       
+    tf4 = r4.getField('translation')
+    tf4.setSFVec3f([-0.18, -0.41, 0.019])
+    
+    tf5 = r5.getField('translation')
+    tf5.setSFVec3f([0.31, -0.23, 0.019])
+    
+    tf6 = r6.getField('translation')
+    tf6.setSFVec3f([0.56, -0.23, 0.019])
+    
+    tf7 = r7.getField('translation')
+    tf7.setSFVec3f([0.8, -0.41, 0.019])
+    
+    tf8 = r8.getField('translation')
+    tf8.setSFVec3f([0.37, 0.3, 0.019])
+    
+    tf9 = r9.getField('translation')
+    tf9.setSFVec3f([-0.14, 0.3, 0.019])
+    
+    tf10 = r10.getField('translation')
+    tf10.setSFVec3f([-0.39, 0.57, 0.019])
+    
+    tf11 = r11.getField('translation')
+    tf11.setSFVec3f([0.68, 0.57, 0.019])
+    
+    # r2.loadState('init')
+    # r3.loadState('init')
+    # r4.loadState('init')
+    # r5.loadState('init')
+    # r6.loadState('init')
+    # r7.loadState('init')
+    # r8.loadState('init')
+    # r9.loadState('init')
+    # r10.loadState('init')
+    # r11.loadState('init')
         
     print('end of trial')
     initialize_genotypes()
     
 def set_block_distribution():
     
-    r1.saveState('init')
-    r2.saveState('init')
-    r3.saveState('init')
-    r4.saveState('init')
-    r5.saveState('init')
-    r6.saveState('init')
-    r7.saveState('init')
-    r8.saveState('init')
-    r9.saveState('init')
-    r10.saveState('init')
-    r11.saveState('init')
+    # r1.saveState('init')
+    # r2.saveState('init')
+    # r3.saveState('init')
+    # r4.saveState('init')
+    # r5.saveState('init')
+    # r6.saveState('init')
+    # r7.saveState('init')
+    # r8.saveState('init')
+    # r9.saveState('init')
+    # r10.saveState('init')
+    # r11.saveState('init')
+    
+    pass
      
     
 def find_nearest_robot_genotype(r_index):
@@ -221,8 +259,10 @@ def message_listener(time_step):
             print(message)
             obj_node = robot.getFromId(int(message))
             print(obj_node)
-            if obj_node is not None: 
-                obj_node.remove()
+            if obj_node is not None:
+                t_field = obj_node.getField('translation')
+                t_field.setSFVec3f([-0.9199,-0.92, 0.059]) 
+                # obj_node.remove()
                 total_found += 1
             receiver.nextPacket()
             
@@ -335,6 +375,7 @@ def update_geno_list(genotype_list):
         
         for i in range(len(population)):
             g = create_individal_genotype(gene_list)
+            print('updated genolist --', g)
             pop_genotypes.append(g)
         
         # g1 = create_individal_genotype(gene_list)
@@ -353,8 +394,7 @@ def update_geno_list(genotype_list):
         cp_genotypes.remove(pop_genotypes[max_index])
         child = reproduce(cp_genotypes[0], pop_genotypes[max_index])
         other_child = reproduce(pop_genotypes[max_index], cp_genotypes[1])
-        
-        
+               
         for i in range(len(fitness_scores)):
             if i != max_index and not taken: 
                 pop_genotypes[0] = child
@@ -395,7 +435,6 @@ def reset_genotype():
         # genotype = create_individal_genotype(gene_list)
         # print('genotype', i, genotype)
         genotype = initial_genotypes[i]
-        print('resetted genotype', genotype)
         pop_genotypes.append(genotype)
         emitter.send(str("#"+ str(index) + str(genotype)).encode('utf-8'))
         index +=1   

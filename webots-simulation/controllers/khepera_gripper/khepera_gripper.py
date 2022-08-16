@@ -257,10 +257,12 @@ while robot.step(timestep) != -1 and sim_complete != True:
             # object_encountered = True
   
             # attempt to get object detected 
-            if len(list) != 0 and dist_val < 10: 
+            if len(list) != 0 and dist_val < 40:
+             
                 firstObject = camera.getRecognitionObjects()[0]
                 id = str(firstObject.get_id())
-                # print('found object 1', firstObject, id)
+                print('dist val ', dist_val)
+                print('found object 1', firstObject, id)
                 id = "$0" + id # indication that it is a object to be deleted 
                 emitter.send(str(id).encode('utf-8'))
                 fitness += 1 

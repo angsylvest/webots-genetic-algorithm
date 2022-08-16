@@ -25,8 +25,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.1804908353460832 -0.8924821648269742 0.4133988918971974 5.373260562070233
-  position -1.2411297901305576 0.6279283877219468 1.2949539215035502
+  orientation -0.17342564397625304 -0.788788464839032 0.5896917022888359 5.569442443400272
+  position -1.4873816014850294 0.770837030118815 1.0397075492485763
 }
 TexturedBackground {
 }
@@ -416,7 +416,7 @@ DEF khepera Khepera1 {
       ]
       endPoint Solid {
         translation -0.01 0 0.022
-        rotation 0.7058148424148399 -0.7058148424148707 -0.060421986509761896 3.0208949999998924
+        rotation 0.7058148424148396 -0.705814842414871 -0.06042198650976226 3.020894999999887
         children [
           DEF RIGHT_GRIP SliderJoint {
             jointParameters JointParameters {
@@ -643,7 +643,7 @@ DEF khepera Khepera1 {
         density -1
         mass 0.02
       }
-      fieldOfView 0.785401
+      fieldOfView 0.3
       recognition Recognition {
         maxRange 50
       }
@@ -651,7 +651,7 @@ DEF khepera Khepera1 {
   ]
 }
 DEF khepera2 Khepera1 {
-  translation 0.244567 0 0.004553
+  translation 0.184567 0 0.004553
   name "khepera camera(1)"
   controller "khepera_gripper_2"
   supervisor TRUE
@@ -912,6 +912,7 @@ DEF khepera2 Khepera1 {
         density -1
         mass 0.02
       }
+      fieldOfView 0.3
       recognition Recognition {
       }
     }
@@ -1179,6 +1180,7 @@ DEF khepera3 Khepera1 {
         density -1
         mass 0.02
       }
+      fieldOfView 0.3
       recognition Recognition {
       }
     }

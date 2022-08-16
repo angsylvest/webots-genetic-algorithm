@@ -249,10 +249,10 @@ while robot.step(timestep) != -1 and sim_complete != True:
             # grab_object(i, prev_object_i)
             # object_encountered = True
             
-            # if retrievable object within range, gets picked up 
-            if len(list) != 0 and dist_val < 10: 
+            # print('light val' , light_sensor.getValue())
+            if len(list) != 0 and dist_val < 40: 
                 firstObject = camera.getRecognitionObjects()[0]
-                # print('found object 3', firstObject)
+                print('found object 3', firstObject)
                 id = str(firstObject.get_id())
                 id = "$2" + id # indication that it is a object to be deleted 
                 emitter.send(str(id).encode('utf-8'))
