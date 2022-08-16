@@ -9,9 +9,9 @@ Angel Sylvester 2022
 """
 
 # sets up csv for reference 
-k_gen_df = pd.DataFrame(columns = ['time step', 'fitness'])
+k_gen_df = pd.DataFrame(columns = ['time step', 'fitness', 'xpos', 'ypos', 'num col'])
 
-overall_df = pd.DataFrame(columns = ['time', 'objects retrieved'])
+overall_df = pd.DataFrame(columns = ['trial', 'time', 'objects retrieved'])
 
 TIME_STEP = 32
 
@@ -52,6 +52,9 @@ fitness_scores = ["!","!","!"]
 global pop_genotypes 
 pop_genotypes = []
 
+global total_collected 
+total_collected = 0 
+
 global taken 
 taken = False # getting second child assigned 
 
@@ -73,6 +76,21 @@ simulation_time = 10
 global count 
 count = 0
 
+global trials 
+trials = 15
+
+r1 = robot.getFromDef("r1")
+r2 = robot.getFromDef("r2")
+r3 = robot.getFromDef("r3")
+r4 = robot.getFromDef("r4")
+r5 = robot.getFromDef("r5")
+r6 = robot.getFromDef("r6")
+r7 = robot.getFromDef("r7")
+r8 = robot.getFromDef("r8")
+r9 = robot.getFromDef("r9")
+r10 = robot.getFromDef("r10")
+r11 = robot.getFromDef("r11")
+
 def initialize_genotypes():
     global initial_genotypes
     with open('initial_genotype.txt') as f:
@@ -80,7 +98,66 @@ def initialize_genotypes():
             initial_genotypes.append(line)
 
 def restore_positions():
-    pass 
+        # clearing messages between each trial 
+    while receiver.getQueueLength()>0:
+        message = receiver.getData().decode('utf-8')
+        receiver.nextPacket()
+        
+    robot.simulationReset()   
+    
+    # manually resets arena configuration (will automate soon or save as csv) 
+    coordinates = [[-0.115, 0, 0.0045], [0.2445, 0, 0.0045], [0.6045, 0, 0.0045]]
+    for r in range(len(population)): 
+        population[r].restartController()
+        r_field = population[r].getField('translation')
+        r_field.setSFVec3f(coordinates[r])
+        
+    tf1 = r1.getField('translation')
+    tf1.setSFVec3f([0.56, 0.29, 0.019])
+    
+    tf2 = r2.getField('translation')
+    tf2.setSFVec3f([0.05, -0.23, 0.019])
+    
+    tf3 = r3.getField('translation')
+    tf3.setSFVec3f([0.13, 0.3, 0.019])
+       
+    tf4 = r4.getField('translation')
+    tf4.setSFVec3f([-0.18, -0.41, 0.019])
+    
+    tf5 = r5.getField('translation')
+    tf5.setSFVec3f([0.31, -0.23, 0.019])
+    
+    tf6 = r6.getField('translation')
+    tf6.setSFVec3f([0.56, -0.23, 0.019])
+    
+    tf7 = r7.getField('translation')
+    tf7.setSFVec3f([0.8, -0.41, 0.019])
+    
+    tf8 = r8.getField('translation')
+    tf8.setSFVec3f([0.37, 0.3, 0.019])
+    
+    tf9 = r9.getField('translation')
+    tf9.setSFVec3f([-0.14, 0.3, 0.019])
+    
+    tf10 = r10.getField('translation')
+    tf10.setSFVec3f([-0.39, 0.57, 0.019])
+    
+    tf11 = r11.getField('translation')
+    tf11.setSFVec3f([0.68, 0.57, 0.019])
+    
+    # r2.loadState('init')
+    # r3.loadState('init')
+    # r4.loadState('init')
+    # r5.loadState('init')
+    # r6.loadState('init')
+    # r7.loadState('init')
+    # r8.loadState('init')
+    # r9.loadState('init')
+    # r10.loadState('init')
+    # r11.loadState('init')
+        
+    print('end of trial')
+    initialize_genotypes()
     
 def save_progress():
     # way to save total number of blocks found 
@@ -108,14 +185,18 @@ def message_listener(time_step):
         print('incoming messages', message) 
         
         if message[0] == "$": # handles deletion of objects when grabbed
-            message = int(message[1:])
-            receiver.nextPacket()
+            collected_count[int(message[1])] = collected_count[int(message[1])] + 1
             print('removing object')
-            obj_node = robot.getFromId(message)
+            message = message[2:]
+            print(message)
+            obj_node = robot.getFromId(int(message))
             print(obj_node)
-            if obj_node is not None: 
-                obj_node.remove()
+            if obj_node is not None:
+                t_field = obj_node.getField('translation')
+                t_field.setSFVec3f([-0.9199,-0.92, 0.059]) 
+                # obj_node.remove()
                 total_found += 1
+            receiver.nextPacket()
             
         elif 'k-fitness' in message:
             print('message', message)
@@ -235,26 +316,32 @@ def run_optimization():
     run_seconds(5, True) # is waiting until got genotypes
     
     
-    for gen in range(num_generations-1): 
-        
-        # pop_fitness = [] 
-        
-        # send relevant genotypes to each robot, handler
-        updated = False 
-        
-        # index = 0 
-        # for i in range(len(population)):
-            # emitter.send(str("#"+ str(index) + str(pop_genotypes[index])).encode('utf-8'))
-            # index +=1 
+    for i in range(trials): 
+        for gen in range(num_generations-1): 
             
-        run_seconds(simulation_time) 
-        
-        print('waiting for genotypes')
-        
-        run_seconds(5, True) # is waiting until got genotypes
-        
-        print('found genotypes')
-        print('new generation starting -')
+            # pop_fitness = [] 
+            
+            # send relevant genotypes to each robot, handler
+            updated = False 
+            
+            # index = 0 
+            # for i in range(len(population)):
+                # emitter.send(str("#"+ str(index) + str(pop_genotypes[index])).encode('utf-8'))
+                # index +=1 
+                
+            run_seconds(simulation_time) 
+            
+            print('waiting for genotypes')
+            
+            run_seconds(5, True) # is waiting until got genotypes
+            
+            print('found genotypes')
+            print('new generation starting -')
+            
+        new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
+        overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)
+        restore_positions()  
+            
                        
     return 
    
