@@ -38,7 +38,7 @@ receiver = robot.getDevice("receiver")
 receiver.enable(TIME_STEP)
 receiver.setChannel(2) 
 
-num_generations = 15
+num_generations = 2
 population = [k1, k2, k3]
 
 global initial_genotypes 
@@ -71,7 +71,7 @@ global fit_update
 fit_update = False 
 
 global simulation_time
-simulation_time = 10
+simulation_time = 2
 
 global count 
 count = 0
@@ -113,37 +113,59 @@ def restore_positions():
         r_field.setSFVec3f(coordinates[r])
         
     tf1 = r1.getField('translation')
+    rf1 = r1.getField('rotation')
     tf1.setSFVec3f([0.56, 0.29, 0.019])
+    rf1.setSFVec3f([0, 1, 0])
     
     tf2 = r2.getField('translation')
+    rf2 = r2.getField('rotation')
     tf2.setSFVec3f([0.05, -0.23, 0.019])
+    rf2.setSFVec3f([0, 1, 0])
     
     tf3 = r3.getField('translation')
+    rf3 = r3.getField('rotation')
     tf3.setSFVec3f([0.13, 0.3, 0.019])
+    rf3.setSFVec3f([0, 1, 0])
        
     tf4 = r4.getField('translation')
+    rf4 = r4.getField('rotation')
     tf4.setSFVec3f([-0.18, -0.41, 0.019])
+    rf4.setSFVec3f([0, 1, 0])
     
     tf5 = r5.getField('translation')
+    rf5 = r5.getField('rotation')
     tf5.setSFVec3f([0.31, -0.23, 0.019])
+    rf5.setSFVec3f([0, 1, 0])
     
     tf6 = r6.getField('translation')
+    rf6 = r6.getField('rotation')
     tf6.setSFVec3f([0.56, -0.23, 0.019])
+    rf6.setSFVec3f([0, 1, 0])
     
     tf7 = r7.getField('translation')
+    rf7 = r7.getField('rotation')
     tf7.setSFVec3f([0.8, -0.41, 0.019])
+    rf7.setSFVec3f([0, 1, 0])
     
     tf8 = r8.getField('translation')
+    rf8 = r8.getField('rotation')
     tf8.setSFVec3f([0.37, 0.3, 0.019])
+    rf8.setSFVec3f([0, 1, 0])
     
     tf9 = r9.getField('translation')
+    rf9 = r9.getField('rotation')
     tf9.setSFVec3f([-0.14, 0.3, 0.019])
+    rf9.setSFVec3f([0, 1, 0])
     
     tf10 = r10.getField('translation')
+    rf10 = r10.getField('rotation')
     tf10.setSFVec3f([-0.39, 0.57, 0.019])
+    rf10.setSFVec3f([0, 1, 0])
     
     tf11 = r11.getField('translation')
+    rf11 = r11.getField('rotation')
     tf11.setSFVec3f([0.68, 0.57, 0.019])
+    rf11.setSFVec3f([0, 1, 0])
     
     # r2.loadState('init')
     # r3.loadState('init')
