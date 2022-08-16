@@ -23,7 +23,7 @@ df_list = [k1_df, k2_df, k3_df]
 global collected_count 
 collected_count = [0, 0, 0]
 
-overall_df = pd.DataFrame(columns = ['time', 'objects retrieved'])
+overall_df = pd.DataFrame(columns = ['trial','time', 'objects retrieved'])
 
 TIME_STEP = 32
 
@@ -117,7 +117,8 @@ def restore_positions():
     coordinates = [[-0.115, 0, 0.0045], [0.2445, 0, 0.0045], [0.6045, 0, 0.0045]]
     for r in range(len(population)): 
         population[r].restartController()
-        r.setSFVec3f(coordinates[r])
+        r_field = population[r].getField('translation')
+        r_field.setSFVec3f(coordinates[r])
         
     tf1 = r1.getField('translation')
     tf1.setSFVec3f([0.56, 0.29, 0.019])
@@ -375,7 +376,7 @@ def update_geno_list(genotype_list):
         
         for i in range(len(population)):
             g = create_individal_genotype(gene_list)
-            print('updated genolist --', g)
+            # print('updated genolist --', g)
             pop_genotypes.append(g)
         
         # g1 = create_individal_genotype(gene_list)
@@ -457,6 +458,7 @@ def run_optimization():
     
     
     for i in range(trials): 
+        print('beginning new trial')
         for gen in range(num_generations-1): 
             
             # pop_fitness = [] 
@@ -477,8 +479,9 @@ def run_optimization():
             
             print('found genotypes')
             print('new generation starting -')
+            # print('trial --' ,i)
             
-        new_row = {'time': simulation_time*num_generations, 'objects retrieved': total_found}
+        new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
         overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)
         restore_positions()   
         reset_genotype()               
