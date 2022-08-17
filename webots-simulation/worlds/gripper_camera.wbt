@@ -416,7 +416,7 @@ DEF khepera Khepera1 {
       ]
       endPoint Solid {
         translation -0.01 0 0.022
-        rotation 0.7058148424148396 -0.705814842414871 -0.06042198650976226 3.020894999999887
+        rotation 0.7058148424148393 -0.7058148424148714 -0.0604219865097618 3.0208949999998853
         children [
           DEF RIGHT_GRIP SliderJoint {
             jointParameters JointParameters {

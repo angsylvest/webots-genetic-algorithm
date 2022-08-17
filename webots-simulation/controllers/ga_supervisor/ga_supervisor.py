@@ -123,57 +123,57 @@ def restore_positions():
     tf1 = r1.getField('translation')
     rf1 = r1.getField('rotation')
     tf1.setSFVec3f([0.56, 0.29, 0.019])
-    rf1.setSFVec3f([0, 1, 0])
+    rf1.setSFRotation([0, 1, 0])
     
     tf2 = r2.getField('translation')
     rf2 = r2.getField('rotation')
     tf2.setSFVec3f([0.05, -0.23, 0.019])
-    rf2.setSFVec3f([0, 1, 0])
+    rf2.setSFRotation([0, 1, 0])
     
     tf3 = r3.getField('translation')
     rf3 = r3.getField('rotation')
     tf3.setSFVec3f([0.13, 0.3, 0.019])
-    rf3.setSFVec3f([0, 1, 0])
+    rf3.setSFRotation([0, 1, 0])
        
     tf4 = r4.getField('translation')
     rf4 = r4.getField('rotation')
     tf4.setSFVec3f([-0.18, -0.41, 0.019])
-    rf4.setSFVec3f([0, 1, 0])
+    rf4.setSFRotation([0, 1, 0])
     
     tf5 = r5.getField('translation')
     rf5 = r5.getField('rotation')
     tf5.setSFVec3f([0.31, -0.23, 0.019])
-    rf5.setSFVec3f([0, 1, 0])
+    rf5.setSFRotation([0, 1, 0])
     
     tf6 = r6.getField('translation')
     rf6 = r6.getField('rotation')
     tf6.setSFVec3f([0.56, -0.23, 0.019])
-    rf6.setSFVec3f([0, 1, 0])
+    rf6.setSFRotation([0, 1, 0])
     
     tf7 = r7.getField('translation')
     rf7 = r7.getField('rotation')
     tf7.setSFVec3f([0.8, -0.41, 0.019])
-    rf7.setSFVec3f([0, 1, 0])
+    rf7.setSFRotation([0, 1, 0])
     
     tf8 = r8.getField('translation')
     rf8 = r8.getField('rotation')
     tf8.setSFVec3f([0.37, 0.3, 0.019])
-    rf8.setSFVec3f([0, 1, 0])
+    rf8.setSFRotation([0, 1, 0])
     
     tf9 = r9.getField('translation')
     rf9 = r9.getField('rotation')
     tf9.setSFVec3f([-0.14, 0.3, 0.019])
-    rf9.setSFVec3f([0, 1, 0])
+    rf9.setSFRotation([0, 1, 0])
     
     tf10 = r10.getField('translation')
     rf10 = r10.getField('rotation')
     tf10.setSFVec3f([-0.39, 0.57, 0.019])
-    rf10.setSFVec3f([0, 1, 0])
+    rf10.setSFRotation([0, 1, 0])
     
     tf11 = r11.getField('translation')
     rf11 = r11.getField('rotation')
     tf11.setSFVec3f([0.68, 0.57, 0.019])
-    rf11.setSFVec3f([0, 1, 0])
+    rf11.setSFRotation([0, 1, 0])
     
     # r2.loadState('init')
     # r3.loadState('init')
@@ -273,15 +273,15 @@ def message_listener(time_step):
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
         
-        print('incoming messages', message) 
+        # print('incoming messages', message) 
         
         if message[0] == "$": # handles deletion of objects when grabbed
             collected_count[int(message[1])] = collected_count[int(message[1])] + 1
-            print('removing object')
+            # print('removing object')
             message = message[2:]
             print(message)
             obj_node = robot.getFromId(int(message))
-            print(obj_node)
+            # print(obj_node)
             if obj_node is not None:
                 t_field = obj_node.getField('translation')
                 t_field.setSFVec3f([-0.9199,-0.92, 0.059]) 
@@ -377,9 +377,11 @@ def run_seconds(t,waiting=False):
             # constantly checking for messages from robots 
             message_listener(robot.getTime())
                          
-            if total_found == 8:
+            if total_found == 11:
                 # new_row = {'time step': robot.getTime(), 'fitness': 0} # this is just here to record time to finish task  
                 # k1_df.append(new_row, ignore_index=True)
+                emitter.send('return_fitness'.encode('utf-8'))
+                print('requesting fitness')
                 print('collected all objects')
                 break      
     return 
@@ -468,6 +470,8 @@ def run_optimization():
     global updated
     global simulation_time 
     global overall_df
+    global total_found 
+    global collected_count
     
     # initialize genotypes 
     # will be same genotype as normal (for comparison purposes) 
@@ -480,7 +484,7 @@ def run_optimization():
     
     
     for i in range(trials): 
-        print('beginning new trial')
+        print('beginning new trial', i)
         for gen in range(num_generations-1): 
             
             # pop_fitness = [] 
@@ -505,7 +509,9 @@ def run_optimization():
             
         new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
         overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)
-        restore_positions()   
+        restore_positions()  
+        total_found = 0 
+        collected_count = [0, 0, 0]
         reset_genotype()               
     return 
    
