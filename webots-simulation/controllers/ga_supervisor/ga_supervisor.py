@@ -66,6 +66,9 @@ fitness_scores = ["!","!","!"]
 global pop_genotypes 
 pop_genotypes = []
 
+global found_list 
+found_list = []
+
 global taken 
 taken = False # getting second child assigned 
 
@@ -269,6 +272,7 @@ def message_listener(time_step):
     global total_found 
     global df_list 
     global collected_count 
+    global found_list
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -286,7 +290,11 @@ def message_listener(time_step):
                 t_field = obj_node.getField('translation')
                 t_field.setSFVec3f([-0.9199,-0.92, 0.059]) 
                 # obj_node.remove()
-                total_found += 1
+                # remove redundant requests 
+                if obj_node not in found_list:
+                    total_found += 1
+                    found_list.append(obj_node)
+                    
             receiver.nextPacket()
             
         elif 'k1-fitness' in message: 
@@ -472,6 +480,7 @@ def run_optimization():
     global overall_df
     global total_found 
     global collected_count
+    global found_list
     
     # initialize genotypes 
     # will be same genotype as normal (for comparison purposes) 
@@ -508,10 +517,12 @@ def run_optimization():
             # print('trial --' ,i)
             
         new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
+        print('items collected', total_found)
         overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)
         restore_positions()  
         total_found = 0 
         collected_count = [0, 0, 0]
+        found_list = []
         reset_genotype()               
     return 
    

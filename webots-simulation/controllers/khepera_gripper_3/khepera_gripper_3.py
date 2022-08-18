@@ -71,6 +71,8 @@ global detect_thres
 detect_thres = 1000
 global time_switch
 time_switch = 150
+global obj_found_so_far
+obj_found_so_far = []
 
 sim_complete = False
 # motor functions 
@@ -254,11 +256,14 @@ while robot.step(timestep) != -1 and sim_complete != True:
                 firstObject = camera.getRecognitionObjects()[0]
                 # print('found object 3', firstObject)
                 id = str(firstObject.get_id())
-                id = "$2" + id # indication that it is a object to be deleted 
-                emitter.send(str(id).encode('utf-8'))
-                fitness += 1 
-                holding_something = False 
-                chosen_direction = correlated_random(chosen_direction)
+                
+                if id not in obj_found_so_far:
+                    obj_found_so_far.append(id)
+                    id = "$2" + id # indication that it is a object to be deleted 
+                    emitter.send(str(id).encode('utf-8'))
+                    fitness += 1 
+                    holding_something = False 
+                    chosen_direction = correlated_random(chosen_direction)
                 
             # if dist_val < 5: 
                 # fitness += 1

@@ -73,6 +73,10 @@ global time_switch
 time_switch = 150
 # motor functions 
 
+global obj_found_so_far
+obj_found_so_far = []
+
+
 def rotate_random():
     # will choose direction following biased random walk 
     directions = [pi/2, pi, -pi/2, 0, 0, 0, 0] # more preference to move straight 
@@ -240,6 +244,7 @@ while robot.step(timestep) != -1:
         
     # read distance sensor value 
     dist_val = ds.getValue()
+    # print(dist_val, 'detect --', detect_thres)
     
     # wall avoidance 
     if round(dist_val) == 283:
@@ -268,13 +273,16 @@ while robot.step(timestep) != -1:
             # if retrievable object within range, gets picked up 
             if len(list) != 0 and dist_val < 40: 
                 firstObject = camera.getRecognitionObjects()[0]
-                print('found object', firstObject)
+                # print('found object', firstObject)
                 id = str(firstObject.get_id())
-                id = "$" + id # indication that it is a object to be deleted 
-                emitter.send(str(id).encode('utf-8'))
-                fitness += 1 
-                holding_something = False 
-                chosen_direction = correlated_random(chosen_direction)
+                
+                if id not in obj_found_so_far:
+                    obj_found_so_far.append(id)
+                    id = "$" + id # indication that it is a object to be deleted 
+                    emitter.send(str(id).encode('utf-8'))
+                    fitness += 1 
+                    holding_something = False 
+                    chosen_direction = correlated_random(chosen_direction)
             elif dist_val == 0:
                 fitness -= 1 
                 print('collision encountered')
