@@ -244,7 +244,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             # grab_object(i, prev_object_i)
             # object_encountered = True
             # print('light val' , light_sensor.getValue())
-            if len(list) != 0 and dist_val < 40:
+            if len(list) == 1 and dist_val < 40:
                 firstObject = camera.getRecognitionObjects()[0]
                 # print('found object 2', firstObject)
                 id = str(firstObject.get_id())

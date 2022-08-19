@@ -261,7 +261,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             # object_encountered = True
   
             # attempt to get object detected 
-            if len(list) != 0 and dist_val < 100:
+            if len(list) == 1 and dist_val < 100:
              
                 firstObject = camera.getRecognitionObjects()[0]
                 id = str(firstObject.get_id())

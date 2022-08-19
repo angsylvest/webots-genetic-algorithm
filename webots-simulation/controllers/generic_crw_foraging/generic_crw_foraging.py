@@ -271,7 +271,7 @@ while robot.step(timestep) != -1:
             # object_encountered = True
             
             # if retrievable object within range, gets picked up 
-            if len(list) != 0 and dist_val < 40: 
+            if len(list) == 1 and dist_val < 40: 
                 firstObject = camera.getRecognitionObjects()[0]
                 # print('found object', firstObject)
                 id = str(firstObject.get_id())
