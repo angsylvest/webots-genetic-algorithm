@@ -213,7 +213,7 @@ def message_listener(time_step):
         if message[0] == "$": # handles deletion of objects when grabbed
             # collected_count[int(message[1])] = collected_count[int(message[1])] + 1
             print('removing object')
-            message = message[2:]
+            message = message[1:]
             print(message)
             obj_node = robot.getFromId(int(message))
             print(obj_node)
@@ -226,7 +226,7 @@ def message_listener(time_step):
                     total_found += 1
                     found_list.append(obj_node)
                     
-                total_found += 1
+                    # total_found += 1
             receiver.nextPacket()
             
         elif 'k-fitness' in message:
@@ -289,6 +289,7 @@ def run_seconds(t,waiting=False):
             if total_found == 11:
                 # new_row = {'time step': robot.getTime(), 'fitness': 0} # this is just here to record time to finish task  
                 # k1_df.append(new_row, ignore_index=True)
+                emitter.send('return_fitness'.encode('utf-8'))
                 print('collected all objects')
                 break      
     return 
@@ -331,6 +332,7 @@ def run_optimization():
     global simulation_time 
     global total_found 
     global overall_df
+    global found_list
     
     # initialize genotypes 
     # will be same genotype as normal (for comparison purposes) 
@@ -377,6 +379,7 @@ def run_optimization():
         overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)
         restore_positions()  
         total_found = 0 
+        found_list = []
             
                        
     return 
