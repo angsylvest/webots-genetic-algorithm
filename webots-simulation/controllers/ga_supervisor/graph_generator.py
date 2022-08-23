@@ -43,4 +43,7 @@ def generate_fitness(csv_summary_fitness):
 def generate_paths():
     pass 
     
+def combine_graphs_fitness():
+    # will combine fitness csvs for non ga, and ga 
+    pass 
 
