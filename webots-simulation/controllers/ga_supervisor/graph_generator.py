@@ -45,5 +45,10 @@ def generate_paths():
     
 def combine_graphs_fitness():
     # will combine fitness csvs for non ga, and ga 
+    df_ga = pd.read_csv()
+    df_crw = pd.read_csv()
+    
+    
+    
     pass 
 

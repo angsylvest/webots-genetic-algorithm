@@ -84,21 +84,20 @@ def rotate_random():
     chosen_direction = round(chosen_direction, 2) 
     return chosen_direction 
     
-   
 def correlated_random(curr_dir): 
-    # follows a markov chain (persistence), will exclude direction directly behind  
+    # follows a markov chain (persistence) 
     # short-term straight line adherence (very simple) 
-    if round(curr_dir,2) == -0.00 or round(curr_dir,2) == 0.00: 
+    if round(curr_dir,2) == -0.00: 
         return round(random.choice([0,0, pi/2, -pi/2]),2)
     
     elif round(curr_dir,2) == round(pi/2, 2):
-        return round(random.choice([pi, pi/2, pi/2, 0]),2)
+        return round(random.choice([0, pi/2, pi/2, -pi/2]),2)
     
     elif round(curr_dir,2) == round(-pi/2): 
-        return round(random.choice([pi, 0, -pi/2, -pi/2]),2)
+        return round(random.choice([0, pi/2, -pi/2, -pi/2]),2)
         
     else: 
-        return round(random.choice([pi,pi, pi/2, -pi/2]),2)
+        return round(random.choice([0,0, pi/2, -pi/2]),2)
     
 def begin_rotating():
     leftMotor.setPosition(float('inf'))
