@@ -1,0 +1,33 @@
+#VRML_OBJ R2022a utf8
+DEF r11 Solid {
+  translation 0.6799997185112072 0.57 0.05999900526599998
+  rotation -0.13196338955375952 -0.48148235857258037 0.86646431097932 1.8138686062099732e-17
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(9)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+  linearVelocity 2.941167474984914e-17 -1.1135660267595766e-17 3.295254361075188e-16
+  angularVelocity 1.3298034687434809e-16 4.255378135189308e-16 -1.1072499514964799e-17
+}
