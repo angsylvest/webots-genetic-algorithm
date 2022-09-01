@@ -104,7 +104,7 @@ def regenerate_environment(block_dist):
     for i in range(10): 
         rootNode = robot.getRoot()
         rootChildrenField = rootNode.getField('children')
-        rootChildrenField.importMFNode(-1, 'cylinder-obj.wbo') 
+        rootChildrenField.importMFNode(-1, '../supervisor_controller/cylinder-obj.wbo') 
         rec_node = rootChildrenField.getMFNode(-1)
     
         t_field = rec_node.getField('translation')
@@ -114,7 +114,7 @@ def regenerate_environment(block_dist):
     for i in range(10): 
         rootNode = robot.getRoot()
         rootChildrenField = rootNode.getField('children')
-        rootChildrenField.importMFNode(-1, 'cylinder-obj.wbo') 
+        rootChildrenField.importMFNode(-1, '../supervisor_controller/cylinder-obj.wbo') 
         rec_node = rootChildrenField.getMFNode(-1)
     
         t_field = rec_node.getField('translation')
@@ -301,11 +301,6 @@ def run_seconds(t,waiting=False):
         elif robot.getTime() - start > new_t: 
             emitter.send('return_fitness'.encode('utf-8'))
             print('requesting fitness')
-            # message_listener(robot.getTime())
-            # fit_update = False
-            # eval_fitness(robot.getTime())
-            
-            # if fit_update:
             break 
                 
         # if reset_position: 
@@ -460,15 +455,9 @@ def run_optimization():
         
             
 def main(): 
-    # restore_positions()
-    # set_block_distribution()
     initialize_genotypes()
     run_optimization()
     save_progress()
-    # translation_field.setSFVec3f([0,0,0]) # reset robot position
-    # rotation_field.setSFRotation([0, 0, 1, 0])
-    # khepera_node.resetPhysics()
-  
          
 main()
                     
