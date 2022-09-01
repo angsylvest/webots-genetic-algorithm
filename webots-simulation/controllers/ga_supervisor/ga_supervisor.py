@@ -12,9 +12,9 @@ Angel Sylvester 2022
 """
 
 # sets up csv for reference 
-k1_df = pd.DataFrame(columns = ['agent id' ,'time step', 'fitness', 'xpos', 'ypos', 'num col'])
-k2_df = pd.DataFrame(columns = ['agent id', 'time step', 'fitness', 'xpos', 'ypos', 'num col'])
-k3_df = pd.DataFrame(columns = ['agent id', 'time step', 'fitness', 'xpos', 'ypos', 'num col'])
+k1_df = pd.DataFrame(columns = ['agent id' ,'time step', 'fitness', 'xpos', 'ypos', 'num col', 'genotype'])
+k2_df = pd.DataFrame(columns = ['agent id', 'time step', 'fitness', 'xpos', 'ypos', 'num col','genotype'])
+k3_df = pd.DataFrame(columns = ['agent id', 'time step', 'fitness', 'xpos', 'ypos', 'num col','genotype'])
 ## add more robot dfs here (be sure to keep num consistent) 
 
 global df_list
@@ -203,6 +203,7 @@ def message_listener(time_step):
     global df_list 
     global collected_count 
     global found_list
+    global pop_genotypes
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -231,7 +232,7 @@ def message_listener(time_step):
             k1_fitness = int(message[10:])
             fitness_scores[0] = k1_fitness
             
-            new_row = {'agent id': 1, 'time step': time_step, 'fitness': k1_fitness, 'xpos': k1.getPosition()[0], 'ypos': k1.getPosition()[1], 'num col': collected_count[0]}
+            new_row = {'agent id': 1, 'time step': time_step, 'fitness': k1_fitness, 'xpos': k1.getPosition()[0], 'ypos': k1.getPosition()[1], 'num col': collected_count[0], 'genotype':pop_genotypes[0]}
             k1_df = pd.concat([k1_df, pd.DataFrame([new_row])], ignore_index=True)
             df_list[0] = k1_df
             
@@ -243,7 +244,7 @@ def message_listener(time_step):
             k2_fitness = int(message[10:])
             fitness_scores[1] = k2_fitness
             
-            new_row = {'agent id': 2,'time step': time_step, 'fitness': k2_fitness, 'xpos': k2.getPosition()[0], 'ypos': k2.getPosition()[1], 'num col': collected_count[1]}
+            new_row = {'agent id': 2,'time step': time_step, 'fitness': k2_fitness, 'xpos': k2.getPosition()[0], 'ypos': k2.getPosition()[1], 'num col': collected_count[1], 'genotype':pop_genotypes[1]}
             k2_df = pd.concat([k2_df, pd.DataFrame([new_row])], ignore_index = True)
             df_list[1] = k2_df
             
@@ -255,7 +256,7 @@ def message_listener(time_step):
             k3_fitness = int(message[10:])
             fitness_scores[2] = k3_fitness
             
-            new_row = {'agent id': 3,'time step': time_step, 'fitness': k3_fitness, 'xpos': k3.getPosition()[0], 'ypos': k3.getPosition()[1], 'num col': collected_count[2]}
+            new_row = {'agent id': 3,'time step': time_step, 'fitness': k3_fitness, 'xpos': k3.getPosition()[0], 'ypos': k3.getPosition()[1], 'num col': collected_count[2], 'genotype':pop_genotypes[2]}
             k3_df = pd.concat([k3_df, pd.DataFrame([new_row])], ignore_index = True)
             df_list[2] = k3_df
             

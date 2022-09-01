@@ -11,7 +11,6 @@ Angel Sylvester 2022
 
 # sets up csv for reference 
 k_gen_df = pd.DataFrame(columns = ['time step', 'fitness', 'xpos', 'ypos', 'num col'])
-
 overall_df = pd.DataFrame(columns = ['trial', 'time', 'objects retrieved'])
 
 TIME_STEP = 32
@@ -22,13 +21,6 @@ robot = Supervisor()  # create Supervisor instance
 k1 = robot.getFromDef("khepera")
 k2 = robot.getFromDef("khepera2")
 k3 = robot.getFromDef("khepera3")
-
-translation_field_1 = k1.getField('translation')
-rotation_field_1 = k1.getField('rotation')
-translation_field_2 = k2.getField('translation')
-rotation_field_2 = k2.getField('rotation')
-translation_field_3 = k3.getField('translation')
-rotation_field_3 = k3.getField('rotation')
 
 # emitter to send info to robots 
 emitter = robot.getDevice("emitter")
