@@ -194,8 +194,6 @@ def message_listener(time_step):
             
             receiver.nextPacket()
 
-    
-    
 # runs simulation for designated amount of time 
 def run_seconds(t,waiting=False):
     global pop_genotypes
