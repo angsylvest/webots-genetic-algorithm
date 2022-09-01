@@ -1,6 +1,7 @@
 from controller import Supervisor, Node, Keyboard, Emitter, Receiver, Field
 import statistics 
 import pandas as pd
+import random
 
 """
 Main supervisor base 
@@ -38,7 +39,7 @@ receiver = robot.getDevice("receiver")
 receiver.enable(TIME_STEP)
 receiver.setChannel(2) 
 
-num_generations = 1
+num_generations = 2
 population = [k1, k2, k3]
 
 global initial_genotypes 
@@ -71,7 +72,7 @@ global fit_update
 fit_update = False 
 
 global simulation_time
-simulation_time = 2
+simulation_time = 30
 
 global count 
 count = 0
@@ -82,44 +83,45 @@ trials = 1
 global found_list 
 found_list = []
 
-# r1 = robot.getFromDef("r1")
-# r2 = robot.getFromDef("r2")
-# r3 = robot.getFromDef("r3")
-# r4 = robot.getFromDef("r4")
-# r5 = robot.getFromDef("r5")
-# r6 = robot.getFromDef("r6")
-# r7 = robot.getFromDef("r7")
-# r8 = robot.getFromDef("r8")
-# r9 = robot.getFromDef("r9")
-# r10 = robot.getFromDef("r10")
-# r11 = robot.getFromDef("r11")
+global block_list 
+block_list = []
 
 arena_area = robot.getFromDef("arena")
 
 def regenerate_environment(block_dist):
     # creates a equally distributed set of blocks 
     # avoiding areas where a robot is already present 
+    global block_list
+    for obj in block_list: 
+        obj.remove()
     
-    floor_size = arena_area.getField('floorSize')
-    print('arena size --', floor_size.getSFVec2f()) 
-    tile_size = arena_area.getField('floorTileSize')
-    print('tile size --', tile_size.getSFVec2f()) 
+    block_list = []
     
-    num_blocks = 0
+    # floor_size = arena_area.getField('floorSize')
+    # print('arena size --', floor_size.getSFVec2f()) 
+    # tile_size = arena_area.getField('floorTileSize')
+    # print('tile size --', tile_size.getSFVec2f()) 
     
-    starting_pos = [1, 1, 0]
+    # generates block on opposite sides of arena (randomly generated) 
+    for i in range(10): 
+        rootNode = robot.getRoot()
+        rootChildrenField = rootNode.getField('children')
+        rootChildrenField.importMFNode(-1, 'cylinder-obj.wbo') 
+        rec_node = rootChildrenField.getMFNode(-1)
     
-    # generate a basic block and place somewhere fanom 
-    rootNode = robot.getRoot()
-    rootChildrenField = rootNode.getField('children')
-    rootChildrenField.importMFNode(-1, 'cylinder-obj.wbo') 
-    rec_node = rootChildrenField.getMFNode(-1)
+        t_field = rec_node.getField('translation')
+        t_field.setSFVec3f([round(random.uniform(0.9, -0.9),2), round(random.uniform(0.3, 0.85),2), 0.02]) 
+        block_list.append(rec_node)
     
-    t_field = rec_node.getField('translation')
-    t_field.setSFVec3f([0.8,0.78, 0.02]) 
-
-    pass 
+    for i in range(10): 
+        rootNode = robot.getRoot()
+        rootChildrenField = rootNode.getField('children')
+        rootChildrenField.importMFNode(-1, 'cylinder-obj.wbo') 
+        rec_node = rootChildrenField.getMFNode(-1)
     
+        t_field = rec_node.getField('translation')
+        t_field.setSFVec3f([round(random.uniform(0.9, -0.9),2), round(random.uniform(-1, 0.23),2), 0.02]) 
+        block_list.append(rec_node)
 
 def initialize_genotypes():
     global initial_genotypes
@@ -133,81 +135,13 @@ def restore_positions():
         message = receiver.getData().decode('utf-8')
         receiver.nextPacket()
         
-    robot.simulationReset()   
+    # robot.simulationReset()   
     
     coordinates = [[-0.115, 0, 0.0045], [0.2445, 0, 0.0045], [0.6045, 0, 0.0045]]
     for r in range(len(population)): 
         population[r].restartController()
         r_field = population[r].getField('translation')
         r_field.setSFVec3f(coordinates[r])
-        
-    # tf1 = r1.getField('translation')
-    # rf1 = r1.getField('rotation')
-    # tf1.setSFVec3f([0.56, 0.29, 0.019])
-    # rf1.setSFRotation([0, 1, 0])
-    
-    # tf2 = r2.getField('translation')
-    # rf2 = r2.getField('rotation')
-    # tf2.setSFVec3f([0.05, -0.23, 0.019])
-    # rf2.setSFRotation([0, 1, 0])
-    
-    # tf3 = r3.getField('translation')
-    # rf3 = r3.getField('rotation')
-    # tf3.setSFVec3f([0.13, 0.3, 0.019])
-    # rf3.setSFRotation([0, 1, 0])
-       
-    # tf4 = r4.getField('translation')
-    # rf4 = r4.getField('rotation')
-    # tf4.setSFVec3f([-0.18, -0.41, 0.019])
-    # rf4.setSFRotation([0, 1, 0])
-    
-    # tf5 = r5.getField('translation')
-    # rf5 = r5.getField('rotation')
-    # tf5.setSFVec3f([0.31, -0.23, 0.019])
-    # rf5.setSFRotation([0, 1, 0])
-    
-    # tf6 = r6.getField('translation')
-    # rf6 = r6.getField('rotation')
-    # tf6.setSFVec3f([0.56, -0.23, 0.019])
-    # rf6.setSFRotation([0, 1, 0])
-    
-    # tf7 = r7.getField('translation')
-    # rf7 = r7.getField('rotation')
-    # tf7.setSFVec3f([0.8, -0.41, 0.019])
-    # rf7.setSFRotation([0, 1, 0])
-    
-    # tf8 = r8.getField('translation')
-    # rf8 = r8.getField('rotation')
-    # tf8.setSFVec3f([0.37, 0.3, 0.019])
-    # rf8.setSFRotation([0, 1, 0])
-    
-    # tf9 = r9.getField('translation')
-    # rf9 = r9.getField('rotation')
-    # tf9.setSFVec3f([-0.14, 0.3, 0.019])
-    # rf9.setSFRotation([0, 1, 0])
-    
-    # tf10 = r10.getField('translation')
-    # rf10 = r10.getField('rotation')
-    # tf10.setSFVec3f([-0.39, 0.57, 0.019])
-    # rf10.setSFRotation([0, 1, 0])
-    
-    # tf11 = r11.getField('translation')
-    # rf11 = r11.getField('rotation')
-    # tf11.setSFVec3f([0.68, 0.57, 0.019])
-    # rf11.setSFRotation([0, 1, 0])
-    
-    # r2.loadState('init')
-    # r3.loadState('init')
-    # r4.loadState('init')
-    # r5.loadState('init')
-    # r6.loadState('init')
-    # r7.loadState('init')
-    # r8.loadState('init')
-    # r9.loadState('init')
-    # r10.loadState('init')
-    # r11.loadState('init')
-        
-    # print('end of trial')
     initialize_genotypes()
     
 def save_progress():
@@ -230,6 +164,7 @@ def message_listener(time_step):
     global k_gen_df
     global total_found
     global found_list
+    global block_list
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -290,19 +225,12 @@ def run_seconds(t,waiting=False):
                 message_listener(robot.getTime())
                 eval_fitness(robot.getTime())
                 continue 
-            # elif not fit_update: 
-                # continue  
             else: 
                 break 
         
         elif robot.getTime() - start > new_t: 
             emitter.send('return_fitness'.encode('utf-8'))
             print('requesting fitness')
-            # message_listener(robot.getTime())
-            # fit_update = False
-            # eval_fitness(robot.getTime())
-            
-            # if fit_update:
             break 
                 
         # if reset_position: 
@@ -312,7 +240,7 @@ def run_seconds(t,waiting=False):
             # constantly checking for messages from robots 
             message_listener(robot.getTime())
                          
-            if total_found == 11:
+            if total_found == len(block_list):
                 # new_row = {'time step': robot.getTime(), 'fitness': 0} # this is just here to record time to finish task  
                 # k1_df.append(new_row, ignore_index=True)
                 emitter.send('return_fitness'.encode('utf-8'))
@@ -371,12 +299,13 @@ def run_optimization():
         pop_genotypes.append(genotype)
         emitter.send(str("#2" + str(genotype)).encode('utf-8'))
         index +=1 
-        
+    
+    regenerate_environment(0.2)   
     run_seconds(simulation_time) # runs generation for that given amount of time  
     print('new generation beginning')
     run_seconds(5, True) # is waiting until got genotypes
     
-    
+    # regenerate_environment(0.2) 
     for i in range(trials): 
         print('beginning new trial', i)
         for gen in range(num_generations-1): 
@@ -397,21 +326,16 @@ def run_optimization():
         # restore_positions()  
         regenerate_environment(0.2) 
         total_found = 0 
-        found_list = []
-            
-                       
+        found_list = []     
     return 
    
         
             
 def main(): 
-    restore_positions()
+    # restore_positions()
     initialize_genotypes()
     run_optimization()
     save_progress()
-    # translation_field.setSFVec3f([0,0,0]) # reset robot position
-    # rotation_field.setSFRotation([0, 0, 1, 0])
-    # khepera_node.resetPhysics()
   
          
 main()

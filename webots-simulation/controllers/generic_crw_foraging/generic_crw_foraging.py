@@ -142,13 +142,6 @@ def grab_object(curr_step, initial_step):
         print('fitness 3 increased', fitness) 
     elif (i == 80):
         motor.setPosition(-1.4) # arm up
-        # emitter.send("k3-found".encode('utf-8'))
-        # delete object here 
-        
-    # elif (i > 100): 
-        # opens the gripper 
-        # leftGrip.setPosition(open_grip)
-        # rightGrip.setPosition(open_grip)
 
 
 def release_object(curr_step, prev_step):
@@ -184,18 +177,6 @@ def interpret():
             fitness = 0
         else: 
             receiver.nextPacket()
-    
-def identify_object():
-    # using camera, can identify other robots, retrievable objects, and foreign objects 
-    
-    # identifies retrievable object 
-    
-    # identifies robot 
-    
-    # identifies foreign object 
-    
-    
-    pass 
     
 # Main loop:
 # - perform simulation steps until Webots is stopping the controller
@@ -234,13 +215,6 @@ while robot.step(timestep) != -1:
 
     # check for collisions with other robot 
     list = camera.getRecognitionObjects()
-    
-    # collision_status = collision.getValue()
-    # if collision_status == 1:
-        # fitness -= 1 
-        # print('collision encountered')
-        # move_backwards()
-        # chosen_direction = rotate_random()
         
     # read distance sensor value 
     dist_val = ds.getValue()
@@ -256,22 +230,13 @@ while robot.step(timestep) != -1:
     # handles other obstacles     
     if dist_val < detect_thres and holding_something == False: 
         # behavior in response to stimuli in front of robot 
-        
-        # if led equipped, assume it's another robot  
-        
-        # if detected, but not recognized, most likely a wall (or foreign obj) 
-            # initiate obstacle avoidance strategies  
-        
-        # if recognized, is a retrievable obj
-        
-        # stop()
         if (object_encountered == False):
             # prev_object_i = i
             # grab_object(i, prev_object_i)
             # object_encountered = True
             
             # if retrievable object within range, gets picked up 
-            if len(list) == 1 and dist_val < 40: 
+            if dist_val < 40: 
                 firstObject = camera.getRecognitionObjects()[0]
                 # print('found object', firstObject)
                 id = str(firstObject.get_id())
@@ -290,35 +255,9 @@ while robot.step(timestep) != -1:
                 move_backwards()
                 
         else: 
-            # grab_object(i, prev_object_i) 
-           
             pass
-            # if (i - prev_object_i == 85) and (len(list) != 0):
-            
-                # id = str(firstObject.get_id())
-                # print('found id')
-                # id = "$" + id # indication that it is a object to be deleted 
-                # emitter.send(str(id).encode('utf-8'))
-           
-                # holding_something = False 
-                # chosen_direction = correlated_random(chosen_direction)
-                # prev_object_i = i
     else: 
          object_encountered = False
-
-    
-    # firstObject = camera.getRecognitionObjects()[0]
-    
-    # id = firstObject.get_id()
-    # id = firstObject.get_model()
-    # print('identified object', id)
-    # position = firstObject.get_position()
-
-    # Process sensor data here.
-
-    # Enter here functions to send actuator commands, like:
-    #  motor.setPosition(10.0)
-
     
     i+=1
     

@@ -1,4 +1,4 @@
-from controller import Supervisor, Node, Keyboard, Emitter, Receiver
+from controller import Supervisor, Node, Keyboard, Emitter, Receiver, Field
 import statistics 
 import math 
 import pandas as pd
@@ -36,13 +36,6 @@ k3 = robot.getFromDef("khepera3")
 ## add more robots here (if defined, be sure to keep num consistent) 
 
 population = [k1, k2, k3] # add population here 
-
-# translation_field_1 = k1.getField('translation')
-# rotation_field_1 = k1.getField('rotation')
-# translation_field_2 = k2.getField('translation')
-# rotation_field_2 = k2.getField('rotation')
-# translation_field_3 = k3.getField('translation')
-# rotation_field_3 = k3.getField('rotation')
 
 # emitter to send info to robots 
 emitter = robot.getDevice("emitter")
@@ -90,17 +83,44 @@ simulation_time = 15
 global trials 
 trials = 15
 
-r1 = robot.getFromDef("r1")
-r2 = robot.getFromDef("r2")
-r3 = robot.getFromDef("r3")
-r4 = robot.getFromDef("r4")
-r5 = robot.getFromDef("r5")
-r6 = robot.getFromDef("r6")
-r7 = robot.getFromDef("r7")
-r8 = robot.getFromDef("r8")
-r9 = robot.getFromDef("r9")
-r10 = robot.getFromDef("r10")
-r11 = robot.getFromDef("r11")
+global block_list 
+block_list = []
+
+def regenerate_environment(block_dist):
+    # creates a equally distributed set of blocks 
+    # avoiding areas where a robot is already present 
+    global block_list
+    for obj in block_list: 
+        obj.remove()
+    
+    block_list = []
+    
+    # floor_size = arena_area.getField('floorSize')
+    # print('arena size --', floor_size.getSFVec2f()) 
+    # tile_size = arena_area.getField('floorTileSize')
+    # print('tile size --', tile_size.getSFVec2f()) 
+    
+    # generates block on opposite sides of arena (randomly generated) 
+    for i in range(10): 
+        rootNode = robot.getRoot()
+        rootChildrenField = rootNode.getField('children')
+        rootChildrenField.importMFNode(-1, 'cylinder-obj.wbo') 
+        rec_node = rootChildrenField.getMFNode(-1)
+    
+        t_field = rec_node.getField('translation')
+        t_field.setSFVec3f([round(random.uniform(0.9, -0.9),2), round(random.uniform(0.3, 0.85),2), 0.02]) 
+        block_list.append(rec_node)
+    
+    for i in range(10): 
+        rootNode = robot.getRoot()
+        rootChildrenField = rootNode.getField('children')
+        rootChildrenField.importMFNode(-1, 'cylinder-obj.wbo') 
+        rec_node = rootChildrenField.getMFNode(-1)
+    
+        t_field = rec_node.getField('translation')
+        t_field.setSFVec3f([round(random.uniform(0.9, -0.9),2), round(random.uniform(-1, 0.23),2), 0.02]) 
+        block_list.append(rec_node)
+        
 
 def initialize_genotypes():
     global initial_genotypes
@@ -114,7 +134,7 @@ def restore_positions():
         message = receiver.getData().decode('utf-8')
         receiver.nextPacket()
         
-    robot.simulationReset()   
+    # robot.simulationReset()   
     
     # manually resets arena configuration (will automate soon or save as csv) 
     coordinates = [[-0.115, 0, 0.0045], [0.2445, 0, 0.0045], [0.6045, 0, 0.0045]]
@@ -123,90 +143,8 @@ def restore_positions():
         r_field = population[r].getField('translation')
         r_field.setSFVec3f(coordinates[r])
         
-    tf1 = r1.getField('translation')
-    rf1 = r1.getField('rotation')
-    tf1.setSFVec3f([0.56, 0.29, 0.019])
-    rf1.setSFRotation([0, 1, 0])
-    
-    tf2 = r2.getField('translation')
-    rf2 = r2.getField('rotation')
-    tf2.setSFVec3f([0.05, -0.23, 0.019])
-    rf2.setSFRotation([0, 1, 0])
-    
-    tf3 = r3.getField('translation')
-    rf3 = r3.getField('rotation')
-    tf3.setSFVec3f([0.13, 0.3, 0.019])
-    rf3.setSFRotation([0, 1, 0])
-       
-    tf4 = r4.getField('translation')
-    rf4 = r4.getField('rotation')
-    tf4.setSFVec3f([-0.18, -0.41, 0.019])
-    rf4.setSFRotation([0, 1, 0])
-    
-    tf5 = r5.getField('translation')
-    rf5 = r5.getField('rotation')
-    tf5.setSFVec3f([0.31, -0.23, 0.019])
-    rf5.setSFRotation([0, 1, 0])
-    
-    tf6 = r6.getField('translation')
-    rf6 = r6.getField('rotation')
-    tf6.setSFVec3f([0.56, -0.23, 0.019])
-    rf6.setSFRotation([0, 1, 0])
-    
-    tf7 = r7.getField('translation')
-    rf7 = r7.getField('rotation')
-    tf7.setSFVec3f([0.8, -0.41, 0.019])
-    rf7.setSFRotation([0, 1, 0])
-    
-    tf8 = r8.getField('translation')
-    rf8 = r8.getField('rotation')
-    tf8.setSFVec3f([0.37, 0.3, 0.019])
-    rf8.setSFRotation([0, 1, 0])
-    
-    tf9 = r9.getField('translation')
-    rf9 = r9.getField('rotation')
-    tf9.setSFVec3f([-0.14, 0.3, 0.019])
-    rf9.setSFRotation([0, 1, 0])
-    
-    tf10 = r10.getField('translation')
-    rf10 = r10.getField('rotation')
-    tf10.setSFVec3f([-0.39, 0.57, 0.019])
-    rf10.setSFRotation([0, 1, 0])
-    
-    tf11 = r11.getField('translation')
-    rf11 = r11.getField('rotation')
-    tf11.setSFVec3f([0.68, 0.57, 0.019])
-    rf11.setSFRotation([0, 1, 0])
-    
-    # r2.loadState('init')
-    # r3.loadState('init')
-    # r4.loadState('init')
-    # r5.loadState('init')
-    # r6.loadState('init')
-    # r7.loadState('init')
-    # r8.loadState('init')
-    # r9.loadState('init')
-    # r10.loadState('init')
-    # r11.loadState('init')
-        
     print('end of trial')
     initialize_genotypes()
-    
-def set_block_distribution():
-    
-    # r1.saveState('init')
-    # r2.saveState('init')
-    # r3.saveState('init')
-    # r4.saveState('init')
-    # r5.saveState('init')
-    # r6.saveState('init')
-    # r7.saveState('init')
-    # r8.saveState('init')
-    # r9.saveState('init')
-    # r10.saveState('init')
-    # r11.saveState('init')
-    
-    pass
      
     
 def find_nearest_robot_genotype(r_index):
@@ -248,17 +186,9 @@ def save_progress():
     global k1_df
     global k2_df 
     global k3_df
-   
-    
+ 
     generate_fitness_csvs(df_list)
     generate_fitness("summary-fitness.csv")
- 
-    
-    # csv_list = []
-            
-    # k1_df.to_csv('k1_results.csv')
-    # k2_df.to_csv('k2_results.csv') 
-    # k3_df.to_csv('k3_results.csv') 
     
     overall_df.to_csv('overall_results.csv')
     
@@ -487,10 +417,10 @@ def run_optimization():
     
     reset_genotype()
         
+    regenerate_environment(0.2) 
     run_seconds(simulation_time) # runs generation for that given amount of time  
     print('new generation beginning')
     run_seconds(5, True) # is waiting until got genotypes
-    
     
     for i in range(trials): 
         print('beginning new trial', i)
@@ -519,7 +449,8 @@ def run_optimization():
         new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
         print('items collected', total_found)
         overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)
-        restore_positions()  
+        # restore_positions() 
+        regenerate_environment(0.2)  
         total_found = 0 
         collected_count = [0, 0, 0]
         found_list = []
@@ -530,7 +461,7 @@ def run_optimization():
             
 def main(): 
     # restore_positions()
-    set_block_distribution()
+    # set_block_distribution()
     initialize_genotypes()
     run_optimization()
     save_progress()
