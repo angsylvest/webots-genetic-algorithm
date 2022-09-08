@@ -38,8 +38,9 @@ DEF arena RectangleArena {
 }
 DEF supervisor TinkerbotsBase {
   translation -0.41 0 0
-  controller "supervisor_controller"
+  controller "ga_supervisor"
   supervisor TRUE
+  synchronization FALSE
   extensionSlot [
     Receiver {
       channel 2
@@ -52,6 +53,9 @@ DEF supervisor TinkerbotsBase {
 DEF khepera Robot {
   translation -0.115433 0 0.0045528
   children [
+    GPS {
+      name "gps(1)"
+    }
     Group {
       children [
         LightSensor {
@@ -537,7 +541,7 @@ DEF khepera Robot {
       baudRate 57600
     }
   ]
-  name "khepera camera"
+  name "k0"
   model "Khepera"
   description "A mini mobile robot by K-Team SA"
   contactMaterial "khepera"
@@ -556,12 +560,15 @@ DEF khepera Robot {
       0 0 0.005
     ]
   }
-  controller "generic_crw_foraging"
+  controller "generalized_ga_controller"
   supervisor TRUE
+  synchronization FALSE
 }
 DEF khepera2 Robot {
   translation 0.184567 0 0.004553
   children [
+    GPS {
+    }
     Group {
       children [
         LED {
@@ -1044,7 +1051,7 @@ DEF khepera2 Robot {
       baudRate 57600
     }
   ]
-  name "khepera camera(1)"
+  name "k1"
   model "Khepera"
   description "A mini mobile robot by K-Team SA"
   contactMaterial "khepera"
@@ -1063,12 +1070,15 @@ DEF khepera2 Robot {
       0 0 0.005
     ]
   }
-  controller "generic_crw_foraging"
+  controller "generalized_ga_controller"
   supervisor TRUE
+  synchronization FALSE
 }
 DEF khepera3 Robot {
   translation 0.604567 0 0.004553
   children [
+    GPS {
+    }
     Group {
       children [
         LED {
@@ -1551,7 +1561,7 @@ DEF khepera3 Robot {
       baudRate 57600
     }
   ]
-  name "khepera camera(2)"
+  name "k2"
   model "Khepera"
   description "A mini mobile robot by K-Team SA"
   contactMaterial "khepera"
@@ -1570,6 +1580,7 @@ DEF khepera3 Robot {
       0 0 0.005
     ]
   }
-  controller "generic_crw_foraging"
+  controller "generalized_ga_controller"
   supervisor TRUE
+  synchronization FALSE
 }

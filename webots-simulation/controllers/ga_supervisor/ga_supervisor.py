@@ -418,40 +418,78 @@ def run_optimization():
     print('new generation beginning')
     run_seconds(5, True) # is waiting until got genotypes
     
-    for i in range(trials): 
-        print('beginning new trial', i)
-        for gen in range(num_generations-1): 
+    # for i in range(trials): 
+        # print('beginning new trial', i)
+        # for gen in range(num_generations-1): 
             
             # pop_fitness = [] 
             
             # send relevant genotypes to each robot, handler
-            updated = False 
+            # updated = False 
             
-            index = 0 
-            for i in range(len(population)):
-                emitter.send(str("#"+ str(index) + str(pop_genotypes[index])).encode('utf-8'))
-                index +=1 
+            # index = 0 
+            # for i in range(len(population)):
+                # emitter.send(str("#"+ str(index) + str(pop_genotypes[index])).encode('utf-8'))
+                # index +=1 
                 
-            run_seconds(simulation_time) 
+            # run_seconds(simulation_time) 
             
-            print('waiting for genotypes')
+            # print('waiting for genotypes')
             
-            run_seconds(5, True) # is waiting until got genotypes
+            # run_seconds(5, True) # is waiting until got genotypes
             
-            print('found genotypes')
-            print('new generation starting -')
+            # print('found genotypes')
+            # print('new generation starting -')
             # print('trial --' ,i)
             
-        new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
-        print('items collected', total_found)
-        overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)
+        # new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
+        # print('items collected', total_found)
+        # overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)
         # restore_positions() 
-        regenerate_environment(0.2)  
-        total_found = 0 
-        collected_count = [0, 0, 0]
-        found_list = []
-        reset_genotype()               
+        # regenerate_environment(0.2)  
+        # total_found = 0 
+        # collected_count = [0, 0, 0]
+        # found_list = []
+        # reset_genotype()               
+    # return 
+    
+    # for i in range(trials): 
+    print('beginning new trial', i)
+    for gen in range(num_generations-1): 
+        
+        # pop_fitness = [] 
+        
+        # send relevant genotypes to each robot, handler
+        updated = False 
+        
+        index = 0 
+        for i in range(len(population)):
+            emitter.send(str("#"+ str(index) + str(pop_genotypes[index])).encode('utf-8'))
+            emitter.send('id: ', i)
+            print('sending id --', i)
+            index +=1 
+            
+        run_seconds(simulation_time) 
+        
+        print('waiting for genotypes')
+        
+        run_seconds(5, True) # is waiting until got genotypes
+        
+        print('found genotypes')
+        print('new generation starting -')
+            # print('trial --' ,i)
+        
+    # new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
+    # print('items collected', total_found)
+    # overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)
+    # restore_positions() 
+    regenerate_environment(0.2)  
+    total_found = 0 
+    collected_count = [0, 0, 0]
+    found_list = []
+    # reset_genotype()               
     return 
+   
    
         
             
