@@ -267,8 +267,8 @@ while robot.step(timestep) != -1 and sim_complete != True:
         chosen_direction = rotate_random() 
         move_backwards()
         
-    if light_sensor.getValue() != 1000:
-        print('light val', light_sensor.getValue())
+    if light_sensor.getValue() == 1024:
+        print('robot: ', given_id, 'has encountered another robot')
     
         
     if dist_val < detect_thres and holding_something == False: 

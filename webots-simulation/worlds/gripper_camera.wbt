@@ -31,6 +31,7 @@ Viewpoint {
 TexturedBackground {
 }
 TexturedBackgroundLight {
+  luminosity 0.5
 }
 DEF arena RectangleArena {
   translation -0.04 -0.07 0
@@ -60,6 +61,10 @@ DEF khepera Robot {
     Group {
       children [
         LightSensor {
+          lookupTable [
+            0 0 0
+            4 1024 0
+          ]
         }
         LED {
           recognitionColors [
@@ -92,8 +97,8 @@ DEF khepera Robot {
             }
           ]
           endPoint Solid {
-            translation -0.010000272342184863 2.437851864822673e-09 0.02199927550845633
-            rotation 0.7058148425159848 -0.7058148425160006 -0.06042198414690519 3.0208953118880344
+            translation -0.010000272342184861 2.437851864822672e-09 0.02199927550845633
+            rotation 0.7058148425159846 -0.7058148425160009 -0.06042198414690506 3.0208953118880326
             children [
               DEF RIGHT_GRIP SliderJoint {
                 jointParameters JointParameters {
@@ -361,7 +366,7 @@ DEF khepera Robot {
       ]
       endPoint Solid {
         translation 0 0.025999999999999943 0.0075
-        rotation -0.6502504768340478 0.6502504768340562 -0.39287228809649577 2.3928989999999644
+        rotation -0.6502504768340481 0.650250476834056 -0.3928722880964958 2.3928989999999644
         children [
           DEF WHEEL Transform {
             rotation 0.5773869352700204 -0.5773319352761864 0.5773319352761864 -2.094339
@@ -402,7 +407,7 @@ DEF khepera Robot {
       ]
       endPoint Solid {
         translation 0 -0.025999999999999693 0.0075
-        rotation -0.6434150394574273 0.6434150394574275 -0.4147700254357757 2.3552449999999636
+        rotation -0.6434150394574272 0.6434150394574275 -0.4147700254357759 2.3552449999999627
         children [
           USE WHEEL
         ]
@@ -506,9 +511,11 @@ DEF khepera Robot {
       rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
       children [
         PointLight {
-          attenuation 0 0 1
-          color 0 0 0
+          attenuation 0 0 12.56
+          color 1 0 0
+          intensity 0.2
           location 0 -0.013 0
+          on FALSE
         }
         Shape {
           appearance PBRAppearance {
@@ -587,6 +594,10 @@ DEF khepera2 Robot {
         }
         LightSensor {
           scale 3 3 3
+          lookupTable [
+            0 0 0
+            4 1024 0
+          ]
         }
         TouchSensor {
         }
@@ -613,7 +624,7 @@ DEF khepera2 Robot {
           ]
           endPoint Solid {
             translation -0.01 0 0.022
-            rotation 0.7058148424148386 -0.7058148424148719 -0.06042198650976205 3.020894999999879
+            rotation 0.7058148424148372 -0.7058148424148732 -0.060421986509762056 3.020894999999866
             children [
               DEF RIGHT_GRIP SliderJoint {
                 jointParameters JointParameters {
@@ -879,8 +890,8 @@ DEF khepera2 Robot {
         }
       ]
       endPoint Solid {
-        translation 0 0.026 0.0075
-        rotation -0.6502504768340513 0.6502504768340517 -0.3928722880964972 2.3928989999999883
+        translation 0 0.02600000000000004 0.0075
+        rotation -0.6502504768340506 0.6502504768340525 -0.392872288096497 2.3928989999999857
         children [
           DEF WHEEL Transform {
             rotation 0.5773869352700204 -0.5773319352761864 0.5773319352761864 -2.094339
@@ -920,8 +931,8 @@ DEF khepera2 Robot {
         }
       ]
       endPoint Solid {
-        translation 0 -0.02599999999999988 0.0075
-        rotation -0.6434150394574283 0.6434150394574288 -0.4147700254357724 2.355244999999993
+        translation 0 -0.02599999999999982 0.0075
+        rotation -0.6434150394574285 0.6434150394574284 -0.4147700254357725 2.3552449999999894
         children [
           USE WHEEL
         ]
@@ -1016,11 +1027,18 @@ DEF khepera2 Robot {
       rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
       scale 3 3 3
       children [
+        PointLight {
+          attenuation 0 0 12.56
+          color 1 0 0
+          intensity 0.25
+          location 0 0.3 0
+          on FALSE
+        }
         Shape {
           appearance PBRAppearance {
             baseColor 0.501961 0.501961 0.501961
             metalness 0
-            emissiveIntensity 6
+            emissiveColor 1 0.149126 0
           }
           geometry Box {
             size 0.002 0.002 0.002
@@ -1091,6 +1109,10 @@ DEF khepera3 Robot {
         LED {
         }
         LightSensor {
+          lookupTable [
+            0 0 0
+            4 1024 0
+          ]
         }
         TouchSensor {
         }
@@ -1528,6 +1550,13 @@ DEF khepera3 Robot {
       translation 0.022 -0.013 0.021
       rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
       children [
+        PointLight {
+          attenuation 0 0 12.56
+          color 1 0 0
+          intensity 0.25
+          location 0 0.3 0
+          on FALSE
+        }
         Shape {
           appearance PBRAppearance {
             baseColor 0.501961 0.501961 0.501961
