@@ -59,8 +59,14 @@ collision = robot.getDevice('touch sensor')
 collision.enable(timestep)
 
 # led 
-led = robot.getDevice('led')
+led = robot.getDevice('led0')
 led.set(1) # led to turned on 
+led_1 = robot.getDevice('led1')
+led_1.set(1) # led to turned on 
+led_2 = robot.getDevice('led')
+led_2.set(1) # led to turned on 
+# led_3 = robot.getDevice('led(3)')
+# led_3.set(1) # led to turned on 
 
 # light sensor 
 light_sensor = robot.getDevice('light sensor')
@@ -83,6 +89,11 @@ obj_found_so_far = []
 
 global given_id 
 given_id = robot.getName()[-1] 
+
+global time_elapsed_since_block
+time_elapsed_since_block = 0
+global time_elapsed_since_robot
+time_elapsed_since_robot = 0
 
 # motor functions 
 
@@ -256,6 +267,10 @@ while robot.step(timestep) != -1 and sim_complete != True:
         chosen_direction = rotate_random() 
         move_backwards()
         
+    if light_sensor.getValue() != 1000:
+        print('light val', light_sensor.getValue())
+    
+        
     if dist_val < detect_thres and holding_something == False: 
         # stop()
         if (object_encountered == False):
@@ -274,6 +289,8 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     # print('dist val ', dist_val)
                     # print('found object 1', firstObject, id)
                     id = given_id + id # indication that it is a object to be deleted 
+                    time_elapsed_since_block = 0
+                    
                     emitter.send(str(id).encode('utf-8'))
                     fitness += 1 
                     holding_something = False 
@@ -291,7 +308,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
         else:
             # grab_object(i, prev_object_i) 
            
-            pass
+            time_elapsed_since_block += 1
         
     else: 
          object_encountered = False
