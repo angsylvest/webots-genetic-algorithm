@@ -119,6 +119,36 @@ def correlated_random(curr_dir):
         
     else: 
         return round(random.choice([pi,pi, pi/2, -pi/2]),2)
+        
+def dynamic_correlated_random(curr_dir, bias): 
+    # follows a markov chain (persistence), will exclude direction directly behind  
+    # short-term straight line adherence (very simple)  
+    
+    if round(curr_dir,2) == -0.00 or round(curr_dir,2) == 0.00: 
+        return round(random.choice([0, pi/2, -pi/2, bias, bias]),2)
+    
+    elif round(curr_dir,2) == round(pi/2, 2):
+        return round(random.choice([pi, pi/2, 0, bias, bias]),2)
+    
+    elif round(curr_dir,2) == round(-pi/2): 
+        return round(random.choice([pi, 0, -pi/2, bias, bias]),2)
+        
+    else: 
+        return round(random.choice([pi, pi/2, -pi/2, bias, bias]),2)
+        
+def choose_strategy():
+    # global time_switch
+    # time_switch = time_switch * random.uniform(0.8, 1.9)
+    strat = random.choice(['sequential', 'alternating-left','alternating-right', 'true random'])
+    if strat == 'sequential':
+        return [pi/2, 0, -pi/2, pi]
+    elif strat == 'alternating-right':
+        return [pi/2, 0, -pi/2, pi]
+    elif strat == 'alternating-left':
+        return [pi/2, pi, -pi/2, 0]
+    else: 
+        return [random.choice([pi/2, 0, -pi/2, pi])]
+    
     
 def begin_rotating():
     leftMotor.setPosition(float('inf'))
@@ -229,8 +259,14 @@ object_encountered = False
 prev_object_i = 0 # keep track of timesteps elapsed for each pickup action
 global chosen_direction
 chosen_direction = rotate_random()
+strategy = choose_strategy()
+curr_index = 0
 
 while robot.step(timestep) != -1 and sim_complete != True:
+
+    if curr_index >= len(strategy): 
+        curr_index = 0 
+        strategy = choose_strategy() # chooses a new strategy 
         
     interpret() # checks for messages from supervisor 
     
@@ -243,7 +279,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
         
     elif (i - prev_i == time_switch and object_encountered != True and holding_something == False):
         orientation_found = False 
-        chosen_direction = correlated_random(chosen_direction)
+        chosen_direction = strategy[curr_index]
     
     elif orientation_found != True and yaw == chosen_direction and object_encountered != True: 
         orientation_found = True 
@@ -268,7 +304,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
         move_backwards()
         
     if light_sensor.getValue() == 1024: # max value for light 
-        print('robot: ', given_id, 'has encountered another robot')
+        communicate_with_robot()
     
         
     if dist_val < detect_thres and holding_something == False: 

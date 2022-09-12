@@ -86,6 +86,9 @@ trials = 15
 global block_list 
 block_list = []
 
+global reproduce_list 
+reproduce_list = []
+
 def regenerate_environment(block_dist):
     # creates a equally distributed set of blocks 
     # avoiding areas where a robot is already present 
@@ -149,9 +152,10 @@ def restore_positions():
     
 def find_nearest_robot_genotype(r_index):
     global population 
+    global reproduce_list 
     closest_neigh = " "
     curr_robot = population[r_index]
-    curr_dist = 400 # arbitrary value 
+    curr_dist = 1000 # arbitrary value 
     curr_fitness = fitness_scores[r_index]
     other_fitness = 0
     
@@ -174,8 +178,11 @@ def find_nearest_robot_genotype(r_index):
                 other_index = i
     # print('found closest neighbor', closest_neigh)
     # use emitter to send genotype to corresponding robot if fitness is better and if nearby 
-    if type(curr_fitness) == 'int' and type (other_fitness) == 'int' and other_fitness > (curr_fitness + 1): 
-        emitter.send(str("#"+ str(r_index) + str(pop_genotypes[i])).encode('utf-8'))
+    if type(curr_fitness) == 'int' and type (other_fitness) == 'int' and other_fitness > (curr_fitness + 2): 
+        reproduced_geno = reproduce(pop_genotypes[r_index], pop_genotypes[i])
+        pop_genotypes[r_index] = new_geno
+        reproduce_list.append(r_index)
+        emitter.send(str("#"+ str(r_index) + str(reproduced_geno)).encode('utf-8'))
         # will probably increase fitness between these two for communciation
                 
     
@@ -204,6 +211,8 @@ def message_listener(time_step):
     global collected_count 
     global found_list
     global pop_genotypes
+    global reproduce_list 
+    global population
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -220,7 +229,7 @@ def message_listener(time_step):
             if obj_node is not None:
                 t_field = obj_node.getField('translation')
                 t_field.setSFVec3f([-0.9199,-0.92, 0.059]) 
-                # obj_node.remove()
+                obj_node.remove()
                 # remove redundant requests 
                 if obj_node not in found_list:
                     total_found += 1
@@ -267,6 +276,7 @@ def message_listener(time_step):
         elif 'encounter' in message: 
             print('robot found -- checking genotype') 
             robo_index = int(message.split('-')[0])
+            # reproduce_list.append(robo_index) 
             new_geno = find_nearest_robot_genotype(robo_index)
             
             receiver.nextPacket()
@@ -279,6 +289,7 @@ def run_seconds(t,waiting=False):
     global fitness_scores
     global updated
     global fit_update 
+    global block_list
     
     n = TIME_STEP / 1000*32 # convert ms to s 
     start = robot.getTime()
@@ -311,7 +322,7 @@ def run_seconds(t,waiting=False):
             # constantly checking for messages from robots 
             message_listener(robot.getTime())
                          
-            if total_found == 11:
+            if total_found == len(block_list):
                 # new_row = {'time step': robot.getTime(), 'fitness': 0} # this is just here to record time to finish task  
                 # k1_df.append(new_row, ignore_index=True)
                 emitter.send('return_fitness'.encode('utf-8'))
@@ -350,17 +361,22 @@ def update_geno_list(genotype_list):
         max_geno = pop_genotypes[max_index]
         cp_genotypes = pop_genotypes.copy()
         
-        cp_genotypes.remove(pop_genotypes[max_index])
-        child = reproduce(cp_genotypes[0], pop_genotypes[max_index])
-        other_child = reproduce(pop_genotypes[max_index], cp_genotypes[1])
+        for g in range(len(cp_genotypes)): 
+            if g not in reproduce_list or g != max_index: 
+                child = reproduce(cp_genotypes[g], pop_genotypes[max_index])
+                cp_genotypes[g] = child
+        
+        # cp_genotypes.remove(pop_genotypes[max_index])
+        # child = reproduce(cp_genotypes[0], pop_genotypes[max_index])
+        # other_child = reproduce(pop_genotypes[max_index], cp_genotypes[1])
                
-        for i in range(len(fitness_scores)):
-            if i != max_index and not taken: 
-                pop_genotypes[0] = child
-                taken = True 
-            elif i != max_index and taken: 
-                pop_genotypes[1] = other_child
-                taken = False 
+        # for i in range(len(fitness_scores)):
+            # if i != max_index and not taken: 
+                # pop_genotypes[0] = child
+                # taken = True 
+            # elif i != max_index and taken: 
+                # pop_genotypes[1] = other_child
+                # taken = False 
         
         # replace genotypes of one of parents 
                      

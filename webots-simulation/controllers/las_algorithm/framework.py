@@ -4,13 +4,14 @@
 import numpy as np
 
 class LAS():
-    def __init__(self, top_right, bot_left, num_cells): # assuming 3 rows, arbitrarily
+    def __init__(self, top_right, bot_left, num_cells, curr_pos): # assuming 3 rows, arbitrarily
         self.trx, self.try = top_right
         self.blx, self.bly = bot_left
         self.num_cells = num_cells
         self.prob_vector = []
         self.neighbors = {}
         self.cells = [] # represents ranges for designated # of cells, right top x,y and bot x, y val
+        self.curr_tile = self.locate_cell(curr_pos)
 
         # create a vector with equal probability of locating target in all cells
         for i in range(num_cells): # current cell
@@ -41,11 +42,32 @@ class LAS():
                 self.neighbors[cell] = neigh
 
 
-    def update(self):
-        pass
+    def update(self, original_tile, curr_pos):
+        neighbors = self.neighbors[original_tile]
+        x, y = curr_pos
+        curr_closest = neighbors[0] 
+        otpx, otpy, obrx, obry = original_tile
+        
+        # check if still in current tile 
+        if x < otpx and x > obrx and y > obry and y < otpy: 
+            return self.neighbors.index(original_tile)
+        
+        for n in neighbors: 
+            # check if in neighboring tiles 
+            tpx, tpy, brx, bry = n 
+            
+            if x < tpx and x > brx and y > bry and y < tpy: 
+                return self.neighbors.index(original_tile)
+        
+        return 'error update not possible'
+               
 
     def locate_cell(self, curr_location):
-        pass
-
-    def find_neightbors(curr_bearing):
-        pass
+        x, y = curr_location
+        for c in self.cells: 
+            otpx, otpy, obrx, obry = cell 
+            
+            if x < otpx and x > obrx and y > obry and y < otpy: 
+                return self.cells.index(cell)  
+            
+        return 'locate cell error'
