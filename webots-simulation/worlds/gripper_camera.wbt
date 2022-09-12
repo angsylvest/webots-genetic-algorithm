@@ -25,13 +25,14 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.006417778102035406 -0.999851232656693 0.016010143007634276 5.521033447965387
-  position -2.04502803638521 -0.07746012354627586 1.5076613234573326
+  orientation -0.3650554127892243 -0.2056985839550119 0.907977223366419 4.087400981479784
+  position 0.6781508592529406 0.5233326250215117 1.0856562589078635
 }
 TexturedBackground {
+  luminosity 0.5
 }
 TexturedBackgroundLight {
-  luminosity 0.5
+  luminosity 0.4
 }
 DEF arena RectangleArena {
   translation -0.04 -0.07 0
@@ -61,12 +62,15 @@ DEF khepera Robot {
     Group {
       children [
         LightSensor {
+          translation -0.02 5.30722e-08 0
+          rotation 0 0 1 3.14159
           lookupTable [
             0 0 0
             4 1024 0
           ]
         }
         LED {
+          translation 0.04 0 0
           recognitionColors [
             0 0 0
           ]
@@ -97,7 +101,7 @@ DEF khepera Robot {
             }
           ]
           endPoint Solid {
-            translation -0.010000272342184861 2.437851864822672e-09 0.02199927550845633
+            translation -0.010000272342184863 2.437851864822672e-09 0.02199927550845633
             rotation 0.7058148425159846 -0.7058148425160009 -0.06042198414690506 3.0208953118880326
             children [
               DEF RIGHT_GRIP SliderJoint {
@@ -366,7 +370,7 @@ DEF khepera Robot {
       ]
       endPoint Solid {
         translation 0 0.025999999999999943 0.0075
-        rotation -0.6502504768340481 0.650250476834056 -0.3928722880964958 2.3928989999999644
+        rotation -0.650250476834048 0.650250476834056 -0.39287228809649577 2.3928989999999644
         children [
           DEF WHEEL Transform {
             rotation 0.5773869352700204 -0.5773319352761864 0.5773319352761864 -2.094339
@@ -407,7 +411,7 @@ DEF khepera Robot {
       ]
       endPoint Solid {
         translation 0 -0.025999999999999693 0.0075
-        rotation -0.6434150394574272 0.6434150394574275 -0.4147700254357759 2.3552449999999627
+        rotation -0.6434150394574273 0.6434150394574273 -0.414770025435776 2.3552449999999623
         children [
           USE WHEEL
         ]
@@ -435,87 +439,87 @@ DEF khepera Robot {
       ]
     }
     DEF LS0 LightSensor {
-      translation 0.012 0.0245 0.0144
-      rotation 0.6109342596550577 0.5598032379237042 0.5598032379237042 2.044752
+      translation 0.00215188 0.0227638 0.0144
+      rotation 0.5102819257784789 0.6081179115480401 0.6081159115483309 2.19792
       name "ls0"
       lookupTable [
-        0 500 0.1
-        0.2 10 0.1
+        0 0 0
+        4 1024 0
       ]
     }
     DEF LS1 LightSensor {
-      translation 0.021 0.0185 0.0144
-      rotation 0.862854253731822 0.35740910510009427 0.35740910510009427 1.717773
+      translation 0.0139291 0.0114289 0.0144
+      rotation 0.6776599336428648 0.5199889490821645 0.5199889490821645 1.95044
       name "ls1"
       lookupTable [
-        0 500 0.1
-        0.2 10 0.1
+        0 0 0
+        4 1024 0
       ]
     }
     DEF LS2 LightSensor {
-      translation 0.027 0.0075 0.0144
-      rotation -1 0 0 -1.570796
+      translation 0.0123588 -0.0225 0.0144
+      rotation -0.5773509358554485 0.5773489358556708 0.5773509358554485 -2.094395307179586
       name "ls2"
       lookupTable [
-        0 500 0.1
-        0.2 10 0.1
+        0 0 0
+        4 1024 0
       ]
     }
     DEF LS3 LightSensor {
-      translation 0.027 -0.0075 0.0144
-      rotation -1 0 0 -1.570796
+      translation -0.00166025 -0.00785883 0.0144
+      rotation -0.1861570160863869 0.6947460600350939 0.6947470600351803 -2.7734953071795863
       name "ls3"
       lookupTable [
-        0 500 0.1
-        0.2 10 0.1
+        0 0 0
+        4 1024 0
       ]
     }
     DEF LS4 LightSensor {
-      translation 0.021 -0.0185 0.0144
-      rotation 0.8628568705192763 -0.357405946367489 -0.357405946367489 1.717771
+      translation -0.0072844 0.00978409 0.0144
+      rotation 0.2810839910810645 0.6785979784677472 0.6785989784677153 2.59357
       name "ls4"
       lookupTable [
-        0 500 0.1
-        0.2 10 0.1
+        0 0 0
+        4 1024 0
       ]
     }
     DEF LS5 LightSensor {
-      translation 0.012 -0.0245 0.0144
-      rotation 0.6109368239350584 -0.5598018386715711 -0.5598018386715711 2.044747
+      translation -0.0103523 -0.0251114 0.0144
+      rotation -0.8053168807607647 0.4192049379304254 0.4192039379305735 -1.7856453071795864
       name "ls5"
       lookupTable [
-        0 500 0.1
-        0.2 10 0.1
+        0 0 0
+        4 1024 0
       ]
     }
     DEF LS6 LightSensor {
-      translation -0.026 -0.009 0.0144
-      rotation 0 -0.7071067811865476 -0.7071067811865476 -3.14159
+      translation -0.0163407 -0.00641179 0.0144
+      rotation -0.09269154676500942 0.7040625956398727 0.7040625956398727 -2.9567353071795863
       name "ls6"
       lookupTable [
-        0 500 0.1
-        0.2 10 0.1
+        0 0 0
+        4 1024 0
       ]
     }
     DEF LS7 LightSensor {
-      translation -0.026 0.009 0.0144
+      translation -0.016 0.00899998 0.0144
       rotation 0 -0.7071067811865476 -0.7071067811865476 -3.14159
       name "ls7"
       lookupTable [
-        0 500 0.1
-        0.2 10 0.1
+        0 0 0
+        4 1024 0
       ]
     }
     DEF LED0 LED {
-      translation 0.022 -0.013 0.021
+      translation 0.042 -0.003 0.021
       rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
       children [
         PointLight {
           attenuation 0 0 12.56
           color 1 0 0
-          intensity 0.2
-          location 0 -0.013 0
+          intensity 0.25
           on FALSE
+          radius 10
         }
         Shape {
           appearance PBRAppearance {
@@ -583,21 +587,22 @@ DEF khepera Robot {
 }
 DEF khepera2 Robot {
   translation 0.184567 0 0.004553
-  rotation 0 0 1 2.61799
+  rotation 0 0 1 -0.7854053071795866
   children [
     GPS {
     }
     Group {
       children [
-        LED {
-          scale 3 3 3
-        }
         LightSensor {
-          scale 3 3 3
+          rotation 0 0 1 3.14159
           lookupTable [
             0 0 0
             4 1024 0
           ]
+        }
+        LED {
+          translation 0.04 0 0.01
+          rotation 0 1 0 0
         }
         TouchSensor {
         }
@@ -624,7 +629,7 @@ DEF khepera2 Robot {
           ]
           endPoint Solid {
             translation -0.01 0 0.022
-            rotation 0.7058148424148372 -0.7058148424148732 -0.060421986509762056 3.020894999999866
+            rotation 0.7058148424148369 -0.7058148424148737 -0.06042198650976179 3.020894999999862
             children [
               DEF RIGHT_GRIP SliderJoint {
                 jointParameters JointParameters {
@@ -891,7 +896,7 @@ DEF khepera2 Robot {
       ]
       endPoint Solid {
         translation 0 0.02600000000000004 0.0075
-        rotation -0.6502504768340506 0.6502504768340525 -0.392872288096497 2.3928989999999857
+        rotation -0.6502504768340507 0.6502504768340525 -0.392872288096497 2.3928989999999857
         children [
           DEF WHEEL Transform {
             rotation 0.5773869352700204 -0.5773319352761864 0.5773319352761864 -2.094339
@@ -960,85 +965,83 @@ DEF khepera2 Robot {
       ]
     }
     DEF LS1 LightSensor {
-      translation 0.021 0.0185 0.0144
-      rotation 0.862854253731822 0.35740910510009427 0.35740910510009427 1.717773
+      translation 0.00685797 0.00435779 0.0144
+      rotation 0.2810819583540569 0.6785988994567587 0.6785988994567587 2.59357
       name "ls1"
       lookupTable [
-        0 500 0.1
-        0.2 10 0.1
+        0 0 0
+        4 1024 0
       ]
     }
     DEF LS2 LightSensor {
-      translation 0.027 0.0075 0.0144
-      rotation -1 0 0 -1.570796
+      translation -0.003 0.0075 0.0144
+      rotation -0.2810851028163115 0.6785982482200877 0.6785982482200877 -2.593565307179586
       name "ls2"
       lookupTable [
-        0 500 0.1
-        0.2 10 0.1
+        0 0 0
+        4 1024 0
       ]
     }
     DEF LS3 LightSensor {
-      translation 0.027 -0.0075 0.0144
-      rotation -1 0 0 -1.570796
+      translation -0.003 -0.0075 0.0144
+      rotation 3.454778930922074e-07 0.7071067811865055 -0.7071067811865055 3.14159
       name "ls3"
       lookupTable [
-        0 500 0.1
-        0.2 10 0.1
+        0 0 0
+        4 1024 0
       ]
     }
     DEF LS4 LightSensor {
       translation 0.021 -0.0185 0.0144
-      rotation 0.8628568705192763 -0.357405946367489 -0.357405946367489 1.717771
+      rotation -0.37796611377235295 0.6546521970581968 0.6546541970587988 -2.4188553071795864
       name "ls4"
       lookupTable [
-        0 500 0.1
-        0.2 10 0.1
+        0 0 0
+        4 1024 0
       ]
     }
     DEF LS5 LightSensor {
       translation 0.012 -0.0245 0.0144
-      rotation 0.6109368239350584 -0.5598018386715711 -0.5598018386715711 2.044747
+      rotation 0.7105770585369853 -0.49753404098660725 -0.49753404098660725 1.90601
       name "ls5"
       lookupTable [
-        0 500 0.1
-        0.2 10 0.1
+        0 0 0
+        4 1024 0
       ]
     }
     DEF LS6 LightSensor {
-      translation -0.026 -0.009 0.0144
-      rotation 0 -0.7071067811865476 -0.7071067811865476 -3.14159
+      translation -0.026 -0.019 0.0144
+      rotation -0.28108491207243697 0.6785987877241534 0.6785977877244662 -2.593565307179586
       name "ls6"
       lookupTable [
-        0 500 0.1
-        0.2 10 0.1
+        0 0 0
+        4 1024 0
       ]
     }
     DEF LS7 LightSensor {
-      translation -0.026 0.009 0.0144
-      rotation 0 -0.7071067811865476 -0.7071067811865476 -3.14159
+      translation -0.00737493 -0.0070489 0.0144
+      rotation -0.47690525599184136 0.6215143336146891 0.6215153336152258 -2.251585307179586
       name "ls7"
       lookupTable [
-        0 500 0.1
-        0.2 10 0.1
+        0 0 0
+        4 1024 0
       ]
     }
     DEF LED0 LED {
-      translation 0.022 -0.003 0.011
-      rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
-      scale 3 3 3
+      translation 0.04 5.65534e-08 0.0199999
+      rotation 0.5773502691896258 0.5773502691896258 0.5773502691896258 2.0944
       children [
         PointLight {
           attenuation 0 0 12.56
           color 1 0 0
           intensity 0.25
-          location 0 0.3 0
           on FALSE
+          radius 10
         }
         Shape {
           appearance PBRAppearance {
             baseColor 0.501961 0.501961 0.501961
             metalness 0
-            emissiveColor 1 0.149126 0
           }
           geometry Box {
             size 0.002 0.002 0.002
@@ -1050,7 +1053,6 @@ DEF khepera2 Robot {
     DEF LED1 LED {
       translation -0.036 -3.72832e-16 0.021
       rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
-      scale 3 3 3
       children [
         Shape {
           appearance PBRAppearance {
@@ -1106,13 +1108,15 @@ DEF khepera3 Robot {
     }
     Group {
       children [
-        LED {
-        }
         LightSensor {
+          rotation 0 0 1 1.5708
           lookupTable [
             0 0 0
             4 1024 0
           ]
+        }
+        LED {
+          translation 0.04 0 0.01
         }
         TouchSensor {
         }
@@ -1139,7 +1143,7 @@ DEF khepera3 Robot {
           ]
           endPoint Solid {
             translation -0.01 0 0.022
-            rotation 0.7058148424148402 -0.7058148424148706 -0.060421986509761966 3.0208949999998924
+            rotation 0.7058148424148399 -0.7058148424148708 -0.06042198650976227 3.0208949999998906
             children [
               DEF RIGHT_GRIP SliderJoint {
                 jointParameters JointParameters {
@@ -1406,7 +1410,7 @@ DEF khepera3 Robot {
       ]
       endPoint Solid {
         translation 0 0.026 0.0075
-        rotation -0.6502504768340517 0.6502504768340517 -0.3928722880964969 2.392899
+        rotation -0.6502504768340518 0.6502504768340516 -0.39287228809649694 2.3928989999999994
         children [
           DEF WHEEL Transform {
             rotation 0.5773869352700204 -0.5773319352761864 0.5773319352761864 -2.094339
@@ -1446,8 +1450,8 @@ DEF khepera3 Robot {
         }
       ]
       endPoint Solid {
-        translation 0 -0.026 0.0075
-        rotation -0.6434150394574285 0.6434150394574285 -0.4147700254357724 2.355245
+        translation 0 -0.025999999999999992 0.0075
+        rotation -0.6434150394574285 0.6434150394574284 -0.41477002543577257 2.3552449999999996
         children [
           USE WHEEL
         ]
@@ -1476,47 +1480,47 @@ DEF khepera3 Robot {
     }
     DEF LS0 LightSensor {
       translation 0.012 0.0245 0.0144
-      rotation 0.6109342596550577 0.5598032379237042 0.5598032379237042 2.044752
+      rotation 0.41073582087321875 0.6447077188352887 0.6447077188352887 2.36214
       name "ls0"
       lookupTable [
-        0 500 0.1
-        0.2 10 0.1
+        0 0 0
+        4 1024 0
       ]
     }
     DEF LS1 LightSensor {
       translation 0.021 0.0185 0.0144
-      rotation 0.862854253731822 0.35740910510009427 0.35740910510009427 1.717773
+      rotation -0.5773479358540498 -0.5773509358537164 -0.5773519358536053 -2.094395307179586
       name "ls1"
       lookupTable [
-        0 500 0.1
-        0.2 10 0.1
+        0 0 0
+        4 1024 0
       ]
     }
     DEF LS2 LightSensor {
       translation 0.027 0.0075 0.0144
-      rotation -1 0 0 -1.570796
+      rotation 0.6776611791705899 0.5199881374825417 0.5199881374825417 1.95044
       name "ls2"
       lookupTable [
-        0 500 0.1
-        0.2 10 0.1
+        0 0 0
+        4 1024 0
       ]
     }
     DEF LS3 LightSensor {
       translation 0.027 -0.0075 0.0144
-      rotation -1 0 0 -1.570796
+      rotation -0.6776611791705899 0.5199881374825417 0.5199881374825417 -1.950445307179586
       name "ls3"
       lookupTable [
-        0 500 0.1
-        0.2 10 0.1
+        0 0 0
+        4 1024 0
       ]
     }
     DEF LS4 LightSensor {
       translation 0.021 -0.0185 0.0144
-      rotation 0.8628568705192763 -0.357405946367489 -0.357405946367489 1.717771
+      rotation -0.2810851028163115 0.6785982482200877 0.6785982482200877 -2.593565307179586
       name "ls4"
       lookupTable [
-        0 500 0.1
-        0.2 10 0.1
+        0 0 0
+        4 1024 0
       ]
     }
     DEF LS5 LightSensor {
@@ -1524,8 +1528,8 @@ DEF khepera3 Robot {
       rotation 0.6109368239350584 -0.5598018386715711 -0.5598018386715711 2.044747
       name "ls5"
       lookupTable [
-        0 500 0.1
-        0.2 10 0.1
+        0 0 0
+        4 1024 0
       ]
     }
     DEF LS6 LightSensor {
@@ -1533,8 +1537,8 @@ DEF khepera3 Robot {
       rotation 0 -0.7071067811865476 -0.7071067811865476 -3.14159
       name "ls6"
       lookupTable [
-        0 500 0.1
-        0.2 10 0.1
+        0 0 0
+        4 1024 0
       ]
     }
     DEF LS7 LightSensor {
@@ -1542,20 +1546,20 @@ DEF khepera3 Robot {
       rotation 0 -0.7071067811865476 -0.7071067811865476 -3.14159
       name "ls7"
       lookupTable [
-        0 500 0.1
-        0.2 10 0.1
+        0 0 0
+        4 1024 0
       ]
     }
     DEF LED0 LED {
-      translation 0.022 -0.013 0.021
+      translation 0.042 -0.003 0.021
       rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
       children [
         PointLight {
           attenuation 0 0 12.56
           color 1 0 0
           intensity 0.25
-          location 0 0.3 0
           on FALSE
+          radius 10
         }
         Shape {
           appearance PBRAppearance {
