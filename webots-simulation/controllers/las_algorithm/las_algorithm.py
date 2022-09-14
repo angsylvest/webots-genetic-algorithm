@@ -83,11 +83,8 @@ obj_found_so_far = []
 
 
 global las 
-las = LAS()
 
 global current_tile 
-current_tile = las.curr_tile((gps.getValues()[0],gps.getValues()[1]))
-print('the current tile robot is on it', current_tile) 
 
 def rotate_random():
     # will choose direction following biased random walk 
@@ -200,8 +197,17 @@ object_encountered = False
 prev_object_i = 0 # keep track of timesteps elapsed for each pickup action
 chosen_direction = rotate_random()
 
+start = False
+
 
 while robot.step(timestep) != -1:
+
+    if not start:
+        las = LAS(curr_pos = (float(gps.getValues()[0]),float(gps.getValues()[1])))
+        current_tile = las.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
+        print('the current tile robot is on it', current_tile) 
+         
+    start = True
 
     interpret()
     light_sensor_value = light_sensor.getValue()
@@ -232,7 +238,7 @@ while robot.step(timestep) != -1:
     dist_val = ds.getValue()
     # print(dist_val, 'detect --', detect_thres)
     
-    current_tile = las.update(current_tile, (gps.getValues()[0], gps.getValues()[1]))
+    # current_tile = las.update(current_tile, (gps.getValues()[0], gps.getValues()[1]))
     
     # wall avoidance 
     if round(dist_val) == 283:

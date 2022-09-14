@@ -41,7 +41,7 @@ DEF arena RectangleArena {
 }
 DEF supervisor TinkerbotsBase {
   translation -0.41 0 0
-  controller "ga_supervisor"
+  controller "supervisor_controller"
   supervisor TRUE
   synchronization FALSE
   extensionSlot [
@@ -581,7 +581,7 @@ DEF khepera Robot {
       0 0 0.005
     ]
   }
-  controller "generalized_ga_controller"
+  controller "las_algorithm"
   supervisor TRUE
   synchronization FALSE
 }
@@ -1097,7 +1097,7 @@ DEF khepera2 Robot {
       0 0 0.005
     ]
   }
-  controller "generalized_ga_controller"
+  controller "las_algorithm"
   supervisor TRUE
   synchronization FALSE
 }
@@ -1143,7 +1143,7 @@ DEF khepera3 Robot {
           ]
           endPoint Solid {
             translation -0.01 0 0.022
-            rotation 0.7058148424148399 -0.7058148424148708 -0.06042198650976227 3.0208949999998906
+            rotation 0.7058148424148398 -0.7058148424148707 -0.06042198650976231 3.020894999999889
             children [
               DEF RIGHT_GRIP SliderJoint {
                 jointParameters JointParameters {
@@ -1409,8 +1409,8 @@ DEF khepera3 Robot {
         }
       ]
       endPoint Solid {
-        translation 0 0.026 0.0075
-        rotation -0.6502504768340518 0.6502504768340516 -0.39287228809649694 2.3928989999999994
+        translation 0 0.026000000000000013 0.0075
+        rotation -0.6502504768340518 0.6502504768340517 -0.39287228809649694 2.3928989999999986
         children [
           DEF WHEEL Transform {
             rotation 0.5773869352700204 -0.5773319352761864 0.5773319352761864 -2.094339
@@ -1451,7 +1451,7 @@ DEF khepera3 Robot {
       ]
       endPoint Solid {
         translation 0 -0.025999999999999992 0.0075
-        rotation -0.6434150394574285 0.6434150394574284 -0.41477002543577257 2.3552449999999996
+        rotation -0.6434150394574285 0.6434150394574283 -0.4147700254357728 2.3552449999999983
         children [
           USE WHEEL
         ]
@@ -1620,7 +1620,7 @@ DEF khepera3 Robot {
       0 0 0.005
     ]
   }
-  controller "generalized_ga_controller"
+  controller "las_algorithm"
   supervisor TRUE
   synchronization FALSE
 }
