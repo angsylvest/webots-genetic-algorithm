@@ -248,6 +248,7 @@ def communicate_with_robot():
     # find closest robot to exchange info with 
     response = str(given_id) + "-encounter"
     emitter.send(response.encode('utf-8'))
+    # print('found neighbor')
     
 # Main loop:
 # - perform simulation steps until Webots is stopping the controller
@@ -269,6 +270,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
         strategy = choose_strategy() # chooses a new strategy 
         
     interpret() # checks for messages from supervisor 
+    time_elapsed_since_robot +=1
     
     # biased random walk movement (each time step, cert prob of turning that direction) 
     roll, pitch, yaw = inertia.getRollPitchYaw()
@@ -302,9 +304,11 @@ while robot.step(timestep) != -1 and sim_complete != True:
         print('collision encountered')
         chosen_direction = rotate_random() 
         move_backwards()
-        
-    if light_sensor.getValue() == 1024: # max value for light 
+     
+    # print('curr light values', light_sensor.getValue())   
+    if light_sensor.getValue() > 800 and time_elapsed_since_robot > 300: # max value for light 
         communicate_with_robot()
+        time_elapsed_since_robot = 0 # reset time step 
     
         
     if dist_val < detect_thres and holding_something == False: 
@@ -324,7 +328,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     obj_found_so_far.append(id)
                     # print('dist val ', dist_val)
                     # print('found object 1', firstObject, id)
-                    id = given_id + id # indication that it is a object to be deleted 
+                    id = "$" + given_id + id # indication that it is a object to be deleted 
                     time_elapsed_since_block = 0
                     
                     emitter.send(str(id).encode('utf-8'))

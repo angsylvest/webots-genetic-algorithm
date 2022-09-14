@@ -217,7 +217,7 @@ def message_listener(time_step):
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
         
-        # print('incoming messages', message) 
+        print('incoming messages', message) 
         
         if message[0] == "$": # handles deletion of objects when grabbed
             collected_count[int(message[1])] = collected_count[int(message[1])] + 1
@@ -229,7 +229,7 @@ def message_listener(time_step):
             if obj_node is not None:
                 t_field = obj_node.getField('translation')
                 t_field.setSFVec3f([-0.9199,-0.92, 0.059]) 
-                obj_node.remove()
+                # obj_node.remove()
                 # remove redundant requests 
                 if obj_node not in found_list:
                     total_found += 1
@@ -280,6 +280,8 @@ def message_listener(time_step):
             new_geno = find_nearest_robot_genotype(robo_index)
             
             receiver.nextPacket()
+            
+        
             
     
     
