@@ -54,38 +54,30 @@ class LAS():
                         
 
     def update(self, original_tile, curr_pos):
-        # print('original tile', str(self.cells[int(original_tile)]))
-        # print('cells', self.cells)
-        # print('neighbors --', self.neighbors)
-        neighbors = self.neighbors[str(self.cells[int(original_tile)])]
+        neighbors = self.neighbors[str(self.cells[original_tile])]
         x, y = curr_pos
         curr_closest = neighbors[0] 
         otpx, otpy, obrx, obry = self.cells[original_tile]
         
         # check if still in current tile 
-        if x < otpx and x > obrx and y > obry and y < otpy: 
-            return self.neighbors.index(self.cells[original_tile])
+        if x > otpx and x < obrx and y < obry and y > otpy: 
+            return original_tile
         
         for n in neighbors: 
             # check if in neighboring tiles 
-            tpx, tpy, brx, bry = tuple(n)
+            tpx, tpy, brx, bry = n
             
-            if x < tpx and x > brx and y > bry and y < tpy: 
-                return self.neighbors.index(original_tile)
+            if x > tpx and x < brx and y < bry and y > tpy: 
+                return self.neighbors.index(n)
         
-        return 'error update not possible'
+        return self.locate_cell(curr_pos)
                
 
     def locate_cell(self, curr_location):
         x, y = curr_location
-        
-        print('curr location', curr_location) 
-        print('cells', self.cells) 
         for c in self.cells: 
             otpx, otpy, obrx, obry = c 
-            
             if round(x,1) > round(otpx,1) and round(x,1) < round(obrx,1) and round(y,1) > round(obry,1) and round(y,1) < round(otpy,1):
                 print('comparison satisfied') 
-                return self.cells.index(c)  
-            
+                return self.cells.index(c)     
         return 'locate cell error'

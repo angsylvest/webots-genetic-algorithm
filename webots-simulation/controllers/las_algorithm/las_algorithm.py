@@ -238,7 +238,7 @@ while robot.step(timestep) != -1:
     dist_val = ds.getValue()
     # print(dist_val, 'detect --', detect_thres)
     
-    # current_tile = las.update(current_tile, (gps.getValues()[0], gps.getValues()[1]))
+    current_tile = las.update(current_tile, (gps.getValues()[0], gps.getValues()[1]))
     
     # wall avoidance 
     if round(dist_val) == 283:
@@ -251,16 +251,11 @@ while robot.step(timestep) != -1:
     if dist_val < detect_thres and holding_something == False and len(list) > 0: 
         # behavior in response to stimuli in front of robot 
         if (object_encountered == False):
-            # prev_object_i = i
-            # grab_object(i, prev_object_i)
-            # object_encountered = True
-            
             # if retrievable object within range, gets picked up 
             if dist_val < 40: 
                 firstObject = camera.getRecognitionObjects()[0]
                 # print('found object', firstObject)
                 id = str(firstObject.get_id())
-                
                 if id not in obj_found_so_far:
                     obj_found_so_far.append(id)
                     id = "$" + id # indication that it is a object to be deleted 

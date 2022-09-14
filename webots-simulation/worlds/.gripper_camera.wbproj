@@ -7,7 +7,7 @@ maximizedDockId: -1
 centralWidgetVisible: 1
 projectionMode: PERSPECTIVE
 orthographicViewHeight: 1
-textFiles: 3 "controllers/ga_supervisor/ga_supervisor.py" "controllers/generalized_ga_controller/generalized_ga_controller.py" "controllers/las_algorithm/las_algorithm.py" "controllers/las_algorithm/framework.py"
+textFiles: 2 "controllers/ga_supervisor/ga_supervisor.py" "controllers/generalized_ga_controller/generalized_ga_controller.py" "controllers/las_algorithm/las_algorithm.py" "controllers/las_algorithm/framework.py"
 globalOptionalRendering: LightSensorRays
 consoles: Console:All:All
 renderingDevicePerspectives: k0:camera;1;7.34375;0;0
