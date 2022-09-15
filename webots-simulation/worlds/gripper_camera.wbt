@@ -41,7 +41,7 @@ DEF arena RectangleArena {
 }
 DEF supervisor TinkerbotsBase {
   translation -0.41 0 0
-  controller "supervisor_controller"
+  controller "ga_supervisor"
   supervisor TRUE
   synchronization FALSE
   extensionSlot [
@@ -516,7 +516,7 @@ DEF khepera Robot {
       children [
         PointLight {
           attenuation 0 0 12.56
-          color 1 0 0
+          color 0 0 0
           intensity 0.25
           on FALSE
           radius 10
@@ -581,7 +581,7 @@ DEF khepera Robot {
       0 0 0.005
     ]
   }
-  controller "las_algorithm"
+  controller "generalized_ga_controller"
   supervisor TRUE
   synchronization FALSE
 }
@@ -1033,7 +1033,7 @@ DEF khepera2 Robot {
       children [
         PointLight {
           attenuation 0 0 12.56
-          color 1 0 0
+          color 0 0 0
           intensity 0.25
           on FALSE
           radius 10
@@ -1097,7 +1097,7 @@ DEF khepera2 Robot {
       0 0 0.005
     ]
   }
-  controller "las_algorithm"
+  controller ""
   supervisor TRUE
   synchronization FALSE
 }
@@ -1143,7 +1143,7 @@ DEF khepera3 Robot {
           ]
           endPoint Solid {
             translation -0.01 0 0.022
-            rotation 0.7058148424148398 -0.7058148424148707 -0.06042198650976231 3.020894999999889
+            rotation 0.7058148424148399 -0.7058148424148706 -0.0604219865097623 3.0208949999998884
             children [
               DEF RIGHT_GRIP SliderJoint {
                 jointParameters JointParameters {
@@ -1556,7 +1556,7 @@ DEF khepera3 Robot {
       children [
         PointLight {
           attenuation 0 0 12.56
-          color 1 0 0
+          color 0 0 0
           intensity 0.25
           on FALSE
           radius 10
@@ -1620,7 +1620,7 @@ DEF khepera3 Robot {
       0 0 0.005
     ]
   }
-  controller "las_algorithm"
+  controller ""
   supervisor TRUE
   synchronization FALSE
 }

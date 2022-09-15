@@ -11,6 +11,9 @@ import random
 from controller import Robot, Motor, DistanceSensor, Camera, CameraRecognitionObject, InertialUnit 
 from math import sin, cos, pi  
 import random 
+import pandas as pd 
+
+strategy_df = pd.DataFrame(columns = ['agent id' ,'time step', 'weight_dist', 'time since last block'])
 
 # create the Robot instance.
 robot = Robot()
@@ -73,27 +76,29 @@ light_sensor = robot.getDevice('light sensor')
 light_sensor.enable(timestep)
 
 # initial genotype parameters
-global fitness
+# global fitness
 fitness = 0  
-global forward_speed 
+# global forward_speed 
 forward_speed = 2
-global detect_thres 
+# global detect_thres 
 detect_thres = 1000
-global time_switch
+# global time_switch
 time_switch = 150
 
 sim_complete = False 
 
-global obj_found_so_far
+# global obj_found_so_far
 obj_found_so_far = []
 
-global given_id 
+# global given_id 
 given_id = robot.getName()[-1] 
 
-global time_elapsed_since_block
+# global time_elapsed_since_block
 time_elapsed_since_block = 0
-global time_elapsed_since_robot
+# global time_elapsed_since_robot
 time_elapsed_since_robot = 0
+weights = [1, 1, 1, 1, 0, 0] 
+curr_best_weights = [] # set initially as empty 
 
 # motor functions 
 
@@ -136,19 +141,73 @@ def dynamic_correlated_random(curr_dir, bias):
     else: 
         return round(random.choice([pi, pi/2, -pi/2, bias, bias]),2)
         
-def choose_strategy():
-    # global time_switch
-    # time_switch = time_switch * random.uniform(0.8, 1.9)
-    strat = random.choice(['sequential', 'alternating-left','alternating-right', 'true random'])
-    if strat == 'sequential':
-        return [pi/2, 0, -pi/2, pi]
+def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False):
+    global curr_best_weights
+    global given_id
+    # want to update weights based off effectiveness of current strategy 
+    if update: 
+        new_weights = create_new_weights(t_block, t_robot, original_weights)
+        strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], new_weights[:-2])
+        
+        new_row = {'agent id': given_id, 'time step': robot.step(timestep),'weight_dist': original_weights, 'time since last block': t_block}
+        strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
+        
+    if not update: 
+        strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], original_weights[:-2])
+    
+    if strat == 'straight':
+        return [correlated_random(curr_dir)]
     elif strat == 'alternating-right':
         return [pi/2, 0, -pi/2, pi]
     elif strat == 'alternating-left':
         return [pi/2, pi, -pi/2, 0]
-    else: 
+    else: # true random 
         return [random.choice([pi/2, 0, -pi/2, pi])]
     
+def create_new_weights(t_block, t_robot, original_weights): 
+    global curr_best_weights
+    global weights 
+    # want to incorporate some level of noise to avoid local max, instead of global
+    # hope to ensure that good weights continue to persist in the pool 
+     
+    if len(curr_best_weights) == 0: # if there is no weight that is better (ie. just starting out) 
+        new_w = []
+        f = random.uniform(0, 1) 
+        new_w.append(f)
+        for i in len(original_weights)-1: 
+            f = random.uniform(0, (1 - f))
+            new_w.append(f)
+        curr_best_weights[-2] = t_block
+        curr_best_weights[1] = t_robot
+        curr_best_weights = original_weights # will serve as point of comparison for subsequent checking 
+        weights = new_w
+        return new_w
+        
+    if (curr_best_weights[-2] < t_block): # will update weights 
+        curr_best_weights = original_weights 
+        curr_best_weights[-2] = t_block
+        curr_best_weights[1] = t_robot
+        
+        # more restrictive sampling 
+        new_w = []
+        f = random.uniform(original[0]*0.9, original[0]*1.1) 
+        new_w.append(f)
+        for i in len(original_weights)-3: 
+            f = random.uniform(original[i]*0.9, original[i]*1.1)
+            new_w.append(f)
+        weights = new_w
+        return new_w
+    
+    else: 
+        new_w = []
+        f = random.uniform(0, 1) 
+        new_w.append(f)
+        for i in len(original_weights)-1: 
+            f = random.uniform(0, (1 - f))
+            new_w.append(f)
+        weights = new_w
+        return new_w 
+     
     
 def begin_rotating():
     leftMotor.setPosition(float('inf'))
@@ -180,27 +239,6 @@ def stop():
     rightMotor.setPosition(float('inf'))
     rightMotor.setVelocity(0)
     
-# gripper functions 
-# def grab_object(curr_step, initial_step): 
-    # global fitness
-     
-    # i = curr_step - initial_step 
-    # if (i == 0):
-        # opens the gripper 
-        # leftGrip.setPosition(open_grip)
-        # rightGrip.setPosition(open_grip)
-    # elif (i == 20):
-        # motor.setPosition(0) # arm down 
-    # elif (i == 40):
-        # closes the gripper 
-        # leftGrip.setPosition(closed_grip)
-        # rightGrip.setPosition(closed_grip) 
-        # fitness += 1 
-        # print('fitness 1 increased', fitness) 
-    # elif (i == 80):
-        # motor.setPosition(-1.4) # arm up
-        # emitter.send("k1-found".encode('utf-8'))
-
 def release_object():
     leftGrip.setPosition(open_grip)
     rightGrip.setPosition(open_grip)
@@ -229,7 +267,7 @@ def interpret():
             parse_genotype(message)
             receiver.nextPacket()
             
-        elif message == "return_fitness":
+        elif message == "return_fitness": # happpens at end of generation 
             response = "k" + str(int(given_id) + 1) + "-fitness" + str(fitness)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
@@ -237,6 +275,7 @@ def interpret():
             
         elif message == 'sim-complete':
             sim_complete = True 
+            strategy_df.to_csv('strategy_df' + str(given_id) + '.csv')
         
         else: 
             receiver.nextPacket()
@@ -258,16 +297,20 @@ holding_something = False
 prev_i = 0 # to keep track of timesteps elapsed before new direction 
 object_encountered = False 
 prev_object_i = 0 # keep track of timesteps elapsed for each pickup action
-global chosen_direction
+# global chosen_direction
 chosen_direction = rotate_random()
-strategy = choose_strategy()
+strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = False)
 curr_index = 0
 
 while robot.step(timestep) != -1 and sim_complete != True:
 
     if curr_index >= len(strategy): 
         curr_index = 0 
-        strategy = choose_strategy() # chooses a new strategy 
+        
+        if robot.step(timestep) % 50 == 0:
+            strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = True) # chooses a new strategy 
+        else: 
+            strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = False)
         
     interpret() # checks for messages from supervisor 
     time_elapsed_since_robot +=1
@@ -306,17 +349,18 @@ while robot.step(timestep) != -1 and sim_complete != True:
         move_backwards()
      
     # print('curr light values', light_sensor.getValue())   
-    if light_sensor.getValue() > 800 and time_elapsed_since_robot > 300: # max value for light 
-        communicate_with_robot()
-        time_elapsed_since_robot = 0 # reset time step 
+    if time_elapsed_since_robot > 300: # max value for light 
+        if light_sensor.getValue() > 800: 
+            communicate_with_robot()
+            time_elapsed_since_robot = 0 # reset time step 
+        else: 
+            time_elapsed_since_robot += 1
+    
     
         
     if dist_val < detect_thres and holding_something == False: 
         # stop()
         if (object_encountered == False):
-            # prev_object_i = i
-            # grab_object(i, prev_object_i)
-            # object_encountered = True
   
             # attempt to get object detected 
             if len(list) == 1 and dist_val < 100:
@@ -326,8 +370,6 @@ while robot.step(timestep) != -1 and sim_complete != True:
                 
                 if id not in obj_found_so_far:
                     obj_found_so_far.append(id)
-                    # print('dist val ', dist_val)
-                    # print('found object 1', firstObject, id)
                     id = "$" + given_id + id # indication that it is a object to be deleted 
                     time_elapsed_since_block = 0
                     
@@ -335,11 +377,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     fitness += 1 
                     holding_something = False 
                     chosen_direction = correlated_random(chosen_direction)
-                
-            # if dist_val < 5: 
-                # fitness += 1
-                # communicate_with_robot()
-                
+         
             if dist_val == 0:
                 fitness -= 1 
                 print('collision encountered')
@@ -352,6 +390,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
         
     else: 
          object_encountered = False
+         time_elapsed_since_block += 1
 
     i+=1
     

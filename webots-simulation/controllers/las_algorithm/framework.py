@@ -78,6 +78,6 @@ class LAS():
         for c in self.cells: 
             otpx, otpy, obrx, obry = c 
             if round(x,1) > round(otpx,1) and round(x,1) < round(obrx,1) and round(y,1) > round(obry,1) and round(y,1) < round(otpy,1):
-                print('comparison satisfied') 
+                # print('comparison satisfied') 
                 return self.cells.index(c)     
         return 'locate cell error'
