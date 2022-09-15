@@ -12,6 +12,7 @@ from controller import Robot, Motor, DistanceSensor, Camera, CameraRecognitionOb
 from math import sin, cos, pi  
 import random 
 import pandas as pd 
+import numpy as np 
 
 strategy_df = pd.DataFrame(columns = ['agent id' ,'time step', 'weight_dist', 'time since last block'])
 
@@ -97,7 +98,7 @@ given_id = robot.getName()[-1]
 time_elapsed_since_block = 0
 # global time_elapsed_since_robot
 time_elapsed_since_robot = 0
-weights = [1, 1, 1, 1, 0, 0] 
+weights = [0.25, 0.25, 0.25, 0.25] 
 curr_best_weights = [] # set initially as empty 
 
 # motor functions 
@@ -147,13 +148,13 @@ def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False
     # want to update weights based off effectiveness of current strategy 
     if update: 
         new_weights = create_new_weights(t_block, t_robot, original_weights)
-        strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], new_weights[:-2])
+        strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], new_weights)
         
         new_row = {'agent id': given_id, 'time step': robot.step(timestep),'weight_dist': original_weights, 'time since last block': t_block}
         strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
         
     if not update: 
-        strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], original_weights[:-2])
+        strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], original_weights)
     
     if strat == 'straight':
         return [correlated_random(curr_dir)]
@@ -163,6 +164,7 @@ def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False
         return [pi/2, pi, -pi/2, 0]
     else: # true random 
         return [random.choice([pi/2, 0, -pi/2, pi])]
+    
     
 def create_new_weights(t_block, t_robot, original_weights): 
     global curr_best_weights
@@ -179,22 +181,32 @@ def create_new_weights(t_block, t_robot, original_weights):
             new_w.append(f)
         curr_best_weights[-2] = t_block
         curr_best_weights[1] = t_robot
-        curr_best_weights = original_weights # will serve as point of comparison for subsequent checking 
+        # curr_best_weights = original_weights # will serve as point of comparison for subsequent checking 
         weights = new_w
         return new_w
         
     if (curr_best_weights[-2] < t_block): # will update weights 
-        curr_best_weights = original_weights 
+        curr_best_weights[:-2] = original_weights 
         curr_best_weights[-2] = t_block
-        curr_best_weights[1] = t_robot
+        curr_best_weights[-1] = t_robot
         
         # more restrictive sampling 
         new_w = []
         f = random.uniform(original[0]*0.9, original[0]*1.1) 
         new_w.append(f)
-        for i in len(original_weights)-3: 
+        for i in len(original_weights)-1: 
             f = random.uniform(original[i]*0.9, original[i]*1.1)
             new_w.append(f)
+        
+        # need to normalize to 1 
+        x = np.array(new_w)
+        min_value = x.min()
+        max_value = x.max()
+
+        normalized = (x - min_value) / (max_value - min_value)
+        
+        new_w = list(normalized) 
+        
         weights = new_w
         return new_w
     
@@ -205,6 +217,16 @@ def create_new_weights(t_block, t_robot, original_weights):
         for i in len(original_weights)-1: 
             f = random.uniform(0, (1 - f))
             new_w.append(f)
+            
+        # need to normalize to 1 
+        x = np.array(new_w)
+        min_value = x.min()
+        max_value = x.max()
+
+        normalized = (x - min_value) / (max_value - min_value)
+        
+        new_w = list(normalized) 
+        
         weights = new_w
         return new_w 
      
