@@ -14,7 +14,7 @@ import random
 import pandas as pd 
 import numpy as np 
 
-strategy_df = pd.DataFrame(columns = ['agent id' ,'time step', 'weight_dist', 'time since last block'])
+strategy_df = pd.DataFrame(columns = ['agent id' ,'time step', 'straight','alternating-left','alternating-right', 'true random', 'time since last block'])
 
 # create the Robot instance.
 robot = Robot()
@@ -150,7 +150,7 @@ def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False
         new_weights = create_new_weights(t_block, t_robot, original_weights)
         strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], new_weights)
         
-        new_row = {'agent id': given_id, 'time step': robot.step(timestep),'weight_dist': original_weights, 'time since last block': t_block}
+        new_row = {'agent id': given_id, 'time step': robot.step(timestep), 'straight': original_weights[0],'alternating-left': original_weights[1],'alternating-right': original_weights[2], 'true random': original_weights[3], 'time since last block': t_block}
         strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
         
     if not update: 

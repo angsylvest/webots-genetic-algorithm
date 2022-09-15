@@ -1,6 +1,5 @@
-# nelder mead optimization to find max (placeholder, untested) 
+# nelder mead multivariate soptimization to find max (placeholder, untested) 
 
-# nelder-mead optimization of noisy one-dimensional convex function
 from scipy.optimize import minimize
 from numpy.random import rand
 from numpy.random import randn
