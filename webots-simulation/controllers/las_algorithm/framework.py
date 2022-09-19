@@ -13,6 +13,8 @@ class LAS():
         self.neighbors = {}
         self.cells = [] # represents ranges for designated # of cells, right top x,y and bot x, y val
         self.curr_tile = self.locate_cell(curr_pos)
+        self.iterations_threshold = 3
+        self.target = self.curr_tile
 
         # create a vector with equal probability of locating target in all cells
         for i in range(num_cells): # current cell
@@ -37,7 +39,8 @@ class LAS():
                 self.cells.append((top_rightx, top_righty, bot_rightx, bot_righty))
                 
         self.prob_vector = list(np.full((1, 3*num_per_row), (1/(3*num_per_row))))
-        self.M_vector = list(np.full(1, len(self.cells), 0))
+        self.M_vector = list(np.full((1, len(self.cells)), 0))
+        self.dir_vector = 0 # direction that robot should persist towards to reach tile 
 
         # precalculates neighbors
         for cell in self.cells:
@@ -118,8 +121,8 @@ class LAS():
             sum = 1 
             if p != curr_tile: 
             
-                if self.prob_vector[p] > self.delta_pen * (len(self.cells) - 1)
-                    in_min = self.delta_pen * (len(self.cells) - 1
+                if self.prob_vector[p] > self.delta_pen * (len(self.cells) - 1):
+                    in_min = self.delta_pen * (len(self.cells) - 1)
                 else: 
                     in_min = self.prob_vector[p]
                     
@@ -138,13 +141,15 @@ class LAS():
                 
         return self.prob_vector 
         
-     def re_direct(self, curr_tile): 
-         new_cell = random.choices(self.cells, self.prob_vector)
-         new_tile = self.cells.index(new_cell)
+    def re_direct(self, curr_tile): 
+        new_cell = random.choices(self.cells, self.prob_vector)
+        new_tile = self.cells.index(new_cell)
          
-         tpx, tpy, brx, bry = self.cells[curr_tile]
-         otpx, otpy, obrx, obry = new_cell
+        tpx, tpy, brx, bry = self.cells[curr_tile]
+        otpx, otpy, obrx, obry = new_cell
          
-         direction = math.atan((otpy - tpy), (otpx - tpx))
+        direction = math.atan((otpy - tpy), (otpx - tpx))
+        self.target = new_tile
+        self.dir_vector = direction 
          
-         return round(direction, 2)
+        return round(direction, 2)

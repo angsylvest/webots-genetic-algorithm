@@ -12,6 +12,9 @@ from controller import Robot, Motor, DistanceSensor, Camera, CameraRecognitionOb
 from math import sin, cos, pi  
 import random 
 from framework import * 
+import pandas as pd 
+
+strategy_df = pd.DataFrame(columns = ['agent id' ,'time step','time since last block'])
 
 # create the Robot instance.
 robot = Robot()
@@ -83,8 +86,8 @@ obj_found_so_far = []
 
 
 global las 
-
 global current_tile 
+t_block = 0
 
 def rotate_random():
     # will choose direction following biased random walk 
@@ -169,6 +172,7 @@ def parse_genotype(gen):
     
 def interpret(): 
     global fitness
+    global t_block
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
     
@@ -184,6 +188,9 @@ def interpret():
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
             fitness = 0
+            
+            new_row = {'agent id': given_id, 'time step': robot.step(timestep),'time since last block': t_block}
+            strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
         else: 
             receiver.nextPacket()
     
@@ -198,7 +205,8 @@ prev_object_i = 0 # keep track of timesteps elapsed for each pickup action
 chosen_direction = rotate_random()
 
 start = False
-
+iterations_passed = 0
+has_collected = False
 
 while robot.step(timestep) != -1:
 
@@ -208,6 +216,26 @@ while robot.step(timestep) != -1:
         print('the current tile robot is on it', current_tile) 
          
     start = True
+    
+    # handles tile localization and appropriate responses 
+    if current_tile == las.target: 
+        
+        if las.iterations_threshold <= iterations_passed:
+        
+            if not has_collected: 
+                # will change direction after max number of iterations passed 
+                iterations_passed = 0 
+                las.penalize(current_tile)
+                chosen_direction = re_direct(current_tile)
+                
+            
+            elif has_collected:
+                iterations_passed = 0 
+                has_collected = False # resets 
+                
+                chosen_direction = rotate_random()
+                time_switch = random.uniform(15, 50)
+            
 
     interpret()
     light_sensor_value = light_sensor.getValue()
@@ -221,7 +249,7 @@ while robot.step(timestep) != -1:
         
     elif (i - prev_i == time_switch and object_encountered != True):
         orientation_found = False 
-        chosen_direction = correlated_random(chosen_direction)
+        # chosen_direction = rotate_random()
         
     elif orientation_found != True and yaw == chosen_direction and object_encountered != True: 
         orientation_found = True 
@@ -239,6 +267,9 @@ while robot.step(timestep) != -1:
     # print(dist_val, 'detect --', detect_thres)
     
     current_tile = las.update(current_tile, (gps.getValues()[0], gps.getValues()[1]))
+    
+    # want to not leave this tile until 3 iterations have passed 
+    
     
     # wall avoidance 
     if round(dist_val) == 283:
@@ -263,6 +294,14 @@ while robot.step(timestep) != -1:
                     fitness += 1 
                     holding_something = False 
                     chosen_direction = correlated_random(chosen_direction)
+                    t_block = 0
+                    
+                    # reward tile 
+                    las.reward(current_tile)
+                    
+                    if current_tile == las.target and las.iterations_threshold <= iterations_passed:
+                        has_collected = True
+                    
             elif dist_val == 0:
                 fitness -= 1 
                 print('collision encountered')
@@ -270,8 +309,9 @@ while robot.step(timestep) != -1:
                 move_backwards()
                 
         else: 
-            pass
+            t_block += 1
     else: 
+         t_block += 1
          object_encountered = False
     
     i+=1
