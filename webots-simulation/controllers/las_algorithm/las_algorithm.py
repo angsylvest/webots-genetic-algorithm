@@ -235,6 +235,9 @@ while robot.step(timestep) != -1:
                 
                 chosen_direction = rotate_random()
                 time_switch = random.uniform(15, 50)
+                
+            elif i - prev_i == time_switch and object_encountered != True:
+                chosen_direction = rotate_random()
             
 
     interpret()
@@ -247,8 +250,8 @@ while robot.step(timestep) != -1:
     if yaw != chosen_direction and orientation_found != True and object_encountered != True: 
         begin_rotating()
         
-    elif (i - prev_i == time_switch and object_encountered != True):
-        orientation_found = False 
+    # elif (i - prev_i == time_switch and object_encountered != True):
+        # orientation_found = False 
         # chosen_direction = rotate_random()
         
     elif orientation_found != True and yaw == chosen_direction and object_encountered != True: 
