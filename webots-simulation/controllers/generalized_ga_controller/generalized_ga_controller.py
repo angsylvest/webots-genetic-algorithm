@@ -77,26 +77,19 @@ light_sensor = robot.getDevice('light sensor')
 light_sensor.enable(timestep)
 
 # initial genotype parameters
-# global fitness
-fitness = 0  
-# global forward_speed 
+
+fitness = 0   
 forward_speed = 2
-# global detect_thres 
 detect_thres = 1000
-# global time_switch
 time_switch = 150
 
 sim_complete = False 
-
-# global obj_found_so_far
 obj_found_so_far = []
 
-# global given_id 
 given_id = robot.getName()[-1] 
 
 # global time_elapsed_since_block
 time_elapsed_since_block = 0
-# global time_elapsed_since_robot
 time_elapsed_since_robot = 0
 weights = [0.25, 0.25, 0.25, 0.25] 
 curr_best_weights = [] # set initially as empty 
@@ -389,8 +382,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             time_elapsed_since_robot = 0 # reset time step 
         else: 
             time_elapsed_since_robot += 1
-    
-    
+
         
     if dist_val < detect_thres and holding_something == False: 
         # stop()

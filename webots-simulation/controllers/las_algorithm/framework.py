@@ -4,8 +4,9 @@
 import numpy as np
 import math 
 
+# (1, 1) (-1, -1)
 class LAS():
-    def __init__(self, top_right = (-1, 0.8), bot_left = (0, 0), num_cells = 9, curr_pos = (0,0)): # assuming 3 rows, arbitrarily
+    def __init__(self, top_right = (1, 1), bot_left = (-1, -1), num_cells = 9, curr_pos = (0,0)): # assuming 3 rows, arbitrarily
         self.trx, self.tr_y = top_right
         self.blx, self.bly = bot_left
         self.num_cells = num_cells

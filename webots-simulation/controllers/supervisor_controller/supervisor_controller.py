@@ -136,6 +136,7 @@ def save_progress():
     overall_df.to_csv('overall_results.csv')
     
     print('progress saved to csv')
+    emitter.send('sim-complete'.encode('utf-8'))
 
 def message_listener(time_step):
     global k1_df 
