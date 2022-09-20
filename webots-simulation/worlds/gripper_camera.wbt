@@ -41,7 +41,7 @@ DEF arena RectangleArena {
 }
 DEF supervisor TinkerbotsBase {
   translation -0.41 0 0
-  controller "ga_supervisor"
+  controller "supervisor_controller"
   supervisor TRUE
   synchronization FALSE
   extensionSlot [
@@ -581,7 +581,7 @@ DEF khepera Robot {
       0 0 0.005
     ]
   }
-  controller "generalized_ga_controller"
+  controller "las_algorithm"
   supervisor TRUE
   synchronization FALSE
 }
@@ -1033,7 +1033,7 @@ DEF khepera2 Robot {
       children [
         PointLight {
           attenuation 0 0 12.56
-          color 0 0 0
+          color 1 0 0
           intensity 0.25
           on FALSE
           radius 10
@@ -1097,7 +1097,7 @@ DEF khepera2 Robot {
       0 0 0.005
     ]
   }
-  controller "generalized_ga_controller"
+  controller "las_algorithm"
   supervisor TRUE
   synchronization FALSE
 }
@@ -1556,7 +1556,7 @@ DEF khepera3 Robot {
       children [
         PointLight {
           attenuation 0 0 12.56
-          color 0 0 0
+          color 1 0 0
           intensity 0.25
           on FALSE
           radius 10
@@ -1620,7 +1620,7 @@ DEF khepera3 Robot {
       0 0 0.005
     ]
   }
-  controller "generalized_ga_controller"
+  controller "las_algorithm"
   supervisor TRUE
   synchronization FALSE
 }

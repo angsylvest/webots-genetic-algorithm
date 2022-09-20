@@ -71,23 +71,25 @@ gps = robot.getDevice('gps')
 gps.enable(timestep)
 
 # initial fitness 
-global fitness
+# global fitness
 fitness = 0 
-global forward_speed 
+# global forward_speed 
 forward_speed = 2
-global detect_thres 
+# global detect_thres 
 detect_thres = 1000
-global time_switch
+# global time_switch
 time_switch = 150
 # motor functions 
 
-global obj_found_so_far
+# global obj_found_so_far
 obj_found_so_far = []
 
 
-global las 
-global current_tile 
+# global las 
+# global current_tile 
 t_block = 0
+
+given_id = robot.getName()[-1] 
 
 def rotate_random():
     # will choose direction following biased random walk 
@@ -173,12 +175,17 @@ def parse_genotype(gen):
 def interpret(): 
     global fitness
     global t_block
+    global given_id
+    global las
+    
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
     
         if message[0:2] == "#2":
             message = message[1:].split("*")
             parse_genotype(message)
+            
+            las.M_vector = np.full((1, len(las.cells)), 0).tolist()
             receiver.nextPacket()
             
         elif message == "return_fitness":
@@ -191,6 +198,11 @@ def interpret():
             
             new_row = {'agent id': given_id, 'time step': robot.step(timestep),'time since last block': t_block}
             strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
+            
+        elif message == 'sim-complete':
+            sim_complete = True 
+            strategy_df.to_csv('strategy_df' + str(given_id) + '.csv')
+            
         else: 
             receiver.nextPacket()
     
@@ -213,7 +225,7 @@ while robot.step(timestep) != -1:
     if not start:
         las = LAS(curr_pos = (float(gps.getValues()[0]),float(gps.getValues()[1])))
         current_tile = las.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
-        print('the current tile robot is on it', current_tile) 
+        # print('the current tile robot is on it', current_tile) 
          
     start = True
     
@@ -271,8 +283,8 @@ while robot.step(timestep) != -1:
     
     current_tile = las.update(current_tile, (gps.getValues()[0], gps.getValues()[1]))
     
+    # print('neighbors --', las.neighbors)
     # want to not leave this tile until 3 iterations have passed 
-    
     
     # wall avoidance 
     if round(dist_val) == 283:

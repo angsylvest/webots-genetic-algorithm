@@ -78,7 +78,7 @@ class LAS():
             tpx, tpy, brx, bry = n
             
             if x > tpx and x < brx and y < bry and y > tpy: 
-                return self.neighbors.index(n)
+                return self.cells.index(n)
         
         return self.locate_cell(curr_pos)
                
@@ -88,8 +88,9 @@ class LAS():
         for c in self.cells: 
             otpx, otpy, obrx, obry = c 
             if round(x,1) > round(otpx,1) and round(x,1) < round(obrx,1) and round(y,1) > round(obry,1) and round(y,1) < round(otpy,1):
-                # print('comparison satisfied') 
-                return self.cells.index(c)     
+                print('comparison satisfied') 
+                return self.cells.index(c)  
+        print('locate cell error')   
         return 'locate cell error'
         
     def reward(self, curr_tile):
