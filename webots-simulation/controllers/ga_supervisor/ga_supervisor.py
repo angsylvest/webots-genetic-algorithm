@@ -17,10 +17,10 @@ k2_df = pd.DataFrame(columns = ['agent id', 'time step', 'fitness', 'xpos', 'ypo
 k3_df = pd.DataFrame(columns = ['agent id', 'time step', 'fitness', 'xpos', 'ypos', 'num col','genotype'])
 ## add more robot dfs here (be sure to keep num consistent) 
 
-global df_list
+# global df_list
 df_list = [k1_df, k2_df, k3_df]
 
-global collected_count 
+# global collected_count 
 collected_count = [0, 0, 0]
 
 overall_df = pd.DataFrame(columns = ['trial','time', 'objects retrieved'])
@@ -48,7 +48,7 @@ receiver.setChannel(2)
 
 num_generations = 10
 
-global initial_genotypes 
+# global initial_genotypes 
 initial_genotypes = []
 
 global k1_fitness
@@ -56,37 +56,25 @@ global k2_fitness
 global k3_fitness
 global fitness_scores
 fitness_scores = ["!","!","!"]
-global pop_genotypes 
-pop_genotypes = []
-
-global found_list 
+# global pop_genotypes 
+pop_genotypes = [] 
 found_list = []
 
-global taken 
 taken = False # getting second child assigned 
-
-global gene_list 
 gene_list = ['control speed 10', 'detection threshold 1000', 'time switch 550']
 
-global total_found 
 total_found = 0
 
-global updated # regarding genepool 
 updated = False
 
-global fit_update
 fit_update = False 
 
-global simulation_time
 simulation_time = 15
 
-global trials 
 trials = 15
 
-global block_list 
 block_list = []
-
-global reproduce_list 
+ 
 reproduce_list = []
 
 def regenerate_environment(block_dist):

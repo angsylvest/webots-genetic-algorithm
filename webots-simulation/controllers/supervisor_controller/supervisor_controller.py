@@ -45,37 +45,26 @@ fitness_scores = ["!","!","!"]
 global pop_genotypes 
 pop_genotypes = []
 
-global total_collected 
 total_collected = 0 
 
-global taken 
 taken = False # getting second child assigned 
 
-global gene_list 
 gene_list = ['control speed 10', 'detection threshold 1000', 'time switch 550']
 
-global total_found 
 total_found = 0
 
-global updated # regarding genepool 
 updated = False
 
-global fit_update
 fit_update = False 
 
-global simulation_time
 simulation_time = 30
 
-global count 
 count = 0
 
-global trials 
 trials = 1
 
-global found_list 
 found_list = []
-
-global block_list 
+ 
 block_list = []
 
 arena_area = robot.getFromDef("arena")

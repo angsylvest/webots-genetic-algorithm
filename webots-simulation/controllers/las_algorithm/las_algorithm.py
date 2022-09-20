@@ -299,6 +299,9 @@ while robot.step(timestep) != -1:
                     chosen_direction = correlated_random(chosen_direction)
                     t_block = 0
                     
+                    new_row = {'agent id': given_id, 'time step': robot.step(timestep),'time since last block': t_block}
+                    strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
+                    
                     # reward tile 
                     las.reward(current_tile)
                     

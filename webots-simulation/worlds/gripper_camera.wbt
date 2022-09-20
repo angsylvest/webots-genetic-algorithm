@@ -26,7 +26,7 @@ WorldInfo {
 }
 Viewpoint {
   orientation -0.3650554127892243 -0.2056985839550119 0.907977223366419 4.087400981479784
-  position 0.6781508592529406 0.5233326250215117 1.0856562589078635
+  position 1.7389477642209799 2.2749621026381113 3.0498016949980213
 }
 TexturedBackground {
   luminosity 0.5
@@ -516,7 +516,7 @@ DEF khepera Robot {
       children [
         PointLight {
           attenuation 0 0 12.56
-          color 0 0 0
+          color 1 0 0
           intensity 0.25
           on FALSE
           radius 10
@@ -1097,7 +1097,7 @@ DEF khepera2 Robot {
       0 0 0.005
     ]
   }
-  controller ""
+  controller "generalized_ga_controller"
   supervisor TRUE
   synchronization FALSE
 }
@@ -1143,7 +1143,7 @@ DEF khepera3 Robot {
           ]
           endPoint Solid {
             translation -0.01 0 0.022
-            rotation 0.7058148424148399 -0.7058148424148706 -0.0604219865097623 3.0208949999998884
+            rotation 0.7058148424148399 -0.7058148424148706 -0.060421986509762354 3.0208949999998884
             children [
               DEF RIGHT_GRIP SliderJoint {
                 jointParameters JointParameters {
@@ -1620,7 +1620,7 @@ DEF khepera3 Robot {
       0 0 0.005
     ]
   }
-  controller ""
+  controller "generalized_ga_controller"
   supervisor TRUE
   synchronization FALSE
 }
