@@ -121,7 +121,7 @@ def restore_positions():
     
     coordinates = [[-0.115, 0, 0.0045], [0.2445, 0, 0.0045], [0.6045, 0, 0.0045]]
     for r in range(len(population)): 
-        population[r].restartController()
+        # population[r].restartController()
         r_field = population[r].getField('translation')
         r_field.setSFVec3f(coordinates[r])
     initialize_genotypes()
@@ -283,7 +283,7 @@ def run_optimization():
         # print('genotype', i, genotype)
         genotype = initial_genotypes[index]
         pop_genotypes.append(genotype)
-        emitter.send(str("#2" + str(genotype)).encode('utf-8'))
+        emitter.send(str("#" + str(i) + str(genotype)).encode('utf-8'))
         index +=1 
     
     regenerate_environment(0.2)   
@@ -309,10 +309,18 @@ def run_optimization():
         new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
         print('items collected', total_found)
         overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)
-        # restore_positions()  
+        restore_positions()  
         regenerate_environment(0.2) 
         total_found = 0 
-        found_list = []     
+        found_list = [] 
+        index = 0 
+        for i in range(3):
+            # genotype = create_individal_genotype(gene_list)
+            # print('genotype', i, genotype)
+            genotype = initial_genotypes[index]
+            pop_genotypes.append(genotype)
+            emitter.send(str("#" + str(i) + str(genotype)).encode('utf-8'))
+            index +=1     
     return 
    
         

@@ -3,6 +3,7 @@
 
 import numpy as np
 import math 
+import random
 
 # (1, 1) (-1, -1)
 class LAS():
@@ -13,7 +14,7 @@ class LAS():
         self.prob_vector = []
         self.neighbors = {}
         self.cells = [] # represents ranges for designated # of cells, right top x,y and bot x, y val
-        self.iterations_threshold = 3
+        self.iterations_threshold = 50
 
         # create a vector with equal probability of locating target in all cells
         for i in range(num_cells): # current cell
@@ -145,7 +146,7 @@ class LAS():
                 
         return self.prob_vector 
         
-    def re_direct(self, curr_tile): 
+    def re_gather(self, curr_tile): 
         new_cell = random.choices(self.cells, self.prob_vector)
         new_tile = self.cells.index(new_cell)
          
@@ -155,6 +156,25 @@ class LAS():
         omx, omy = (otpx + obrx)/2, (otpy + obry)/2 # calculating midpoint 
          
         direction = math.atan((omy - my), (omx - mx))
+        self.target = new_tile
+        self.dir_vector = direction 
+         
+        return round(direction, 2)
+
+    def re_direct(self, curr_tile): 
+        new_cell = self.target
+        new_tile = self.cells[new_cell]
+        
+        if curr_tile == new_cell: 
+            return round(random.choice([0,0, math.pi/2, -math.pi/2]),2)
+         
+        tpx, tpy, brx, bry = self.cells[curr_tile]
+        mx, my = (tpx + brx)/2, (tpy + bry)/2 # calculating midpoint 
+        print(mx, my)
+        otpx, otpy, obrx, obry = self.cells[new_cell]
+        omx, omy = (otpx + obrx)/2, (otpy + obry)/2 # calculating midpoint 
+        print(omx, omy)
+        direction = math.atan((omy - my)/ (omx - mx))
         self.target = new_tile
         self.dir_vector = direction 
          

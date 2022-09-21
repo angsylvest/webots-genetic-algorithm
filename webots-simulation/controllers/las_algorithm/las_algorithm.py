@@ -99,7 +99,7 @@ given_id = robot.getName()[-1]
 
 def rotate_random():
     # will choose direction following biased random walk 
-    directions = [pi/2, pi, -pi/2, 0, 0, 0, 0] # more preference to move straight 
+    directions = [pi/2, pi, -pi/2, 0] # more preference to move straight 
     chosen_direction = random.choice(directions)
     chosen_direction = round(chosen_direction, 2) 
     return chosen_direction 
@@ -188,8 +188,8 @@ def interpret():
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
     
-        if message[0:2] == "#2":
-            message = message[1:].split("*")
+        if message[0] == "#" + str(given_id):
+            message = message[2:].split("*")
             parse_genotype(message)
             
             las.M_vector = np.full((1, len(las.cells)), 0).tolist()
@@ -233,53 +233,58 @@ while robot.step(timestep) != -1 and sim_complete != True:
     if not start:
         las = LAS(curr_pos = (float(gps.getValues()[0]),float(gps.getValues()[1])))
         current_tile = las.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
-        print('the current tile robot is on: ', current_tile) 
+        chosen_direction = las.re_direct(current_tile)
+        print('the current tile robot is on: ', current_tile, 'target is ', las.target) 
         start = True
     
-    # handles tile localization and appropriate responses 
-    if current_tile == las.target: 
-        
-        if las.iterations_threshold <= iterations_passed:
-        
-            if not has_collected: 
-                # will change direction after max number of iterations passed 
-                iterations_passed = 0 
-                las.penalize(current_tile)
-                chosen_direction = re_direct(current_tile)
-                
-            
-            elif has_collected:
-                iterations_passed = 0 
-                has_collected = False # resets 
-                
-                chosen_direction = rotate_random()
-                time_switch = random.uniform(15, 50)
-                
-            elif i - prev_i == time_switch and object_encountered != True:
-                chosen_direction = rotate_random()
-            
-
-    interpret()
-    light_sensor_value = light_sensor.getValue()
-    # biased random walk movement (each time step, cert prob of turning that direction) 
     roll, pitch, yaw = inertia.getRollPitchYaw()
-    yaw = round(yaw, 2) 
-    
-    
+    yaw = round(yaw, 2)
+    current_tile = las.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
+                    
     if yaw != chosen_direction and orientation_found != True and object_encountered != True: 
         begin_rotating()
         
-    # elif (i - prev_i == time_switch and object_encountered != True):
+    elif (i - prev_i == time_switch and object_encountered != True):
         # orientation_found = False 
-        # chosen_direction = rotate_random()
         
-    elif orientation_found != True and yaw == chosen_direction and object_encountered != True: 
-        orientation_found = True 
+        if current_tile == las.target: 
+            chosen_direction = rotate_random()
+            iterations_passed += 1
+            
+            if las.iterations_threshold <= iterations_passed:
+
+                if not has_collected: 
+                    # will change direction after max number of iterations passed 
+                    # iterations_passed = 0 
+                    las.penalize(current_tile)
+                    chosen_direction = las.re_direct(current_tile) # updates target 
+                    time_switch = 150
+                    
+                elif has_collected:
+                    iterations_passed = 0 
+                    has_collected = False # resets 
+                    
+                    chosen_direction = rotate_random()
+                    # orientation_found = False
+                    time_switch = random.uniform(20, 50)
+            
+        else: 
+            chosen_direction = las.re_gather(current_tile)  
+        
+    elif yaw == chosen_direction and current_tile != las.target: 
+        # orientation_found = True 
         prev_i = i
         move_forward()
-        
+      
     else: 
         pass
+        
+        
+        
+    interpret()
+    light_sensor_value = light_sensor.getValue()
+    # biased random walk movement (each time step, cert prob of turning that direction)  
+    
 
     # check for collisions with other robot 
     list = camera.getRecognitionObjects()
@@ -297,6 +302,10 @@ while robot.step(timestep) != -1 and sim_complete != True:
     if round(dist_val) == 283:
         fitness -= 1 
         print('collision encountered')
+        chosen_direction = rotate_random() 
+        move_backwards()
+        
+    if collision.getValue() == 1: 
         chosen_direction = rotate_random() 
         move_backwards()
         
@@ -328,11 +337,11 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     if current_tile == las.target and las.iterations_threshold <= iterations_passed:
                         has_collected = True
                     
-            elif dist_val == 0:
+            elif dist_val == 0 or collision.getValue() == 1:
                 fitness -= 1 
                 print('collision encountered')
                 chosen_direction = rotate_random() 
-                move_backwards()
+                # move_backwards()
                 
         else: 
             t_block += 1

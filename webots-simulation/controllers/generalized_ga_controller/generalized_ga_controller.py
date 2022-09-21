@@ -409,7 +409,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     holding_something = False 
                     chosen_direction = correlated_random(chosen_direction)
          
-            if dist_val == 0:
+            if dist_val == 0 or collision.getValue() == 1:
                 fitness -= 1 
                 print('collision encountered')
                 chosen_direction = rotate_random()

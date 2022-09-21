@@ -454,7 +454,7 @@ def run_optimization():
         new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
         print('items collected', total_found)
         overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)
-        # restore_positions() 
+        restore_positions() 
         regenerate_environment(0.2)  
         total_found = 0 
         collected_count = [0, 0, 0]
