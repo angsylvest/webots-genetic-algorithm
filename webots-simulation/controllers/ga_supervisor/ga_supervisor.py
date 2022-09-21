@@ -212,16 +212,19 @@ def message_listener(time_step):
             # print('removing object')
             message = message[2:]
             print(message)
-            obj_node = robot.getFromId(int(message))
             # print(obj_node)
             if obj_node is not None:
+                r_node_loc = population[int(message[1])].getField('translation').getSFVec3f()
                 t_field = obj_node.getField('translation')
-                t_field.setSFVec3f([-0.9199,-0.92, 0.059]) 
-                # obj_node.remove()
-                # remove redundant requests 
-                if obj_node not in found_list:
-                    total_found += 1
-                    found_list.append(obj_node)
+                t_node_loc = t_field.getSFVec3f()
+                
+                if (math.dist(r_node_loc, t_node_loc) < 0.15):
+                    t_field.setSFVec3f([-0.9199,-0.92, 0.059]) 
+                    # obj_node.remove()
+                    # remove redundant requests 
+                    if obj_node not in found_list:
+                        total_found += 1
+                        found_list.append(obj_node)
                     
             receiver.nextPacket()
             

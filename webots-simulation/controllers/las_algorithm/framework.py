@@ -6,16 +6,14 @@ import math
 
 # (1, 1) (-1, -1)
 class LAS():
-    def __init__(self, top_right = (1, 1), bot_left = (-1, -1), num_cells = 9, curr_pos = (0,0)): # assuming 3 rows, arbitrarily
+    def __init__(self, top_right = (-1, 1), bot_left = (1, -1), num_cells = 9, curr_pos = (0,0)): # assuming 3 rows, arbitrarily
         self.trx, self.tr_y = top_right
         self.blx, self.bly = bot_left
         self.num_cells = num_cells
         self.prob_vector = []
         self.neighbors = {}
         self.cells = [] # represents ranges for designated # of cells, right top x,y and bot x, y val
-        self.curr_tile = self.locate_cell(curr_pos)
         self.iterations_threshold = 3
-        self.target = self.curr_tile
 
         # create a vector with equal probability of locating target in all cells
         for i in range(num_cells): # current cell
@@ -31,18 +29,20 @@ class LAS():
         
         # column increment 
         self.c_incre = abs(self.tr_y - self.bly) / 3
-
         # need to specy num to increment by, so equally distributed 
         for i in range(3): # arbitrary 3 rows 
             for j in range(num_per_row):
                 top_rightx, top_righty = self.trx + (self.r_incre*j), self.tr_y - (self.c_incre*i)
-                bot_rightx, bot_righty = self.blx + (self.r_incre*j), self.bly - (self.c_incre*i)
+                bot_rightx, bot_righty = top_rightx + self.r_incre, top_righty - self.c_incre
                 self.cells.append((top_rightx, top_righty, bot_rightx, bot_righty))
                 
-        self.prob_vector = list(np.full((1, 3*num_per_row), (1/(3*num_per_row))))
-        self.M_vector = list(np.full((1, len(self.cells)), 0))
+        self.prob_vector = np.full((1, 3*num_per_row), (1/(3*num_per_row))).tolist()
+        self.M_vector = np.full((1, len(self.cells)), 0).tolist()
         self.dir_vector = 0 # direction that robot should persist towards to reach tile 
 
+        self.curr_tile = self.locate_cell(curr_pos)
+        self.target = self.curr_tile
+        
         # precalculates neighbors
         for cell in self.cells:
             neigh = []
@@ -62,16 +62,18 @@ class LAS():
             
         self.res_factor = 70 
         self.delta_pen = 1 / ((len(self.cells)) * self.res_factor)
+        # print(self.cells)
                         
 
     def update(self, original_tile, curr_pos):
-        neighbors = self.neighbors[str(self.cells[original_tile])]
+        # print('original tile', original_tile)
+        neighbors = self.neighbors[str(self.cells[int(original_tile)])]
         x, y = curr_pos
         curr_closest = neighbors[0] 
         otpx, otpy, obrx, obry = self.cells[original_tile]
         
         # check if still in current tile 
-        if x > otpx and x < obrx and y < obry and y > otpy: 
+        if x > otpx and x < obrx and y > obry and y < otpy: 
             return original_tile
         
         for n in neighbors: 
@@ -88,10 +90,10 @@ class LAS():
         x, y = curr_location
         for c in self.cells: 
             otpx, otpy, obrx, obry = c 
-            if round(x,1) > round(otpx,1) and round(x,1) < round(obrx,1) and round(y,1) > round(obry,1) and round(y,1) < round(otpy,1):
-                print('comparison satisfied') 
+            if round(x,1) >= round(otpx,1) and round(x,1) <= round(obrx,1) and round(y,1) >= round(obry,1) and round(y,1) <= round(otpy,1):
+                # print(self.cells.index(c) ) 
                 return self.cells.index(c)  
-        print('locate cell error')   
+        print('locate cell error ', 'cells: ',self.cells,'current_location: ', curr_location)   
         return 'locate cell error'
         
     def reward(self, curr_tile):
@@ -111,7 +113,7 @@ class LAS():
                 sum += new_p 
                 
             else: 
-                elf.prob_vector[p] = 1 - sum 
+                self.prob_vector[p] = 1 - sum 
                 
         return self.prob_vector 
         
@@ -148,9 +150,11 @@ class LAS():
         new_tile = self.cells.index(new_cell)
          
         tpx, tpy, brx, bry = self.cells[curr_tile]
+        mx, my = (tpx + brx)/2, (tpy + bry)/2 # calculating midpoint 
         otpx, otpy, obrx, obry = new_cell
+        omx, omy = (otpx + obrx)/2, (otpy + obry)/2 # calculating midpoint 
          
-        direction = math.atan((otpy - tpy), (otpx - tpx))
+        direction = math.atan((omy - my), (omx - mx))
         self.target = new_tile
         self.dir_vector = direction 
          

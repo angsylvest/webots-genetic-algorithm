@@ -2,6 +2,7 @@ from controller import Supervisor, Node, Keyboard, Emitter, Receiver, Field
 import statistics 
 import pandas as pd
 import random
+import math 
 
 """
 Main supervisor base 
@@ -31,7 +32,7 @@ receiver = robot.getDevice("receiver")
 receiver.enable(TIME_STEP)
 receiver.setChannel(2) 
 
-num_generations = 2
+num_generations = 10
 population = [k1, k2, k3]
 
 global initial_genotypes 
@@ -57,11 +58,11 @@ updated = False
 
 fit_update = False 
 
-simulation_time = 30
+simulation_time = 15
 
 count = 0
 
-trials = 1
+trials = 15
 
 found_list = []
  
@@ -156,18 +157,23 @@ def message_listener(time_step):
         if message[0] == "$": # handles deletion of objects when grabbed
             # collected_count[int(message[1])] = collected_count[int(message[1])] + 1
             print('removing object')
-            message = message[1:]
+            # message = message[1:]
             print(message)
-            obj_node = robot.getFromId(int(message))
+            obj_node = robot.getFromId(int(message[2:]))
             print(obj_node)
             if obj_node is not None:
+                r_node_loc = population[int(message[1])].getField('translation').getSFVec3f()
                 t_field = obj_node.getField('translation')
-                t_field.setSFVec3f([-0.9199,-0.92, 0.059]) 
-                # obj_node.remove()
-                # remove redundant requests 
-                if obj_node not in found_list:
-                    total_found += 1
-                    found_list.append(obj_node)
+                t_node_loc = t_field.getSFVec3f()
+                
+                print(math.dist(r_node_loc, t_node_loc))
+                if (math.dist(r_node_loc, t_node_loc) < 0.15): # only count if actually in range 
+                    t_field.setSFVec3f([-0.9199,-0.92, 0.059]) 
+                    # obj_node.remove()
+                    # remove redundant requests 
+                    if obj_node not in found_list:
+                        total_found += 1
+                        found_list.append(obj_node)
                     
                     # total_found += 1
             receiver.nextPacket()

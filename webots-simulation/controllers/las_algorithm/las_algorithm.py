@@ -59,8 +59,14 @@ collision = robot.getDevice('touch sensor')
 collision.enable(timestep)
 
 # led 
-led = robot.getDevice('led')
+led = robot.getDevice('led0')
 led.set(1) # led to turned on 
+led_1 = robot.getDevice('led1')
+led_1.set(1) # led to turned on 
+led_2 = robot.getDevice('led')
+led_2.set(1) # led to turned on 
+# led_3 = robot.getDevice('led(3)')
+# led_3.set(1) # led to turned on 
 
 # light sensor 
 light_sensor = robot.getDevice('light sensor')
@@ -177,6 +183,7 @@ def interpret():
     global t_block
     global given_id
     global las
+    global strategy_df
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -201,7 +208,7 @@ def interpret():
             
         elif message == 'sim-complete':
             sim_complete = True 
-            strategy_df.to_csv('strategy_df' + str(given_id) + '.csv')
+            strategy_df.to_csv('las_df' + str(given_id) + '.csv')
             
         else: 
             receiver.nextPacket()
@@ -219,15 +226,15 @@ chosen_direction = rotate_random()
 start = False
 iterations_passed = 0
 has_collected = False
+sim_complete = False
 
-while robot.step(timestep) != -1:
+while robot.step(timestep) != -1 and sim_complete != True:
 
     if not start:
         las = LAS(curr_pos = (float(gps.getValues()[0]),float(gps.getValues()[1])))
         current_tile = las.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
-        # print('the current tile robot is on it', current_tile) 
-         
-    start = True
+        print('the current tile robot is on: ', current_tile) 
+        start = True
     
     # handles tile localization and appropriate responses 
     if current_tile == las.target: 
@@ -298,13 +305,14 @@ while robot.step(timestep) != -1:
         # behavior in response to stimuli in front of robot 
         if (object_encountered == False):
             # if retrievable object within range, gets picked up 
-            if dist_val < 40: 
+            if len(list) == 1 and dist_val < 100:
                 firstObject = camera.getRecognitionObjects()[0]
                 # print('found object', firstObject)
                 id = str(firstObject.get_id())
+                
                 if id not in obj_found_so_far:
                     obj_found_so_far.append(id)
-                    id = "$" + id # indication that it is a object to be deleted 
+                    id = "$" + given_id + id # indication that it is a object to be deleted 
                     emitter.send(str(id).encode('utf-8'))
                     fitness += 1 
                     holding_something = False 
