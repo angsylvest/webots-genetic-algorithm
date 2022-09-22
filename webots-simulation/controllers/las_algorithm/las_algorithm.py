@@ -234,21 +234,23 @@ while robot.step(timestep) != -1 and sim_complete != True:
         las = LAS(curr_pos = (float(gps.getValues()[0]),float(gps.getValues()[1])))
         current_tile = las.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
         chosen_direction = las.re_direct(current_tile)
-        print('the current tile robot is on: ', current_tile, 'target is ', las.target) 
+        print('the current tile robot is on: ', current_tile, 'target is ', las.target, 'chosen direction: ', chosen_direction) 
         start = True
     
     roll, pitch, yaw = inertia.getRollPitchYaw()
     yaw = round(yaw, 2)
+    # print(yaw, 'vs: ', chosen_direction)
     current_tile = las.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
                     
-    if yaw != chosen_direction and orientation_found != True and object_encountered != True: 
+    if yaw != chosen_direction and object_encountered != True and orientation_found != True: 
         begin_rotating()
         
     elif (i - prev_i == time_switch and object_encountered != True):
         # orientation_found = False 
         
         if current_tile == las.target: 
-            chosen_direction = rotate_random()
+            # chosen_direction = rotate_random()
+            orientation_found = False 
             iterations_passed += 1
             
             if las.iterations_threshold <= iterations_passed:
@@ -263,16 +265,21 @@ while robot.step(timestep) != -1 and sim_complete != True:
                 elif has_collected:
                     iterations_passed = 0 
                     has_collected = False # resets 
+                    # move_forward()
                     
                     chosen_direction = rotate_random()
                     # orientation_found = False
                     time_switch = random.uniform(20, 50)
+            # else: 
+                # prev_i = i
+                # move_forward()
+              
             
         else: 
             chosen_direction = las.re_gather(current_tile)  
         
-    elif yaw == chosen_direction and current_tile != las.target: 
-        # orientation_found = True 
+    elif yaw == chosen_direction and orientation_found != True: 
+        orientation_found = True 
         prev_i = i
         move_forward()
       

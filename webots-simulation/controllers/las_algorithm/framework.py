@@ -37,8 +37,10 @@ class LAS():
                 bot_rightx, bot_righty = top_rightx + self.r_incre, top_righty - self.c_incre
                 self.cells.append((top_rightx, top_righty, bot_rightx, bot_righty))
                 
-        self.prob_vector = np.full((1, 3*num_per_row), (1/(3*num_per_row))).tolist()
-        self.M_vector = np.full((1, len(self.cells)), 0).tolist()
+        self.prob_vector = np.full(len(self.cells), (1/(len(self.cells)))).tolist()
+        # print('len of prob', len(self.prob_vector))
+        self.M_vector = np.full(len(self.cells), 0).tolist()
+        # print(self.M_vector)
         self.dir_vector = 0 # direction that robot should persist towards to reach tile 
 
         self.curr_tile = self.locate_cell(curr_pos)
@@ -147,7 +149,9 @@ class LAS():
         return self.prob_vector 
         
     def re_gather(self, curr_tile): 
-        new_cell = random.choices(self.cells, self.prob_vector)
+        new_cell = random.choices(self.cells, self.prob_vector)[0]
+        # print(self.cells) 
+        # print(new_cell)
         new_tile = self.cells.index(new_cell)
          
         tpx, tpy, brx, bry = self.cells[curr_tile]
@@ -155,7 +159,7 @@ class LAS():
         otpx, otpy, obrx, obry = new_cell
         omx, omy = (otpx + obrx)/2, (otpy + obry)/2 # calculating midpoint 
          
-        direction = math.atan((omy - my), (omx - mx))
+        direction = math.atan((omy - my)/ (omx - mx))
         self.target = new_tile
         self.dir_vector = direction 
          
@@ -170,10 +174,10 @@ class LAS():
          
         tpx, tpy, brx, bry = self.cells[curr_tile]
         mx, my = (tpx + brx)/2, (tpy + bry)/2 # calculating midpoint 
-        print(mx, my)
+        # print(mx, my)
         otpx, otpy, obrx, obry = self.cells[new_cell]
         omx, omy = (otpx + obrx)/2, (otpy + obry)/2 # calculating midpoint 
-        print(omx, omy)
+        # print(omx, omy)
         direction = math.atan((omy - my)/ (omx - mx))
         self.target = new_tile
         self.dir_vector = direction 
