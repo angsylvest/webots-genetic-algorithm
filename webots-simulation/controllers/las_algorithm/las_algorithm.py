@@ -12,9 +12,9 @@ from controller import Robot, Motor, DistanceSensor, Camera, CameraRecognitionOb
 from math import sin, cos, pi  
 import random 
 from framework import * 
-import pandas as pd 
+# import pandas as pd 
 
-strategy_df = pd.DataFrame(columns = ['agent id' ,'time step','time since last block'])
+# strategy_df = pd.DataFrame(columns = ['agent id' ,'time step','time since last block'])
 
 # create the Robot instance.
 robot = Robot()
@@ -96,6 +96,12 @@ obj_found_so_far = []
 t_block = 0
 
 given_id = robot.getName()[-1] 
+strategy_f = open(str(given_id) + "las-info.txt", 'w')
+strategy_f.write('agent id,'+ 'time step,' + 'straight,' + 'alternating-left,' + 'alternating-right,' + 'true random,' + 'time since last block')
+strategy_f.close()
+
+strategy_f = open(str(given_id) + "las-info.txt", 'w')
+
 
 def rotate_random():
     # will choose direction following biased random walk 
@@ -183,7 +189,7 @@ def interpret():
     global t_block
     global given_id
     global las
-    global strategy_df
+    global strategy_f
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -203,12 +209,13 @@ def interpret():
             receiver.nextPacket()
             fitness = 0
             
-            new_row = {'agent id': given_id, 'time step': robot.step(timestep),'time since last block': t_block}
-            strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
+            strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block)))
+            # new_row = {'agent id': given_id, 'time step': robot.step(timestep),'time since last block': t_block}
+            # strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
             
         elif message == 'sim-complete':
             sim_complete = True 
-            strategy_df.to_csv('las_df' + str(given_id) + '.csv')
+            strategy_df.close()
             
         else: 
             receiver.nextPacket()
@@ -335,8 +342,9 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     chosen_direction = correlated_random(chosen_direction)
                     t_block = 0
                     
-                    new_row = {'agent id': given_id, 'time step': robot.step(timestep),'time since last block': t_block}
-                    strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
+                    strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block)))
+                    # new_row = {'agent id': given_id, 'time step': robot.step(timestep),'time since last block': t_block}
+                    # strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
                     
                     # reward tile 
                     las.reward(current_tile)

@@ -1,7 +1,7 @@
 # parameters of LAS:
 # incorporates number of robots m
 
-import numpy as np
+# import numpy as np
 import math 
 import random
 
@@ -37,9 +37,11 @@ class LAS():
                 bot_rightx, bot_righty = top_rightx + self.r_incre, top_righty - self.c_incre
                 self.cells.append((top_rightx, top_righty, bot_rightx, bot_righty))
                 
-        self.prob_vector = np.full(len(self.cells), (1/(len(self.cells)))).tolist()
+        # self.prob_vector = np.full(len(self.cells), (1/(len(self.cells)))).tolist()
+        self.prob_vector = [(1/(len(self.cells))) for i in range(len(self.cells))]
         # print('len of prob', len(self.prob_vector))
-        self.M_vector = np.full(len(self.cells), 0).tolist()
+        # self.M_vector = np.full(len(self.cells), 0).tolist()
+        self.M_vector = []
         # print(self.M_vector)
         self.dir_vector = 0 # direction that robot should persist towards to reach tile 
 

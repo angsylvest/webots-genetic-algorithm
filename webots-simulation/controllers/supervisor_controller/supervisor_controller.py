@@ -1,6 +1,6 @@
 from controller import Supervisor, Node, Keyboard, Emitter, Receiver, Field
-import statistics 
-import pandas as pd
+# import statistics 
+# import pandas as pd
 import random
 import math 
 
@@ -11,8 +11,19 @@ Angel Sylvester 2022
 """
 
 # sets up csv for reference 
-k_gen_df = pd.DataFrame(columns = ['time step', 'fitness', 'xpos', 'ypos', 'num col'])
-overall_df = pd.DataFrame(columns = ['trial', 'time', 'objects retrieved'])
+k_gen_f = open('gen-crw-info.txt', 'w')
+k_gen_f.write('time step' + ',fitness' + ',xpos' + ',ypos' + ',num col')
+k_gen_f.close()
+
+k_gen_f = open('gen-crw-info.txt', 'a')
+# k_gen_df = pd.DataFrame(columns = ['time step', 'fitness', 'xpos', 'ypos', 'num col'])
+
+overall_f = open('overall-crw-info.txt', 'w') 
+overall_f.write('trial' + ',time' + ',objects retrieved')
+overall_f.close()
+
+overall_f = open('overall-crw-info.txt', 'a') 
+# overall_df = pd.DataFrame(columns = ['trial', 'time', 'objects retrieved'])
 
 TIME_STEP = 32
 
@@ -128,23 +139,26 @@ def restore_positions():
     
 def save_progress():
     # way to save total number of blocks found 
-    global k_gen_df
-    global overall_df
+    global k_gen_f
+    global overall_f
     
-    new_row = {'time': simulation_time*num_generations, 'objects retrieved': total_found}
-    overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index=True)
-    k_gen_df.to_csv('k_gen_results.csv')
-    overall_df.to_csv('overall_results.csv')
+    # new_row = {'time': simulation_time*num_generations, 'objects retrieved': total_found}
+    # overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index=True)
+    overall_f.write('time:' + str(simulation_time*num_generations) + ',objects retrieved:' + str(total_found))
+    overall_f.close()
+    k_gen_f.close()
+    # k_gen_df.to_csv('k_gen_results.csv')
+    # overall_df.to_csv('overall_results.csv')
     
     print('progress saved to csv')
     emitter.send('sim-complete'.encode('utf-8'))
 
 def message_listener(time_step):
-    global k1_df 
-    global k2_df 
-    global k3_df
+    # global k1_df 
+    # global k2_df 
+    # global k3_df
     global count 
-    global k_gen_df
+    global k_gen_f
     global total_found
     global found_list
     global block_list
@@ -178,14 +192,15 @@ def message_listener(time_step):
                     # total_found += 1
             receiver.nextPacket()
             
-        elif 'k-fitness' in message:
+        elif 'fitness' in message:
             print('message', message)
-            k3_fitness = int(message[9:])
+            k3_fitness = message.split("-")[-1]
             fitness_scores[count] = k3_fitness
             count += 1
             
-            new_row = {'time step': time_step, 'fitness': k3_fitness}
-            k_gen_df = pd.concat([k_gen_df, pd.DataFrame([new_row])], ignore_index=True)
+            # new_row = {'time step': time_step, 'fitness': k3_fitness}
+            k_gen_f.write('id:' + str(message[1]) + ',time step:' + str(time_step) + ',fitness:' + str(k3_fitness))
+            # k_gen_df = pd.concat([k_gen_df, pd.DataFrame([new_row])], ignore_index=True)
             print('k fitness', k3_fitness)
             
             receiver.nextPacket()
@@ -271,7 +286,7 @@ def run_optimization():
     global updated
     global simulation_time 
     global total_found 
-    global overall_df
+    global overall_f
     global found_list
     
     # initialize genotypes 
@@ -305,10 +320,11 @@ def run_optimization():
             
             print('found genotypes')
             print('new generation starting -')
-            
-        new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
+        
+        overall_f.write('trial:' + str(i) + ',time:' + str(simulation_time*num_generations) + ',objects retrieved:' + str(total_found))    
+        # new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
         print('items collected', total_found)
-        overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)
+        # overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)
         restore_positions()  
         regenerate_environment(0.2) 
         total_found = 0 

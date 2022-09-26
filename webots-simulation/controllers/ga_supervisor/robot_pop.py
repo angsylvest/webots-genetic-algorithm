@@ -1,8 +1,8 @@
 # Generates ruleset for each robot 
 
 import random 
-import pandas as pd 
-import numpy as np 
+# import pandas as pd 
+# import numpy as np 
 
 
 def create_random_population(size, gene_list): 
@@ -28,8 +28,10 @@ def create_individal_genotype(gene_list):
      
 # will generate binary encoding for corresponding feature 
 def generate_random_act(length):
-    np_binary = np.random.randint(2, size = length)
-    list_binary = ''.join([",".join(item) for item in np_binary.astype(str)])
+
+    list_binary = [random.randint(0,1) for i in range(length)]
+    # np_binary = np.random.randint(2, size = length)
+    # list_binary = ''.join([",".join(item) for item in str(np_binary)])
     return list_binary
     
     

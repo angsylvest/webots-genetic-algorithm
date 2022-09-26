@@ -1,9 +1,9 @@
 from controller import Supervisor, Node, Keyboard, Emitter, Receiver, Field
-import statistics 
-import math 
-import pandas as pd
+# import statistics 
+# import math 
+# import pandas as pd
 from robot_pop import * 
-from graph_generator import * 
+# from graph_generator import * 
 
 """
 Main supervisor base 
@@ -11,19 +11,43 @@ Optimization algorithm - Collaboration-oriented
 Angel Sylvester 2022
 """
 
+columns = 'agent id' + ',time step' + ',fitness' + ',xpos'+ ',ypos' + ',num col' + ',genotype'
+
+# create data frame so that it is singularity friendly 
+k1_f = open('robot-1-info.txt', 'w')
+k2_f = open('robot-2-info.txt', 'w')
+k3_f = open('robot-3-info.txt', 'w')
+
+k1_f.write(str(columns))
+k2_f.write(str(columns))
+k3_f.write(str(columns))
+
+k1_f.close()
+k2_f.close()
+k3_f.close()
+
+k1_f = open('robot-1-info.txt', 'a')
+k2_f = open('robot-2-info.txt', 'a')
+k3_f = open('robot-3-info.txt', 'a')
+
 # sets up csv for reference 
-k1_df = pd.DataFrame(columns = ['agent id' ,'time step', 'fitness', 'xpos', 'ypos', 'num col', 'genotype'])
-k2_df = pd.DataFrame(columns = ['agent id', 'time step', 'fitness', 'xpos', 'ypos', 'num col','genotype'])
-k3_df = pd.DataFrame(columns = ['agent id', 'time step', 'fitness', 'xpos', 'ypos', 'num col','genotype'])
+# k1_df = pd.DataFrame(columns = ['agent id' ,'time step', 'fitness', 'xpos', 'ypos', 'num col', 'genotype'])
+# k2_df = pd.DataFrame(columns = ['agent id', 'time step', 'fitness', 'xpos', 'ypos', 'num col','genotype'])
+# k3_df = pd.DataFrame(columns = ['agent id', 'time step', 'fitness', 'xpos', 'ypos', 'num col','genotype'])
 ## add more robot dfs here (be sure to keep num consistent) 
 
 # global df_list
-df_list = [k1_df, k2_df, k3_df]
+# df_list = [k1_df, k2_df, k3_df]
+# df_list = [k1_f, k2_f, k3_ df]
 
 # global collected_count 
 collected_count = [0, 0, 0]
 
-overall_df = pd.DataFrame(columns = ['trial','time', 'objects retrieved'])
+overall_f = open('overall-df.txt', 'w')
+overall_columns = ['trial','time', 'objects retrieved']
+overall_f.write(str(overall_columns))
+# overall_df = pd.DataFrame(columns = ['trial','time', 'objects retrieved'])
+overall_f.close()
 
 TIME_STEP = 32
 
@@ -181,21 +205,30 @@ def save_progress():
     global k1_df
     global k2_df 
     global k3_df
- 
-    generate_fitness_csvs(df_list)
-    generate_fitness("summary-fitness.csv")
     
-    overall_df.to_csv('overall_results.csv')
+    global overall_f
+    global df_list 
+    global k1_f
+    global k2_f 
+    global k3_f  
+    
+    k1_f.close()
+    k2_f.close() 
+    k3_f.close()     
+ 
+    # generate_fitness_csvs(df_list)
+    # generate_fitness("summary-fitness.csv")
+    # overall_df.to_csv('overall_results.csv')
     
     print('progress saved to csv')
     emitter.send('sim-complete'.encode('utf-8'))
 
 def message_listener(time_step):
-    global k1_df 
-    global k2_df 
-    global k3_df
+    global k1_f 
+    global k2_f 
+    global k3_f
     global total_found 
-    global df_list 
+    # global df_list 
     global collected_count 
     global found_list
     global pop_genotypes
@@ -232,9 +265,11 @@ def message_listener(time_step):
             k1_fitness = int(message[10:])
             fitness_scores[0] = k1_fitness
             
-            new_row = {'agent id': 1, 'time step': time_step, 'fitness': k1_fitness, 'xpos': k1.getPosition()[0], 'ypos': k1.getPosition()[1], 'num col': collected_count[0], 'genotype':pop_genotypes[0]}
-            k1_df = pd.concat([k1_df, pd.DataFrame([new_row])], ignore_index=True)
-            df_list[0] = k1_df
+            k1_f.write('agent id:' + str(1) + ',time step: ' + str(time_step) + ',fitness:' + str(k1_fitness) + ',xpos:' + str(k1.getPosition()[0]) + ',ypos:' + str(k1.getPosition()[1]) + ',num col:' + str(collected_count[0]) + ',genotype:' + str(pop_genotypes[0]))
+            
+            # new_row = {'agent id': 1, 'time step': time_step, 'fitness': k1_fitness, 'xpos': k1.getPosition()[0], 'ypos': k1.getPosition()[1], 'num col': collected_count[0], 'genotype':pop_genotypes[0]}
+            # k1_df = pd.concat([k1_df, pd.DataFrame([new_row])], ignore_index=True)
+            # df_list[0] = k1_f
             
             print('k1 fitness', k1_fitness)
             
@@ -244,9 +279,11 @@ def message_listener(time_step):
             k2_fitness = int(message[10:])
             fitness_scores[1] = k2_fitness
             
-            new_row = {'agent id': 2,'time step': time_step, 'fitness': k2_fitness, 'xpos': k2.getPosition()[0], 'ypos': k2.getPosition()[1], 'num col': collected_count[1], 'genotype':pop_genotypes[1]}
-            k2_df = pd.concat([k2_df, pd.DataFrame([new_row])], ignore_index = True)
-            df_list[1] = k2_df
+            k1_f.write('agent id:' + str(2) + ',time step: ' + str(time_step) + ',fitness:' + str(k2_fitness) + ',xpos:' + str(k2.getPosition()[0]) + ',ypos:' + str(k2.getPosition()[1]) + ',num col:' + str(collected_count[1]) + ',genotype:' + str(pop_genotypes[1])) 
+            
+            # new_row = {'agent id': 2,'time step': time_step, 'fitness': k2_fitness, 'xpos': k2.getPosition()[0], 'ypos': k2.getPosition()[1], 'num col': collected_count[1], 'genotype':pop_genotypes[1]}
+            # k2_df = pd.concat([k2_df, pd.DataFrame([new_row])], ignore_index = True)
+            # df_list[1] = k2_f
             
             print('k2 fitness', k2_fitness)
             
@@ -256,9 +293,11 @@ def message_listener(time_step):
             k3_fitness = int(message[10:])
             fitness_scores[2] = k3_fitness
             
-            new_row = {'agent id': 3,'time step': time_step, 'fitness': k3_fitness, 'xpos': k3.getPosition()[0], 'ypos': k3.getPosition()[1], 'num col': collected_count[2], 'genotype':pop_genotypes[2]}
-            k3_df = pd.concat([k3_df, pd.DataFrame([new_row])], ignore_index = True)
-            df_list[2] = k3_df
+            k1_f.write('agent id:' + str(2) + ',time step: ' + str(time_step) + ',fitness:' + str(k3_fitness) + ',xpos:' + str(k3.getPosition()[0]) + ',ypos:' + str(k3.getPosition()[1]) + ',num col:' + str(collected_count[2]) + ',genotype:' + str(pop_genotypes[2]))
+            
+            # new_row = {'agent id': 3,'time step': time_step, 'fitness': k3_fitness, 'xpos': k3.getPosition()[0], 'ypos': k3.getPosition()[1], 'num col': collected_count[2], 'genotype':pop_genotypes[2]}
+            # k3_df = pd.concat([k3_df, pd.DataFrame([new_row])], ignore_index = True)
+            # df_list[2] = k3_f
             
             print('k3 fitness', k3_fitness)
             
@@ -412,7 +451,7 @@ def run_optimization():
     global gene_list 
     global updated
     global simulation_time 
-    global overall_df
+    global overall_f
     global total_found 
     global collected_count
     global found_list
@@ -450,10 +489,11 @@ def run_optimization():
             print('found genotypes')
             print('new generation starting -')
             # print('trial --' ,i)
-            
-        new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
+        
+        overall_f.write('trial:' + str(i) + ',time:' + str(simulation_time*num_generations) + ',objects retrieved:' + str(total_found))    
+        # new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
         print('items collected', total_found)
-        overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)
+        # overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)
         restore_positions() 
         regenerate_environment(0.2)  
         total_found = 0 
@@ -469,7 +509,7 @@ def run_optimization():
 def main(): 
     initialize_genotypes()
     run_optimization()
-    save_progress()
+    save_progsaveress()
          
 main()
                     

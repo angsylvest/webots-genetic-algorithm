@@ -63,18 +63,20 @@ light_sensor = robot.getDevice('light sensor')
 light_sensor.enable(timestep)
 
 # initial fitness 
-global fitness
+# global fitnes s
 fitness = 0 
-global forward_speed 
+# global forward_speed 
 forward_speed = 2
-global detect_thres 
+# global detect_thres 
 detect_thres = 1000
-global time_switch
+# global time_switch
 time_switch = 150
 # motor functions 
 
 global obj_found_so_far
 obj_found_so_far = []
+
+given_id = robot.getName()[-1] 
 
 
 def rotate_random():
@@ -151,6 +153,7 @@ def parse_genotype(gen):
     global forward_speed 
     global detect_thres 
     global time_switch
+    global given_id
     
     forward_speed = gen[0].count('1')
     if forward_speed < 3: 
@@ -160,6 +163,8 @@ def parse_genotype(gen):
     
 def interpret(): 
     global fitness
+    global given_id 
+    
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
     
@@ -170,7 +175,7 @@ def interpret():
             
         elif message == "return_fitness":
             print('request received') 
-            response = "k-fitness" + str(fitness)
+            response = "k" + str(given_id) + "fitness-" + str(fitness)
             print('response is', response)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()

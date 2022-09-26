@@ -11,10 +11,8 @@ import random
 from controller import Robot, Motor, DistanceSensor, Camera, CameraRecognitionObject, InertialUnit 
 from math import sin, cos, pi  
 import random 
-import pandas as pd 
-import numpy as np 
-
-strategy_df = pd.DataFrame(columns = ['agent id' ,'time step', 'straight','alternating-left','alternating-right', 'true random', 'time since last block'])
+# import pandas as pd 
+# import numpy as np 
 
 # create the Robot instance.
 robot = Robot()
@@ -87,6 +85,12 @@ sim_complete = False
 obj_found_so_far = []
 
 given_id = robot.getName()[-1] 
+# strategy_df = pd.DataFrame(columns = ['agent id' ,'time step', 'straight','alternating-left','alternating-right', 'true random', 'time since last block'])
+strategy_f = open(str(given_id) + "info.txt", 'w')
+strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block')
+strategy_f.close()
+
+strategy_f = open(str(given_id) + "info.txt", 'w')
 
 # global time_elapsed_since_block
 time_elapsed_since_block = 0
@@ -138,15 +142,16 @@ def dynamic_correlated_random(curr_dir, bias):
 def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False):
     global curr_best_weights
     global given_id
-    global strategy_df 
+    global strategy_f 
     
     # want to update weights based off effectiveness of current strategy 
     if update: 
         new_weights = create_new_weights(t_block, t_robot, original_weights)
         strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], new_weights)
+        strategy_f.write('agent id:' + str(given_id) + ',time step: '+ str(robot.step(timestep)) + ',straight:' + str(original_weights[0]) + ',alternating-left:' + str(original_weights[1]) + ',alternating-right:' + str(original_weights[2]) + ',true random:' + str(original_weights[3]) + ',time since last block:'+ str(t_block))
         
-        new_row = {'agent id': given_id, 'time step': robot.step(timestep), 'straight': original_weights[0],'alternating-left': original_weights[1],'alternating-right': original_weights[2], 'true random': original_weights[3], 'time since last block': t_block}
-        strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
+        # new_row = {'agent id': given_id, 'time step': robot.step(timestep), 'straight': original_weights[0],'alternating-left': original_weights[1],'alternating-right': original_weights[2], 'true random': original_weights[3], 'time since last block': t_block}
+        # strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
         
     if not update: 
         strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], original_weights)
@@ -279,6 +284,7 @@ def interpret():
     global fitness
     global sim_complete
     global given_id
+    global strategy_f
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -296,7 +302,8 @@ def interpret():
             
         elif message == 'sim-complete':
             sim_complete = True 
-            strategy_df.to_csv('strategy_df' + str(given_id) + '.csv')
+            strategy_f.close()
+            # strategy_df.to_csv('strategy_df' + str(given_id) + '.csv')
         
         else: 
             receiver.nextPacket()
@@ -395,10 +402,12 @@ while robot.step(timestep) != -1 and sim_complete != True:
                 id = str(firstObject.get_id())
                 
                 if id not in obj_found_so_far:
-                    new_row = {'agent id': given_id, 'time step': robot.step(timestep), 'straight': weights[0],'alternating-left': weights[1],'alternating-right': weights[2], 'true random': weights[3], 'time since last block': time_elapsed_since_block}
-                    strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
+                    # new_row = {'agent id': given_id, 'time step': robot.step(timestep), 'straight': weights[0],'alternating-left': weights[1],'alternating-right': weights[2], 'true random': weights[3], 'time since last block': time_elapsed_since_block}
+                    # strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
+                    # strategy_f.write(str('agent id': given_id, 'time step': robot.step(timestep), 'straight': weights[0],'alternating-left': weights[1],'alternating-right': weights[2], 'true random': weights[3], 'time since last block': time_elapsed_since_block))
         
-        
+                    strategy_f.write('agent id:' + str(given_id) + ',time step: '+ robot.step(timestep) + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block))
+                    
                     obj_found_so_far.append(id)
                     id = "$" + given_id + id # indication that it is a object to be deleted 
                     time_elapsed_since_block = 0
