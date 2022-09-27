@@ -202,14 +202,19 @@ def create_new_weights(t_block, t_robot, original_weights):
             new_w.append(f)
         
         # need to normalize to 1 
-        x = np.array(new_w)
-        min_value = x.min()
-        max_value = x.max()
+        
+        
+        # x = np.array(new_w)
+        # min_value = x.min()
+        # max_value = x.max()
+        
+        s = sum(new_w)
+        normalized = [float(i)/s for i in new_w]
 
-        normalized = (x - min_value) / (max_value - min_value)
+        # normalized = (x - min_value) / (max_value - min_value)
         # print('normalized --', normalized)
         
-        new_w = normalized.tolist()
+        new_w = normalized
         
         weights = new_w
         return new_w
@@ -223,13 +228,19 @@ def create_new_weights(t_block, t_robot, original_weights):
             new_w.append(f)
             
         # need to normalize to 1 
-        x = np.array(new_w)
-        min_value = x.min()
-        max_value = x.max()
-
-        normalized = (x - min_value) / (max_value - min_value)
+        # x = np.array(new_w)
+        # min_value = x.min()
+        # max_value = x.max()
         
-        new_w = normalized.tolist() 
+        s = sum(new_w)
+        normalized = [float(i)/s for i in new_w]
+
+        
+        new_w = normalized
+
+        # normalized = (x - min_value) / (max_value - min_value)
+        
+        # new_w = normalized.tolist
         
         weights = new_w
         return new_w 
