@@ -29,7 +29,7 @@ def create_individal_genotype(gene_list):
 # will generate binary encoding for corresponding feature 
 def generate_random_act(length):
 
-    list_binary = ''.join([random.randint(0,1) for i in range(length)])
+    list_binary = ''.join([str(random.randint(0,1)) for i in range(length)])
     # np_binary = np.random.randint(2, size = length)
     # list_binary = ''.join([",".join(item) for item in str(np_binary)])
     return list_binary
