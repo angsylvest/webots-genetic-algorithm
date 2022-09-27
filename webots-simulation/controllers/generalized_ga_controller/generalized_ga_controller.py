@@ -417,7 +417,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     # strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
                     # strategy_f.write(str('agent id': given_id, 'time step': robot.step(timestep), 'straight': weights[0],'alternating-left': weights[1],'alternating-right': weights[2], 'true random': weights[3], 'time since last block': time_elapsed_since_block))
         
-                    strategy_f.write('agent id:' + str(given_id) + ',time step: '+ robot.step(timestep) + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block))
+                    strategy_f.write('agent id:' + str(given_id) + ',time step: '+ str(robot.step(timestep)) + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block))
                     
                     obj_found_so_far.append(id)
                     id = "$" + given_id + id # indication that it is a object to be deleted 
