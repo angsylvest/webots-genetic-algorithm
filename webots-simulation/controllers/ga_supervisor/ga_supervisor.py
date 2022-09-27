@@ -246,7 +246,7 @@ def message_listener(time_step):
             message = message[2:]
             print(message)
             # print(obj_node)
-            obj_node = robot.getFromId(message)
+            obj_node = robot.getFromId(int(message))
             if obj_node is not None:
                 r_node_loc = population[int(message[1])].getField('translation').getSFVec3f()
                 t_field = obj_node.getField('translation')
