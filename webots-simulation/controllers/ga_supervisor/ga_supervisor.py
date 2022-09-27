@@ -243,10 +243,10 @@ def message_listener(time_step):
         if message[0] == "$": # handles deletion of objects when grabbed
             collected_count[int(message[1])] = collected_count[int(message[1])] + 1
             # print('removing object')
-            message = message[2:]
-            print(message)
+            # message = message[2:]
+            # print(message)
             # print(obj_node)
-            obj_node = robot.getFromId(int(message))
+            obj_node = robot.getFromId(int(message[2:))
             if obj_node is not None:
                 r_node_loc = population[int(message[1])].getField('translation').getSFVec3f()
                 t_field = obj_node.getField('translation')
