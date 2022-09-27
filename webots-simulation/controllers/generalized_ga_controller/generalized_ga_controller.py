@@ -167,7 +167,7 @@ def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False
     
     
 def create_new_weights(t_block, t_robot, original_weights): 
-    print('original weights --', original_weights)
+    # print('original weights --', original_weights)
     global curr_best_weights
     global weights 
     # want to incorporate some level of noise to avoid local max, instead of global
@@ -347,7 +347,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
         curr_index = 0 
         
         if robot.step(timestep) % 500 == 0:
-            print('choosing strategy with update') 
+            # print('choosing strategy with update') 
             strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = True) # chooses a new strategy 
             print(strategy) 
             
