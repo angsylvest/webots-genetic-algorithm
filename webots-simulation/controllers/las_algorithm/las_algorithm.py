@@ -96,11 +96,11 @@ obj_found_so_far = []
 t_block = 0
 
 given_id = robot.getName()[-1] 
-strategy_f = open(str(given_id) + "las-info.txt", 'w')
+strategy_f = open(str(given_id) + "las-info.csv", 'w')
 strategy_f.write('agent id,'+ 'time step,' + 'straight,' + 'alternating-left,' + 'alternating-right,' + 'true random,' + 'time since last block')
 strategy_f.close()
 
-strategy_f = open(str(given_id) + "las-info.txt", 'w')
+strategy_f = open(str(given_id) + "las-info.csv", 'w')
 
 
 def rotate_random():

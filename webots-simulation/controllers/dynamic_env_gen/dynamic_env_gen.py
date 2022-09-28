@@ -18,6 +18,9 @@ timestep = int(robot.getBasicTimeStep())
 #  ds = robot.getDevice('dsname')
 #  ds.enable(timestep)
 
+# want to update density of robots each time (central place search) (ie. 5, 10, 15?) 
+robot_population_sizes = [5, 10, 15]
+
 def generate_robot_central(num_robots):
     for i in range(num_robots):
         rootNode = robot.getRoot()
@@ -26,7 +29,7 @@ def generate_robot_central(num_robots):
         rec_node = rootChildrenField.getMFNode(-1)
     
         t_field = rec_node.getField('translation')
-        t_field.setSFVec3f([round(random.uniform(0.5, -0.5),2), round(random.uniform(0.5, -0.5) ,2), 0.2])
+        t_field.setSFVec3f([round(random.uniform(0.25, -0.25),2), round(random.uniform(0.25, -0.25) ,2), 0.2])
         
     pass 
     
@@ -66,10 +69,20 @@ def regenerate_blocks_random():
         
     
 def generate_blocks_single_source():
-    pass
+
+    for i in range(20): 
+        rootNode = robot.getRoot()
+        rootChildrenField = rootNode.getField('children')
+        rootChildrenField.importMFNode(-1, '../supervisor_controller/cylinder-obj.wbo') 
+        rec_node = rootChildrenField.getMFNode(-1)
     
-def generate_blocks_dual_source():
-    pass 
+        t_field = rec_node.getField('translation')
+        t_field.setSFVec3f([round(random.uniform(0.9, -0.9),2), round(random.uniform(-1, 0.23),2), 0.02]) 
+        block_list.append(rec_node)
+    
+    
+# def generate_blocks_dual_source():
+    # pass 
 
 # Main loop:
 # - perform simulation steps until Webots is stopping the controller
@@ -78,7 +91,7 @@ i = 0
 while robot.step(timestep) != -1:
     if (i == 0): # test to generate robots and blocks 
         # regenerate_blocks_random()
-        generate_robot_central(1)
+        generate_robot_central(3)
         
     i += 1 
     # Read the sensors:

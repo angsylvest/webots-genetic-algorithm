@@ -11,18 +11,18 @@ Angel Sylvester 2022
 """
 
 # sets up csv for reference 
-k_gen_f = open('gen-crw-info.txt', 'w')
+k_gen_f = open('gen-crw-info.csv', 'w')
 k_gen_f.write('time step' + ',fitness' + ',xpos' + ',ypos' + ',num col')
 k_gen_f.close()
 
-k_gen_f = open('gen-crw-info.txt', 'a')
+k_gen_f = open('gen-crw-info.csv', 'a')
 # k_gen_df = pd.DataFrame(columns = ['time step', 'fitness', 'xpos', 'ypos', 'num col'])
 
-overall_f = open('overall-crw-info.txt', 'w') 
+overall_f = open('overall-crw-info.csv', 'w') 
 overall_f.write('trial' + ',time' + ',objects retrieved')
 overall_f.close()
 
-overall_f = open('overall-crw-info.txt', 'a') 
+overall_f = open('overall-crw-info.csv', 'a') 
 # overall_df = pd.DataFrame(columns = ['trial', 'time', 'objects retrieved'])
 
 TIME_STEP = 32

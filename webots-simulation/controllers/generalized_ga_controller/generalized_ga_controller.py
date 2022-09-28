@@ -84,13 +84,18 @@ time_switch = 150
 sim_complete = False 
 obj_found_so_far = []
 
-given_id = robot.getName()[-1] 
+# given_id = robot.getName()[-1] 
+if robot.getName() == "k0":
+    given_id = 0
+else: 
+    given_id = robot.getName()[-2] 
+
 # strategy_df = pd.DataFrame(columns = ['agent id' ,'time step', 'straight','alternating-left','alternating-right', 'true random', 'time since last block'])
-strategy_f = open(str(given_id) + "info.txt", 'w')
+strategy_f = open(str(given_id) + "info.csv", 'w')
 strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block')
 strategy_f.close()
 
-strategy_f = open(str(given_id) + "info.txt", 'w')
+strategy_f = open(str(given_id) + "info.csv", 'w')
 
 # global time_elapsed_since_block
 time_elapsed_since_block = 0
@@ -300,13 +305,13 @@ def interpret():
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
     
-        if message[0:2] == "#" + given_id:
-            message = message[1:].split("*")
+        if message[0:2] == "#" + str(given_id):
+            message = message[2:].split("*")
             parse_genotype(message)
             receiver.nextPacket()
             
         elif message == "return_fitness": # happpens at end of generation 
-            response = "k" + str(int(given_id) + 1) + "-fitness" + str(fitness)
+            response = "k" + str(int(given_id)) + "-fitness" + str(fitness)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
             fitness = 0
