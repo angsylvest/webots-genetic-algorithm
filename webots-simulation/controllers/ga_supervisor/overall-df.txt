@@ -1,1 +1,1 @@
-['trial', 'time', 'objects retrieved']
+['trial', 'time', 'objects retrieved']trial:2,time:4,objects retrieved:0trial:2,time:4,objects retrieved:0

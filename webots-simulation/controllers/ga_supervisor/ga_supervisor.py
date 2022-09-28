@@ -1,6 +1,6 @@
 from controller import Supervisor, Node, Keyboard, Emitter, Receiver, Field
 # import statistics 
-# import math 
+import math 
 # import pandas as pd
 from robot_pop import * 
 # from graph_generator import * 
@@ -48,6 +48,7 @@ overall_columns = ['trial','time', 'objects retrieved']
 overall_f.write(str(overall_columns))
 # overall_df = pd.DataFrame(columns = ['trial','time', 'objects retrieved'])
 overall_f.close()
+overall_f = open('overall-df.txt', 'a')
 
 TIME_STEP = 32
 
@@ -246,7 +247,7 @@ def message_listener(time_step):
             # message = message[2:]
             # print(message)
             # print(obj_node)
-            obj_node = robot.getFromId(int(message[2:))
+            obj_node = robot.getFromId(int(message[2:]))
             if obj_node is not None:
                 r_node_loc = population[int(message[1])].getField('translation').getSFVec3f()
                 t_field = obj_node.getField('translation')
@@ -510,7 +511,7 @@ def run_optimization():
 def main(): 
     initialize_genotypes()
     run_optimization()
-    save_progsaveress()
+    save_progress()
          
 main()
                     
