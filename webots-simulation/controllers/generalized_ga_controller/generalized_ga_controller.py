@@ -425,7 +425,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     strategy_f.write('agent id:' + str(given_id) + ',time step: '+ str(robot.step(timestep)) + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block))
                     
                     obj_found_so_far.append(id)
-                    id = "$" + given_id + id # indication that it is a object to be deleted 
+                    id = "$" + str(given_id) + "-" + str(id) # indication that it is a object to be deleted 
                     time_elapsed_since_block = 0
                     
                     emitter.send(str(id).encode('utf-8'))
