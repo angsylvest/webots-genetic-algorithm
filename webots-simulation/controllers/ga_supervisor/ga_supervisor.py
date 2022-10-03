@@ -109,12 +109,15 @@ reproduce_list = []
 
 robot_population_sizes = [5, 10, 15]
 
+r_pos_to_generate = []
+
 def generate_robot_central(num_robots):
     global fitness_scores 
     global collected_count 
     global population
     global columns 
     global curr_df
+    global r_pos_to_generate
     
     initialize_genotypes(num_robots)
     
@@ -124,6 +127,7 @@ def generate_robot_central(num_robots):
             r.remove()
             
         population = []
+        
     
     for i in range(num_robots):
         rootNode = robot.getRoot()
@@ -132,7 +136,9 @@ def generate_robot_central(num_robots):
         rec_node = rootChildrenField.getMFNode(-1)
     
         t_field = rec_node.getField('translation')
-        t_field.setSFVec3f([round(random.uniform(0.25, -0.25),2), round(random.uniform(0.25, -0.25) ,2), 0.02])
+        pose = [round(random.uniform(0.25, -0.25),2), round(random.uniform(0.25, -0.25) ,2), 0.02]
+        r_pos_to_generate.append(pose)
+        t_field.setSFVec3f(pose)
         
         # sets up metrics 
         fitness_scores.append("!")
@@ -197,10 +203,15 @@ def regenerate_environment(block_dist):
     # creates a equally distributed set of blocks 
     # avoiding areas where a robot is already present 
     global block_list
+    global r_pos_to_generate
+    
     for obj in block_list: 
         obj.remove()
     
     block_list = []
+    
+    for i in range(len(r_pos_to_generate)):
+        population[i].getField('translation').setSFVec3f(r_pos_to_generate[i])
     
     # floor_size = arena_area.getField('floorSize')
     # print('arena size --', floor_size.getSFVec2f()) 
@@ -352,6 +363,7 @@ def message_listener(time_step):
             # print(message)
             # print(obj_node)
             obj_node = robot.getFromId(int(message.split("-")[1]))
+            
             if obj_node is not None:
                 r_node_loc = population[int(message.split("-")[0][1:])].getField('translation').getSFVec3f()
                 t_field = obj_node.getField('translation')
@@ -578,6 +590,7 @@ def run_optimization():
     global collected_count
     global found_list
     global reproduce_list 
+    global r_pos_to_generate
     
     # initialize genotypes 
     # will be same genotype as normal (for comparison purposes) 
@@ -605,6 +618,7 @@ def run_optimization():
         # k2_f.close()
         # k3_f.close()
         
+        r_pos_to_generate = []
         generate_robot_central(size)
         
         for i in range(trials): 

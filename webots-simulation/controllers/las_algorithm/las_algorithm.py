@@ -334,15 +334,19 @@ while robot.step(timestep) != -1 and sim_complete != True:
                 id = str(firstObject.get_id())
                 
                 if id not in obj_found_so_far:
+                
                     obj_found_so_far.append(id)
-                    id = "$" + given_id + id # indication that it is a object to be deleted 
+                    
+                    strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block)))
+                                        
+                    id = "$" + given_id + "-" + id # indication that it is a object to be deleted 
+                    
                     emitter.send(str(id).encode('utf-8'))
                     fitness += 1 
                     holding_something = False 
                     chosen_direction = correlated_random(chosen_direction)
                     t_block = 0
                     
-                    strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block)))
                     # new_row = {'agent id': given_id, 'time step': robot.step(timestep),'time since last block': t_block}
                     # strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
                     

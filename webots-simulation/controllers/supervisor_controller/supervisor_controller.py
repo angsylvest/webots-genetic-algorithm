@@ -44,7 +44,10 @@ receiver.enable(TIME_STEP)
 receiver.setChannel(2) 
 
 num_generations = 10
-population = [k1, k2, k3]
+
+global population 
+population = []
+# population = [k1, k2, k3]
 
 global initial_genotypes 
 initial_genotypes = []
@@ -53,7 +56,7 @@ global k1_fitness
 global k2_fitness
 global k3_fitness
 global fitness_scores
-fitness_scores = ["!","!","!"]
+fitness_scores = []
 global pop_genotypes 
 pop_genotypes = []
 
@@ -81,14 +84,63 @@ block_list = []
 
 arena_area = robot.getFromDef("arena")
 
+robot_population_sizes = [5, 10, 15]
+
+collected_count = []
+
+r_pos_to_generate = []
+
+def generate_robot_central(num_robots):
+    global fitness_scores 
+    global collected_count 
+    global population
+    global columns 
+    global curr_df
+    global r_pos_to_generate
+    # initialize_genotypes(num_robots)
+    
+    if len(population) != 0: 
+    
+        for r in population: 
+            r.remove()
+            
+        population = []
+    
+    for i in range(num_robots):
+        rootNode = robot.getRoot()
+        rootChildrenField = rootNode.getField('children')
+        rootChildrenField.importMFNode(-1, 'robots/robot-las.wbo') 
+        rec_node = rootChildrenField.getMFNode(-1)
+    
+        t_field = rec_node.getField('translation')
+        pos = [round(random.uniform(0.25, -0.25),2), round(random.uniform(0.25, -0.25) ,2), 0.02]
+        r_pos_to_generate.append(pos)
+        t_field.setSFVec3f(pos)
+        
+        # sets up metrics 
+        fitness_scores.append("!")
+        collected_count.append(0)
+        population.append(rec_node)
+        
+        curr_df = open('robot-info-' + str(num_robots) + '.csv', 'a')
+        # k2_f = open('robot-2-info.csv', 'a')
+        # k3_f = open('robot-3-info.csv', 'a') 
+        
+
 def regenerate_environment(block_dist):
     # creates a equally distributed set of blocks 
     # avoiding areas where a robot is already present 
     global block_list
+    global population 
+    global r_pos_to_generate
+    
     for obj in block_list: 
         obj.remove()
     
     block_list = []
+    
+    for i in range(len(r_pos_to_generate)):
+        population[i].getField('translation').setSFVec3f(r_pos_to_generate[i])
     
     # floor_size = arena_area.getField('floorSize')
     # print('arena size --', floor_size.getSFVec2f()) 
@@ -115,27 +167,46 @@ def regenerate_environment(block_dist):
         t_field = rec_node.getField('translation')
         t_field.setSFVec3f([round(random.uniform(0.9, -0.9),2), round(random.uniform(-1, 0.23),2), 0.02]) 
         block_list.append(rec_node)
+        
+        
+def generate_blocks_single_source():
 
-def initialize_genotypes():
-    global initial_genotypes
-    with open('initial_genotype.txt') as f:
-        for line in f: 
-            initial_genotypes.append(line)
+    for i in range(40): 
+        rootNode = robot.getRoot()
+        rootChildrenField = rootNode.getField('children')
+        rootChildrenField.importMFNode(-1, '../supervisor_controller/cylinder-obj.wbo') 
+        rec_node = rootChildrenField.getMFNode(-1)
+    
+        t_field = rec_node.getField('translation')
+        t_field.setSFVec3f([round(random.uniform(0.9, -0.9),2), round(random.uniform(-1, 0.23),2), 0.02]) 
+        block_list.append(rec_node)
+        
 
-def restore_positions():
+# def initialize_genotypes(size):
+    # global initial_genotypes
+    # global gene_list 
+    # initial_geno_txt = open('initial_genotype.txt', 'w')
+    
+    # lines = []
+    # for r in range(size):
+        # new_geno = create_individal_genotype(gene_list)
+        # initial_genotypes.append(new_geno)
+        
+
+# def restore_positions():
         # clearing messages between each trial 
-    while receiver.getQueueLength()>0:
-        message = receiver.getData().decode('utf-8')
-        receiver.nextPacket()
+    # while receiver.getQueueLength()>0:
+        # message = receiver.getData().decode('utf-8')
+        # receiver.nextPacket()
         
     # robot.simulationReset()   
     
-    coordinates = [[-0.115, 0, 0.0045], [0.2445, 0, 0.0045], [0.6045, 0, 0.0045]]
-    for r in range(len(population)): 
+    # coordinates = [[-0.115, 0, 0.0045], [0.2445, 0, 0.0045], [0.6045, 0, 0.0045]]
+    # for r in range(len(population)): 
         # population[r].restartController()
-        r_field = population[r].getField('translation')
-        r_field.setSFVec3f(coordinates[r])
-    initialize_genotypes()
+        # r_field = population[r].getField('translation')
+        # r_field.setSFVec3f(coordinates[r])
+    # initialize_genotypes()
     
 def save_progress():
     # way to save total number of blocks found 
@@ -144,9 +215,9 @@ def save_progress():
     
     # new_row = {'time': simulation_time*num_generations, 'objects retrieved': total_found}
     # overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index=True)
-    overall_f.write('time:' + str(simulation_time*num_generations) + ',objects retrieved:' + str(total_found))
-    overall_f.close()
-    k_gen_f.close()
+    # overall_f.write('time:' + str(simulation_time*num_generations) + ',objects retrieved:' + str(total_found))
+    # overall_f.close()
+    # k_gen_f.close()
     # k_gen_df.to_csv('k_gen_results.csv')
     # overall_df.to_csv('overall_results.csv')
     
@@ -162,6 +233,7 @@ def message_listener(time_step):
     global total_found
     global found_list
     global block_list
+    global collected_count
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -173,10 +245,10 @@ def message_listener(time_step):
             print('removing object')
             # message = message[1:]
             print(message)
-            obj_node = robot.getFromId(int(message[2:]))
+            obj_node = robot.getFromId(int(message.split("-")[1]))
             print(obj_node)
             if obj_node is not None:
-                r_node_loc = population[int(message[1])].getField('translation').getSFVec3f()
+                r_node_loc = population[int(message.split("-")[0][1:])].getField('translation').getSFVec3f()
                 t_field = obj_node.getField('translation')
                 t_node_loc = t_field.getSFVec3f()
                 
@@ -188,22 +260,20 @@ def message_listener(time_step):
                     if obj_node not in found_list:
                         total_found += 1
                         found_list.append(obj_node)
+                        collected_count[int(message.split("-")[0][1:])] = collected_count[int(message.split("-")[0][1:])] + 1
                     
                     # total_found += 1
             receiver.nextPacket()
             
         elif 'fitness' in message:
-            print('message', message)
-            k3_fitness = message.split("-")[-1]
-            fitness_scores[count] = k3_fitness
-            count += 1
+            fit = message.split('-')[1][8:] 
+            index = message.split('-')[0][1:]
+            fitness_scores[int(index)] = fit
             
-            # new_row = {'time step': time_step, 'fitness': k3_fitness}
-            k_gen_f.write('id:' + str(message[1]) + ',time step:' + str(time_step) + ',fitness:' + str(k3_fitness))
-            # k_gen_df = pd.concat([k_gen_df, pd.DataFrame([new_row])], ignore_index=True)
-            print('k fitness', k3_fitness)
+            curr_df.write('agent id:' + str(index) + ',time step: ' + str(time_step) + ',fitness:' + str(fit) + ',xpos:' + str(population[int(index)].getPosition()[0]) + ',ypos:' + str(population[int(index)].getPosition()[1]) + ',num col:' + str(collected_count[int(index)]) + ',genotype:' + str(pop_genotypes[int(index)]))
             
             receiver.nextPacket()
+            pass # will be generalized 
 
 # runs simulation for designated amount of time 
 def run_seconds(t,waiting=False):
@@ -258,8 +328,7 @@ def update_geno_list(genotype_list):
     global count 
                      
     # update parameters to hopefully improve performance
-    fitness_scores = ["!","!","!"]
-    count = 0 
+    fitness_scores = ["!" for i in range(len(population))]
     fit_update = False 
     print('gene pool updated') 
     updated = True
@@ -288,64 +357,93 @@ def run_optimization():
     global total_found 
     global overall_f
     global found_list
+    global r_pos_to_generate
     
     # initialize genotypes 
     # will be same genotype as normal (for comparison purposes) 
     
-    index = 0 
-    for i in range(3):
-        # genotype = create_individal_genotype(gene_list)
-        # print('genotype', i, genotype)
-        genotype = initial_genotypes[index]
-        pop_genotypes.append(genotype)
-        emitter.send(str("#" + str(i) + str(genotype)).encode('utf-8'))
-        index +=1 
-    
-    regenerate_environment(0.2)   
-    run_seconds(simulation_time) # runs generation for that given amount of time  
+    generate_robot_central(5)
+    regenerate_environment(0.2) 
+    run_seconds(simulation_time)
     print('new generation beginning')
     run_seconds(5, True) # is waiting until got genotypes
     
+    # index = 0 
+    # for i in range(3):
+        # genotype = create_individal_genotype(gene_list)
+        # print('genotype', i, genotype)
+        # genotype = initial_genotypes[index]
+        # pop_genotypes.append(genotype)
+        # emitter.send(str("#" + str(i) + str(genotype)).encode('utf-8'))
+        # index +=1 
+    
+    # regenerate_environment(0.2)   
+    # run_seconds(simulation_time) # runs generation for that given amount of time  
+    # print('new generation beginning')
+    # run_seconds(5, True) # is waiting until got genotypes
+    
     # regenerate_environment(0.2) 
-    for i in range(trials): 
-        print('beginning new trial', i)
-        for gen in range(num_generations-1): 
-            
-            updated = False     
-            run_seconds(simulation_time) 
-            
-            print('waiting for genotypes')
-            
-            run_seconds(5, True) # is waiting until got genotypes
-            
-            print('found genotypes')
-            print('new generation starting -')
+    for size in robot_population_sizes: 
+    
+        initialize_genotypes(size)
+                # creates a csv specific to the robot 
+        curr_df = open('robot-info-' + str(size) + '.csv', 'w')
+        # k2_f = open('robot-2-info.csv', 'w')
+        # k3_f = open('robot-3-info.csv', 'w')
         
-        overall_f.write('trial:' + str(i) + ',time:' + str(simulation_time*num_generations) + ',objects retrieved:' + str(total_found))    
-        # new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
-        print('items collected', total_found)
-        # overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)
-        restore_positions()  
-        regenerate_environment(0.2) 
-        total_found = 0 
-        found_list = [] 
-        index = 0 
-        for i in range(3):
-            # genotype = create_individal_genotype(gene_list)
-            # print('genotype', i, genotype)
-            genotype = initial_genotypes[index]
-            pop_genotypes.append(genotype)
-            emitter.send(str("#" + str(i) + str(genotype)).encode('utf-8'))
-            index +=1     
+        curr_df.write(str(columns))
+        # k2_f.write(str(columns))
+        # k3_f.write(str(columns))
+        
+        curr_df.close()
+        # k2_f.close()
+        # k3_f.close()
+        
+        r_pos_to_generate = []
+        generate_robot_central(size)
+        
+        for i in range(trials): 
+            print('beginning new trial', i)
+            for gen in range(num_generations-1): 
+                
+                updated = False     
+                run_seconds(simulation_time) 
+                
+                print('waiting for genotypes')
+                
+                run_seconds(5, True) # is waiting until got genotypes
+                
+                print('found genotypes')
+                print('new generation starting -')
+            
+            overall_f.write('trial:' + str(i) + ',time:' + str(simulation_time*num_generations) + ',objects retrieved:' + str(total_found))    
+            # new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
+            print('items collected', total_found)
+            # overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)
+            # restore_positions()  
+            regenerate_environment(0.2) 
+            total_found = 0 
+            found_list = [] 
+            index = 0 
+            # for i in range(3):
+                # genotype = create_individal_genotype(gene_list)
+                # print('genotype', i, genotype)
+                # genotype = initial_genotypes[index]
+                # pop_genotypes.append(genotype)
+                # emitter.send(str("#" + str(i) + str(genotype)).encode('utf-8'))
+                # index +=1  
+                
+    overall_f.close()
+    
     return 
    
         
             
 def main(): 
     # restore_positions()
-    initialize_genotypes()
+    # initialize_genotypes()
     run_optimization()
-    save_progress()
+    # save_progress()
   
          
 main()
