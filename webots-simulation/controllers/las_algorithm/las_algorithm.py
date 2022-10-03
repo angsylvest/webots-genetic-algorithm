@@ -95,7 +95,11 @@ obj_found_so_far = []
 # global current_tile 
 t_block = 0
 
-given_id = robot.getName()[-1] 
+if robot.getName() == "k0":
+    given_id = 0
+else: 
+    given_id = robot.getName()[-2] 
+    
 strategy_f = open(str(given_id) + "las-info.csv", 'w')
 strategy_f.write('agent id,'+ 'time step,' + 'straight,' + 'alternating-left,' + 'alternating-right,' + 'true random,' + 'time since last block')
 strategy_f.close()
@@ -190,6 +194,8 @@ def interpret():
     global given_id
     global las
     global strategy_f
+    global fitness 
+    global t_block
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -202,9 +208,7 @@ def interpret():
             receiver.nextPacket()
             
         elif message == "return_fitness":
-            print('request received') 
-            response = "k-fitness" + str(fitness)
-            print('response is', response)
+            response = "k" + str(int(given_id)) + "-fitness" + str(fitness)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
             fitness = 0
@@ -217,6 +221,17 @@ def interpret():
             sim_complete = True 
             strategy_df.close()
             
+        elif message[0] == "%" and message.split('-')[0][1:] == str(given_id):
+            fitness = 0 
+            t_block = 0
+            curr_tile = int(message.split('-')[1])
+            it_passed = int(message.split('-')[2])
+            
+            las.reward(current_tile)
+            
+            if current_tile == las.target and las.iterations_threshold <= iterations_passed:
+                has_collected = True
+
         else: 
             receiver.nextPacket()
     
@@ -339,28 +354,28 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     
                     strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block)))
                                         
-                    id = "$" + given_id + "-" + id # indication that it is a object to be deleted 
+                    id = "$" + str(given_id) + "-" + str(id) + "-" + str(current_tile) + "-" + str(iterations_passed) # indication that it is a object to be deleted 
                     
                     emitter.send(str(id).encode('utf-8'))
-                    fitness += 1 
+                    # fitness += 1 
                     holding_something = False 
                     chosen_direction = correlated_random(chosen_direction)
-                    t_block = 0
+                    # t_block = 0
                     
                     # new_row = {'agent id': given_id, 'time step': robot.step(timestep),'time since last block': t_block}
                     # strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
                     
                     # reward tile 
-                    las.reward(current_tile)
+                    # las.reward(current_tile)
                     
-                    if current_tile == las.target and las.iterations_threshold <= iterations_passed:
-                        has_collected = True
+                    # if current_tile == las.target and las.iterations_threshold <= iterations_passed:
+                        # has_collected = True
                     
             elif dist_val == 0 or collision.getValue() == 1:
                 fitness -= 1 
                 print('collision encountered')
                 chosen_direction = rotate_random() 
-                # move_backwards()
+                move_backwards()
                 
         else: 
             t_block += 1

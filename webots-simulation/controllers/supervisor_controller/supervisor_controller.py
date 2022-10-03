@@ -90,6 +90,8 @@ collected_count = []
 
 r_pos_to_generate = []
 
+overall_columns = ['trial','time', 'objects retrieved', 'size']
+
 def generate_robot_central(num_robots):
     global fitness_scores 
     global collected_count 
@@ -261,6 +263,8 @@ def message_listener(time_step):
                         total_found += 1
                         found_list.append(obj_node)
                         collected_count[int(message.split("-")[0][1:])] = collected_count[int(message.split("-")[0][1:])] + 1
+                        msg_info = "%" + message[1:]
+                        emitter.send(str(msg_info).encode('utf-8'))
                     
                     # total_found += 1
             receiver.nextPacket()
@@ -270,7 +274,7 @@ def message_listener(time_step):
             index = message.split('-')[0][1:]
             fitness_scores[int(index)] = fit
             
-            curr_df.write('agent id:' + str(index) + ',time step: ' + str(time_step) + ',fitness:' + str(fit) + ',xpos:' + str(population[int(index)].getPosition()[0]) + ',ypos:' + str(population[int(index)].getPosition()[1]) + ',num col:' + str(collected_count[int(index)]) + ',genotype:' + str(pop_genotypes[int(index)]))
+            curr_df.write('agent id:' + str(index) + ',time step: ' + str(time_step) + ',fitness:' + str(fit) + ',xpos:' + str(population[int(index)].getPosition()[0]) + ',ypos:' + str(population[int(index)].getPosition()[1]) + ',num col:' + str(collected_count[int(index)]) + ',genotype:')
             
             receiver.nextPacket()
             pass # will be generalized 
@@ -385,7 +389,7 @@ def run_optimization():
     # regenerate_environment(0.2) 
     for size in robot_population_sizes: 
     
-        initialize_genotypes(size)
+        # initialize_genotypes(size)
                 # creates a csv specific to the robot 
         curr_df = open('robot-info-' + str(size) + '.csv', 'w')
         # k2_f = open('robot-2-info.csv', 'w')
@@ -416,7 +420,7 @@ def run_optimization():
                 print('found genotypes')
                 print('new generation starting -')
             
-            overall_f.write('trial:' + str(i) + ',time:' + str(simulation_time*num_generations) + ',objects retrieved:' + str(total_found))    
+            overall_f.write('trial:' + str(i) + ',time:' + str(simulation_time*num_generations) + ',objects retrieved:' + str(total_found) + ',size:' + str(size))    
             # new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
             print('items collected', total_found)
             # overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)

@@ -296,11 +296,17 @@ def parse_genotype(gen):
     detect_thres = gen[1].count('1')
     time_switch = gen[2].count('1')
     
-def interpret(): 
+def interpret(timestep): 
     global fitness
     global sim_complete
     global given_id
     global strategy_f
+    global obj_found_so_far
+    global time_elapsed_since_block
+    global fitness
+    global holding_something
+    global chosen_direction
+    global weights 
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -320,6 +326,20 @@ def interpret():
             sim_complete = True 
             strategy_f.close()
             # strategy_df.to_csv('strategy_df' + str(given_id) + '.csv')
+            
+        elif message[0] == "%" and message.split('-')[0][1:] == str(given_id):
+            strategy_f.write('agent id:' + str(given_id) + ',time step: '+ timestep + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block))
+            
+            obj_id = message.split('-')[1]
+            
+            obj_found_so_far.append(obj_id ) 
+            time_elapsed_since_block = 0
+            
+            emitter.send(str(id).encode('utf-8'))
+            
+            fitness += 1 
+            holding_something = False 
+            chosen_direction = correlated_random(chosen_direction)
         
         else: 
             receiver.nextPacket()
@@ -361,7 +381,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = False)
             print(strategy)
         
-    interpret() # checks for messages from supervisor 
+    interpret(str(robot.step(timestep))) # checks for messages from supervisor 
     time_elapsed_since_robot +=1
     
     # biased random walk movement (each time step, cert prob of turning that direction) 
@@ -422,17 +442,17 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     # strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
                     # strategy_f.write(str('agent id': given_id, 'time step': robot.step(timestep), 'straight': weights[0],'alternating-left': weights[1],'alternating-right': weights[2], 'true random': weights[3], 'time since last block': time_elapsed_since_block))
         
-                    strategy_f.write('agent id:' + str(given_id) + ',time step: '+ str(robot.step(timestep)) + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block))
+                    # strategy_f.write('agent id:' + str(given_id) + ',time step: '+ str(robot.step(timestep)) + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block))
                     
-                    obj_found_so_far.append(id)
+                    # obj_found_so_far.append(id)
                     id = "$" + str(given_id) + "-" + str(id) # indication that it is a object to be deleted 
-                    time_elapsed_since_block = 0
+                    # time_elapsed_since_block = 0
                     
                     emitter.send(str(id).encode('utf-8'))
                     
-                    fitness += 1 
-                    holding_something = False 
-                    chosen_direction = correlated_random(chosen_direction)
+                    # fitness += 1 
+                    # holding_something = False 
+                    # chosen_direction = correlated_random(chosen_direction)
          
             if dist_val == 0 or collision.getValue() == 1:
                 fitness -= 1 

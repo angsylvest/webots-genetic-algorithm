@@ -156,16 +156,20 @@ class LAS():
         # print(new_cell)
         new_tile = self.cells.index(new_cell)
          
-        tpx, tpy, brx, bry = self.cells[curr_tile]
-        mx, my = (tpx + brx)/2, (tpy + bry)/2 # calculating midpoint 
-        otpx, otpy, obrx, obry = new_cell
-        omx, omy = (otpx + obrx)/2, (otpy + obry)/2 # calculating midpoint 
-         
-        direction = math.atan((omy - my)/ (omx - mx))
-        self.target = new_tile
-        self.dir_vector = direction 
-         
-        return round(direction, 2)
+        if curr_tile != new_tile: 
+            tpx, tpy, brx, bry = self.cells[curr_tile]
+            mx, my = (tpx + brx)/2, (tpy + bry)/2 # calculating midpoint 
+            otpx, otpy, obrx, obry = new_cell
+            omx, omy = (otpx + obrx)/2, (otpy + obry)/2 # calculating midpoint 
+             
+            direction = math.atan((omy - my)/ (omx - mx))
+            self.target = new_tile
+            self.dir_vector = direction 
+             
+            return round(direction, 2)
+        else: 
+            re_gather(curr_tile)
+        
 
     def re_direct(self, curr_tile): 
         new_cell = self.target

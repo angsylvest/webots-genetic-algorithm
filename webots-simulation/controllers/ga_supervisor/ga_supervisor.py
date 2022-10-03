@@ -377,6 +377,8 @@ def message_listener(time_step):
                         total_found += 1
                         found_list.append(obj_node)
                         collected_count[int(message.split("-")[0][1:])] = collected_count[int(message.split("-")[0][1:])] + 1
+                        msg = "%" + message[1:]
+                        emitter.send(str(msg).encode('utf-8'))
                     
             receiver.nextPacket()
         
