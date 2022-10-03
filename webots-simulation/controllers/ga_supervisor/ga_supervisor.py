@@ -50,6 +50,10 @@ overall_f.write(str(overall_columns))
 overall_f.close()
 overall_f = open('overall-df.csv', 'a')
 
+strategy_f = open("ga-info.csv", 'w')
+strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size')
+strategy_f.close()
+
 TIME_STEP = 32
 
 robot = Supervisor()  # create Supervisor instance
@@ -120,6 +124,7 @@ def generate_robot_central(num_robots):
     global r_pos_to_generate
     
     initialize_genotypes(num_robots)
+    emitter.send(str("size-" + str(num_robots)).encode('utf-8'))
     
     if len(population) != 0: 
     

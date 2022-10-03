@@ -18,6 +18,11 @@ k_gen_f.close()
 k_gen_f = open('gen-crw-info.csv', 'a')
 # k_gen_df = pd.DataFrame(columns = ['time step', 'fitness', 'xpos', 'ypos', 'num col'])
 
+# csv from robot controllers - las 
+strategy_f = open("las-info.csv", 'w')
+strategy_f.write('agent id,'+ 'time step,' + 'straight,' + 'alternating-left,' + 'alternating-right,' + 'true random,' + 'time since last block,' + 'size')
+strategy_f.close()
+
 overall_f = open('overall-crw-info.csv', 'w') 
 overall_f.write('trial' + ',time' + ',objects retrieved')
 overall_f.close()
@@ -96,10 +101,13 @@ def generate_robot_central(num_robots):
     global fitness_scores 
     global collected_count 
     global population
-    global columns 
+    global overall_columns 
     global curr_df
     global r_pos_to_generate
+    
     # initialize_genotypes(num_robots)
+    emitter.send(str("size-" + str(num_robots)).encode('utf-8'))
+    
     
     if len(population) != 0: 
     
@@ -362,6 +370,7 @@ def run_optimization():
     global overall_f
     global found_list
     global r_pos_to_generate
+    global overall_columns
     
     # initialize genotypes 
     # will be same genotype as normal (for comparison purposes) 
@@ -395,7 +404,7 @@ def run_optimization():
         # k2_f = open('robot-2-info.csv', 'w')
         # k3_f = open('robot-3-info.csv', 'w')
         
-        curr_df.write(str(columns))
+        curr_df.write(str(overall_columns))
         # k2_f.write(str(columns))
         # k3_f.write(str(columns))
         

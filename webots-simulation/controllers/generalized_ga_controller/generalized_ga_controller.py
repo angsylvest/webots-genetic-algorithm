@@ -83,6 +83,7 @@ time_switch = 150
 
 sim_complete = False 
 obj_found_so_far = []
+curr_sim_size = 5
 
 # given_id = robot.getName()[-1] 
 if robot.getName() == "k0":
@@ -91,11 +92,11 @@ else:
     given_id = robot.getName()[-2] 
 
 # strategy_df = pd.DataFrame(columns = ['agent id' ,'time step', 'straight','alternating-left','alternating-right', 'true random', 'time since last block'])
-strategy_f = open(str(given_id) + "info.csv", 'w')
-strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block')
-strategy_f.close()
+# strategy_f = open(str(given_id) + "info.csv", 'w')
+# strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size')
+# strategy_f.close()
 
-strategy_f = open(str(given_id) + "info.csv", 'w')
+strategy_f = open(str(given_id) + "ga-info.csv", 'a')
 
 # global time_elapsed_since_block
 time_elapsed_since_block = 0
@@ -148,12 +149,13 @@ def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False
     global curr_best_weights
     global given_id
     global strategy_f 
+    global curr_sim_size
     
     # want to update weights based off effectiveness of current strategy 
     if update: 
         new_weights = create_new_weights(t_block, t_robot, original_weights)
         strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], new_weights)
-        strategy_f.write('agent id:' + str(given_id) + ',time step: '+ str(robot.step(timestep)) + ',straight:' + str(original_weights[0]) + ',alternating-left:' + str(original_weights[1]) + ',alternating-right:' + str(original_weights[2]) + ',true random:' + str(original_weights[3]) + ',time since last block:'+ str(t_block))
+        strategy_f.write('agent id:' + str(given_id) + ',time step: '+ str(robot.step(timestep)) + ',straight:' + str(original_weights[0]) + ',alternating-left:' + str(original_weights[1]) + ',alternating-right:' + str(original_weights[2]) + ',true random:' + str(original_weights[3]) + ',time since last block:'+ str(t_block) + ',size:' + str(curr_sim_size))
         
         # new_row = {'agent id': given_id, 'time step': robot.step(timestep), 'straight': original_weights[0],'alternating-left': original_weights[1],'alternating-right': original_weights[2], 'true random': original_weights[3], 'time since last block': t_block}
         # strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
@@ -307,6 +309,7 @@ def interpret(timestep):
     global holding_something
     global chosen_direction
     global weights 
+    global curr_sim_size
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -318,6 +321,7 @@ def interpret(timestep):
             
         elif message == "return_fitness": # happpens at end of generation 
             response = "k" + str(int(given_id)) + "-fitness" + str(fitness)
+            strategy_f.write('agent id:' + str(given_id) + ',time step: '+ timestep + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block) + ',size' + str(curr_sim_size))
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
             fitness = 0
@@ -328,7 +332,7 @@ def interpret(timestep):
             # strategy_df.to_csv('strategy_df' + str(given_id) + '.csv')
             
         elif message[0] == "%" and message.split('-')[0][1:] == str(given_id):
-            strategy_f.write('agent id:' + str(given_id) + ',time step: '+ timestep + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block))
+            # strategy_f.write('agent id:' + str(given_id) + ',time step: '+ timestep + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block) + ',size' + str(curr_sim_size))
             
             obj_id = message.split('-')[1]
             
@@ -340,6 +344,9 @@ def interpret(timestep):
             fitness += 1 
             holding_something = False 
             chosen_direction = correlated_random(chosen_direction)
+            
+        elif 'size' in message:
+            curr_sim_size = message[4:]
         
         else: 
             receiver.nextPacket()

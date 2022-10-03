@@ -89,7 +89,7 @@ time_switch = 150
 
 # global obj_found_so_far
 obj_found_so_far = []
-
+curr_sim_size = 5
 
 # global las 
 # global current_tile 
@@ -100,11 +100,8 @@ if robot.getName() == "k0":
 else: 
     given_id = robot.getName()[-2] 
     
-strategy_f = open(str(given_id) + "las-info.csv", 'w')
-strategy_f.write('agent id,'+ 'time step,' + 'straight,' + 'alternating-left,' + 'alternating-right,' + 'true random,' + 'time since last block')
-strategy_f.close()
 
-strategy_f = open(str(given_id) + "las-info.csv", 'w')
+strategy_f = open(str(given_id) + "las-info.csv", 'a')
 
 
 def rotate_random():
@@ -196,6 +193,7 @@ def interpret():
     global strategy_f
     global fitness 
     global t_block
+    global curr_sim_size
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -213,13 +211,16 @@ def interpret():
             receiver.nextPacket()
             fitness = 0
             
-            strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block)))
+            strategy_f.write('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block) + ',size: ' + str(curr_sim_size))
             # new_row = {'agent id': given_id, 'time step': robot.step(timestep),'time since last block': t_block}
             # strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
             
         elif message == 'sim-complete':
             sim_complete = True 
             strategy_df.close()
+            
+        elif "size" in message: 
+            curr_sim_size = message[4:]
             
         elif message[0] == "%" and message.split('-')[0][1:] == str(given_id):
             fitness = 0 
@@ -229,7 +230,7 @@ def interpret():
             
             las.reward(current_tile)
             
-            if current_tile == las.target and las.iterations_threshold <= iterations_passed:
+            if curr_tile == las.target and las.iterations_threshold <= int(it_passed):
                 has_collected = True
 
         else: 
