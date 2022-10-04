@@ -11,20 +11,21 @@ Angel Sylvester 2022
 """
 
 # sets up csv for reference 
-k_gen_f = open('gen-crw-info.csv', 'w')
-k_gen_f.write('time step' + ',fitness' + ',xpos' + ',ypos' + ',num col')
-k_gen_f.close()
+# k_gen_f = open('gen-crw-info.csv', 'w')
+# k_gen_f.write('time step' + ',fitness' + ',xpos' + ',ypos' + ',num col')
+# k_gen_f.close()
 
 # k_gen_f = open('gen-crw-info.csv', 'a')
 # k_gen_df = pd.DataFrame(columns = ['time step', 'fitness', 'xpos', 'ypos', 'num col'])
 
-# csv from robot controllers - las 
+# Agent File Initialization 
 strategy_f = open("crw-info.csv", 'w')
-strategy_f.write('agent id,'+ 'time step,' +' time since last block')
+strategy_f.write('agent id,'+ 'time step,' +' time since last block' + ',size')
 strategy_f.close()
 
+# Global File Initialization 
 overall_f = open('overall-crw-info.csv', 'w') 
-overall_f.write('trial' + ',time' + ',objects retrieved')
+overall_f.write('trial' + ',time' + ',objects retrieved' + ',size')
 overall_f.close()
 
 overall_f = open('overall-crw-info.csv', 'a') 
@@ -35,9 +36,9 @@ TIME_STEP = 32
 robot = Supervisor()  # create Supervisor instance
 
 # get info from this def 
-k1 = robot.getFromDef("khepera")
-k2 = robot.getFromDef("khepera2")
-k3 = robot.getFromDef("khepera3")
+# k1 = robot.getFromDef("khepera")
+# k2 = robot.getFromDef("khepera2")
+# k3 = robot.getFromDef("khepera3")
 
 # emitter to send info to robots 
 emitter = robot.getDevice("emitter")
@@ -220,7 +221,7 @@ def generate_blocks_single_source():
     
 def save_progress():
     # way to save total number of blocks found 
-    global k_gen_f
+    # global k_gen_f
     global overall_f
     
     # new_row = {'time': simulation_time*num_generations, 'objects retrieved': total_found}
@@ -239,7 +240,7 @@ def message_listener(time_step):
     # global k2_df 
     # global k3_df
     global count 
-    global k_gen_f
+    # global k_gen_f
     global total_found
     global found_list
     global block_list

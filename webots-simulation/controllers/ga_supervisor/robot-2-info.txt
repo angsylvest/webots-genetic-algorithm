@@ -1,1 +1,0 @@
-agent id,time step,fitness,xpos,ypos,num col,genotype

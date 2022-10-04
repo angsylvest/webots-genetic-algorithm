@@ -81,8 +81,10 @@ if robot.getName() == "k0":
 else: 
     given_id = robot.getName()[-2] 
 
+# Agent Level File Appended Set-up 
 strategy_f = open(str(given_id) + "crw-info.csv", 'a')
 t_block = 0
+curr_sim_size = 5
 
 
 def rotate_random():
@@ -173,6 +175,7 @@ def interpret():
     global t_block
     global strategy_f
     global obj_found_so_far
+    global curr_sim_size
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -190,11 +193,14 @@ def interpret():
             receiver.nextPacket()
             fitness = 0
             
+        elif 'size' in message:
+            curr_sim_size = message[4:]
+            
         elif message[0] == "%" and message.split('-')[0][1:] == str(given_id):
              
             id = message.split('-')[1]
             obj_found_so_far.append(id)
-            strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block)))
+            strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block) ',size: ' + str(curr_sim_size)))
                     
             fitness = 0 
             t_block = 0

@@ -1,1 +1,0 @@
-agent id:2,time step: 10,straight:0.25,alternating-left:0.25,alternating-right:0.25,true random:0.25,time since last block:0agent id:2,time step: 0,straight:0.25,alternating-left:0.25,alternating-right:0.25,true random:0.25,time since last block:6

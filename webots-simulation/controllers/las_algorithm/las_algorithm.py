@@ -94,6 +94,7 @@ curr_sim_size = 5
 # global las 
 # global current_tile 
 t_block = 0
+curr_sim_size = 5
 
 if robot.getName() == "k0":
     given_id = 0
@@ -226,7 +227,7 @@ def interpret():
         elif message[0] == "%" and message.split('-')[0][1:] == str(given_id):
             id = message.split('-')[1]
             obj_found_so_far.append(id)
-            strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block)))
+            strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block) + ',size: ' + str(curr_sim_size)))
                     
             fitness = 0 
             t_block = 0
