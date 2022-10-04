@@ -194,6 +194,7 @@ def interpret():
     global fitness 
     global t_block
     global curr_sim_size
+    global obj_found_so_far
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -223,6 +224,10 @@ def interpret():
             curr_sim_size = message[4:]
             
         elif message[0] == "%" and message.split('-')[0][1:] == str(given_id):
+            id = message.split('-')[1]
+            obj_found_so_far.append(id)
+            strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block)))
+                    
             fitness = 0 
             t_block = 0
             curr_tile = int(message.split('-')[1])
@@ -351,9 +356,9 @@ while robot.step(timestep) != -1 and sim_complete != True:
                 
                 if id not in obj_found_so_far:
                 
-                    obj_found_so_far.append(id)
+                    # obj_found_so_far.append(id)
                     
-                    strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block)))
+                    # strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block)))
                                         
                     id = "$" + str(given_id) + "-" + str(id) + "-" + str(current_tile) + "-" + str(iterations_passed) # indication that it is a object to be deleted 
                     

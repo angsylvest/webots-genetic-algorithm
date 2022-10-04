@@ -15,13 +15,13 @@ k_gen_f = open('gen-crw-info.csv', 'w')
 k_gen_f.write('time step' + ',fitness' + ',xpos' + ',ypos' + ',num col')
 k_gen_f.close()
 
-k_gen_f = open('gen-crw-info.csv', 'a')
+# k_gen_f = open('gen-crw-info.csv', 'a')
 # k_gen_df = pd.DataFrame(columns = ['time step', 'fitness', 'xpos', 'ypos', 'num col'])
 
 # csv from robot controllers - las 
-# strategy_f = open("las-info.csv", 'w')
-# strategy_f.write('agent id,'+ 'time step,' + 'straight,' + 'alternating-left,' + 'alternating-right,' + 'true random,' + 'time since last block,' + 'size')
-# strategy_f.close()
+strategy_f = open("crw-info.csv", 'w')
+strategy_f.write('agent id,'+ 'time step,' +' time since last block')
+strategy_f.close()
 
 overall_f = open('overall-crw-info.csv', 'w') 
 overall_f.write('trial' + ',time' + ',objects retrieved')
@@ -119,7 +119,7 @@ def generate_robot_central(num_robots):
     for i in range(num_robots):
         rootNode = robot.getRoot()
         rootChildrenField = rootNode.getField('children')
-        rootChildrenField.importMFNode(-1, 'robots/robot-las.wbo') 
+        rootChildrenField.importMFNode(-1, '../supervisor_controller/robots/robot-crw.wbo') 
         rec_node = rootChildrenField.getMFNode(-1)
     
         t_field = rec_node.getField('translation')
@@ -161,7 +161,7 @@ def regenerate_environment(block_dist):
     for i in range(10): 
         rootNode = robot.getRoot()
         rootChildrenField = rootNode.getField('children')
-        rootChildrenField.importMFNode(-1, 'cylinder-obj.wbo') 
+        rootChildrenField.importMFNode(-1, '../supervisor_controller/cylinder-obj.wbo') 
         rec_node = rootChildrenField.getMFNode(-1)
     
         t_field = rec_node.getField('translation')
@@ -171,7 +171,7 @@ def regenerate_environment(block_dist):
     for i in range(10): 
         rootNode = robot.getRoot()
         rootChildrenField = rootNode.getField('children')
-        rootChildrenField.importMFNode(-1, 'cylinder-obj.wbo') 
+        rootChildrenField.importMFNode(-1, '../supervisor_controller/cylinder-obj.wbo') 
         rec_node = rootChildrenField.getMFNode(-1)
     
         t_field = rec_node.getField('translation')
@@ -243,7 +243,7 @@ def message_listener(time_step):
     global total_found
     global found_list
     global block_list
-    global collected_count
+    global collected_count 
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -254,7 +254,7 @@ def message_listener(time_step):
             # collected_count[int(message[1])] = collected_count[int(message[1])] + 1
             print('removing object')
             # message = message[1:]
-            print(message)
+            # print(message)
             obj_node = robot.getFromId(int(message.split("-")[1]))
             print(obj_node)
             if obj_node is not None:
@@ -273,6 +273,7 @@ def message_listener(time_step):
                         collected_count[int(message.split("-")[0][1:])] = collected_count[int(message.split("-")[0][1:])] + 1
                         msg_info = "%" + message[1:]
                         emitter.send(str(msg_info).encode('utf-8'))
+ 
                     
                     # total_found += 1
             receiver.nextPacket()
@@ -283,6 +284,7 @@ def message_listener(time_step):
             fitness_scores[int(index)] = fit
             
             curr_df.write('agent id:' + str(index) + ',time step: ' + str(time_step) + ',fitness:' + str(fit) + ',xpos:' + str(population[int(index)].getPosition()[0]) + ',ypos:' + str(population[int(index)].getPosition()[1]) + ',num col:' + str(collected_count[int(index)]) + ',genotype:')
+            
             
             receiver.nextPacket()
             pass # will be generalized 

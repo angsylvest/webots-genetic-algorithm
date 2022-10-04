@@ -76,7 +76,13 @@ time_switch = 150
 global obj_found_so_far
 obj_found_so_far = []
 
-given_id = robot.getName()[-1] 
+if robot.getName() == "k0":
+    given_id = 0
+else: 
+    given_id = robot.getName()[-2] 
+
+strategy_f = open(str(given_id) + "crw-info.csv", 'a')
+t_block = 0
 
 
 def rotate_random():
@@ -164,6 +170,9 @@ def parse_genotype(gen):
 def interpret(): 
     global fitness
     global given_id 
+    global t_block
+    global strategy_f
+    global obj_found_so_far
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -180,6 +189,16 @@ def interpret():
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
             fitness = 0
+            
+        elif message[0] == "%" and message.split('-')[0][1:] == str(given_id):
+             
+            id = message.split('-')[1]
+            obj_found_so_far.append(id)
+            strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block)))
+                    
+            fitness = 0 
+            t_block = 0
+                
         else: 
             receiver.nextPacket()
     
@@ -247,12 +266,26 @@ while robot.step(timestep) != -1:
                 id = str(firstObject.get_id())
                 
                 if id not in obj_found_so_far:
-                    obj_found_so_far.append(id)
-                    id = "$" + id # indication that it is a object to be deleted 
+                
+                    # obj_found_so_far.append(id)
+                    
+                    # strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block)))
+                                        
+                    id = "$" + str(given_id) + "-" + str(id) # indication that it is a object to be deleted 
+                    
                     emitter.send(str(id).encode('utf-8'))
-                    fitness += 1 
+                    # fitness += 1 
                     holding_something = False 
                     chosen_direction = correlated_random(chosen_direction)
+                    
+                    
+                    # obj_found_so_far.append(id)
+                    # id = "$" + id # indication that it is a object to be deleted 
+                    # emitter.send(str(id).encode('utf-8'))
+                    # fitness += 1 
+                    # holding_something = False 
+                    # chosen_direction = correlated_random(chosen_direction)
+                    
             elif dist_val == 0:
                 fitness -= 1 
                 print('collision encountered')
@@ -260,8 +293,9 @@ while robot.step(timestep) != -1:
                 move_backwards()
                 
         else: 
-            pass
+            t_block += 1
     else: 
+         t_block += 1
          object_encountered = False
     
     i+=1
