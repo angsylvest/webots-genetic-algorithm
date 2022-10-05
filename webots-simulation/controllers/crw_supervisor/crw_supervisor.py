@@ -20,7 +20,7 @@ Angel Sylvester 2022
 
 # Agent File Initialization 
 strategy_f = open("crw-info.csv", 'w')
-strategy_f.write('agent id,'+ 'time step,' +' time since last block' + ',size')
+strategy_f.write('agent id,'+ 'time step,' +' time since last block' + ',size' + ',collisions')
 strategy_f.close()
 
 # Global File Initialization 

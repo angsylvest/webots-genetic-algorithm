@@ -11,7 +11,7 @@ Optimization algorithm - Collaboration-oriented
 Angel Sylvester 2022
 """
 
-columns = 'agent id' + ',time step' + ',fitness' + ',xpos'+ ',ypos' + ',num col' + ',genotype'
+columns = 'agent id' + ',time step' + ',fitness' + ',xpos'+ ',ypos' + ',num col' + ',genotype' 
 
 # create data frame so that it is singularity friendly 
 # k1_f = open('robot-1-info.csv', 'w')
@@ -51,7 +51,7 @@ overall_f.close()
 overall_f = open('overall-df.csv', 'a')
 
 strategy_f = open("ga-info.csv", 'w')
-strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size')
+strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size' + ',collisions')
 strategy_f.close()
 
 TIME_STEP = 32
@@ -448,6 +448,9 @@ def message_listener(time_step):
             
             receiver.nextPacket()
             
+        else: 
+            
+            receiver.nextPacket()
         
             
     

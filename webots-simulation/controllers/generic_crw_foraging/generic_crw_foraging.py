@@ -191,6 +191,8 @@ def interpret():
             print('response is', response)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
+            strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block) + ',size: ' + str(curr_sim_size) + ',collisions' + str(fitness)))
+            
             fitness = 0
             
         elif 'size' in message:
@@ -200,9 +202,9 @@ def interpret():
              
             id = message.split('-')[1]
             obj_found_so_far.append(id)
-            strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block) ',size: ' + str(curr_sim_size)))
+            # strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block) + ',size: ' + str(curr_sim_size)))
                     
-            fitness = 0 
+            # fitness = 0 
             t_block = 0
                 
         else: 
@@ -252,10 +254,11 @@ while robot.step(timestep) != -1:
     
     # wall avoidance 
     if round(dist_val) == 283:
-        fitness -= 1 
+        # fitness -= 1 
         print('collision encountered')
         chosen_direction = rotate_random() 
         move_backwards()
+        fitness += 1
         
     # handles other obstacles     
     if dist_val < detect_thres and holding_something == False and len(list) > 0: 
@@ -293,7 +296,7 @@ while robot.step(timestep) != -1:
                     # chosen_direction = correlated_random(chosen_direction)
                     
             elif dist_val == 0:
-                fitness -= 1 
+                fitness += 1 
                 print('collision encountered')
                 chosen_direction = rotate_random() 
                 move_backwards()

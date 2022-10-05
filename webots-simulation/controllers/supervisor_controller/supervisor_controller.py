@@ -20,7 +20,7 @@ Angel Sylvester 2022
 
 # Agent File Initialization 
 strategy_f = open("las-info.csv", 'w')
-strategy_f.write('agent id,'+ 'time step,' + 'time since last block' + ',size')
+strategy_f.write('agent id,'+ 'time step,' + 'time since last block' + ',size' + ',collisions')
 strategy_f.close()
 
 # Global File Initialization 
@@ -287,6 +287,9 @@ def message_listener(time_step):
             
             receiver.nextPacket()
             pass # will be generalized 
+            
+        else: 
+            receiver.nextPacket()
 
 # runs simulation for designated amount of time 
 def run_seconds(t,waiting=False):

@@ -211,9 +211,10 @@ def interpret():
             response = "k" + str(int(given_id)) + "-fitness" + str(fitness)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
+            strategy_f.write('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block) + ',size: ' + str(curr_sim_size) + 'collisions,' + str(fitness))
             fitness = 0
             
-            strategy_f.write('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block) + ',size: ' + str(curr_sim_size))
+            # strategy_f.write('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block) + ',size: ' + str(curr_sim_size))
             # new_row = {'agent id': given_id, 'time step': robot.step(timestep),'time since last block': t_block}
             # strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
             
@@ -227,9 +228,10 @@ def interpret():
         elif message[0] == "%" and message.split('-')[0][1:] == str(given_id):
             id = message.split('-')[1]
             obj_found_so_far.append(id)
-            strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block) + ',size: ' + str(curr_sim_size)))
+            # fitness += 1 
+            # strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block) + ',size: ' + str(curr_sim_size) + ',fitness' + str(fitness)))
                     
-            fitness = 0 
+            # fitness += 1 
             t_block = 0
             curr_tile = int(message.split('-')[1])
             it_passed = int(message.split('-')[2])
@@ -336,7 +338,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
     
     # wall avoidance 
     if round(dist_val) == 283:
-        fitness -= 1 
+        fitness += 1 
         print('collision encountered')
         chosen_direction = rotate_random() 
         move_backwards()
@@ -344,6 +346,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
     if collision.getValue() == 1: 
         chosen_direction = rotate_random() 
         move_backwards()
+        fitness += 1
         
     # handles other obstacles     
     if dist_val < detect_thres and holding_something == False and len(list) > 0: 
@@ -379,7 +382,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                         # has_collected = True
                     
             elif dist_val == 0 or collision.getValue() == 1:
-                fitness -= 1 
+                fitness += 1 
                 print('collision encountered')
                 chosen_direction = rotate_random() 
                 move_backwards()
