@@ -50,7 +50,7 @@ overall_f.write(str(overall_columns))
 overall_f.close()
 overall_f = open('overall-df.csv', 'a')
 
-strategy_f = open("ga-info.csv", 'w')
+strategy_f = open("../generalized_ga_controller/ga-info.csv", 'w')
 strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size' + ',collisions')
 strategy_f.close()
 
@@ -334,6 +334,7 @@ def save_progress():
     # k2_f.close() 
     # k3_f.close()    
     curr_df.close() 
+    overall_f.close()
  
     # generate_fitness_csvs(df_list)
     # generate_fitness("summary-fitness.csv")

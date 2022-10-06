@@ -19,7 +19,7 @@ Angel Sylvester 2022
 # k_gen_df = pd.DataFrame(columns = ['time step', 'fitness', 'xpos', 'ypos', 'num col'])
 
 # Agent File Initialization 
-strategy_f = open("las-info.csv", 'w')
+strategy_f = open("../las_algorithm/las-info.csv", 'w')
 strategy_f.write('agent id,'+ 'time step,' + 'time since last block' + ',size' + ',collisions')
 strategy_f.close()
 
@@ -223,6 +223,7 @@ def save_progress():
     # way to save total number of blocks found 
     # global k_gen_f
     global overall_f
+    overall_f.close()
     
     # new_row = {'time': simulation_time*num_generations, 'objects retrieved': total_found}
     # overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index=True)

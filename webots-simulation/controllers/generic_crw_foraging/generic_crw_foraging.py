@@ -187,7 +187,7 @@ def interpret():
             
         elif message == "return_fitness":
             print('request received') 
-            response = "k" + str(given_id) + "fitness-" + str(fitness)
+            response = "k" + str(given_id) + "-fitness" + str(fitness)
             print('response is', response)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()

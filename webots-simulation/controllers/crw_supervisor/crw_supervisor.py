@@ -19,7 +19,7 @@ Angel Sylvester 2022
 # k_gen_df = pd.DataFrame(columns = ['time step', 'fitness', 'xpos', 'ypos', 'num col'])
 
 # Agent File Initialization 
-strategy_f = open("crw-info.csv", 'w')
+strategy_f = open("../generic_crw_foraging/crw-info.csv", 'w')
 strategy_f.write('agent id,'+ 'time step,' +' time since last block' + ',size' + ',collisions')
 strategy_f.close()
 
