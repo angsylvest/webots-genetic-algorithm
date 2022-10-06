@@ -167,7 +167,7 @@ def grab_object(curr_step, initial_step):
         leftGrip.setPosition(closed_grip)
         rightGrip.setPosition(closed_grip) 
         fitness += 1 
-        print('fitness 3 increased', fitness) 
+        # print('fitness 3 increased', fitness) 
     elif (i == 80):
         motor.setPosition(-1.4) # arm up
 
@@ -290,7 +290,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     # will change direction after max number of iterations passed 
                     # iterations_passed = 0 
                     las.penalize(current_tile)
-                    chosen_direction = las.re_direct(current_tile) # updates target 
+                    chosen_direction = las.re_gather(current_tile) # updates target 
                     time_switch = 150
                     
                 elif has_collected:
@@ -307,7 +307,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
               
             
         else: 
-            chosen_direction = las.re_gather(current_tile)  
+            chosen_direction = las.re_direct(current_tile)  
         
     elif yaw == chosen_direction and orientation_found != True: 
         orientation_found = True 
@@ -339,7 +339,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
     # wall avoidance 
     if round(dist_val) == 283:
         fitness += 1 
-        print('collision encountered')
+        # print('collision encountered')
         chosen_direction = rotate_random() 
         move_backwards()
         
@@ -383,7 +383,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     
             elif dist_val == 0 or collision.getValue() == 1:
                 fitness += 1 
-                print('collision encountered')
+                # print('collision encountered')
                 chosen_direction = rotate_random() 
                 move_backwards()
                 

@@ -381,12 +381,12 @@ while robot.step(timestep) != -1 and sim_complete != True:
         if robot.step(timestep) % 500 == 0:
             # print('choosing strategy with update') 
             strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = True) # chooses a new strategy 
-            print(strategy) 
+            # print(strategy) 
             
         else: 
-            print('choosing strategy, no updating') 
+            # print('choosing strategy, no updating') 
             strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = False)
-            print(strategy)
+            # print(strategy)
         
     interpret(str(robot.step(timestep))) # checks for messages from supervisor 
     time_elapsed_since_robot +=1
@@ -421,7 +421,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
     
     if round(dist_val) == 283: # wall detection 
         fitness += 1 
-        print('collision encountered')
+        # print('collision encountered')
         chosen_direction = rotate_random() 
         move_backwards()
      
@@ -463,7 +463,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
          
             if dist_val == 0 or collision.getValue() == 1:
                 fitness += 1 
-                print('collision encountered')
+                # print('collision encountered')
                 chosen_direction = rotate_random()
                 move_backwards()
         else:

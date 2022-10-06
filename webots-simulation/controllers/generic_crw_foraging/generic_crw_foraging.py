@@ -255,7 +255,7 @@ while robot.step(timestep) != -1:
     # wall avoidance 
     if round(dist_val) == 283:
         # fitness -= 1 
-        print('collision encountered')
+        # print('collision encountered')
         chosen_direction = rotate_random() 
         move_backwards()
         fitness += 1
@@ -297,7 +297,7 @@ while robot.step(timestep) != -1:
                     
             elif dist_val == 0:
                 fitness += 1 
-                print('collision encountered')
+                # print('collision encountered')
                 chosen_direction = rotate_random() 
                 move_backwards()
                 

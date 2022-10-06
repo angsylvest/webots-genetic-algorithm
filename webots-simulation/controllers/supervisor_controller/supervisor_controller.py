@@ -250,15 +250,14 @@ def message_listener(time_step):
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
         
-        print('incoming messages', message) 
+        # print('incoming messages', message) 
         
         if message[0] == "$": # handles deletion of objects when grabbed
             # collected_count[int(message[1])] = collected_count[int(message[1])] + 1
-            print('removing object')
             # message = message[1:]
-            print(message)
+            # print(message)
             obj_node = robot.getFromId(int(message.split("-")[1]))
-            print(obj_node)
+            # print(obj_node)
             if obj_node is not None:
                 r_node_loc = population[int(message.split("-")[0][1:])].getField('translation').getSFVec3f()
                 t_field = obj_node.getField('translation')
@@ -275,6 +274,7 @@ def message_listener(time_step):
                         collected_count[int(message.split("-")[0][1:])] = collected_count[int(message.split("-")[0][1:])] + 1
                         msg_info = "%" + message[1:]
                         emitter.send(str(msg_info).encode('utf-8'))
+                        print('removing object')
                     
                     # total_found += 1
             receiver.nextPacket()
