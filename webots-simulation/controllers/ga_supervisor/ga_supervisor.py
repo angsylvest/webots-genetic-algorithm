@@ -392,6 +392,7 @@ def message_listener(time_step):
             fit = message.split('-')[1][7:] 
             index = message.split('-')[0][1:]
             fitness_scores[int(index)] = fit
+            print('fitness' , message, index, fit)
             
             curr_df.write('agent id:' + str(index) + ',time step: ' + str(time_step) + ',fitness:' + str(fit) + ',xpos:' + str(population[int(index)].getPosition()[0]) + ',ypos:' + str(population[int(index)].getPosition()[1]) + ',num col:' + str(collected_count[int(index)]) + ',genotype:' + str(pop_genotypes[int(index)]))
             
@@ -568,9 +569,9 @@ def eval_fitness(time_step):
     global pop_genotypes 
     global fitness_scores 
     global fit_update
-    global k1_df 
-    global k2_df 
-    global k3_df
+    # global k1_df 
+    # global k2_df 
+    # global k3_df
     global population 
             
     if '!' not in fitness_scores: 

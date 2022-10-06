@@ -321,6 +321,7 @@ def interpret(timestep):
             
         elif message == "return_fitness": # happpens at end of generation 
             response = "k" + str(int(given_id)) + "-fitness" + str(fitness)
+            print('response' , response) 
             strategy_f.write('agent id:' + str(given_id) + ',time step: '+ timestep + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block) + ',size:' + str(curr_sim_size) + ',collisions:' + str(fitness))
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()

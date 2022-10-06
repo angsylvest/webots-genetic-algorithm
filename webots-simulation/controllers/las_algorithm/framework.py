@@ -162,7 +162,7 @@ class LAS():
             otpx, otpy, obrx, obry = new_cell
             omx, omy = (otpx + obrx)/2, (otpy + obry)/2 # calculating midpoint 
              
-            direction = math.atan((omy - my)/ (omx - mx))
+            direction = math.atan2(omy,omx)
             self.target = new_tile
             self.dir_vector = direction 
              
@@ -184,7 +184,7 @@ class LAS():
         otpx, otpy, obrx, obry = self.cells[new_cell]
         omx, omy = (otpx + obrx)/2, (otpy + obry)/2 # calculating midpoint 
         # print(omx, omy)
-        direction = math.atan((omy - my)/ (omx - mx))
+        direction = math.atan2((omy),(omx))
         self.target = new_tile
         self.dir_vector = direction 
          
