@@ -389,7 +389,7 @@ def message_listener(time_step):
             receiver.nextPacket()
         
         elif 'fitness' in message: 
-            fit = message.split('-')[1][8:] 
+            fit = message.split('-')[1][7:] 
             index = message.split('-')[0][1:]
             fitness_scores[int(index)] = fit
             
