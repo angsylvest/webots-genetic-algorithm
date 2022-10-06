@@ -221,9 +221,11 @@ def interpret():
         elif message == 'sim-complete':
             sim_complete = True 
             strategy_df.close()
+            receiver.nextPacket()
             
         elif "size" in message: 
             curr_sim_size = message[4:]
+            receiver.nextPacket()
             
         elif message[0] == "%" and message.split('-')[0][1:] == str(given_id):
             id = message.split('-')[1]
@@ -240,6 +242,8 @@ def interpret():
             
             if curr_tile == las.target and las.iterations_threshold <= int(it_passed):
                 has_collected = True
+                
+            receiver.nextPacket()
 
         else: 
             receiver.nextPacket()

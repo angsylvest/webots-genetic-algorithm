@@ -197,6 +197,7 @@ def interpret():
             
         elif 'size' in message:
             curr_sim_size = message[4:]
+            receiver.nextPacket()
             
         elif message[0] == "%" and message.split('-')[0][1:] == str(given_id):
              
@@ -206,6 +207,7 @@ def interpret():
                     
             # fitness = 0 
             t_block = 0
+            receiver.nextPacket()
                 
         else: 
             receiver.nextPacket()

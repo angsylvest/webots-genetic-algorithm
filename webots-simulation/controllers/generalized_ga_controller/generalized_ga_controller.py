@@ -313,6 +313,8 @@ def interpret(timestep):
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
+        
+        # print('incoming messages: ', given_id, message) 
     
         if message[0:2] == "#" + str(given_id):
             message = message[2:].split("*")
@@ -321,7 +323,7 @@ def interpret(timestep):
             
         elif message == "return_fitness": # happpens at end of generation 
             response = "k" + str(int(given_id)) + "-fitness" + str(fitness)
-            print('response' , response) 
+            # print('response' , response) 
             strategy_f.write('agent id:' + str(given_id) + ',time step: '+ timestep + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block) + ',size:' + str(curr_sim_size) + ',collisions:' + str(fitness))
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
@@ -330,9 +332,10 @@ def interpret(timestep):
         elif message == 'sim-complete':
             sim_complete = True 
             strategy_f.close()
+            receiver.nextPacket()
             # strategy_df.to_csv('strategy_df' + str(given_id) + '.csv')
             
-        elif message[0] == "%" and message.split('-')[0][1:] == str(given_id):
+        elif message[0] == "%" and str(message.split('-')[0][1:]) == str(given_id):
             # strategy_f.write('agent id:' + str(given_id) + ',time step: '+ timestep + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block) + ',size' + str(curr_sim_size))
             
             obj_id = message.split('-')[1]
@@ -346,8 +349,12 @@ def interpret(timestep):
             holding_something = False 
             chosen_direction = correlated_random(chosen_direction)
             
+            receiver.nextPacket()
+            
         elif 'size' in message:
             curr_sim_size = message[4:]
+            
+            receiver.nextPacket()
         
         else: 
             receiver.nextPacket()

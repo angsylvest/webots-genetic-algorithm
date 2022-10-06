@@ -263,7 +263,7 @@ def message_listener(time_step):
                 t_field = obj_node.getField('translation')
                 t_node_loc = t_field.getSFVec3f()
                 
-                print(math.dist(r_node_loc, t_node_loc))
+                # print(math.dist(r_node_loc, t_node_loc))
                 if (math.dist(r_node_loc, t_node_loc) < 0.15): # only count if actually in range 
                     t_field.setSFVec3f([-0.9199,-0.92, 0.059]) 
                     # obj_node.remove()
