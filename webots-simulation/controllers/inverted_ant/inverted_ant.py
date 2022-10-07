@@ -1,8 +1,4 @@
-"""levy_walk controller.
-Controller for random walk in which the step-lengths have a Levy Distribution (a probability 
-distribution that is heavy-tailed)
-
-"""
+"""inverted_ant controller."""
 
 # You may need to import some classes of the controller module. Ex:
 #  from controller import Robot, Motor, DistanceSensor
