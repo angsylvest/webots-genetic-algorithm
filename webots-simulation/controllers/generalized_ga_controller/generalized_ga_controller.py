@@ -96,7 +96,7 @@ else:
 # strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size')
 # strategy_f.close()
 
-strategy_f = open(str(given_id) + "ga-info.csv", 'a')
+strategy_f = open("ga-info.csv", 'a')
 
 # global time_elapsed_since_block
 time_elapsed_since_block = 0

@@ -102,7 +102,7 @@ else:
     given_id = robot.getName()[-2] 
     
 
-strategy_f = open(str(given_id) + "las-info.csv", 'a')
+strategy_f = open("las-info.csv", 'a')
 
 
 def rotate_random():
