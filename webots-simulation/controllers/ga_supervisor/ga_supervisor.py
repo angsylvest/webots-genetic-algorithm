@@ -51,7 +51,7 @@ overall_f.close()
 overall_f = open('overall-df.csv', 'a')
 
 strategy_f = open("../generalized_ga_controller/ga-info.csv", 'w')
-strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size' + ',collisions'+ '\n')
+strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size' + ',collisions'+ ',size' + '\n')
 strategy_f.close()
 
 TIME_STEP = 32
