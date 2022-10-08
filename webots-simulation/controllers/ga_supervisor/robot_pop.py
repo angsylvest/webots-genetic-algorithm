@@ -65,7 +65,7 @@ def crossover(m, d):
     return new_child 
 
 def mutate(c, mut_prob):
-    print('child c', c, len(c)) 
+    # print('child c', c, len(c)) 
 
     size = len(c) 
     for i in range(size): 

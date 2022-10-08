@@ -20,12 +20,12 @@ Angel Sylvester 2022
 
 # Agent File Initialization 
 strategy_f = open("../las_algorithm/las-info.csv", 'w')
-strategy_f.write('agent id,'+ 'time step,' + 'time since last block' + ',size' + ',collisions')
+strategy_f.write('agent id,'+ 'time step,' + 'time since last block' + ',size' + ',collisions'+ '\n')
 strategy_f.close()
 
 # Global File Initialization 
 overall_f = open('overall-crw-info.csv', 'w') 
-overall_f.write('trial' + ',time' + ',objects retrieved'+ ',size')
+overall_f.write('trial' + ',time' + ',objects retrieved'+ ',size'+ '\n')
 overall_f.close()
 
 overall_f = open('overall-crw-info.csv', 'a') 
@@ -49,7 +49,7 @@ receiver = robot.getDevice("receiver")
 receiver.enable(TIME_STEP)
 receiver.setChannel(2) 
 
-num_generations = 10
+num_generations = 1
 
 global population 
 population = []
@@ -82,7 +82,7 @@ simulation_time = 15
 
 count = 0
 
-trials = 15
+trials = 10
 
 found_list = []
  
@@ -115,7 +115,9 @@ def generate_robot_central(num_robots):
         for r in population: 
             r.remove()
             
-        population = []
+    population = []
+    fitness_scores = []
+    collected_count = []
     
     for i in range(num_robots):
         rootNode = robot.getRoot()
@@ -284,7 +286,7 @@ def message_listener(time_step):
             index = message.split('-')[0][1:]
             fitness_scores[int(index)] = fit
             
-            curr_df.write('agent id:' + str(index) + ',time step: ' + str(time_step) + ',fitness:' + str(fit) + ',xpos:' + str(population[int(index)].getPosition()[0]) + ',ypos:' + str(population[int(index)].getPosition()[1]) + ',num col:' + str(collected_count[int(index)]) + ',genotype:')
+            curr_df.write('agent id:' + str(index) + ',time step: ' + str(time_step) + ',fitness:' + str(fit) + ',xpos:' + str(population[int(index)].getPosition()[0]) + ',ypos:' + str(population[int(index)].getPosition()[1]) + ',num col:' + str(collected_count[int(index)]) + ',genotype:'+ + '\n')
             
             receiver.nextPacket()
             pass # will be generalized 
@@ -380,7 +382,7 @@ def run_optimization():
     # initialize genotypes 
     # will be same genotype as normal (for comparison purposes) 
     
-    generate_robot_central(5)
+    generate_robot_central(robot_population_sizes[0])
     regenerate_environment(0.2) 
     run_seconds(simulation_time)
     print('new generation beginning')
@@ -409,7 +411,7 @@ def run_optimization():
         # k2_f = open('robot-2-info.csv', 'w')
         # k3_f = open('robot-3-info.csv', 'w')
         
-        curr_df.write(str(overall_columns))
+        curr_df.write(str(overall_columns)+ '\n')
         # k2_f.write(str(columns))
         # k3_f.write(str(columns))
         
@@ -434,7 +436,7 @@ def run_optimization():
                 print('found genotypes')
                 print('new generation starting -')
             
-            overall_f.write('trial:' + str(i) + ',time:' + str(simulation_time*num_generations) + ',objects retrieved:' + str(total_found) + ',size:' + str(size))    
+            overall_f.write('trial:' + str(i) + ',time:' + str(simulation_time*num_generations) + ',objects retrieved:' + str(total_found) + ',size:' + str(size)+ '\n')    
             # new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
             print('items collected', total_found)
             # overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)
@@ -450,6 +452,7 @@ def run_optimization():
                 # pop_genotypes.append(genotype)
                 # emitter.send(str("#" + str(i) + str(genotype)).encode('utf-8'))
                 # index +=1  
+        curr_df.close()
                 
     overall_f.close()
     

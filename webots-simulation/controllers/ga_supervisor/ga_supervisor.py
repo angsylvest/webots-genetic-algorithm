@@ -45,13 +45,13 @@ collected_count = []
 
 overall_f = open('overall-df.csv', 'w')
 overall_columns = ['trial','time', 'objects retrieved', 'size']
-overall_f.write(str(overall_columns))
+overall_f.write(str(overall_columns) + '\n')
 # overall_df = pd.DataFrame(columns = ['trial','time', 'objects retrieved'])
 overall_f.close()
 overall_f = open('overall-df.csv', 'a')
 
 strategy_f = open("../generalized_ga_controller/ga-info.csv", 'w')
-strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size' + ',collisions')
+strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size' + ',collisions'+ '\n')
 strategy_f.close()
 
 TIME_STEP = 32
@@ -79,7 +79,7 @@ receiver = robot.getDevice("receiver")
 receiver.enable(TIME_STEP)
 receiver.setChannel(2) 
 
-num_generations = 2
+num_generations = 10
 
 # global initial_genotypes 
 initial_genotypes = []
@@ -103,9 +103,9 @@ updated = False
 
 fit_update = False 
 
-simulation_time = 5
+simulation_time = 15
 
-trials = 2
+trials = 19
 
 block_list = []
  
@@ -130,10 +130,11 @@ def generate_robot_central(num_robots):
     
         for r in population: 
             r.remove()
-            
-        population = []
+             
+    population = []
+    fitness_scores = []
+    collected_count = []
         
-    
     for i in range(num_robots):
         rootNode = robot.getRoot()
         rootChildrenField = rootNode.getField('children')
@@ -392,9 +393,9 @@ def message_listener(time_step):
             fit = message.split('-')[1][7:] 
             index = message.split('-')[0][1:]
             fitness_scores[int(index)] = fit
-            # print('fitness' , message, index, fit)
+            print('fitness' , message, index, fit)
             
-            curr_df.write('agent id:' + str(index) + ',time step: ' + str(time_step) + ',fitness:' + str(fit) + ',xpos:' + str(population[int(index)].getPosition()[0]) + ',ypos:' + str(population[int(index)].getPosition()[1]) + ',num col:' + str(collected_count[int(index)]) + ',genotype:' + str(pop_genotypes[int(index)]))
+            curr_df.write('agent id:' + str(index) + ',time step: ' + str(time_step) + ',fitness:' + str(fit) + ',xpos:' + str(population[int(index)].getPosition()[0]) + ',ypos:' + str(population[int(index)].getPosition()[1]) + ',num col:' + str(collected_count[int(index)]) + ',genotype:' + str(pop_genotypes[int(index)])+ '\n')
             
             receiver.nextPacket()
             pass # will be generalized 
@@ -521,7 +522,7 @@ def update_geno_list(genotype_list):
         for i in range(len(population)):
             g = create_individal_genotype(gene_list)
             # print('updated genolist --', g)
-            pop_genotypes.append(g)
+            pop_genotypes[i] = g
         
         # g1 = create_individal_genotype(gene_list)
         # g2 = create_individal_genotype(gene_list)
@@ -556,6 +557,9 @@ def update_geno_list(genotype_list):
         # replace genotypes of one of parents 
                      
     # update parameters to hopefully improve performance
+    print('curr population --', population, len(population))
+    
+    # fitness_scores = []
     fitness_scores = ["!" for i in range(len(population))]
     fit_update = False 
     print('gene pool updated') 
@@ -573,6 +577,8 @@ def eval_fitness(time_step):
     # global k2_df 
     # global k3_df
     global population 
+    
+    # print('fitness scores ', fitness_scores)
             
     if '!' not in fitness_scores: 
         # receiver.nextPacket()
@@ -583,6 +589,8 @@ def eval_fitness(time_step):
 def reset_genotype():
     index = 0 
     global population 
+    global pop_genotypes 
+    pop_genotypes = []
     
     for i in range(len(population)):
         # genotype = create_individal_genotype(gene_list)
@@ -622,7 +630,7 @@ def run_optimization():
         # k2_f = open('robot-2-info.csv', 'w')
         # k3_f = open('robot-3-info.csv', 'w')
         
-        curr_df.write(str(columns))
+        curr_df.write(str(columns)+ '\n')
         # k2_f.write(str(columns))
         # k3_f.write(str(columns))
         
@@ -663,7 +671,7 @@ def run_optimization():
                 reproduce_list = []
                 # print('trial --' ,i)
             
-            overall_f.write('trial:' + str(i) + ',time:' + str(simulation_time*num_generations) + ',objects retrieved:' + str(total_found), ',size:' + str(size))    
+            overall_f.write('trial:' + str(i) + ',time:' + str(simulation_time*num_generations) + ',objects retrieved:' + str(total_found) + ',size:' + str(size)+ '\n')    
             # new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
             print('items collected', total_found)
             # overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)

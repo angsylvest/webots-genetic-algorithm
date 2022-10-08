@@ -20,12 +20,12 @@ Angel Sylvester 2022
 
 # Agent File Initialization 
 strategy_f = open("../generic_crw_foraging/crw-info.csv", 'w')
-strategy_f.write('agent id,'+ 'time step,' +' time since last block' + ',size' + ',collisions')
+strategy_f.write('agent id,'+ 'time step,' +' time since last block' + ',size' + ',collisions'+ '\n')
 strategy_f.close()
 
 # Global File Initialization 
 overall_f = open('overall-crw-info.csv', 'w') 
-overall_f.write('trial' + ',time' + ',objects retrieved' + ',size')
+overall_f.write('trial' + ',time' + ',objects retrieved' + ',size'+ '\n')
 overall_f.close()
 
 overall_f = open('overall-crw-info.csv', 'a') 
@@ -49,7 +49,7 @@ receiver = robot.getDevice("receiver")
 receiver.enable(TIME_STEP)
 receiver.setChannel(2) 
 
-num_generations = 10
+num_generations = 3
 
 global population 
 population = []
@@ -78,11 +78,11 @@ updated = False
 
 fit_update = False 
 
-simulation_time = 15
+simulation_time = 5
 
 count = 0
 
-trials = 15
+trials = 3
 
 found_list = []
  
@@ -115,7 +115,10 @@ def generate_robot_central(num_robots):
         for r in population: 
             r.remove()
             
-        population = []
+            
+    population = []
+    fitness_scores = []
+    collected_count = []
     
     for i in range(num_robots):
         rootNode = robot.getRoot()
@@ -257,7 +260,7 @@ def message_listener(time_step):
             # message = message[1:]
             # print(message)
             obj_node = robot.getFromId(int(message.split("-")[1]))
-            print(obj_node)
+            # print(obj_node)
             if obj_node is not None:
                 r_node_loc = population[int(message.split("-")[0][1:])].getField('translation').getSFVec3f()
                 t_field = obj_node.getField('translation')
@@ -281,15 +284,20 @@ def message_listener(time_step):
             receiver.nextPacket()
             
         elif 'fitness' in message:
+            print('message', message) 
             fit = message.split('-')[1][7:] 
             index = message.split('-')[0][1:]
             fitness_scores[int(index)] = fit
+            print('fitness scores', fitness_scores)
             
-            curr_df.write('agent id:' + str(index) + ',time step: ' + str(time_step) + ',fitness:' + str(fit) + ',xpos:' + str(population[int(index)].getPosition()[0]) + ',ypos:' + str(population[int(index)].getPosition()[1]) + ',num col:' + str(collected_count[int(index)]) + ',genotype:')
+            curr_df.write('agent id:' + str(index) + ',time step: ' + str(time_step) + ',fitness:' + str(fit) + ',xpos:' + str(population[int(index)].getPosition()[0]) + ',ypos:' + str(population[int(index)].getPosition()[1]) + ',num col:' + str(collected_count[int(index)]) + ',genotype:'+ '\n')
             
             
             receiver.nextPacket()
-            pass # will be generalized 
+            # will be generalized 
+            
+        else: 
+            receiver.nextPacket()
 
 # runs simulation for designated amount of time 
 def run_seconds(t,waiting=False):
@@ -346,7 +354,7 @@ def update_geno_list(genotype_list):
     # update parameters to hopefully improve performance
     fitness_scores = ["!" for i in range(len(population))]
     fit_update = False 
-    print('gene pool updated') 
+    print('gene pool updated', fitness_scores) 
     updated = True
     
  
@@ -357,6 +365,8 @@ def eval_fitness(time_step):
     global fitness_scores 
     global fit_update
     global updated
+    
+    # print('evaluating fitness', fitness_scores)
             
     if '!' not in fitness_scores: 
         # receiver.nextPacket()
@@ -380,7 +390,7 @@ def run_optimization():
     # will be same genotype as normal (for comparison purposes) 
     
     generate_robot_central(5)
-    regenerate_environment(0.2) 
+    generate_robot_central(robot_population_sizes[0])
     run_seconds(simulation_time)
     print('new generation beginning')
     run_seconds(5, True) # is waiting until got genotypes
@@ -408,7 +418,7 @@ def run_optimization():
         # k2_f = open('robot-2-info.csv', 'w')
         # k3_f = open('robot-3-info.csv', 'w')
         
-        curr_df.write(str(overall_columns))
+        curr_df.write(str(overall_columns)+ '\n')
         # k2_f.write(str(columns))
         # k3_f.write(str(columns))
         
@@ -449,6 +459,7 @@ def run_optimization():
                 # pop_genotypes.append(genotype)
                 # emitter.send(str("#" + str(i) + str(genotype)).encode('utf-8'))
                 # index +=1  
+        curr_df.close()
                 
     overall_f.close()
     

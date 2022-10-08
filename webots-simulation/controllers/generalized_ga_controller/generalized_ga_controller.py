@@ -155,7 +155,7 @@ def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False
     if update: 
         new_weights = create_new_weights(t_block, t_robot, original_weights)
         strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], new_weights)
-        strategy_f.write('agent id:' + str(given_id) + ',time step: '+ str(robot.step(timestep)) + ',straight:' + str(original_weights[0]) + ',alternating-left:' + str(original_weights[1]) + ',alternating-right:' + str(original_weights[2]) + ',true random:' + str(original_weights[3]) + ',time since last block:'+ str(t_block) + ',size:' + str(curr_sim_size) + ',collisions' + str(fitness))
+        strategy_f.write('agent id:' + str(given_id) + ',time step: '+ str(robot.step(timestep)) + ',straight:' + str(original_weights[0]) + ',alternating-left:' + str(original_weights[1]) + ',alternating-right:' + str(original_weights[2]) + ',true random:' + str(original_weights[3]) + ',time since last block:'+ str(t_block) + ',size:' + str(curr_sim_size) + ',collisions' + str(fitness)+ '\n')
         
         # new_row = {'agent id': given_id, 'time step': robot.step(timestep), 'straight': original_weights[0],'alternating-left': original_weights[1],'alternating-right': original_weights[2], 'true random': original_weights[3], 'time since last block': t_block}
         # strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
@@ -324,7 +324,7 @@ def interpret(timestep):
         elif message == "return_fitness": # happpens at end of generation 
             response = "k" + str(int(given_id)) + "-fitness" + str(fitness)
             # print('response' , response) 
-            strategy_f.write('agent id:' + str(given_id) + ',time step: '+ timestep + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block) + ',size:' + str(curr_sim_size) + ',collisions:' + str(fitness))
+            strategy_f.write('agent id:' + str(given_id) + ',time step: '+ timestep + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block) + ',size:' + str(curr_sim_size) + ',collisions:' + str(fitness)+ '\n')
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
             fitness = 0

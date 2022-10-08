@@ -89,7 +89,7 @@ curr_sim_size = 5
 
 def rotate_random():
     # will choose direction following biased random walk 
-    directions = [pi/2, pi, -pi/2, 0, 0, 0, 0] # more preference to move straight 
+    directions = [pi/2, pi, -pi/2, 0] # more preference to move straight 
     chosen_direction = random.choice(directions)
     chosen_direction = round(chosen_direction, 2) 
     return chosen_direction 
@@ -191,7 +191,7 @@ def interpret():
             print('response is', response)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
-            strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block) + ',size: ' + str(curr_sim_size) + ',collisions' + str(fitness)))
+            strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block) + ',size: ' + str(curr_sim_size) + ',collisions' + str(fitness))+ '\n')
             
             fitness = 0
             

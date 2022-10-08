@@ -83,15 +83,18 @@ curr_sim_size = 5
 # variables for LF (random walk with variable step size) 
 
 def calc_step_size():
+    global forward_speed
     beta = random.uniform(0.3, 1.99)
     omega_u = (get_gamma_val(1 + beta)*math.sin((math.pi * beta)/2)) / (beta*get_gamma_val((1 + beta)/2)*math.pow(2, ((beta - 1)/2)))
     omega_v = 1
     u = sample_normal_dist(omega_u)
     v = sample_normal_dist(omega_v)
     
-    z = u / (math.pow(1/beta))
+    z = u / (math.pow(2,1/beta)) 
     
-    return z 
+    return ((forward_speed/32)*1000) / z
+   
+   
 
 def get_gamma_val(input): 
     return math.gamma(input) 
@@ -102,7 +105,7 @@ def sample_normal_dist(stdev):
    
 def rotate_random():
     # will choose direction following biased random walk 
-    directions = [pi/2, pi, -pi/2, 0] # more preference to move straight 
+    directions = [math.pi/2, math.pi, -math.pi/2, 0] # more preference to move straight 
     chosen_direction = random.choice(directions)
     chosen_direction = round(chosen_direction, 2) 
     return chosen_direction 
@@ -237,6 +240,7 @@ while robot.step(timestep) != -1:
     elif (i - prev_i == time_switch and object_encountered != True):
         orientation_found = False 
         time_switch = calc_step_size()
+        print('new time switch', time_switch)
         chosen_direction = rotate_random() 
         
     elif orientation_found != True and yaw == chosen_direction and object_encountered != True: 
