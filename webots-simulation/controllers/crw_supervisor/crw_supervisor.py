@@ -49,7 +49,7 @@ receiver = robot.getDevice("receiver")
 receiver.enable(TIME_STEP)
 receiver.setChannel(2) 
 
-num_generations = 3
+num_generations = 10
 
 global population 
 population = []
@@ -78,11 +78,11 @@ updated = False
 
 fit_update = False 
 
-simulation_time = 5
+simulation_time = 15
 
 count = 0
 
-trials = 3
+trials = 10
 
 found_list = []
  
@@ -389,7 +389,7 @@ def run_optimization():
     # initialize genotypes 
     # will be same genotype as normal (for comparison purposes) 
     
-    generate_robot_central(5)
+    # generate_robot_central(5)
     generate_robot_central(robot_population_sizes[0])
     run_seconds(simulation_time)
     print('new generation beginning')
