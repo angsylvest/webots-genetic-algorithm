@@ -76,7 +76,7 @@ else:
     given_id = robot.getName()[-2] 
 
 # Agent Level File Appended Set-up 
-strategy_f = open(str(given_id) + "levy-info.csv", 'a')
+strategy_f = open("levy-info.csv", 'a')
 t_block = 0
 curr_sim_size = 5
 

@@ -11,21 +11,19 @@ class InvertedAnt():
         self.trx, self.tr_y = top_right
         self.blx, self.bly = bot_left
         self.num_cells = num_cells
-        self.prob_vector = []
+        self.curr_prob_vector = []
         self.neighbors = {}
         self.cells = [] # represents ranges for designated # of cells, right top x,y and bot x, y val
         # self.cell_names = [i in range(len(self.cells)] # for when we use random.choices with the corresponding prob distribution 
         self.cmax = 0.2
         self.cmin = 0.04
         self.ctotal = 0 
-        self.cvector = [o for i in range(len(self.cells))]
         
         # relevant sim variables 
         self.d = 1
         self.delta = 0.25
         self.beta = 0.01
         self.Q_vector = [] # previously visited cells 
-        self.phermoneVector = [0 for cell in range(len(self.cells))]
 
         num_per_row = num_cells // 3
         # row increment 
@@ -44,8 +42,9 @@ class InvertedAnt():
         
         self.dir_vector = 0 # direction that robot should persist towards to reach tile 
         self.curr_tile = self.locate_cell(curr_pos)
-        self.curr_prob_vector = initializeCurrentProbVector(self.curr_tile) # without phermones considered 
         self.target = self.curr_tile
+        self.cvector = [0 for i in range(len(self.cells))]
+        self.phermoneVector = [0 for cell in range(len(self.cells))]
 
         # precalculates neighbors
         for cell in self.cells:
@@ -60,9 +59,11 @@ class InvertedAnt():
                         neigh.append(other_cell)
             self.neighbors[str(cell)] = neigh
             
+        self.initializeCurrentProbVector(self.curr_tile) # without phermones considered 
+            
  
     def initializeCurrentProbVector(self, curr_tile): # just takes neighbors into account 
-        neighbors = self.neighbors[str(cell)]
+        neighbors = self.neighbors[str(self.cells[int(curr_tile)])]
         nei_tiles = []
         curr_prob_vector = [0 for i in range(len(self.cells))]
         
@@ -81,10 +82,9 @@ class InvertedAnt():
                 self.cvector[self.cells.index(self.cells[i])] = self.cmin
                 self.ctotal += self.cmin
                 
-        curr_prob_vector = [i/self.ctotal for i in curr_prob_vector]
+        # curr_prob_vector = [i/self.ctotal for i in curr_prob_vector]
         
-        return curr_prob_vector
-        
+        self.curr_prob_vector = curr_prob_vector
     
         
     def update_Q(self, curr_tile):
@@ -98,8 +98,8 @@ class InvertedAnt():
    
     # will update probability distribution as well   
     def addPhermone(self, curr_tile): 
-        self.phermoneVector[curr_tile] += self.d
-        neighbors = self.neighbors[self.cells[curr_tile]]
+        self.phermoneVector[int(curr_tile)] += self.d
+        neighbors = self.neighbors[str(self.cells[int(curr_tile)])]
         neighbor_phermones = []
         
         for n in neighbors: 
@@ -116,21 +116,22 @@ class InvertedAnt():
             tile = int(self.cells.index(n))
             if self.phermoneVector[tile] == max_phermone: 
                 self.ctotal -= self.cvector[tile]
-                self.cvector[tile] = cmin
-                self.ctotal += cmin
+                self.cvector[tile] = self.cmin
+                self.ctotal += self.cmin
             
-            elif all(self.phermoneVector[tile] <= for p in neighbor_phermones)
+            elif all(self.phermoneVector[tile] <= p for p in neighbor_phermones):
                 self.ctotal -= self.cvector[tile]
-                self.cvector[tile] = cmax
-                self.ctotal += cmax
-                
-        self.curr_prob_vector = [i/self.ctotal for i in curr_prob_vector]
+                self.cvector[tile] = self.cmax
+                self.ctotal += self.cmax
+           
+        for val in range(len(self.cvector)): 
+            self.curr_prob_vector[val] = self.cvector[val]
                 
    
     # will update probability distribution as well 
     def declinePhermone(self, curr_tile): # after 1 sec or (t/1000)*32 time_step 
     
-        neighbors = self.neighbors[self.cells[curr_tile]]
+        neighbors = self.neighbors[str(self.cells[int(curr_tile)])]
         for p in self.phermoneVector:
             if p != 0: 
                 p -= self.beta
@@ -148,19 +149,20 @@ class InvertedAnt():
             tile = int(self.cells.index(n))
             if self.phermoneVector[tile] == max_phermone: 
                 self.ctotal -= self.cvector[tile]
-                self.cvector[tile] = cmin
-                self.ctotal += cmin
+                self.cvector[tile] = self.cmin
+                self.ctotal += self.cmin
             
-            elif all(self.phermoneVector[tile] <= for p in neighbor_phermones)
+            elif all(self.phermoneVector[tile] <= p for p in neighbor_phermones):
                 self.ctotal -= self.cvector[tile]
-                self.cvector[tile] = cmax
-                self.ctotal += cmax
+                self.cvector[tile] = self.cmax
+                self.ctotal += self.cmax
                 
-        self.curr_prob_vector = [i/self.ctotal for i in curr_prob_vector]
+        for val in range(len(self.cvector)): 
+            self.curr_prob_vector[val] = self.cvector[val]
           
             
     def re_gather(self, curr_tile): 
-        new_cell = random.choices(self.cells, self.prob_vector)[0]
+        new_cell = random.choices(self.cells, self.curr_prob_vector)[0]
         # print(self.cells) 
         # print(new_cell)
         new_tile = self.cells.index(new_cell)
@@ -177,7 +179,7 @@ class InvertedAnt():
              
             return round(direction, 2)
         else: 
-            re_gather(curr_tile)
+            self.re_gather(curr_tile)
                                          
     # methods to locate cell 
     def update(self, original_tile, curr_pos):
@@ -213,6 +215,7 @@ class InvertedAnt():
         
         
     def re_direct(self, curr_tile): 
+    
         new_cell = self.target
         new_tile = self.cells[new_cell]
         

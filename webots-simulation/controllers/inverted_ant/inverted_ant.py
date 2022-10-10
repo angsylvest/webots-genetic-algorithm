@@ -11,7 +11,7 @@ import random
 from controller import Robot, Motor, DistanceSensor, Camera, CameraRecognitionObject, InertialUnit, GPS 
 from math import sin, cos, pi  
 import random 
-from inverted-framework import * 
+from inverted_framework import * 
 # import pandas as pd 
 
 # strategy_df = pd.DataFrame(columns = ['agent id' ,'time step','time since last block'])
@@ -102,7 +102,7 @@ else:
     given_id = robot.getName()[-2] 
     
 
-strategy_f = open(str(given_id) + "invertant-info.csv", 'a')
+strategy_f = open("ant-info.csv", 'a')
 
 
 def rotate_random():
@@ -196,6 +196,7 @@ def interpret():
     global t_block
     global curr_sim_size
     global obj_found_so_far
+    global ant 
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -237,6 +238,10 @@ def interpret():
             t_block = 0
                 
             receiver.nextPacket()
+            
+        elif message[0] == '*' and message.split('-')[1] != str(given_id): # updates prob distrib after encounter received 
+            current_tile = message.split('-')[0][1:]
+            ant.addPhermone(current_tile)
 
         else: 
             receiver.nextPacket()
@@ -255,62 +260,52 @@ start = False
 iterations_passed = 0
 has_collected = False
 sim_complete = False
+start_count = robot.getTime()
 
 while robot.step(timestep) != -1 and sim_complete != True:
 
     if not start:
-        las = LAS(curr_pos = (float(gps.getValues()[0]),float(gps.getValues()[1])))
-        current_tile = las.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
-        chosen_direction = las.re_direct(current_tile)
-        print('the current tile robot is on: ', current_tile, 'target is ', las.target, 'chosen direction: ', chosen_direction) 
+        ant = InvertedAnt(curr_pos = (float(gps.getValues()[0]),float(gps.getValues()[1])))
+        current_tile = ant.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
+        prev_tile = ant.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
+        chosen_direction = ant.re_gather(current_tile)
+        print('the current tile robot is on: ', current_tile, 'target is ', ant.target, 'chosen direction: ', chosen_direction) 
+        location = '*' + str(current_tile) + '-' + str(given_id)
+        emitter.send(str(location).encode('utf-8'))
+        
         start = True
     
     roll, pitch, yaw = inertia.getRollPitchYaw()
     yaw = round(yaw, 2)
     # print(yaw, 'vs: ', chosen_direction)
-    current_tile = las.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
-                    
-    if yaw != chosen_direction and object_encountered != True and orientation_found != True: 
+    current_tile = ant.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
+    
+    if current_tile != prev_tile: 
+        location = '*' + str(current_tile) + '-' + str(given_id)
+        emitter.send(str(location).encode('utf-8'))
+        
+    
+    # regathers from prob distribution after 1 sec 
+    if robot.getTime() - start_count >= 1: 
+        start_count = robot.getTime()
+        ant.declinePhermone(current_tile)
+        chosen_direction = ant.re_gather(current_tile)
+        
+        # degrade phermone amounts all throughout 
+        
+    
+    if yaw != chosen_direction and orientation_found != True and object_encountered != True: 
         begin_rotating()
         
-    elif (i - prev_i == time_switch and object_encountered != True):
+    # elif (i - prev_i == time_switch and object_encountered != True):
         # orientation_found = False 
+        # chosen_direction = correlated_random(chosen_direction)
         
-        if current_tile == las.target: 
-            # chosen_direction = rotate_random()
-            orientation_found = False 
-            iterations_passed += 1
-            
-            if las.iterations_threshold <= iterations_passed:
-
-                if not has_collected: 
-                    # will change direction after max number of iterations passed 
-                    # iterations_passed = 0 
-                    las.penalize(current_tile)
-                    chosen_direction = las.re_gather(current_tile) # updates target 
-                    time_switch = 150
-                    
-                elif has_collected:
-                    iterations_passed = 0 
-                    has_collected = False # resets 
-                    # move_forward()
-                    
-                    chosen_direction = rotate_random()
-                    # orientation_found = False
-                    time_switch = random.uniform(20, 50)
-            # else: 
-                # prev_i = i
-                # move_forward()
-              
-            
-        else: 
-            chosen_direction = las.re_direct(current_tile)  
-        
-    elif yaw == chosen_direction and orientation_found != True: 
+    elif orientation_found != True and yaw == chosen_direction and object_encountered != True: 
         orientation_found = True 
         prev_i = i
         move_forward()
-      
+        
     else: 
         pass
         
@@ -328,7 +323,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
     dist_val = ds.getValue()
     # print(dist_val, 'detect --', detect_thres)
     
-    current_tile = las.update(current_tile, (gps.getValues()[0], gps.getValues()[1]))
+    current_tile = ant.update(current_tile, (gps.getValues()[0], gps.getValues()[1]))
     
     # print('neighbors --', las.neighbors)
     # want to not leave this tile until 3 iterations have passed 
@@ -391,6 +386,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
          object_encountered = False
     
     i+=1
+    prev_tile = current_tile # will be compared during the next iterations 
     
     pass
 
