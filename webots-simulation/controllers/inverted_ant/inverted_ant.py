@@ -200,6 +200,7 @@ def interpret():
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
+        
     
         if message[0] == "#" + str(given_id):
             message = message[2:].split("*")
@@ -210,6 +211,7 @@ def interpret():
             
         elif message == "return_fitness":
             response = "k" + str(int(given_id)) + "-fitness" + str(fitness)
+            # print('message received', response)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
             strategy_f.write('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block) + ',size: ' + str(curr_sim_size) + 'collisions,' + str(fitness))
@@ -242,6 +244,7 @@ def interpret():
         elif message[0] == '*' and message.split('-')[1] != str(given_id): # updates prob distrib after encounter received 
             current_tile = message.split('-')[0][1:]
             ant.addPhermone(current_tile)
+            receiver.nextPacket()
 
         else: 
             receiver.nextPacket()
@@ -361,7 +364,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     emitter.send(str(id).encode('utf-8'))
                     # fitness += 1 
                     holding_something = False 
-                    chosen_direction = correlated_random(chosen_direction)
+                    # chosen_direction = correlated_random(chosen_direction)
                     # t_block = 0
                     
                     # new_row = {'agent id': given_id, 'time step': robot.step(timestep),'time since last block': t_block}

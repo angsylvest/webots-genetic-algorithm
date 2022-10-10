@@ -85,12 +85,12 @@ curr_sim_size = 5
 def calc_step_size():
     global forward_speed
     beta = random.uniform(0.3, 1.99)
-    omega_u = (get_gamma_val(1 + beta)*math.sin((math.pi * beta)/2)) / (beta*get_gamma_val((1 + beta)/2)*math.pow(2, ((beta - 1)/2)))
-    omega_v = 1
+    omega_u = ((get_gamma_val(1 + beta)*math.sin((math.pi * beta)/2)) / (beta*get_gamma_val((1 + beta)/2)*math.pow(2, ((beta - 1)/2)))**(1/beta))**2
+    omega_v = 1**2
     u = sample_normal_dist(omega_u)
-    v = sample_normal_dist(omega_v)
+    v = abs(sample_normal_dist(omega_v))
     
-    z = u / (math.pow(2,1/beta)) 
+    z = abs(u / (math.pow(2,1/beta)) )
     
     return ((forward_speed/32)*1000) / z
    
@@ -181,6 +181,8 @@ def interpret():
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
+       
+        print('income robot' + str(given_id) + 'messages', message)
     
         if message[0:2] == "#2":
             message = message[1:].split("*")

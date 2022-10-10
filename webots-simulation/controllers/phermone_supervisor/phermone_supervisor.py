@@ -248,6 +248,7 @@ def message_listener(time_step):
     global found_list
     global block_list
     global collected_count 
+    global fitness_scores
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -299,6 +300,7 @@ def message_listener(time_step):
         elif message[0] == '*':
             new_reponse = message 
             emitter.send(str(new_reponse).encode('utf-8'))
+            receiver.nextPacket()
             
             # notify other robots 
             
@@ -373,7 +375,7 @@ def eval_fitness(time_step):
     global fit_update
     global updated
     
-    # print('evaluating fitness', fitness_scores)
+    print('fitness scores ', fitness_scores)
             
     if '!' not in fitness_scores: 
         # receiver.nextPacket()
