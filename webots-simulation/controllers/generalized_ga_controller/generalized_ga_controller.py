@@ -9,7 +9,8 @@ import random
 # You may need to import some classes of the controller module. Ex:
 #  from controller import Robot, Motor, DistanceSensor
 from controller import Robot, Motor, DistanceSensor, Camera, CameraRecognitionObject, InertialUnit 
-from math import sin, cos, pi  
+from math import sin, cos, pi 
+import math 
 import random 
 # import pandas as pd 
 # import numpy as np 
@@ -103,6 +104,24 @@ time_elapsed_since_block = 0
 time_elapsed_since_robot = 0
 weights = [0.25, 0.25, 0.25, 0.25] 
 curr_best_weights = [] # set initially as empty 
+
+def calc_step_size():
+    global forward_speed
+    beta = random.uniform(0.3, 1.99)
+    omega_u = ((get_gamma_val(1 + beta)*math.sin((math.pi * beta)/2)) / (beta*get_gamma_val((1 + beta)/2)*math.pow(2, ((beta - 1)/2)))**(1/beta))**2
+    omega_v = 1**2
+    u = sample_normal_dist(omega_u)
+    v = abs(sample_normal_dist(omega_v))
+    
+    z = abs(u / (math.pow(2,1/beta)) )
+    
+    return ((forward_speed/32)*1000) / z
+
+def get_gamma_val(input): 
+    return math.gamma(input) 
+    
+def sample_normal_dist(stdev): 
+    return random.gauss(0, stdev) 
 
 # motor functions 
 
@@ -324,7 +343,7 @@ def interpret(timestep):
         elif message == "return_fitness": # happpens at end of generation 
             response = "k" + str(int(given_id)) + "-fitness" + str(fitness)
             # print('response' , response) 
-            strategy_f.write('agent id:' + str(given_id) + ',time step: '+ timestep + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block) + ',size:' + str(curr_sim_size) + ',collisions:' + str(fitness)+ ',size:' + str(curr_sim_size) + '\n')
+            strategy_f.write('agent id,' + str(given_id) + ',time step, '+ timestep + ',straight,' + str(weights[0]) + ',alternating-left,' + str(weights[1]) + ',alternating-right,' + str(weights[2]) + ',true random,' + str(weights[3]) + ',time since last block,'+ str(time_elapsed_since_block) + ',size,' + str(curr_sim_size) + ',collisions,' + str(fitness)+ ',size,' + str(curr_sim_size) + '\n')
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
             fitness = 0
@@ -380,16 +399,18 @@ prev_object_i = 0 # keep track of timesteps elapsed for each pickup action
 chosen_direction = rotate_random()
 strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = False)
 curr_index = 0
+initial_step_size = calc_step_size()
 
 while robot.step(timestep) != -1 and sim_complete != True:
 
     if curr_index >= len(strategy): 
         curr_index = 0 
         
-        if robot.step(timestep) % 500 == 0:
+        if robot.step(timestep) % initial_step_size == 0:
             # print('choosing strategy with update') 
             strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = True) # chooses a new strategy 
             # print(strategy) 
+            initial_step_size = calc_step_size()
             
         else: 
             # print('choosing strategy, no updating') 

@@ -105,13 +105,13 @@ fit_update = False
 
 simulation_time = 15
 
-trials = 19
+trials = 5
 
 block_list = []
  
 reproduce_list = []
 
-robot_population_sizes = [5, 10, 15]
+robot_population_sizes = [5]
 
 r_pos_to_generate = []
 
@@ -361,7 +361,7 @@ def message_listener(time_step):
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
         
-        # print('incoming messages', message) 
+        print('incoming messages', message) 
         
         if message[0] == "$": # handles deletion of objects when grabbed
             # collected_count[int(message[1])] = collected_count[int(message[1])] + 1
@@ -395,7 +395,7 @@ def message_listener(time_step):
             fitness_scores[int(index)] = fit
             print('fitness' , message, index, fit)
             
-            curr_df.write('agent id:' + str(index) + ',time step: ' + str(time_step) + ',fitness:' + str(fit) + ',xpos:' + str(population[int(index)].getPosition()[0]) + ',ypos:' + str(population[int(index)].getPosition()[1]) + ',num col:' + str(collected_count[int(index)]) + ',genotype:' + str(pop_genotypes[int(index)])+ '\n')
+            curr_df.write('agent id,' + str(index) + ',time step, ' + str(time_step) + ',fitness,' + str(fit) + ',xpos,' + str(population[int(index)].getPosition()[0]) + ',ypos,' + str(population[int(index)].getPosition()[1]) + ',num col,' + str(collected_count[int(index)]) + ',genotype,' + str(pop_genotypes[int(index)])+ '\n')
             
             receiver.nextPacket()
             pass # will be generalized 
@@ -671,7 +671,7 @@ def run_optimization():
                 reproduce_list = []
                 # print('trial --' ,i)
             
-            overall_f.write('trial:' + str(i) + ',time:' + str(simulation_time*num_generations) + ',objects retrieved:' + str(total_found) + ',size:' + str(size)+ '\n')    
+            overall_f.write('trial,' + str(i) + ',time,' + str(simulation_time*num_generations) + ',objects retrieved,' + str(total_found) + ',size,' + str(size)+ '\n')    
             # new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
             print('items collected', total_found)
             # overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)

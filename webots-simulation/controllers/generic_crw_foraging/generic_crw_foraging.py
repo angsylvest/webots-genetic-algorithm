@@ -191,7 +191,7 @@ def interpret():
             print('response is', response)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
-            strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block) + ',size: ' + str(curr_sim_size) + ',collisions' + str(fitness))+ '\n')
+            strategy_f.write(str('agent id,' + str(given_id) + ',time step,' + str(robot.step(timestep)) + ',time since last block,' + str(t_block) + ',size, ' + str(curr_sim_size) + ',collisions,' + str(fitness))+ '\n')
             
             fitness = 0
             

@@ -82,7 +82,7 @@ simulation_time = 15
 
 count = 0
 
-trials = 10
+trials = 5
 
 found_list = []
  
@@ -90,7 +90,7 @@ block_list = []
 
 arena_area = robot.getFromDef("arena")
 
-robot_population_sizes = [5, 10, 15]
+robot_population_sizes = [5]
 
 collected_count = []
 
@@ -248,6 +248,7 @@ def message_listener(time_step):
     global found_list
     global block_list
     global collected_count 
+    global curr_df
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -290,7 +291,7 @@ def message_listener(time_step):
             fitness_scores[int(index)] = fit
             print('fitness scores', fitness_scores)
             
-            curr_df.write('agent id:' + str(index) + ',time step: ' + str(time_step) + ',fitness:' + str(fit) + ',xpos:' + str(population[int(index)].getPosition()[0]) + ',ypos:' + str(population[int(index)].getPosition()[1]) + ',num col:' + str(collected_count[int(index)]) + ',genotype:'+ '\n')
+            curr_df.write('agent id,' + str(index) + ',time step, ' + str(time_step) + ',fitness,' + str(fit) + ',xpos,' + str(population[int(index)].getPosition()[0]) + ',ypos,' + str(population[int(index)].getPosition()[1]) + ',num col,' + str(collected_count[int(index)]) + ',genotype,'+ '\n')
             
             
             receiver.nextPacket()
@@ -443,7 +444,7 @@ def run_optimization():
                 print('found genotypes')
                 print('new generation starting -')
             
-            overall_f.write('trial:' + str(i) + ',time:' + str(simulation_time*num_generations) + ',objects retrieved:' + str(total_found) + ',size:' + str(size))    
+            overall_f.write('trial,' + str(i) + ',time,' + str(simulation_time*num_generations) + ',objects retrieved,' + str(total_found) + ',size,' + str(size))    
             # new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
             print('items collected', total_found)
             # overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)

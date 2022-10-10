@@ -93,8 +93,6 @@ def calc_step_size():
     z = abs(u / (math.pow(2,1/beta)) )
     
     return ((forward_speed/32)*1000) / z
-   
-   
 
 def get_gamma_val(input): 
     return math.gamma(input) 
@@ -195,7 +193,7 @@ def interpret():
             print('response is', response)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
-            strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block) + ',size: ' + str(curr_sim_size) + ',collisions' + str(fitness)))
+            strategy_f.write(str('agent id,' + str(given_id) + ',time step,' + str(robot.step(timestep)) + ',time since last block,' + str(t_block) + ',size, ' + str(curr_sim_size) + ',collisions,' + str(fitness))+ '\n')
             
             fitness = 0
             

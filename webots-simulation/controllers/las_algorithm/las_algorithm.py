@@ -211,7 +211,7 @@ def interpret():
             response = "k" + str(int(given_id)) + "-fitness" + str(fitness)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
-            strategy_f.write('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block) + ',size: ' + str(curr_sim_size) + 'collisions,' + str(fitness)+ '\n')
+            strategy_f.write('agent id,' + str(given_id) + ',time step,' + str(robot.step(timestep)) + ',time since last block,' + str(t_block) + ',size,' + str(curr_sim_size) + ',collisions,' + str(fitness)+ '\n')
             fitness = 0
             
             # strategy_f.write('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block) + ',size: ' + str(curr_sim_size))
@@ -220,7 +220,7 @@ def interpret():
             
         elif message == 'sim-complete':
             sim_complete = True 
-            strategy_df.close()
+            strategy_f.close()
             receiver.nextPacket()
             
         elif "size" in message: 
