@@ -24,11 +24,11 @@ strategy_f.write('agent id,'+ 'time step,' + 'time since last block' + ',size' +
 strategy_f.close()
 
 # Global File Initialization 
-overall_f = open('overall-crw-info.csv', 'w') 
+overall_f = open('overall-las-info.csv', 'w') 
 overall_f.write('trial' + ',time' + ',objects retrieved'+ ',size'+ '\n')
 overall_f.close()
 
-overall_f = open('overall-crw-info.csv', 'a') 
+overall_f = open('overall-las-info.csv', 'a') 
 # overall_df = pd.DataFrame(columns = ['trial', 'time', 'objects retrieved'])
 
 TIME_STEP = 32
