@@ -79,7 +79,7 @@ receiver = robot.getDevice("receiver")
 receiver.enable(TIME_STEP)
 receiver.setChannel(2) 
 
-num_generations = 10
+num_generations = 1
 
 # global initial_genotypes 
 initial_genotypes = []
@@ -103,9 +103,9 @@ updated = False
 
 fit_update = False 
 
-simulation_time = 15
+simulation_time = 10
 
-trials = 5
+trials = 1
 
 block_list = []
  

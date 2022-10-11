@@ -472,7 +472,7 @@ def main():
     # restore_positions()
     # initialize_genotypes()
     run_optimization()
-    # save_progress()
+    save_progress()
   
          
 main()

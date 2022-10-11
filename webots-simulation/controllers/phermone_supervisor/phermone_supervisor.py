@@ -375,7 +375,7 @@ def eval_fitness(time_step):
     global fit_update
     global updated
     
-    print('fitness scores ', fitness_scores)
+    # print('fitness scores ', fitness_scores)
             
     if '!' not in fitness_scores: 
         # receiver.nextPacket()
@@ -481,7 +481,7 @@ def main():
     # restore_positions()
     # initialize_genotypes()
     run_optimization()
-    # save_progress()
+    save_progress()
   
          
 main()

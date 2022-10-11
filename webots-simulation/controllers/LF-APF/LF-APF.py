@@ -197,6 +197,11 @@ def interpret():
             
             fitness = 0
             
+        elif message == 'sim-complete':
+            sim_complete = True 
+            strategy_f.close()
+            receiver.nextPacket()
+            
         elif 'size' in message:
             curr_sim_size = message[4:]
             receiver.nextPacket()

@@ -176,6 +176,7 @@ def interpret():
     global strategy_f
     global obj_found_so_far
     global curr_sim_size
+    global sim_complete
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -199,6 +200,13 @@ def interpret():
             curr_sim_size = message[4:]
             receiver.nextPacket()
             
+            
+        elif message == 'sim-complete':
+            sim_complete = True 
+            strategy_f.close()
+            receiver.nextPacket()
+            
+            # strategy_df.to_csv('strategy_df' + str(given_id) + '.csv')
         elif message[0] == "%" and message.split('-')[0][1:] == str(given_id):
              
             id = message.split('-')[1]
@@ -221,9 +229,10 @@ prev_i = 0 # to keep track of timesteps elapsed before new direction
 object_encountered = False 
 prev_object_i = 0 # keep track of timesteps elapsed for each pickup action
 chosen_direction = rotate_random()
+sim_complete = False
 
 
-while robot.step(timestep) != -1:
+while robot.step(timestep) != -1 and sim_complete != True:
 
     interpret()
     light_sensor_value = light_sensor.getValue()

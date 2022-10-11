@@ -463,6 +463,7 @@ def run_optimization():
         curr_df.close()
                 
     overall_f.close()
+    emitter.send('sim-complete'.encode('utf-8'))
     
     return 
    
