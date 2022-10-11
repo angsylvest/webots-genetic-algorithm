@@ -176,6 +176,7 @@ def interpret():
     global strategy_f
     global obj_found_so_far
     global curr_sim_size
+    global sim_complete 
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -227,10 +228,11 @@ holding_something = False
 prev_i = 0 # to keep track of timesteps elapsed before new direction 
 object_encountered = False 
 prev_object_i = 0 # keep track of timesteps elapsed for each pickup action
+sim_complete = False 
 chosen_direction = rotate_random()
 
 
-while robot.step(timestep) != -1:
+while robot.step(timestep) != -1 and sim_complete != True:
 
     interpret()
     light_sensor_value = light_sensor.getValue()

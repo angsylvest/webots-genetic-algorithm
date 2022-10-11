@@ -196,6 +196,7 @@ def interpret():
     global t_block
     global curr_sim_size
     global obj_found_so_far
+    global sim_complete
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
