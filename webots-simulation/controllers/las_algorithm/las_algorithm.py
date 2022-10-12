@@ -226,6 +226,11 @@ def interpret():
             strategy_f.close()
             receiver.nextPacket()
             
+        elif message == "trial_complete":
+            # resets prob distrib 
+            start = False 
+            
+            
         elif "size" in message: 
             curr_sim_size = message[4:]
             receiver.nextPacket()

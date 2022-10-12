@@ -244,6 +244,11 @@ def interpret():
                 
             receiver.nextPacket()
             
+        elif message == "trial_complete":
+            # resets prob distrib 
+            start = False 
+            
+            
         elif message[0] == '*' and message.split('-')[1] != str(given_id): # updates prob distrib after encounter received 
             current_tile = message.split('-')[0][1:]
             ant.addPhermone(current_tile)

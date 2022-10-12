@@ -452,6 +452,7 @@ def run_optimization():
             total_found = 0 
             found_list = [] 
             index = 0 
+            emitter.send('trial_complete'.encode('utf-8'))
             # for i in range(3):
                 # genotype = create_individal_genotype(gene_list)
                 # print('genotype', i, genotype)
