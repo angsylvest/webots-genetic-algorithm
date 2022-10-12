@@ -1,0 +1,6 @@
+['trial', 'time', 'objects retrieved', 'size']
+agent id,0,time step, 16.55,fitness,0,xpos,0.2407158311611909,ypos,0.1332547511864914,num col,0,genotype,
+agent id,1,time step, 16.61,fitness,1,xpos,0.12109507046930659,ypos,0.032095588228835355,num col,0,genotype,
+agent id,2,time step, 16.67,fitness,0,xpos,-0.21346236220737505,ypos,0.11747404199961407,num col,0,genotype,
+agent id,3,time step, 16.73,fitness,0,xpos,-0.14851388582067743,ypos,0.20263043746391535,num col,0,genotype,
+agent id,4,time step, 16.79,fitness,0,xpos,0.1584647847795244,ypos,-0.20990697816493795,num col,0,genotype,

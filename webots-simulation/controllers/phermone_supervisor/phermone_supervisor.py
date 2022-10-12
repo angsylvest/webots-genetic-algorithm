@@ -82,7 +82,7 @@ simulation_time = 15
 
 count = 0
 
-trials = 5
+trials = 15
 
 found_list = []
  
@@ -90,13 +90,15 @@ block_list = []
 
 arena_area = robot.getFromDef("arena")
 
-robot_population_sizes = [5]
+robot_population_sizes = [5, 10, 15]
 
 collected_count = []
 
 r_pos_to_generate = []
 
 overall_columns = ['trial','time', 'objects retrieved', 'size']
+
+curr_size = 5
 
 def generate_robot_central(num_robots):
     global fitness_scores 
@@ -249,6 +251,7 @@ def message_listener(time_step):
     global block_list
     global collected_count 
     global fitness_scores
+    global curr_size 
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -291,8 +294,10 @@ def message_listener(time_step):
             fitness_scores[int(index)] = fit
             print('fitness scores', fitness_scores)
             
-            curr_df.write('agent id,' + str(index) + ',time step, ' + str(time_step) + ',fitness,' + str(fit) + ',xpos,' + str(population[int(index)].getPosition()[0]) + ',ypos,' + str(population[int(index)].getPosition()[1]) + ',num col,' + str(collected_count[int(index)]) + ',genotype,'+ '\n')
             
+            curr_df.write('agent id,' + str(index) + ',time step, ' + str(robot.getTime()) + ',fitness,' + str(fit) + ',xpos,' + str(population[int(index)].getPosition()[0]) + ',ypos,' + str(population[int(index)].getPosition()[1]) + ',num col,' + str(collected_count[int(index)]) + ',genotype,'+ '\n')
+            curr_df.close()
+            curr_df = open('robot-info-' + str(curr_size) + '.csv', 'a')
             
             receiver.nextPacket()
             # will be generalized 
@@ -394,6 +399,7 @@ def run_optimization():
     global found_list
     global r_pos_to_generate
     global overall_columns
+    global curr_size 
     
     # initialize genotypes 
     # will be same genotype as normal (for comparison purposes) 
@@ -421,6 +427,7 @@ def run_optimization():
     
     # regenerate_environment(0.2) 
     for size in robot_population_sizes: 
+        curr_size = size 
     
         # initialize_genotypes(size)
                 # creates a csv specific to the robot 
@@ -453,7 +460,9 @@ def run_optimization():
                 print('found genotypes')
                 print('new generation starting -')
             
-            overall_f.write('trial,' + str(i) + ',time,' + str(simulation_time*num_generations) + ',objects retrieved,' + str(total_found) + ',size,' + str(size))    
+            overall_f.write('trial,' + str(i) + ',time,' + str(robot.getTime()) + ',objects retrieved,' + str(total_found) + ',size,' + str(size))   
+            overall_f.close()
+            overall_f = open('overall-ant-info.csv', 'a')  
             # new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
             print('items collected', total_found)
             # overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)

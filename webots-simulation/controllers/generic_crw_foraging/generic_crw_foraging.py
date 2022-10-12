@@ -192,8 +192,9 @@ def interpret():
             print('response is', response)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
-            strategy_f.write(str('agent id,' + str(given_id) + ',time step,' + str(robot.step(timestep)) + ',time since last block,' + str(t_block) + ',size, ' + str(curr_sim_size) + ',collisions,' + str(fitness))+ '\n')
-            
+            strategy_f.write(str('agent id,' + str(given_id) + ',time step,' + str(robot.getTime()) + ',time since last block,' + str(t_block) + ',size, ' + str(curr_sim_size) + ',collisions,' + str(fitness))+ '\n')
+            strategy_f.close()
+            strategy_f = open("crw-info.csv", 'a')
             fitness = 0
             
         elif 'size' in message:
@@ -230,12 +231,11 @@ object_encountered = False
 prev_object_i = 0 # keep track of timesteps elapsed for each pickup action
 chosen_direction = rotate_random()
 sim_complete = False
+start_count = robot.getTime()
 
 
 while robot.step(timestep) != -1 and sim_complete != True:
 
-    interpret()
-    light_sensor_value = light_sensor.getValue()
     # biased random walk movement (each time step, cert prob of turning that direction) 
     roll, pitch, yaw = inertia.getRollPitchYaw()
     yaw = round(yaw, 2) 
@@ -256,70 +256,76 @@ while robot.step(timestep) != -1 and sim_complete != True:
     else: 
         pass
 
-    # check for collisions with other robot 
-    list = camera.getRecognitionObjects()
-        
-    # read distance sensor value 
-    dist_val = ds.getValue()
-    # print(dist_val, 'detect --', detect_thres)
-    
-    # wall avoidance 
-    if round(dist_val) == 283:
-        # fitness -= 1 
-        # print('collision encountered')
-        chosen_direction = rotate_random() 
-        move_backwards()
-        fitness += 1
-        
-    # handles other obstacles     
-    if dist_val < detect_thres and holding_something == False and len(list) > 0: 
-        # behavior in response to stimuli in front of robot 
-        if (object_encountered == False):
-            # prev_object_i = i
-            # grab_object(i, prev_object_i)
-            # object_encountered = True
+
+    # does each behavior after 1 sec    
+    if robot.getTime() - start_count >= 1: 
+        start_count = robot.getTime()
+        interpret()
+        light_sensor_value = light_sensor.getValue()
+        # check for collisions with other robot 
+        list = camera.getRecognitionObjects()
             
-            # if retrievable object within range, gets picked up 
-            if dist_val < 40: 
-                firstObject = camera.getRecognitionObjects()[0]
-                # print('found object', firstObject)
-                id = str(firstObject.get_id())
+        # read distance sensor value 
+        dist_val = ds.getValue()
+        # print(dist_val, 'detect --', detect_thres)
+        
+        # wall avoidance 
+        if round(dist_val) == 283:
+            # fitness -= 1 
+            # print('collision encountered')
+            chosen_direction = rotate_random() 
+            move_backwards()
+            fitness += 1
+            
+        # handles other obstacles     
+        if dist_val < detect_thres and holding_something == False and len(list) > 0: 
+            # behavior in response to stimuli in front of robot 
+            if (object_encountered == False):
+                # prev_object_i = i
+                # grab_object(i, prev_object_i)
+                # object_encountered = True
                 
-                if id not in obj_found_so_far:
-                
-                    # obj_found_so_far.append(id)
+                # if retrievable object within range, gets picked up 
+                if dist_val < 40: 
+                    firstObject = camera.getRecognitionObjects()[0]
+                    # print('found object', firstObject)
+                    id = str(firstObject.get_id())
                     
-                    # strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block)))
-                                        
-                    id = "$" + str(given_id) + "-" + str(id) # indication that it is a object to be deleted 
+                    if id not in obj_found_so_far:
                     
-                    emitter.send(str(id).encode('utf-8'))
-                    # fitness += 1 
-                    holding_something = False 
-                    chosen_direction = correlated_random(chosen_direction)
+                        # obj_found_so_far.append(id)
+                        
+                        # strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block)))
+                                            
+                        id = "$" + str(given_id) + "-" + str(id) # indication that it is a object to be deleted 
+                        
+                        emitter.send(str(id).encode('utf-8'))
+                        # fitness += 1 
+                        holding_something = False 
+                        chosen_direction = correlated_random(chosen_direction)
+                        
+                        
+                        # obj_found_so_far.append(id)
+                        # id = "$" + id # indication that it is a object to be deleted 
+                        # emitter.send(str(id).encode('utf-8'))
+                        # fitness += 1 
+                        # holding_something = False 
+                        # chosen_direction = correlated_random(chosen_direction)
+                        
+                elif dist_val == 0:
+                    fitness += 1 
+                    # print('collision encountered')
+                    chosen_direction = rotate_random() 
+                    move_backwards()
                     
-                    
-                    # obj_found_so_far.append(id)
-                    # id = "$" + id # indication that it is a object to be deleted 
-                    # emitter.send(str(id).encode('utf-8'))
-                    # fitness += 1 
-                    # holding_something = False 
-                    # chosen_direction = correlated_random(chosen_direction)
-                    
-            elif dist_val == 0:
-                fitness += 1 
-                # print('collision encountered')
-                chosen_direction = rotate_random() 
-                move_backwards()
-                
+            else: 
+                t_block += 1
         else: 
-            t_block += 1
-    else: 
-         t_block += 1
-         object_encountered = False
-    
-    i+=1
-    
-    pass
+             t_block += 1
+             object_encountered = False
+        
+        i+=1
+        
+        pass
 
 # Enter here exit cleanup code.

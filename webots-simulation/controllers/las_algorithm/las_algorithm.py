@@ -212,7 +212,9 @@ def interpret():
             response = "k" + str(int(given_id)) + "-fitness" + str(fitness)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
-            strategy_f.write('agent id,' + str(given_id) + ',time step,' + str(robot.step(timestep)) + ',time since last block,' + str(t_block) + ',size,' + str(curr_sim_size) + ',collisions,' + str(fitness)+ '\n')
+            strategy_f.write('agent id,' + str(given_id) + ',time step,' + str(robot.getTime()) + ',time since last block,' + str(t_block) + ',size,' + str(curr_sim_size) + ',collisions,' + str(fitness)+ '\n')
+            strategy_f.close()
+            strategy_f = open("las-info.csv", 'a')
             fitness = 0
             
             # strategy_f.write('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block) + ',size: ' + str(curr_sim_size))
@@ -263,6 +265,7 @@ start = False
 iterations_passed = 0
 has_collected = False
 sim_complete = False
+start_count = robot.getTime()
 
 while robot.step(timestep) != -1 and sim_complete != True:
 
@@ -322,84 +325,87 @@ while robot.step(timestep) != -1 and sim_complete != True:
     else: 
         pass
         
+        # does each behavior after 1 sec    
+    if robot.getTime() - start_count >= 1: 
+        start_count = robot.getTime()
         
         
-    interpret()
-    light_sensor_value = light_sensor.getValue()
-    # biased random walk movement (each time step, cert prob of turning that direction)  
+        interpret()
+        light_sensor_value = light_sensor.getValue()
+        # biased random walk movement (each time step, cert prob of turning that direction)  
+        
     
-
-    # check for collisions with other robot 
-    list = camera.getRecognitionObjects()
+        # check for collisions with other robot 
+        list = camera.getRecognitionObjects()
+            
+        # read distance sensor value 
+        dist_val = ds.getValue()
+        # print(dist_val, 'detect --', detect_thres)
         
-    # read distance sensor value 
-    dist_val = ds.getValue()
-    # print(dist_val, 'detect --', detect_thres)
-    
-    current_tile = las.update(current_tile, (gps.getValues()[0], gps.getValues()[1]))
-    
-    # print('neighbors --', las.neighbors)
-    # want to not leave this tile until 3 iterations have passed 
-    
-    # wall avoidance 
-    if round(dist_val) == 283:
-        fitness += 1 
-        # print('collision encountered')
-        chosen_direction = rotate_random() 
-        move_backwards()
+        current_tile = las.update(current_tile, (gps.getValues()[0], gps.getValues()[1]))
         
-    if collision.getValue() == 1: 
-        chosen_direction = rotate_random() 
-        move_backwards()
-        fitness += 1
+        # print('neighbors --', las.neighbors)
+        # want to not leave this tile until 3 iterations have passed 
         
-    # handles other obstacles     
-    if dist_val < detect_thres and holding_something == False and len(list) > 0: 
-        # behavior in response to stimuli in front of robot 
-        if (object_encountered == False):
-            # if retrievable object within range, gets picked up 
-            if len(list) == 1 and dist_val < 100:
-                firstObject = camera.getRecognitionObjects()[0]
-                # print('found object', firstObject)
-                id = str(firstObject.get_id())
-                
-                if id not in obj_found_so_far:
-                
-                    # obj_found_so_far.append(id)
+        # wall avoidance 
+        if round(dist_val) == 283:
+            fitness += 1 
+            # print('collision encountered')
+            chosen_direction = rotate_random() 
+            move_backwards()
+            
+        if collision.getValue() == 1: 
+            chosen_direction = rotate_random() 
+            move_backwards()
+            fitness += 1
+            
+        # handles other obstacles     
+        if dist_val < detect_thres and holding_something == False and len(list) > 0: 
+            # behavior in response to stimuli in front of robot 
+            if (object_encountered == False):
+                # if retrievable object within range, gets picked up 
+                if len(list) == 1 and dist_val < 100:
+                    firstObject = camera.getRecognitionObjects()[0]
+                    # print('found object', firstObject)
+                    id = str(firstObject.get_id())
                     
-                    # strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block)))
-                                        
-                    id = "$" + str(given_id) + "-" + str(id) + "-" + str(current_tile) + "-" + str(iterations_passed) # indication that it is a object to be deleted 
+                    if id not in obj_found_so_far:
                     
-                    emitter.send(str(id).encode('utf-8'))
-                    # fitness += 1 
-                    holding_something = False 
-                    chosen_direction = correlated_random(chosen_direction)
-                    # t_block = 0
+                        # obj_found_so_far.append(id)
+                        
+                        # strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block)))
+                                            
+                        id = "$" + str(given_id) + "-" + str(id) + "-" + str(current_tile) + "-" + str(iterations_passed) # indication that it is a object to be deleted 
+                        
+                        emitter.send(str(id).encode('utf-8'))
+                        # fitness += 1 
+                        holding_something = False 
+                        chosen_direction = correlated_random(chosen_direction)
+                        # t_block = 0
+                        
+                        # new_row = {'agent id': given_id, 'time step': robot.step(timestep),'time since last block': t_block}
+                        # strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
+                        
+                        # reward tile 
+                        # las.reward(current_tile)
+                        
+                        # if current_tile == las.target and las.iterations_threshold <= iterations_passed:
+                            # has_collected = True
+                        
+                elif dist_val == 0 or collision.getValue() == 1:
+                    fitness += 1 
+                    # print('collision encountered')
+                    chosen_direction = rotate_random() 
+                    move_backwards()
                     
-                    # new_row = {'agent id': given_id, 'time step': robot.step(timestep),'time since last block': t_block}
-                    # strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
-                    
-                    # reward tile 
-                    # las.reward(current_tile)
-                    
-                    # if current_tile == las.target and las.iterations_threshold <= iterations_passed:
-                        # has_collected = True
-                    
-            elif dist_val == 0 or collision.getValue() == 1:
-                fitness += 1 
-                # print('collision encountered')
-                chosen_direction = rotate_random() 
-                move_backwards()
-                
+            else: 
+                t_block += 1
         else: 
-            t_block += 1
-    else: 
-         t_block += 1
-         object_encountered = False
-    
-    i+=1
-    
-    pass
+             t_block += 1
+             object_encountered = False
+        
+        i+=1
+        
+        pass
 
 # Enter here exit cleanup code.

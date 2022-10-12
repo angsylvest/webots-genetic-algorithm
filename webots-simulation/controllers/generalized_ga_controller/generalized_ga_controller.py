@@ -174,8 +174,9 @@ def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False
     if update: 
         new_weights = create_new_weights(t_block, t_robot, original_weights)
         strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], new_weights)
-        strategy_f.write('agent id:' + str(given_id) + ',time step: '+ str(robot.step(timestep)) + ',straight:' + str(original_weights[0]) + ',alternating-left:' + str(original_weights[1]) + ',alternating-right:' + str(original_weights[2]) + ',true random:' + str(original_weights[3]) + ',time since last block:'+ str(t_block) + ',size:' + str(curr_sim_size) + ',collisions' + str(fitness)+ ',size:' + str(curr_sim_size) +'\n')
-        
+        strategy_f.write('agent id:' + str(given_id) + ',time step: '+ str(robot.getTime()) + ',straight:' + str(original_weights[0]) + ',alternating-left:' + str(original_weights[1]) + ',alternating-right:' + str(original_weights[2]) + ',true random:' + str(original_weights[3]) + ',time since last block:'+ str(t_block) + ',size:' + str(curr_sim_size) + ',collisions' + str(fitness)+ ',size:' + str(curr_sim_size) +'\n')
+        strategy_f.close()
+        strategy_f = open("ga-info.csv", 'a')
         # new_row = {'agent id': given_id, 'time step': robot.step(timestep), 'straight': original_weights[0],'alternating-left': original_weights[1],'alternating-right': original_weights[2], 'true random': original_weights[3], 'time since last block': t_block}
         # strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
         
@@ -343,7 +344,10 @@ def interpret(timestep):
         elif message == "return_fitness": # happpens at end of generation 
             response = "k" + str(int(given_id)) + "-fitness" + str(fitness)
             # print('response' , response) 
-            strategy_f.write('agent id,' + str(given_id) + ',time step, '+ timestep + ',straight,' + str(weights[0]) + ',alternating-left,' + str(weights[1]) + ',alternating-right,' + str(weights[2]) + ',true random,' + str(weights[3]) + ',time since last block,'+ str(time_elapsed_since_block) + ',size,' + str(curr_sim_size) + ',collisions,' + str(fitness)+ ',size,' + str(curr_sim_size) + '\n')
+            strategy_f.write('agent id,' + str(given_id) + ',time step, '+ str(robot.getTime()) + ',straight,' + str(weights[0]) + ',alternating-left,' + str(weights[1]) + ',alternating-right,' + str(weights[2]) + ',true random,' + str(weights[3]) + ',time since last block,'+ str(time_elapsed_since_block) + ',size,' + str(curr_sim_size) + ',collisions,' + str(fitness)+ ',size,' + str(curr_sim_size) + '\n')
+            strategy_f.close()
+            strategy_f = open("ga-info.csv", 'a')
+            
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
             fitness = 0
@@ -400,6 +404,7 @@ chosen_direction = rotate_random()
 strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = False)
 curr_index = 0
 initial_step_size = calc_step_size()
+start_count = robot.getTime()
 
 while robot.step(timestep) != -1 and sim_complete != True:
 
@@ -416,96 +421,100 @@ while robot.step(timestep) != -1 and sim_complete != True:
             # print('choosing strategy, no updating') 
             strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = False)
             # print(strategy)
-        
-    interpret(str(robot.step(timestep))) # checks for messages from supervisor 
-    time_elapsed_since_robot +=1
-    
-    # biased random walk movement (each time step, cert prob of turning that direction) 
-    roll, pitch, yaw = inertia.getRollPitchYaw()
-    yaw = round(yaw, 2) 
-
-    if yaw != chosen_direction and orientation_found != True and object_encountered != True: 
-        begin_rotating()
-        
-    elif (i - prev_i == time_switch and object_encountered != True and holding_something == False):
-        orientation_found = False 
-        chosen_direction = strategy[curr_index]
-        curr_index += 1
-    
-    elif orientation_found != True and yaw == chosen_direction and object_encountered != True: 
-        orientation_found = True 
-        prev_i = i
-        move_forward()
-        
-    else: 
-        pass
-
-    # read distance sensor value 
-    # want to lower fitness for those that grab other robots 
-    
-    # check for collisions with other robot 
-    list = camera.getRecognitionObjects()
-    dist_val = ds.getValue()
-    # print(dist_val)
-    
-    if round(dist_val) == 283: # wall detection 
-        fitness += 1 
-        # print('collision encountered')
-        chosen_direction = rotate_random() 
-        move_backwards()
      
-    # print('curr light values', light_sensor.getValue())   
-    if time_elapsed_since_robot > 300: # max value for light 
-        if light_sensor.getValue() > 800: 
-            communicate_with_robot()
-            time_elapsed_since_robot = 0 # reset time step 
-        else: 
-            time_elapsed_since_robot += 1
-
+        # does each behavior after 1 sec    
+    if robot.getTime() - start_count >= 1: 
+        start_count = robot.getTime()    
         
-    if dist_val < detect_thres and holding_something == False: 
-        # stop()
-        if (object_encountered == False):
-  
-            # attempt to get object detected 
-            if len(list) == 1 and dist_val < 100:
-             
-                firstObject = camera.getRecognitionObjects()[0]
-                id = str(firstObject.get_id())
-                
-                if id not in obj_found_so_far:
-                    # new_row = {'agent id': given_id, 'time step': robot.step(timestep), 'straight': weights[0],'alternating-left': weights[1],'alternating-right': weights[2], 'true random': weights[3], 'time since last block': time_elapsed_since_block}
-                    # strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
-                    # strategy_f.write(str('agent id': given_id, 'time step': robot.step(timestep), 'straight': weights[0],'alternating-left': weights[1],'alternating-right': weights[2], 'true random': weights[3], 'time since last block': time_elapsed_since_block))
+        interpret(str(robot.step(timestep))) # checks for messages from supervisor 
+        time_elapsed_since_robot +=1
         
-                    # strategy_f.write('agent id:' + str(given_id) + ',time step: '+ str(robot.step(timestep)) + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block))
-                    
-                    # obj_found_so_far.append(id)
-                    id = "$" + str(given_id) + "-" + str(id) # indication that it is a object to be deleted 
-                    # time_elapsed_since_block = 0
-                    
-                    emitter.send(str(id).encode('utf-8'))
-                    
-                    # fitness += 1 
-                    # holding_something = False 
-                    # chosen_direction = correlated_random(chosen_direction)
-         
-            if dist_val == 0 or collision.getValue() == 1:
-                fitness += 1 
-                # print('collision encountered')
-                chosen_direction = rotate_random()
-                move_backwards()
-        else:
-            # grab_object(i, prev_object_i) 
-           
-            time_elapsed_since_block += 1
-        
-    else: 
-         object_encountered = False
-         time_elapsed_since_block += 1
-
-    i+=1
+        # biased random walk movement (each time step, cert prob of turning that direction) 
+        roll, pitch, yaw = inertia.getRollPitchYaw()
+        yaw = round(yaw, 2) 
     
-    pass
-
+        if yaw != chosen_direction and orientation_found != True and object_encountered != True: 
+            begin_rotating()
+            
+        elif (i - prev_i == time_switch and object_encountered != True and holding_something == False):
+            orientation_found = False 
+            chosen_direction = strategy[curr_index]
+            curr_index += 1
+        
+        elif orientation_found != True and yaw == chosen_direction and object_encountered != True: 
+            orientation_found = True 
+            prev_i = i
+            move_forward()
+            
+        else: 
+            pass
+    
+        # read distance sensor value 
+        # want to lower fitness for those that grab other robots 
+        
+        # check for collisions with other robot 
+        list = camera.getRecognitionObjects()
+        dist_val = ds.getValue()
+        # print(dist_val)
+        
+        if round(dist_val) == 283: # wall detection 
+            fitness += 1 
+            # print('collision encountered')
+            chosen_direction = rotate_random() 
+            move_backwards()
+         
+        # print('curr light values', light_sensor.getValue())   
+        if time_elapsed_since_robot > 300: # max value for light 
+            if light_sensor.getValue() > 800: 
+                communicate_with_robot()
+                time_elapsed_since_robot = 0 # reset time step 
+            else: 
+                time_elapsed_since_robot += 1
+    
+            
+        if dist_val < detect_thres and holding_something == False: 
+            # stop()
+            if (object_encountered == False):
+      
+                # attempt to get object detected 
+                if len(list) == 1 and dist_val < 100:
+                 
+                    firstObject = camera.getRecognitionObjects()[0]
+                    id = str(firstObject.get_id())
+                    
+                    if id not in obj_found_so_far:
+                        # new_row = {'agent id': given_id, 'time step': robot.step(timestep), 'straight': weights[0],'alternating-left': weights[1],'alternating-right': weights[2], 'true random': weights[3], 'time since last block': time_elapsed_since_block}
+                        # strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
+                        # strategy_f.write(str('agent id': given_id, 'time step': robot.step(timestep), 'straight': weights[0],'alternating-left': weights[1],'alternating-right': weights[2], 'true random': weights[3], 'time since last block': time_elapsed_since_block))
+            
+                        # strategy_f.write('agent id:' + str(given_id) + ',time step: '+ str(robot.step(timestep)) + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block))
+                        
+                        # obj_found_so_far.append(id)
+                        id = "$" + str(given_id) + "-" + str(id) # indication that it is a object to be deleted 
+                        # time_elapsed_since_block = 0
+                        
+                        emitter.send(str(id).encode('utf-8'))
+                        
+                        # fitness += 1 
+                        # holding_something = False 
+                        # chosen_direction = correlated_random(chosen_direction)
+             
+                if dist_val == 0 or collision.getValue() == 1:
+                    fitness += 1 
+                    # print('collision encountered')
+                    chosen_direction = rotate_random()
+                    move_backwards()
+            else:
+                # grab_object(i, prev_object_i) 
+               
+                time_elapsed_since_block += 1
+            
+        else: 
+             object_encountered = False
+             time_elapsed_since_block += 1
+    
+        i+=1
+        
+        pass
+    
 # Enter here exit cleanup code.
