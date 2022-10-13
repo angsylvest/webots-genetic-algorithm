@@ -273,7 +273,8 @@ sim_complete = False
 start_count = robot.getTime()
 
 while robot.step(timestep) != -1 and sim_complete != True:
-
+    interpret() 
+    
     if not start:
         las = LAS(curr_pos = (float(gps.getValues()[0]),float(gps.getValues()[1])))
         current_tile = las.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
@@ -333,9 +334,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
         # does each behavior after 1 sec    
     if robot.getTime() - start_count >= 1: 
         start_count = robot.getTime()
-        
-        
-        interpret()
+       
         light_sensor_value = light_sensor.getValue()
         # biased random walk movement (each time step, cert prob of turning that direction)  
         

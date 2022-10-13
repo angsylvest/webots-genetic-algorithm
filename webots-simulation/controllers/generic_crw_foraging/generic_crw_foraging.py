@@ -236,6 +236,7 @@ start_count = robot.getTime()
 
 while robot.step(timestep) != -1 and sim_complete != True:
 
+    interpret()
     # biased random walk movement (each time step, cert prob of turning that direction) 
     roll, pitch, yaw = inertia.getRollPitchYaw()
     yaw = round(yaw, 2) 
@@ -256,11 +257,9 @@ while robot.step(timestep) != -1 and sim_complete != True:
     else: 
         pass
 
-
     # does each behavior after 1 sec    
     if robot.getTime() - start_count >= 1: 
         start_count = robot.getTime()
-        interpret()
         light_sensor_value = light_sensor.getValue()
         # check for collisions with other robot 
         list = camera.getRecognitionObjects()

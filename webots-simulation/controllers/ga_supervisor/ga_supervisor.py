@@ -105,7 +105,7 @@ fit_update = False
 
 simulation_time = 10
 
-trials = 15
+trials = 30
 
 block_list = []
  

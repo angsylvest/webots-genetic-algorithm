@@ -403,11 +403,12 @@ prev_object_i = 0 # keep track of timesteps elapsed for each pickup action
 chosen_direction = rotate_random()
 strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = False)
 curr_index = 0
-initial_step_size = calc_step_size()
+initial_step_size = 500
 start_count = robot.getTime()
 
 while robot.step(timestep) != -1 and sim_complete != True:
-
+    interpret(str(robot.step(timestep))) 
+    
     if curr_index >= len(strategy): 
         curr_index = 0 
         
@@ -415,39 +416,42 @@ while robot.step(timestep) != -1 and sim_complete != True:
             # print('choosing strategy with update') 
             strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = True) # chooses a new strategy 
             # print(strategy) 
-            initial_step_size = calc_step_size()
+            # initial_step_size = calc_step_size()
             
         else: 
             # print('choosing strategy, no updating') 
             strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = False)
-            # print(strategy)
-     
+      
+           # print(strategy)
+    
+            # interpret(str(robot.step(timestep))) # checks for messages from supervisor 
+    time_elapsed_since_robot +=1
+    
+    # biased random walk movement (each time step, cert prob of turning that direction) 
+    roll, pitch, yaw = inertia.getRollPitchYaw()
+    yaw = round(yaw, 2) 
+
+    if yaw != chosen_direction and orientation_found != True and object_encountered != True: 
+        begin_rotating()
+        
+    elif (i - prev_i == time_switch and object_encountered != True and holding_something == False):
+        orientation_found = False 
+        chosen_direction = strategy[curr_index]
+        curr_index += 1
+    
+    elif orientation_found != True and yaw == chosen_direction and object_encountered != True: 
+        orientation_found = True 
+        prev_i = i
+        move_forward()
+        
+    else: 
+        pass
+            
+            
         # does each behavior after 1 sec    
     if robot.getTime() - start_count >= 1: 
         start_count = robot.getTime()    
-        
-        interpret(str(robot.step(timestep))) # checks for messages from supervisor 
-        time_elapsed_since_robot +=1
-        
-        # biased random walk movement (each time step, cert prob of turning that direction) 
-        roll, pitch, yaw = inertia.getRollPitchYaw()
-        yaw = round(yaw, 2) 
-    
-        if yaw != chosen_direction and orientation_found != True and object_encountered != True: 
-            begin_rotating()
-            
-        elif (i - prev_i == time_switch and object_encountered != True and holding_something == False):
-            orientation_found = False 
-            chosen_direction = strategy[curr_index]
-            curr_index += 1
-        
-        elif orientation_found != True and yaw == chosen_direction and object_encountered != True: 
-            orientation_found = True 
-            prev_i = i
-            move_forward()
-            
-        else: 
-            pass
+       
     
         # read distance sensor value 
         # want to lower fitness for those that grab other robots 

@@ -274,7 +274,7 @@ sim_complete = False
 start_count = robot.getTime()
 
 while robot.step(timestep) != -1 and sim_complete != True:
-
+    interpret()
     # initializes ant class 
     if not start:
         ant = InvertedAnt(curr_pos = (float(gps.getValues()[0]),float(gps.getValues()[1])))
@@ -320,9 +320,6 @@ while robot.step(timestep) != -1 and sim_complete != True:
         start_count = robot.getTime()
         ant.declinePhermone(current_tile)
         chosen_direction = ant.re_gather(current_tile)
-   
-
-        interpret()
         light_sensor_value = light_sensor.getValue()
         # biased random walk movement (each time step, cert prob of turning that direction)  
         

@@ -1,6 +1,1 @@
 agent id,time step, time since last block,size,collisions
-agent id,0,time step,0,time since last block,1552,size, 5,collisions,0
-agent id,1,time step,0,time since last block,1006,size, 5,collisions,1
-agent id,2,time step,0,time since last block,1499,size, 5,collisions,0
-agent id,3,time step,0,time since last block,1402,size, 5,collisions,0
-agent id,4,time step,10,time since last block,1116,size, 5,collisions,0

@@ -78,7 +78,7 @@ updated = False
 
 fit_update = False 
 
-simulation_time = 15
+simulation_time = 30
 
 count = 0
 

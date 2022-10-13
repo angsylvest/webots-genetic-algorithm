@@ -82,7 +82,7 @@ simulation_time = 15
 
 count = 0
 
-trials = 15
+trials = 30
 
 found_list = []
  
