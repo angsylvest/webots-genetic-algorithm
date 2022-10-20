@@ -10,35 +10,22 @@ Optimization algorithm - Collaboration-oriented
 Angel Sylvester 2022
 """
 
-# sets up csv for reference 
-# k_gen_f = open('gen-crw-info.csv', 'w')
-# k_gen_f.write('time step' + ',fitness' + ',xpos' + ',ypos' + ',num col')
-# k_gen_f.close()
+# collected counts csv generation 
+overall_f = open('overall-las-info.csv', 'w') 
+overall_f.write('trial' + ',time' + ',objects retrieved'+ ',size'+ '\n')
+overall_f.close()
 
-# k_gen_f = open('gen-crw-info.csv', 'a')
-# k_gen_df = pd.DataFrame(columns = ['time step', 'fitness', 'xpos', 'ypos', 'num col'])
+overall_f = open('overall-las-info.csv', 'a') 
 
 # Agent File Initialization 
 strategy_f = open("../las_algorithm/las-info.csv", 'w')
 strategy_f.write('agent id,'+ 'time step,' + 'time since last block' + ',size' + ',collisions'+ '\n')
 strategy_f.close()
 
-# Global File Initialization 
-overall_f = open('overall-las-info.csv', 'w') 
-overall_f.write('trial' + ',time' + ',objects retrieved'+ ',size'+ '\n')
-overall_f.close()
-
-overall_f = open('overall-las-info.csv', 'a') 
-# overall_df = pd.DataFrame(columns = ['trial', 'time', 'objects retrieved'])
 
 TIME_STEP = 32
 
 robot = Supervisor()  # create Supervisor instance
-
-# get info from this def 
-k1 = robot.getFromDef("khepera")
-k2 = robot.getFromDef("khepera2")
-k3 = robot.getFromDef("khepera3")
 
 # emitter to send info to robots 
 emitter = robot.getDevice("emitter")
@@ -51,16 +38,10 @@ receiver.setChannel(2)
 
 num_generations = 10
 
-global population 
 population = []
-# population = [k1, k2, k3]
 
-global initial_genotypes 
 initial_genotypes = []
 
-global k1_fitness
-global k2_fitness
-global k3_fitness
 global fitness_scores
 fitness_scores = []
 global pop_genotypes 

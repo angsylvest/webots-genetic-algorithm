@@ -12,8 +12,6 @@ from controller import Robot, Motor, DistanceSensor, Camera, CameraRecognitionOb
 from math import sin, cos, pi 
 import math 
 import random 
-# import pandas as pd 
-# import numpy as np 
 
 # create the Robot instance.
 robot = Robot()
@@ -23,44 +21,35 @@ timestep = int(robot.getBasicTimeStep())
 open_grip = 0.029
 closed_grip = 0.005
 
+# set up sensors that robot will use 
 motor = robot.getDevice('motor')
-
 leftMotor = robot.getDevice('left wheel motor')
 rightMotor = robot.getDevice('right wheel motor')
-
 leftMotor.setVelocity(0)
 rightMotor.setVelocity(0)
-
 leftGrip = robot.getDevice('left grip')
 rightGrip = robot.getDevice('right grip')
-
 ds = robot.getDevice('distance sensor')
 ds.enable(timestep)
 
 # initialize emitter and reciever 
 emitter = robot.getDevice("emitter")
 emitter.setChannel(2)
-
 receiver = robot.getDevice("receiver")
 receiver.enable(timestep)
 receiver.setChannel(1)
-
 inertia = robot.getDevice("inertial unit")
 inertia.enable(timestep)
-
 # camera info 
 camera = robot.getDevice('camera')
 camera.enable(timestep)
 camera.recognitionEnable(timestep)
-
 # gps info 
 gps = robot.getDevice('gps')
 gps.enable(timestep)
-
 # collision info 
 collision = robot.getDevice('touch sensor')
 collision.enable(timestep)
-
 # led 
 led = robot.getDevice('led0')
 led.set(1) # led to turned on 
@@ -68,15 +57,10 @@ led_1 = robot.getDevice('led1')
 led_1.set(1) # led to turned on 
 led_2 = robot.getDevice('led')
 led_2.set(1) # led to turned on 
-# led_3 = robot.getDevice('led(3)')
-# led_3.set(1) # led to turned on 
-
-# light sensor 
 light_sensor = robot.getDevice('light sensor')
 light_sensor.enable(timestep)
 
 # initial genotype parameters
-
 fitness = 0   
 forward_speed = 2
 detect_thres = 1000
@@ -87,22 +71,15 @@ obj_found_so_far = []
 curr_sim_size = 5
 follow_thres = 3
 
-# given_id = robot.getName()[-1] 
+# generalize id acquisition
 if robot.getName() == "k0":
     given_id = 0
+    
+else: 
+    given_id = robot.getName()[3:-1]
 
-elif len(robot.getName()) == 5:
-    given_id = robot.getName()[-2]
-
-else:
-    given_id = robot.getName()[-3:len(robot.getName())-1] 
-
-# strategy_df = pd.DataFrame(columns = ['agent id' ,'time step', 'straight','alternating-left','alternating-right', 'true random', 'time since last block'])
-# strategy_f = open(str(given_id) + "info.csv", 'w')
-# strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size')
-# strategy_f.close()
-
-strategy_f = open("ga-info.csv", 'a')
+# collects statistics about strategy and collisions 
+strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'a')
 
 # global time_elapsed_since_block
 time_elapsed_since_block = 0
@@ -114,6 +91,7 @@ best_prev_genotype = '!'
 best_prev_score = -1000 
 curr_robot_genotype = []
 
+# levy walk calculation 
 def calc_step_size():
     global forward_speed
     beta = random.uniform(0.3, 1.99)
@@ -132,8 +110,7 @@ def get_gamma_val(input):
 def sample_normal_dist(stdev): 
     return random.gauss(0, stdev) 
 
-# motor functions 
-
+# direction selection 
 def rotate_random():
     # will choose direction following biased random walk (initial) 
     directions = [pi/2, -pi/2, 0, 0] # more preference to move straight 
@@ -172,7 +149,8 @@ def dynamic_correlated_random(curr_dir, bias):
         
     else: 
         return round(random.choice([pi, pi/2, -pi/2, bias, bias]),2)
-        
+   
+# strategy selection      
 def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False):
     global curr_best_weights
     global given_id
@@ -183,12 +161,10 @@ def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False
     if update: 
         new_weights = create_new_weights(t_block, t_robot, original_weights)
         strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], new_weights)
-        strategy_f.write('agent id:' + str(given_id) + ',time step: '+ str(robot.getTime()) + ',straight:' + str(original_weights[0]) + ',alternating-left:' + str(original_weights[1]) + ',alternating-right:' + str(original_weights[2]) + ',true random:' + str(original_weights[3]) + ',time since last block:'+ str(t_block) + ',size:' + str(curr_sim_size) + ',collisions' + str(fitness)+ ',size:' + str(curr_sim_size) +'\n')
+        strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(original_weights[0]) + ',' + str(original_weights[1]) + ',' + str(original_weights[2]) + ',' + str(original_weights[3]) + ','+ str(t_block) + ',' + str(curr_sim_size) + ',' + str(fitness)+ ',' + str(curr_sim_size) + ',ga' +'\n')
         strategy_f.close()
-        strategy_f = open("ga-info.csv", 'a')
-        # new_row = {'agent id': given_id, 'time step': robot.step(timestep), 'straight': original_weights[0],'alternating-left': original_weights[1],'alternating-right': original_weights[2], 'true random': original_weights[3], 'time since last block': t_block}
-        # strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
-        
+        strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'a')
+
     if not update: 
         strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], original_weights)
     
@@ -333,19 +309,15 @@ def interpret(timestep):
             parse_genotype(message)
             obj_found_so_far = []
             receiver.nextPacket()
-        
-        # response should also possess best genotype this generation and globally
-        # if not, will provide a genotype from random individual 
             
         elif message == "return_fitness": # happpens at end of generation 
             if best_prev_genotype == '!': 
                 best_prev_genotype = 'none'
             
             response = "k" + str(int(given_id)) + "-fitness" + str(fitness) + '-other' + str(best_prev_genotype)
-            # print('response' , response) 
-            strategy_f.write('agent id,' + str(given_id) + ',time step, '+ str(robot.getTime()) + ',straight,' + str(weights[0]) + ',alternating-left,' + str(weights[1]) + ',alternating-right,' + str(weights[2]) + ',true random,' + str(weights[3]) + ',time since last block,'+ str(time_elapsed_since_block) + ',size,' + str(curr_sim_size) + ',collisions,' + str(fitness)+ ',size,' + str(curr_sim_size) + '\n')
+            strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(weights[0]) + ',' + str(weights[1]) + ',' + str(weights[2]) + ',' + str(weights[3]) + ','+ str(time_elapsed_since_block) + ',' + str(curr_sim_size) + ',' + str(fitness)+ ',' + str(curr_sim_size) + ',ga' + '\n')
             strategy_f.close()
-            strategy_f = open("ga-info.csv", 'a')
+            strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'a')
             
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
@@ -373,17 +345,13 @@ def interpret(timestep):
             
         elif message[0] == "%" and str(message.split('-')[0][1:]) == str(given_id):
             # strategy_f.write('agent id:' + str(given_id) + ',time step: '+ timestep + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block) + ',size' + str(curr_sim_size))
+            holding_someting = True 
             
             obj_id = message.split('-')[1]
             
-            obj_found_so_far.append(obj_id ) 
+            obj_found_so_far.append(obj_id) 
             time_elapsed_since_block = 0
-            
             emitter.send(str(id).encode('utf-8'))
-            
-            # fitness += 1 
-            holding_something = False 
-            chosen_direction = correlated_random(chosen_direction)
             
             receiver.nextPacket()
             
@@ -395,13 +363,10 @@ def interpret(timestep):
         
         else: 
             receiver.nextPacket()
- 
- 
+
 
 def communicate_with_robot():
     global given_id 
-    # print('able to see other robot') 
-    
     # find closest robot to exchange info with 
     response = str(given_id) + "-encounter"
     emitter.send(response.encode('utf-8'))
@@ -409,10 +374,12 @@ def communicate_with_robot():
     
 # Main loop:
 # - perform simulation steps until Webots is stopping the controller
+
+# controller tracker variables 
 i = 0 
+prev_i = 0 # to keep track of timesteps elapsed before new direction 
 orientation_found = False 
 holding_something = False
-prev_i = 0 # to keep track of timesteps elapsed before new direction 
 object_encountered = False 
 prev_object_i = 0 # keep track of timesteps elapsed for each pickup action
 # global chosen_direction
@@ -425,22 +392,21 @@ start_count = robot.getTime()
 while robot.step(timestep) != -1 and sim_complete != True:
     interpret(str(robot.step(timestep))) 
     
+    if holding_something: # move towards nest (constant vector towards home) 
+        cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
+        if math.dist([cd_x, cd_y], [0,0]) > 0.05: 
+            chosen_direction = math.atan2(-cd_y,-cd_x)
+        else: 
+            holding_someting = False
+        
+    
     if curr_index >= len(strategy): 
         curr_index = 0 
-        
         if robot.step(timestep) % initial_step_size == 0:
-            # print('choosing strategy with update') 
-            strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = True) # chooses a new strategy 
-            # print(strategy) 
-            # initial_step_size = calc_step_size()
-            
+            strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = True) # chooses a new strategy      
         else: 
-            # print('choosing strategy, no updating') 
             strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = False)
-      
-           # print(strategy)
-    
-            # interpret(str(robot.step(timestep))) # checks for messages from supervisor 
+
     time_elapsed_since_robot +=1
     
     # biased random walk movement (each time step, cert prob of turning that direction) 
@@ -458,25 +424,16 @@ while robot.step(timestep) != -1 and sim_complete != True:
     elif orientation_found != True and yaw == chosen_direction and object_encountered != True: 
         orientation_found = True 
         prev_i = i
-        move_forward()
-        
-    else: 
-        pass
-            
+        move_forward()    
             
         # does each behavior after 1 sec    
     if robot.getTime() - start_count >= 1: 
         start_count = robot.getTime()    
-       
-    
-        # read distance sensor value 
-        # want to lower fitness for those that grab other robots 
         
         # check for collisions with other robot 
         list = camera.getRecognitionObjects()
         dist_val = ds.getValue()
-        # print(dist_val)
-        
+
         if round(dist_val) == 283: # wall detection 
             fitness += 1 
             # print('collision encountered')
@@ -513,36 +470,18 @@ while robot.step(timestep) != -1 and sim_complete != True:
                         chosen_direction = yaw
                     
                     if id not in obj_found_so_far:
-                        # new_row = {'agent id': given_id, 'time step': robot.step(timestep), 'straight': weights[0],'alternating-left': weights[1],'alternating-right': weights[2], 'true random': weights[3], 'time since last block': time_elapsed_since_block}
-                        # strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
-                        # strategy_f.write(str('agent id': given_id, 'time step': robot.step(timestep), 'straight': weights[0],'alternating-left': weights[1],'alternating-right': weights[2], 'true random': weights[3], 'time since last block': time_elapsed_since_block))
-            
-                        # strategy_f.write('agent id:' + str(given_id) + ',time step: '+ str(robot.step(timestep)) + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block))
-                        
-                        # obj_found_so_far.append(id)
                         id = "$" + str(given_id) + "-" + str(id) # indication that it is a object to be deleted 
-                        # time_elapsed_since_block = 0
-                        
                         emitter.send(str(id).encode('utf-8'))
-                        
-                        # fitness += 1 
-                        # holding_something = False 
-                        # chosen_direction = correlated_random(chosen_direction)
-             
                 if dist_val == 0 or collision.getValue() == 1:
                     fitness += 1 
-                    # print('collision encountered')
-                    chosen_direction = rotate_random()
+                    chosen_direction = rotate_random() # obstacle avoidance mechanism 
                     move_backwards()
             else:
-                # grab_object(i, prev_object_i) 
-               
                 time_elapsed_since_block += 1
             
         else: 
              object_encountered = False
              time_elapsed_since_block += 1
-    
         i+=1
         
         pass

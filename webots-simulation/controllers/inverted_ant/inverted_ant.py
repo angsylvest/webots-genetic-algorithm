@@ -23,41 +23,30 @@ robot = Robot()
 timestep = int(robot.getBasicTimeStep())
 open_grip = 0.029
 closed_grip = 0.005
-
 motor = robot.getDevice('motor')
-
 leftMotor = robot.getDevice('left wheel motor')
 rightMotor = robot.getDevice('right wheel motor')
-
 leftMotor.setVelocity(0)
 rightMotor.setVelocity(0)
-
 leftGrip = robot.getDevice('left grip')
 rightGrip = robot.getDevice('right grip')
-
 ds = robot.getDevice('distance sensor')
 ds.enable(timestep)
-
 # initialize emitter and reciever 
 emitter = robot.getDevice("emitter")
 emitter.setChannel(2)
-
 receiver = robot.getDevice("receiver")
 receiver.enable(timestep)
 receiver.setChannel(1)
-
 inertia = robot.getDevice("inertial unit")
 inertia.enable(timestep)
-
 # camera info 
 camera = robot.getDevice('camera')
 camera.enable(timestep)
 camera.recognitionEnable(timestep)
-
 # collision info 
 collision = robot.getDevice('touch sensor')
 collision.enable(timestep)
-
 # led 
 led = robot.getDevice('led0')
 led.set(1) # led to turned on 
@@ -67,45 +56,31 @@ led_2 = robot.getDevice('led')
 led_2.set(1) # led to turned on 
 # led_3 = robot.getDevice('led(3)')
 # led_3.set(1) # led to turned on 
-
 # light sensor 
 light_sensor = robot.getDevice('light sensor')
 light_sensor.enable(timestep)
-
 # gps info 
 gps = robot.getDevice('gps')
 gps.enable(timestep)
 
-# initial fitness 
-# global fitness
-fitness = 0 
-# global forward_speed 
-forward_speed = 2
-# global detect_thres 
-detect_thres = 1000
-# global time_switch
-time_switch = 150
-# motor functions 
 
-# global obj_found_so_far
+fitness = 0 
+forward_speed = 2
+detect_thres = 1000
+time_switch = 150
 obj_found_so_far = []
 curr_sim_size = 5
 
-# global las 
-# global current_tile 
 t_block = 0
 curr_sim_size = 5
 
+# generalize id acquisition
 if robot.getName() == "k0":
     given_id = 0
-    
-elif len(robot.getName()) == 5: 
-    given_id = robot.getName()[-2] 
-    
 else: 
-    given_id = robot.getName()[-3:len(robot.getName())-1]     
+    given_id = robot.getName()[3:-1]   
 
-strategy_f = open("ant-info.csv", 'a')
+strategy_f = open("../../graph-generation/collision-data/ant-info.csv", 'a')
 
 
 def rotate_random():
@@ -201,11 +176,11 @@ def interpret():
     global obj_found_so_far
     global ant 
     global sim_complete
+    global holding_something 
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
-        
-    
+
         if message[0] == "#" + str(given_id):
             message = message[2:].split("*")
             parse_genotype(message)
@@ -218,15 +193,11 @@ def interpret():
             print('message received', response)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
-            strategy_f.write('agent id,' + str(given_id) + ',time step,' + str(robot.getTime()) + ',time since last block,' + str(t_block) + ',size, ' + str(curr_sim_size) + ',collisions,' + str(fitness)+ '\n')
+            strategy_f.write(str(given_id) + ',' + str(robot.getTime()) + ',' + str(t_block) + ',' + str(curr_sim_size) + ',' + str(fitness)+ ',invert-ant' + '\n')
             strategy_f.close()
-            strategy_f = open("ant-info.csv", 'a')
+            strategy_f = open("../../graph-generation/collision-data/ant-info.csv", 'a')
             fitness = 0
-            
-            # strategy_f.write('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block) + ',size: ' + str(curr_sim_size))
-            # new_row = {'agent id': given_id, 'time step': robot.step(timestep),'time since last block': t_block}
-            # strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
-            
+
         elif message == 'sim-complete':
             sim_complete = True 
             strategy_f.close()
@@ -239,10 +210,7 @@ def interpret():
         elif message[0] == "%" and message.split('-')[0][1:] == str(given_id):
             id = message.split('-')[1]
             obj_found_so_far.append(id)
-            # fitness += 1 
-            # strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block) + ',size: ' + str(curr_sim_size) + ',fitness' + str(fitness)))
-                    
-            # fitness += 1 
+            holding_something = True
             t_block = 0
                 
             receiver.nextPacket()
@@ -297,6 +265,14 @@ while robot.step(timestep) != -1 and sim_complete != True:
     # print(yaw, 'vs: ', chosen_direction)
     current_tile = ant.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
     
+    if holding_something: # move towards nest (constant vector towards home) 
+        cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
+        if math.dist([cd_x, cd_y], [0,0]) > 0.05: 
+            chosen_direction = math.atan2(-cd_y,-cd_x)
+        else: 
+            holding_someting = False
+            
+    
     if current_tile != prev_tile: 
         location = '*' + str(current_tile) + '-' + str(given_id)
         emitter.send(str(location).encode('utf-8'))
@@ -322,11 +298,11 @@ while robot.step(timestep) != -1 and sim_complete != True:
     if robot.getTime() - start_count >= 1: 
         start_count = robot.getTime()
         ant.declinePhermone(current_tile)
-        chosen_direction = ant.re_gather(current_tile)
-        light_sensor_value = light_sensor.getValue()
-        # biased random walk movement (each time step, cert prob of turning that direction)  
         
-    
+        if holding_something == False: 
+            chosen_direction = ant.re_gather(current_tile)
+            
+        light_sensor_value = light_sensor.getValue()
         # check for collisions with other robot 
         list = camera.getRecognitionObjects()
             
@@ -335,10 +311,6 @@ while robot.step(timestep) != -1 and sim_complete != True:
         # print(dist_val, 'detect --', detect_thres)
         
         current_tile = ant.update(current_tile, (gps.getValues()[0], gps.getValues()[1]))
-        
-        # print('neighbors --', las.neighbors)
-        # want to not leave this tile until 3 iterations have passed 
-        
         # wall avoidance 
         if round(dist_val) == 283:
             fitness += 1 
@@ -362,28 +334,11 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     id = str(firstObject.get_id())
                     
                     if id not in obj_found_so_far:
-                    
-                        # obj_found_so_far.append(id)
-                        
-                        # strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block)))
-                                            
+            
                         id = "$" + str(given_id) + "-" + str(id) + "-" + str(current_tile) + "-" + str(iterations_passed) # indication that it is a object to be deleted 
-                        
                         emitter.send(str(id).encode('utf-8'))
-                        # fitness += 1 
                         holding_something = False 
-                        # chosen_direction = correlated_random(chosen_direction)
-                        # t_block = 0
-                        
-                        # new_row = {'agent id': given_id, 'time step': robot.step(timestep),'time since last block': t_block}
-                        # strategy_df = pd.concat([strategy_df, pd.DataFrame([new_row])], ignore_index=True)
-                        
-                        # reward tile 
-                        # las.reward(current_tile)
-                        
-                        # if current_tile == las.target and las.iterations_threshold <= iterations_passed:
-                            # has_collected = True
-                        
+
                 elif dist_val == 0 or collision.getValue() == 1:
                     fitness += 1 
                     # print('collision encountered')

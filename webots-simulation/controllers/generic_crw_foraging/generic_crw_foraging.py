@@ -19,77 +19,56 @@ robot = Robot()
 timestep = int(robot.getBasicTimeStep())
 open_grip = 0.029
 closed_grip = 0.005
-
 motor = robot.getDevice('motor')
-
 leftMotor = robot.getDevice('left wheel motor')
 rightMotor = robot.getDevice('right wheel motor')
-
 leftMotor.setVelocity(0)
 rightMotor.setVelocity(0)
-
 leftGrip = robot.getDevice('left grip')
 rightGrip = robot.getDevice('right grip')
-
 ds = robot.getDevice('distance sensor')
 ds.enable(timestep)
 
 # initialize emitter and reciever 
 emitter = robot.getDevice("emitter")
 emitter.setChannel(2)
-
 receiver = robot.getDevice("receiver")
 receiver.enable(timestep)
 receiver.setChannel(1)
-
 inertia = robot.getDevice("inertial unit")
 inertia.enable(timestep)
-
 # camera info 
 camera = robot.getDevice('camera')
 camera.enable(timestep)
 camera.recognitionEnable(timestep)
-
 # collision info 
 collision = robot.getDevice('touch sensor')
 collision.enable(timestep)
-
 # led 
 led = robot.getDevice('led')
 led.set(1) # led to turned on 
-
 # light sensor 
 light_sensor = robot.getDevice('light sensor')
 light_sensor.enable(timestep)
 
-# initial fitness 
-# global fitnes s
+# sim statistics 
 fitness = 0 
-# global forward_speed 
 forward_speed = 2
-# global detect_thres 
 detect_thres = 1000
-# global time_switch
 time_switch = 150
-# motor functions 
-
-global obj_found_so_far
-obj_found_so_far = []
-
-if robot.getName() == "k0":
-    given_id = 0
-
-elif len(robot.getName()) == 5: 
-    given_id = robot.getName()[-2] 
-    
-else: 
-    given_id = robot.getName()[-3:len(robot.getName())-1] 
-
-# Agent Level File Appended Set-up 
-strategy_f = open("crw-info.csv", 'a')
 t_block = 0
 curr_sim_size = 5
 
+obj_found_so_far = []
+
+# generalize id acquisition
+if robot.getName() == "k0":
+    given_id = 0
+else: 
+    given_id = robot.getName()[3:-1] 
+
+# Agent Level File Appended Set-up 
+strategy_f = open("../../graph-generation/collision-data/crw-info.csv", 'a')
 
 def rotate_random():
     # will choose direction following biased random walk 
@@ -157,21 +136,8 @@ def grab_object(curr_step, initial_step):
     elif (i == 80):
         motor.setPosition(-1.4) # arm up
 
-
 def release_object(curr_step, prev_step):
     pass 
-    
-def parse_genotype(gen):
-    global forward_speed 
-    global detect_thres 
-    global time_switch
-    global given_id
-    
-    forward_speed = gen[0].count('1')
-    if forward_speed < 3: 
-        forward_speed = 3
-    detect_thres = gen[1].count('1')
-    time_switch = gen[2].count('1')
     
 def interpret(): 
     global fitness
@@ -181,44 +147,36 @@ def interpret():
     global obj_found_so_far
     global curr_sim_size
     global sim_complete
+    global holding_something
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
-    
-        if message[0:2] == "#2":
-            message = message[1:].split("*")
-            parse_genotype(message)
-            receiver.nextPacket()
             
-        elif message == "return_fitness":
+        if message == "return_fitness":
             print('request received') 
             response = "k" + str(given_id) + "-fitness" + str(fitness)
             print('response is', response)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
-            strategy_f.write(str('agent id,' + str(given_id) + ',time step,' + str(robot.getTime()) + ',time since last block,' + str(t_block) + ',size, ' + str(curr_sim_size) + ',collisions,' + str(fitness))+ '\n')
+            strategy_f.write(str(given_id) + ',' + str(robot.getTime()) + ',' + str(t_block) + ',' + str(curr_sim_size) + ',' + str(fitness) + ',crw' + '\n')
             strategy_f.close()
-            strategy_f = open("crw-info.csv", 'a')
+            strategy_f = open("../../graph-generation/collision-data/crw-info.csv", 'a')
             fitness = 0
             
         elif 'size' in message:
             curr_sim_size = message[4:]
             receiver.nextPacket()
-            
-            
+
         elif message == 'sim-complete':
             sim_complete = True 
             strategy_f.close()
             receiver.nextPacket()
-            
-            # strategy_df.to_csv('strategy_df' + str(given_id) + '.csv')
+
         elif message[0] == "%" and message.split('-')[0][1:] == str(given_id):
              
             id = message.split('-')[1]
             obj_found_so_far.append(id)
-            # strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block) + ',size: ' + str(curr_sim_size)))
-                    
-            # fitness = 0 
+            holding_something = True
             t_block = 0
             receiver.nextPacket()
                 
@@ -227,6 +185,7 @@ def interpret():
     
 # Main loop:
 # - perform simulation steps until Webots is stopping the controller
+
 i = 0 
 orientation_found = False 
 holding_something = False
@@ -237,7 +196,6 @@ chosen_direction = rotate_random()
 sim_complete = False
 start_count = robot.getTime()
 
-
 while robot.step(timestep) != -1 and sim_complete != True:
 
     interpret()
@@ -245,11 +203,17 @@ while robot.step(timestep) != -1 and sim_complete != True:
     roll, pitch, yaw = inertia.getRollPitchYaw()
     yaw = round(yaw, 2) 
     
+    if holding_something: # move towards nest (constant vector towards home) 
+        cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
+        if math.dist([cd_x, cd_y], [0,0]) > 0.05: 
+            chosen_direction = math.atan2(-cd_y,-cd_x)
+        else: 
+            holding_someting = False
     
     if yaw != chosen_direction and orientation_found != True and object_encountered != True: 
         begin_rotating()
         
-    elif (i - prev_i == time_switch and object_encountered != True):
+    elif (i - prev_i == time_switch and object_encountered != True and holding_something == False):
         orientation_found = False 
         chosen_direction = correlated_random(chosen_direction)
         
@@ -270,12 +234,9 @@ while robot.step(timestep) != -1 and sim_complete != True:
             
         # read distance sensor value 
         dist_val = ds.getValue()
-        # print(dist_val, 'detect --', detect_thres)
         
         # wall avoidance 
         if round(dist_val) == 283:
-            # fitness -= 1 
-            # print('collision encountered')
             chosen_direction = rotate_random() 
             move_backwards()
             fitness += 1
@@ -284,40 +245,15 @@ while robot.step(timestep) != -1 and sim_complete != True:
         if dist_val < detect_thres and holding_something == False and len(list) > 0: 
             # behavior in response to stimuli in front of robot 
             if (object_encountered == False):
-                # prev_object_i = i
-                # grab_object(i, prev_object_i)
-                # object_encountered = True
-                
-                # if retrievable object within range, gets picked up 
                 if dist_val < 40: 
                     firstObject = camera.getRecognitionObjects()[0]
-                    # print('found object', firstObject)
                     id = str(firstObject.get_id())
-                    
-                    if id not in obj_found_so_far:
-                    
-                        # obj_found_so_far.append(id)
-                        
-                        # strategy_f.write(str('agent id:' + str(given_id) + ',time step:' + str(robot.step(timestep)) + ',time since last block:' + str(t_block)))
-                                            
+                    if id not in obj_found_so_far:            
                         id = "$" + str(given_id) + "-" + str(id) # indication that it is a object to be deleted 
-                        
                         emitter.send(str(id).encode('utf-8'))
-                        # fitness += 1 
-                        holding_something = False 
-                        chosen_direction = correlated_random(chosen_direction)
-                        
-                        
-                        # obj_found_so_far.append(id)
-                        # id = "$" + id # indication that it is a object to be deleted 
-                        # emitter.send(str(id).encode('utf-8'))
-                        # fitness += 1 
-                        # holding_something = False 
-                        # chosen_direction = correlated_random(chosen_direction)
                         
                 elif dist_val == 0:
                     fitness += 1 
-                    # print('collision encountered')
                     chosen_direction = rotate_random() 
                     move_backwards()
                     

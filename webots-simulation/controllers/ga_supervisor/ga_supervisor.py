@@ -1,9 +1,6 @@
 from controller import Supervisor, Node, Keyboard, Emitter, Receiver, Field
-# import statistics 
 import math 
-# import pandas as pd
 from robot_pop import * 
-# from graph_generator import * 
 
 """
 Main supervisor base 
@@ -13,110 +10,58 @@ Angel Sylvester 2022
 
 columns = 'agent id' + ',time step' + ',fitness' + ',xpos'+ ',ypos' + ',num col' + ',genotype' 
 
-# create data frame so that it is singularity friendly 
-# k1_f = open('robot-1-info.csv', 'w')
-# k2_f = open('robot-2-info.csv', 'w')
-# k3_f = open('robot-3-info.csv', 'w')
-
-# k1_f.write(str(columns))
-# k2_f.write(str(columns))
-# k3_f.write(str(columns))
-
-# k1_f.close()
-# k2_f.close()
-# k3_f.close()
-
-# k1_f = open('robot-1-info.csv', 'a')
-# k2_f = open('robot-2-info.csv', 'a')
-# k3_f = open('robot-3-info.csv', 'a')
-
-# sets up csv for reference 
-# k1_df = pd.DataFrame(columns = ['agent id' ,'time step', 'fitness', 'xpos', 'ypos', 'num col', 'genotype'])
-# k2_df = pd.DataFrame(columns = ['agent id', 'time step', 'fitness', 'xpos', 'ypos', 'num col','genotype'])
-# k3_df = pd.DataFrame(columns = ['agent id', 'time step', 'fitness', 'xpos', 'ypos', 'num col','genotype'])
-## add more robot dfs here (be sure to keep num consistent) 
-
-# global df_list
-# df_list = [k1_df, k2_df, k3_df]
-# df_list = [k1_f, k2_f, k3_ df]
-
-# global collected_count 
-collected_count = []
-
-overall_f = open('overall-df.csv', 'w')
+# collected counts csv generation 
+overall_f = open('../../graph-generation/collection-data/overall-df.csv', 'w')
 overall_columns = ['trial','time', 'objects retrieved', 'size']
 overall_f.write(str(overall_columns) + '\n')
 # overall_df = pd.DataFrame(columns = ['trial','time', 'objects retrieved'])
 overall_f.close()
 overall_f = open('overall-df.csv', 'a')
 
+# for individual robot, statistics about strategy taken over time 
 strategy_f = open("../generalized_ga_controller/ga-info.csv", 'w')
 strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size' + ',collisions'+ ',size' + '\n')
 strategy_f.close()
 
-TIME_STEP = 32
+# genetic algorithm-specific parameters 
+num_generations = 10
+simulation_time = 10
+trials = 30
+robot_population_sizes = [5, 10, 15]
+curr_size = 5
+gene_list = ['control speed 10', 'detection threshold 1000', 'time switch 550']
 
+# statistics collected 
+collected_count = []
+initial_genotypes = []
+fitness_scores = []
+pop_genotypes = [] 
+found_list = []
+total_found = 0
+population = []
+
+# simulation specific setup 
+TIME_STEP = 32
 robot = Supervisor()  # create Supervisor instance
 
-# get info from this def 
-# k1 = robot.getFromDef("khepera")
-# k2 = robot.getFromDef("khepera2")
-# k3 = robot.getFromDef("khepera3")
-## add more robots here (if defined, be sure to keep num consistent) 
-
-global population 
-population = []
 global curr_df
 
-# population = [k1, k2, k3] # add population here 
-
-# emitter to send info to robots 
+# set up messenging system 
 emitter = robot.getDevice("emitter")
 emitter.setChannel(1)
-
-# set receiver to receive info 
 receiver = robot.getDevice("receiver") 
 receiver.enable(TIME_STEP)
 receiver.setChannel(2) 
 
-num_generations = 10
-
-# global initial_genotypes 
-initial_genotypes = []
-
-global k1_fitness
-global k2_fitness
-global k3_fitness
-global fitness_scores
-fitness_scores = []
-
-# global pop_genotypes 
-pop_genotypes = [] 
-found_list = []
-
+# sim specific parameters 
 taken = False # getting second child assigned 
-gene_list = ['control speed 10', 'detection threshold 1000', 'time switch 550']
-
-total_found = 0
-
 updated = False
-
 fit_update = False 
-
-simulation_time = 10
-
-trials = 30
-
 block_list = []
- 
 reproduce_list = []
-
-robot_population_sizes = [5, 10, 15]
-
 r_pos_to_generate = []
 
-curr_size = 5
-
+# generate environment type: random 
 def generate_robot_central(num_robots):
     global fitness_scores 
     global collected_count 
