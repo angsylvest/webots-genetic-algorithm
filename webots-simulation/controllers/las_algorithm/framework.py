@@ -172,16 +172,20 @@ class LAS():
         
 
     def re_direct(self, curr_tile): 
-        new_cell = self.target
-        new_tile = self.cells[new_cell]
-        
-        if curr_tile == new_cell: 
+        # new_cell = self.target
+        # print('curr cell --', curr_tile)
+        # print('target cell --', self.target)
+        # new_tile = self.cells[new_cell]
+        new_tile = self.target
+        new_cell = self.cells[new_tile]
+
+        if curr_tile == new_tile: 
             return round(random.choice([0,0, math.pi/2, -math.pi/2]),2)
          
         tpx, tpy, brx, bry = self.cells[curr_tile]
         mx, my = (tpx + brx)/2, (tpy + bry)/2 # calculating midpoint 
         # print(mx, my)
-        otpx, otpy, obrx, obry = self.cells[new_cell]
+        otpx, otpy, obrx, obry = self.cells[new_tile]
         omx, omy = (otpx + obrx)/2, (otpy + obry)/2 # calculating midpoint 
         # print(omx, omy)
         direction = math.atan2((omy - my),(omx - mx))

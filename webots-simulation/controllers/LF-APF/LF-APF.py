@@ -72,8 +72,12 @@ obj_found_so_far = []
 
 if robot.getName() == "k0":
     given_id = 0
-else: 
+    
+elif len(robot.getName()) == 5: 
     given_id = robot.getName()[-2] 
+    
+else: 
+    given_id = robot.getName()[-3:len(robot.getName())-1] 
 
 # Agent Level File Appended Set-up 
 strategy_f = open("levy-info.csv", 'a')

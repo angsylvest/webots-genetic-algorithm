@@ -82,7 +82,7 @@ simulation_time = 30
 
 count = 0
 
-trials = 15
+trials = 30
 
 found_list = []
  
@@ -90,7 +90,7 @@ block_list = []
 
 arena_area = robot.getFromDef("arena")
 
-robot_population_sizes = [5, 10, 15]
+robot_population_sizes = [15]
 
 collected_count = []
 
@@ -251,7 +251,9 @@ def message_listener(time_step):
     global block_list
     global collected_count 
     global fitness_scores
-    global curr_size 
+    global curr_size
+    global curr_df
+    global population  
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -460,7 +462,7 @@ def run_optimization():
                 print('found genotypes')
                 print('new generation starting -')
             
-            overall_f.write('trial,' + str(i) + ',time,' + str(robot.getTime()) + ',objects retrieved,' + str(total_found) + ',size,' + str(size))   
+            overall_f.write('trial,' + str(i) + ',time,' + str(robot.getTime()) + ',objects retrieved,' + str(total_found) + ',size,' + str(size)+ '\n')   
             overall_f.close()
             overall_f = open('overall-ant-info.csv', 'a')  
             # new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}

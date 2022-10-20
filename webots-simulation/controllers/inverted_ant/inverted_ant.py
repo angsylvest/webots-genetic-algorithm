@@ -98,9 +98,12 @@ curr_sim_size = 5
 
 if robot.getName() == "k0":
     given_id = 0
-else: 
+    
+elif len(robot.getName()) == 5: 
     given_id = robot.getName()[-2] 
     
+else: 
+    given_id = robot.getName()[-3:len(robot.getName())-1]     
 
 strategy_f = open("ant-info.csv", 'a')
 
@@ -247,7 +250,7 @@ def interpret():
         elif message == "trial_complete":
             # resets prob distrib 
             start = False 
-            
+            receiver.nextPacket()            
             
         elif message[0] == '*' and message.split('-')[1] != str(given_id): # updates prob distrib after encounter received 
             current_tile = message.split('-')[0][1:]

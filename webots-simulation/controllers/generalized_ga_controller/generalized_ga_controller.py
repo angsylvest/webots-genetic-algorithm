@@ -476,7 +476,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                 time_elapsed_since_robot += 1
     
             
-        if dist_val < detect_thres and holding_something == False: 
+        if dist_val < 1000 and holding_something == False: 
             # stop()
             if (object_encountered == False):
       

@@ -90,7 +90,7 @@ block_list = []
 
 arena_area = robot.getFromDef("arena")
 
-robot_population_sizes = [5, 10, 15]
+robot_population_sizes = [5, 10]
 
 collected_count = []
 
@@ -450,7 +450,7 @@ def run_optimization():
                 print('found genotypes')
                 print('new generation starting -')
             
-            overall_f.write('trial,' + str(i) + ',time,' + str(robot.getTime()) + ',objects retrieved,' + str(total_found) + ',size,' + str(size))    
+            overall_f.write('trial,' + str(i) + ',time,' + str(robot.getTime()) + ',objects retrieved,' + str(total_found) + ',size,' + str(size)+ '\n')    
             overall_f.close()
             overall_f = open('overall-crw-info.csv', 'a') 
             # new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}

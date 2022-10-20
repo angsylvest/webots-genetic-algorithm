@@ -250,13 +250,19 @@ def regenerate_environment(block_dist):
 
 def initialize_genotypes(size):
     global initial_genotypes
-    global gene_list 
+    global gene_list
+    global pop_genotypes 
     # initial_geno_txt = open('initial_genotype.txt', 'w')
     
     lines = []
+    pop_genotypes = []
+    initial_genotypes = []
+
     for r in range(size):
         new_geno = create_individal_genotype(gene_list)
         initial_genotypes.append(new_geno)
+        pop_genotypes.append(new_geno)
+        # emitter.send(str("#"+ str(r) + str(genotype)).encode('utf-8'))
     
     # with open('initial_genotype.txt') as f:
         # for line in f: 
@@ -309,7 +315,7 @@ def find_nearest_robot_genotype(r_index):
                 other_index = i
     # print('found closest neighbor', closest_neigh)
     # use emitter to send genotype to corresponding robot if fitness is better and if nearby 
-    if type(curr_fitness) == 'int' and type (other_fitness) == 'int' and other_fitness > (curr_fitness + 2): 
+    if type(curr_fitness) == 'int' and type (other_fitness) == 'int' and other_fitness < (curr_fitness + 2): 
         reproduced_geno = reproduce(pop_genotypes[r_index], pop_genotypes[i])
         pop_genotypes[r_index] = new_geno
         reproduce_list.append(r_index)

@@ -251,6 +251,8 @@ def message_listener(time_step):
     global block_list
     global collected_count
     global curr_size
+    global curr_df
+    global population
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')

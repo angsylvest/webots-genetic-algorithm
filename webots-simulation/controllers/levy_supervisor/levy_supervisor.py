@@ -82,7 +82,7 @@ simulation_time = 30
 
 count = 0
 
-trials = 15
+trials = 30
 
 found_list = []
  
@@ -90,7 +90,7 @@ block_list = []
 
 arena_area = robot.getFromDef("arena")
 
-robot_population_sizes = [5, 10, 15]
+robot_population_sizes = [15]
 
 collected_count = []
 
@@ -250,7 +250,9 @@ def message_listener(time_step):
     global found_list
     global block_list
     global collected_count
-    global curr_size  
+    global curr_size
+    global curr_df
+    global population  
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
