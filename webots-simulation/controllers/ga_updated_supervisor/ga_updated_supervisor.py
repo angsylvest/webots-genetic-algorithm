@@ -87,8 +87,11 @@ def generate_robot_central(num_robots):
     
         t_field = rec_node.getField('translation')
         pose = [round(random.uniform(0.25, -0.25),2), round(random.uniform(0.25, -0.25) ,2), 0.02]
+        while pose in r_pos_to_generate: # remove any duplicates
+            pose = [round(random.uniform(0.25, -0.25),2), round(random.uniform(0.25, -0.25) ,2), 0.02]
         r_pos_to_generate.append(pose)
         t_field.setSFVec3f(pose)
+                # print(r_field)
         
         # sets up metrics 
         fitness_scores.append("!")
@@ -400,11 +403,19 @@ def run_optimization():
     global reproduce_list 
     global r_pos_to_generate
     global curr_size
+    global population 
     
     # initialize genotypes 
     generate_robot_central(5)
     reset_genotype()
-    regenerate_environment(0.2) 
+    regenerate_environment(0.2)
+    
+    # fixes robots falling over
+    for rec_node in population: 
+        r_field = rec_node.getField('rotation')
+        if r_field.getSFRotation() != [0, 0, -1]:
+            r_field.setSFRotation([0, 0, -1])
+            
     run_seconds(simulation_time) # runs generation for that given amount of time  
     print('new generation beginning')
     run_seconds(5, True) # is waiting until got genotypes
