@@ -26,7 +26,7 @@ strategy_f.close()
 
 # genetic algorithm-specific parameters 
 num_generations = 10
-simulation_time = 10
+simulation_time = 30
 trials = 30
 robot_population_sizes = [5, 10, 15]
 gene_list = ['control speed 10', 'detection threshold 1000', 'follower threshold 5']

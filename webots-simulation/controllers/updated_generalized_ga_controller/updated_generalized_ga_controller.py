@@ -85,30 +85,15 @@ strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'a')
 time_elapsed_since_block = 0
 time_elapsed_since_robot = 0
 weights = [0.25, 0.25, 0.25, 0.25] 
+observations_per_strategy = [0, 0, 0, 0]
+total_observations = sum(observations_per_strategy)
+current_strat_index = 0 # set arbitrarily 
 curr_best_weights = [] # set initially as empty 
 
 best_prev_genotype = '!'
 best_prev_score = -1000 
 curr_robot_genotype = []
 
-# levy walk calculation 
-def calc_step_size():
-    global forward_speed
-    beta = random.uniform(0.3, 1.99)
-    omega_u = ((get_gamma_val(1 + beta)*math.sin((math.pi * beta)/2)) / (beta*get_gamma_val((1 + beta)/2)*math.pow(2, ((beta - 1)/2)))**(1/beta))**2
-    omega_v = 1**2
-    u = sample_normal_dist(omega_u)
-    v = abs(sample_normal_dist(omega_v))
-    
-    z = abs(u / (math.pow(2,1/beta)) )
-    
-    return ((forward_speed/32)*1000) / z
-
-def get_gamma_val(input): 
-    return math.gamma(input) 
-    
-def sample_normal_dist(stdev): 
-    return random.gauss(0, stdev) 
 
 # direction selection 
 def rotate_random():
@@ -156,6 +141,7 @@ def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False
     global given_id
     global strategy_f 
     global curr_sim_size
+    global current_strat_index 
     
     # want to update weights based off effectiveness of current strategy 
     if update: 
@@ -166,74 +152,32 @@ def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False
         strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'a')
 
     if not update: 
-        strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], original_weights)
+        strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], original_weights)[0]
+        current_strat_index = ['straight','alternating-left','alternating-right', 'true random'].index(strat)
     
     if strat == 'straight':
-        return [correlated_random(curr_dir)]
+        return [correlated_random(curr_dir), correlated_random(curr_dir), correlated_random(curr_dir), correlated_random(curr_dir)]
     elif strat == 'alternating-right':
         return [round(pi/2, 2), 0, round(-pi/2,2), round(pi,2)]
     elif strat == 'alternating-left':
         return [round(pi/2,2), round(pi,2), round(-pi/2,2), 0]
     else: # true random 
-        return [random.choice([round(pi/2,2), 0, round(-pi/2,2), round(pi,2)])]
+        return [random.choice([round(pi/2,2), 0, round(-pi/2,2), round(pi,2)]), random.choice([round(pi/2,2), 0, round(-pi/2,2), round(pi,2)]), random.choice([round(pi/2,2), 0, round(-pi/2,2), round(pi,2)]), random.choice([round(pi/2,2), 0, round(-pi/2,2), round(pi,2)])]
     
     
 def create_new_weights(t_block, t_robot, original_weights): 
     # print('original weights --', original_weights)
     global curr_best_weights
     global weights 
+    global observations_per_strategy
+    global total_observations 
+    global current_strat_index
+    global observations_per_strategy
     # want to incorporate some level of noise to avoid local max, instead of global
     # hope to ensure that good weights continue to persist in the pool 
-     
-    if len(curr_best_weights) == 0: # if there is no weight that is better (ie. just starting out) 
-        new_w = []
-        f = random.uniform(0, 1) 
-        new_w.append(f)
-        for i in range(len(original_weights)-1): 
-            f = random.uniform(0, (1 - f))
-            new_w.append(f)
-        
-        curr_best_weights = original_weights 
-        curr_best_weights.append(t_block)
-        curr_best_weights.append(t_robot)
-        # curr_best_weights = original_weights # will serve as point of comparison for subsequent checking 
-        weights = new_w
-        return new_w
-        
-    if (curr_best_weights[-2] < t_block): # will update weights 
-        curr_best_weights[:-2] = original_weights 
-        curr_best_weights[-2] = t_block
-        curr_best_weights[-1] = t_robot
-        
-        # more restrictive sampling 
-        new_w = []
-        f = random.uniform(original_weights[0]*0.9, original_weights[0]*1.1) 
-        new_w.append(f)
-        for i in range(len(original_weights)-1): 
-            f = random.uniform(original_weights[i]*0.9, original_weights[i]*1.1)
-            new_w.append(f)
-        
-        s = sum(new_w)
-        normalized = [float(i)/s for i in new_w]
-        
-        new_w = normalized
-        
-        weights = new_w
-        return new_w
     
-    else: 
-        new_w = []
-        f = random.uniform(0, 1) 
-        new_w.append(f)
-        for i in range(len(original_weights)-1): 
-            f = random.uniform(0, (1 - f))
-            new_w.append(f)
-
-        s = sum(new_w)
-        normalized = [float(i)/s for i in new_w] 
-        new_w = normalized
-        weights = new_w
-        return new_w 
+    new_w = [observations_per_strategy[i]/sum(observations_per_strategy) for i in range(len(observations_per_strategy))]
+    return new_w
      
     
 def begin_rotating():
@@ -294,10 +238,14 @@ def interpret(timestep):
     global fitness
     global holding_something
     global chosen_direction
-    global weights 
+    # global weights 
     global curr_sim_size
     global best_prev_genotype
     global best_prev_score  
+    
+    global observations_per_strategy
+    global total_observations 
+    global current_strat_index 
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -324,6 +272,8 @@ def interpret(timestep):
             fitness = 0
             best_prev_genotype = '!'
             best_prev_score = -1000
+            observations_per_strategy = [0, 0, 0, 0]
+            current_strat_index = 0
             
             
         elif message == 'sim-complete':
@@ -345,7 +295,9 @@ def interpret(timestep):
             
         elif message[0] == "%" and str(message.split('-')[0][1:]) == str(given_id):
             # strategy_f.write('agent id:' + str(given_id) + ',time step: '+ timestep + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block) + ',size' + str(curr_sim_size))
-            holding_someting = True 
+            holding_something = True 
+            print('currently holding obj')
+            observations_per_strategy[current_strat_index] += 1
             
             obj_id = message.split('-')[1]
             
@@ -392,12 +344,14 @@ start_count = robot.getTime()
 while robot.step(timestep) != -1 and sim_complete != True:
     interpret(str(robot.step(timestep))) 
     
-    if holding_something: # move towards nest (constant vector towards home) 
+    if holding_something == True: # move towards nest (constant vector towards home) 
         cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
         if math.dist([cd_x, cd_y], [0,0]) > 0.05: 
-            chosen_direction = math.atan2(-cd_y,-cd_x)
+            chosen_direction = round(math.atan2(-cd_y,-cd_x),2)
+            # print('homing towards center of map --', given_id, chosen_direction )
         else: 
-            holding_someting = False
+            holding_something = False
+            # print('successfully dropped off object')
         
     
     if curr_index >= len(strategy): 
@@ -440,7 +394,6 @@ while robot.step(timestep) != -1 and sim_complete != True:
             chosen_direction = rotate_random() 
             move_backwards()
          
-        # print('curr light values', light_sensor.getValue())   
         if time_elapsed_since_robot > 300: # max value for light 
             if light_sensor.getValue() > 800: 
                 communicate_with_robot()
@@ -479,9 +432,9 @@ while robot.step(timestep) != -1 and sim_complete != True:
             else:
                 time_elapsed_since_block += 1
             
-        else: 
-             object_encountered = False
-             time_elapsed_since_block += 1
+        # else: 
+             # object_encountered = False
+             # time_elapsed_since_block += 1
         i+=1
         
         pass
