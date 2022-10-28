@@ -21,16 +21,16 @@ overall_f = open('../../graph-generation/collection-data/overall-df.csv', 'a')
 
 # for individual robot, statistics about strategy taken over time & individual collision info 
 strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'w')
-strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size' + ',collisions'+ ',size'+ ',type' + '\n')
+strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size' + ',fitness'+ ',size'+ ',type' + '\n')
 strategy_f.close()
 
 # genetic algorithm-specific parameters 
 num_generations = 10
 simulation_time = 30
 trials = 30
-robot_population_sizes = [5, 10, 15]
-gene_list = ['control speed 10', 'detection threshold 1000', 'follower threshold 5']
-curr_size = 5
+robot_population_sizes = [1, 10, 15]
+gene_list = ['control speed 10', 'energy cost 1000', 'food energy 5', 'observations thres 20']
+curr_size = robot_population_sizes[0]
 
 # statistics collected 
 population = []
@@ -43,6 +43,7 @@ reproduce_list = []
 r_pos_to_generate = []
 pairs = []
 fitness_scores = []
+overall_fitness_scores = []
 
 # set-up robot 
 TIME_STEP = 32
@@ -56,7 +57,7 @@ taken = False # getting second child assigned
 updated = False
 fit_update = False 
 
-
+    
 # set up environments 
 def generate_robot_central(num_robots):
     global fitness_scores 
@@ -65,6 +66,7 @@ def generate_robot_central(num_robots):
     global columns 
     global r_pos_to_generate
     global pairs 
+    global overall_fitness_scores
     
     initialize_genotypes(num_robots)
     emitter.send(str("size-" + str(num_robots)).encode('utf-8'))
@@ -76,13 +78,14 @@ def generate_robot_central(num_robots):
              
     population = []
     fitness_scores = []
+    overall_fitness_scores = []
     collected_count = []
     pairs = []
         
     for i in range(num_robots):
         rootNode = robot.getRoot()
         rootChildrenField = rootNode.getField('children')
-        rootChildrenField.importMFNode(-1, '../las_supervisor/robots/robot-updated-ga.wbo') 
+        rootChildrenField.importMFNode(-1, '../las_supervisor/robots/robot-ga-update.wbo') 
         rec_node = rootChildrenField.getMFNode(-1)
     
         t_field = rec_node.getField('translation')
@@ -95,6 +98,7 @@ def generate_robot_central(num_robots):
         
         # sets up metrics 
         fitness_scores.append("!")
+        overall_fitness_scores.append('!')
         pairs.append("!")
         collected_count.append(0)
         population.append(rec_node)
@@ -198,11 +202,14 @@ def find_nearest_robot_genotype(r_index):
     global reproduce_list 
     global collected_count 
     global pairs 
-    
+    global overall_fitness_scores
+
     closest_neigh = " "
     curr_robot = population[r_index]
     curr_dist = 1000 # arbitrary value 
     curr_fitness = fitness_scores[r_index]
+    print('overall fitness list', overall_fitness_scores)
+    curr_overall_fitness = overall_fitness_scores[r_index]
     other_fitness = 0
     
     curr_pos = [curr_robot.getPosition()[0], curr_robot.getPosition()[1]]
@@ -215,15 +222,15 @@ def find_nearest_robot_genotype(r_index):
             if closest_neigh == " ":
                 closest_neigh = str(population[i].getId())
                 curr_dist = dis
-                other_fitness = fitness_scores[i]
+                other_fitness = overall_fitness_scores[i]
                 other_index = i
             elif dis < curr_dist: 
                 closest_neigh = str(population[i].getId())
                 curr_dist = dis 
-                other_fitness = fitness_scores[i]
+                other_fitness = overall_fitness_scores[i]
                 other_index = i
     # use emitter to send genotype to corresponding robot if fitness is better and if nearby 
-    if type(curr_fitness) == 'int' and type (other_fitness) == 'int' and (other_fitness < (curr_fitness + 2) or collected_count[r_index] < collected_count[other_index]) : 
+    if type(curr_fitness) == 'int' and type (other_fitness) == 'int' and (other_fitness > curr_overall_fitness) : 
         emitter.send('potential partner-' + str(pop_genotypes[other_index]) + '-' + str(other_fitness) + '-' + str(collected_count[other_index]))
         pairs.append(r_index) # this robot now has a potential partner 
                 
@@ -243,6 +250,7 @@ def message_listener(time_step):
     global reproduce_list 
     global population
     global curr_size
+    global overall_fitness_scores
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -272,7 +280,9 @@ def message_listener(time_step):
             fit = message.split('-')[1][7:] 
             index = int(message.split('-')[0][1:])
             partner = message.split('-')[2][5:]
+            overall_fitness = message.split('-')[3][7:]
             fitness_scores[int(index)] = fit
+            overall_fitness_scores[int(index)] = int(overall_fitness)
             
             print('fitness' , message, index, fit)
             
@@ -299,6 +309,7 @@ def message_listener(time_step):
 def run_seconds(t,waiting=False):
     global pop_genotypes
     global fitness_scores
+    global overall_fitness_scores
     global updated
     global fit_update 
     global block_list
@@ -338,6 +349,7 @@ def run_seconds(t,waiting=False):
 # will use selected partners from each robot and reproduce with that corresponding index, and update population at the end of gen          
 def update_geno_list(genotype_list): 
     global fitness_scores
+    global overall_fitness_scores
     global pop_genotypes 
     global gene_list
     global taken 
@@ -346,7 +358,8 @@ def update_geno_list(genotype_list):
     global pairs 
     
     # only makes executive changes if it's better off to just re-randomize population   
-    if max(fitness_scores) == 0:
+    print('getting overall fitness scores --', overall_fitness_scores)
+    if max(overall_fitness_scores) <= 0:
         cp_genotypes = pop_genotypes.copy()
         for i in range(len(population)):
             if i not in pairs: 
@@ -360,6 +373,7 @@ def update_geno_list(genotype_list):
     
     # fitness_scores = []
     fitness_scores = ["!" for i in range(len(population))]
+    overall_fitness_scores = ["!" for i in range(len(population))]
     pairs = ["!" for i in range(len(population))]
     fit_update = False 
     print('gene pool updated') 
@@ -371,8 +385,9 @@ def eval_fitness(time_step):
     global fitness_scores 
     global fit_update
     global population 
+    global overall_fitness_scores
             
-    if '!' not in fitness_scores: 
+    if '!' not in fitness_scores and '!' not in overall_fitness_scores: 
         # receiver.nextPacket()
         print('will update gene pool --')
         fit_update = True 
@@ -406,25 +421,31 @@ def run_optimization():
     global population 
     
     # initialize genotypes 
-    generate_robot_central(5)
-    reset_genotype()
-    regenerate_environment(0.2)
+    # generate_robot_central(robot_population_sizes[0])
+    # reset_genotype()
+    # regenerate_environment(0.2)
     
     # fixes robots falling over
-    for rec_node in population: 
-        r_field = rec_node.getField('rotation')
-        if r_field.getSFRotation() != [0, 0, -1]:
-            r_field.setSFRotation([0, 0, -1])
+    # for rec_node in population: 
+        # r_field = rec_node.getField('rotation')
+        # if r_field.getSFRotation() != [0, 0, -1]:
+            # r_field.setSFRotation([0, 0, -1])
             
-    run_seconds(simulation_time) # runs generation for that given amount of time  
-    print('new generation beginning')
-    run_seconds(5, True) # is waiting until got genotypes
+    # run_seconds(simulation_time) # runs generation for that given amount of time  
+    # print('new generation beginning')
+    # run_seconds(5, True) # is waiting until got genotypes
     
     for size in robot_population_sizes:
         curr_size = size  
         initialize_genotypes(size)
         r_pos_to_generate = []
         generate_robot_central(size)
+        regenerate_environment(0.2)
+        
+        for rec_node in population: 
+            r_field = rec_node.getField('rotation')
+            if r_field.getSFRotation() != [0, 0, -1]:
+                r_field.setSFRotation([0, 0, -1])
         
         for i in range(trials): 
             print('beginning new trial', i)
