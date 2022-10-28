@@ -28,7 +28,7 @@ strategy_f.close()
 num_generations = 10
 simulation_time = 30
 trials = 30
-robot_population_sizes = [1, 10, 15]
+robot_population_sizes = [5, 10, 15]
 gene_list = ['control speed 10', 'energy cost 1000', 'food energy 5', 'observations thres 20']
 curr_size = robot_population_sizes[0]
 

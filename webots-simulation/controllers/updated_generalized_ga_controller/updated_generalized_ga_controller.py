@@ -435,6 +435,8 @@ while robot.step(timestep) != -1 and sim_complete != True:
         if math.dist([cd_x, cd_y], [0,0]) > 0.05: 
             chosen_direction = round(math.atan2(-cd_y,-cd_x),2)
             # print('homing towards center of map --', given_id, chosen_direction )
+            # also want to avoid other obstacles in the meantime as well 
+            
         else: 
             holding_something = False
             t_elapsed_block_total += time_elapsed_since_block 
@@ -485,9 +487,9 @@ while robot.step(timestep) != -1 and sim_complete != True:
     elif reversing: 
         move_backwards()
         
-    if round(dist_val) == 298 and not reversing: # wall detection 
+    if round(dist_val) >= 330 and not reversing: # wall detection 
         fitness += 1 
-        print('collision encountered -- wall')
+        print('collision encountered -- wall or block')
         reversing = True 
         move_backwards()
         
