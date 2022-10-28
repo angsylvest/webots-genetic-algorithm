@@ -27,8 +27,14 @@ leftMotor.setVelocity(0)
 rightMotor.setVelocity(0)
 leftGrip = robot.getDevice('left grip')
 rightGrip = robot.getDevice('right grip')
-ds = robot.getDevice('distance sensor')
+
+ds = robot.getDevice('distance sensor') # front 
+ds_right = robot.getDevice('distance sensor right')
+ds_left = robot.getDevice('distance sensor left')
+
 ds.enable(timestep)
+ds_right.enable(timestep)
+ds_left.enable(timestep)
 
 # initialize emitter and reciever 
 emitter = robot.getDevice("emitter")
@@ -64,7 +70,7 @@ gps.enable(timestep)
 
 # controller parameters 
 fitness = 0 
-forward_speed = 2
+forward_speed = 5
 detect_thres = 1000
 time_switch = 150
 obj_found_so_far = []
@@ -229,11 +235,12 @@ iterations_passed = 0
 has_collected = False
 sim_complete = False
 start_count = robot.getTime()
+reversing = False
 
 while robot.step(timestep) != -1 and sim_complete != True:
     interpret() 
     
-    if not start:
+    if not start and not reversing:
         las = LAS(curr_pos = (float(gps.getValues()[0]),float(gps.getValues()[1])))
         current_tile = las.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
         chosen_direction = las.re_direct(current_tile)
@@ -246,17 +253,17 @@ while robot.step(timestep) != -1 and sim_complete != True:
     current_tile = las.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
     
     
-    if holding_something: # move towards nest (constant vector towards home) 
+    if holding_something and not reversing: # move towards nest (constant vector towards home) 
         cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
         if math.dist([cd_x, cd_y], [0,0]) > 0.05: 
             chosen_direction = math.atan2(-cd_y,-cd_x)
         else: 
             holding_someting = False
                     
-    if yaw != chosen_direction and object_encountered != True and orientation_found != True: 
+    if yaw != chosen_direction and object_encountered != True and orientation_found != True and not reversing: 
         begin_rotating()
         
-    elif (i - prev_i == time_switch and object_encountered != True and holding_something == False):
+    elif (i - prev_i == time_switch and object_encountered != True and holding_something == False and not reversing):
         # orientation_found = False 
         
         if current_tile == las.target: 
@@ -282,13 +289,35 @@ while robot.step(timestep) != -1 and sim_complete != True:
         else: 
             chosen_direction = las.re_direct(current_tile)  
         
-    elif yaw == chosen_direction and orientation_found != True: 
+    elif yaw == chosen_direction and orientation_found != True and not reversing: 
         orientation_found = True 
         prev_i = i
         move_forward()
       
     else: 
         pass
+        
+            
+    # read distance sensor value 
+    dist_val = ds.getValue()
+    dist_vals = [ds.getValue(), ds_left.getValue(), ds_right.getValue()]
+    
+    if min(dist_vals) > 500 and reversing: # no longer within range of obstacle
+        print('proceeding with navigation')
+        reversing = False
+        chosen_direction = rotate_random() 
+        orientation_found = False 
+        # begin_rotating()
+        
+    elif reversing: 
+        move_backwards()
+        
+    if min(dist_vals) <= 330 and not reversing: # wall detection 
+        fitness += 1 
+        print('collision encountered -- wall or block')
+        reversing = True 
+        move_backwards()   
+        
         
         # does each behavior after 1 sec    
     if robot.getTime() - start_count >= 1: 
@@ -297,29 +326,14 @@ while robot.step(timestep) != -1 and sim_complete != True:
         light_sensor_value = light_sensor.getValue()
         # check for collisions with other robot 
         list = camera.getRecognitionObjects()
-            
-        # read distance sensor value 
-        dist_val = ds.getValue()
-        
         current_tile = las.update(current_tile, (gps.getValues()[0], gps.getValues()[1]))
-        # wall avoidance 
-        if round(dist_val) == 283:
-            fitness += 1 
-            # print('collision encountered')
-            chosen_direction = rotate_random() 
-            move_backwards()
-            
-        if collision.getValue() == 1: 
-            chosen_direction = rotate_random() 
-            move_backwards()
-            fitness += 1
-            
+     
         # handles other obstacles     
-        if dist_val < detect_thres and holding_something == False and len(list) > 0: 
+        if holding_something == False and not reversing: 
             # behavior in response to stimuli in front of robot 
             if (object_encountered == False):
                 # if retrievable object within range, gets picked up 
-                if len(list) == 1 and dist_val < 100:
+                if min(dist_vals) < 400 and len(list) != 0:
                     firstObject = camera.getRecognitionObjects()[0]
                     id = str(firstObject.get_id())
                     
@@ -327,15 +341,9 @@ while robot.step(timestep) != -1 and sim_complete != True:
                         id = "$" + str(given_id) + "-" + str(id) + "-" + str(current_tile) + "-" + str(iterations_passed) # indication that it is a object to be deleted 
                         emitter.send(str(id).encode('utf-8'))
                         
-                elif dist_val == 0 or collision.getValue() == 1:
-                    fitness += 1 
-                    chosen_direction = rotate_random() 
-                    move_backwards()
             else: 
                 t_block += 1
-        else: 
-             t_block += 1
-             object_encountered = False
+
         i+=1
         
         pass

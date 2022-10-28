@@ -29,8 +29,14 @@ leftMotor.setVelocity(0)
 rightMotor.setVelocity(0)
 leftGrip = robot.getDevice('left grip')
 rightGrip = robot.getDevice('right grip')
-ds = robot.getDevice('distance sensor')
+
+ds = robot.getDevice('distance sensor') # front 
+ds_right = robot.getDevice('distance sensor right')
+ds_left = robot.getDevice('distance sensor left')
+
 ds.enable(timestep)
+ds_right.enable(timestep)
+ds_left.enable(timestep)
 
 # initialize emitter and reciever 
 emitter = robot.getDevice("emitter")
@@ -61,7 +67,7 @@ light_sensor = robot.getDevice('light sensor')
 light_sensor.enable(timestep)
 
 # initial genotype parameters 
-forward_speed = 2
+forward_speed = 5
 # detect_thres = 1000
 time_switch = 200
 
@@ -474,10 +480,11 @@ while robot.step(timestep) != -1 and sim_complete != True:
         
     # collision avoidance mechanism     
     dist_val = ds.getValue()
+    dist_vals = [ds.getValue(), ds_left.getValue(), ds_right.getValue()]
     
-    print(chosen_direction, 'cur facing', yaw, 'dist', dist_val, 'reverse', reversing, 'collision', collision.getValue())
+    # print(chosen_direction, 'cur facing', yaw, 'dist', dist_val, 'reverse', reversing, 'collision', collision.getValue())
             
-    if dist_val > 500 and reversing: # no longer within range of obstacle
+    if min(dist_vals) > 500 and reversing: # no longer within range of obstacle
         print('proceeding with navigation')
         reversing = False
         chosen_direction = rotate_random() 
@@ -487,7 +494,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
     elif reversing: 
         move_backwards()
         
-    if round(dist_val) >= 330 and not reversing: # wall detection 
+    if min(dist_vals) <= 330 and not reversing: # wall detection 
         fitness += 1 
         print('collision encountered -- wall or block')
         reversing = True 
@@ -529,7 +536,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             if (object_encountered == False):
       
                 # attempt to get object detected 
-                if dist_val < 400 and len(list) != 0:
+                if min(dist_vals) < 400 and len(list) != 0:
                  
                     firstObject = camera.getRecognitionObjects()[0]
                     count = len(camera.getRecognitionObjects())

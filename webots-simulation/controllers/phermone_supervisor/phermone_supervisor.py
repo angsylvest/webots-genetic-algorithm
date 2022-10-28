@@ -284,18 +284,25 @@ def run_optimization():
     global r_pos_to_generate
     global overall_columns
     global curr_size 
+    global population 
 
     # generate_robot_central(5)
-    generate_robot_central(robot_population_sizes[0])
-    regenerate_environment(0.2)
-    run_seconds(simulation_time)
-    print('new generation beginning')
-    run_seconds(5, True) # is waiting until got genotypes
+    # generate_robot_central(robot_population_sizes[0])
+    # regenerate_environment(0.2)
+    # run_seconds(simulation_time)
+    # print('new generation beginning')
+    # run_seconds(5, True) # is waiting until got genotypes
     for size in robot_population_sizes: 
         curr_size = size 
         
         r_pos_to_generate = []
         generate_robot_central(size)
+        regenerate_environment(0.2)
+        
+        for rec_node in population: 
+            r_field = rec_node.getField('rotation')
+            if r_field.getSFRotation() != [0, 0, -1]:
+                r_field.setSFRotation([0, 0, -1])
         
         for i in range(trials): 
             print('beginning new trial', i)
