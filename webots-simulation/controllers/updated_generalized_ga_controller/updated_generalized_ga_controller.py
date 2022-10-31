@@ -546,9 +546,12 @@ while robot.step(timestep) != -1 and sim_complete != True:
                         id = "$" + str(given_id) + "-" + str(id) # indication that it is a object to be deleted 
                         emitter.send(str(id).encode('utf-8'))
                         
-        else:
-            time_elapsed_since_block += 1 # on a per sec basis 
-            print('adding val')
+                    else: 
+                        time_elapsed_since_block += 1 # on a per sec basis 
+                        
+                else: 
+                    time_elapsed_since_block += 1 # on a per sec basis 
+                        
 
         i+=1
         

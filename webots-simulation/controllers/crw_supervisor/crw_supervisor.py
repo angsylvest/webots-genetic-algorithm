@@ -32,7 +32,7 @@ receiver.setChannel(2)
 # set up timing so consistent with ga 
 num_generations = 10
 trials = 30
-simulation_time = 15
+simulation_time = 60
 curr_size = 5
 robot_population_sizes = [5, 10, 15]
 population = []
