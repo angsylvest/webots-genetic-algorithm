@@ -281,6 +281,8 @@ while robot.step(timestep) != -1 and sim_complete != True:
             # behavior in response to stimuli in front of robot 
             if (object_encountered == False):
                 # if retrievable object within range, gets picked up 
+                list = camera.getRecognitionObjects()
+                
                 if min(dist_vals) < 400 and len(list) != 0: 
                     firstObject = camera.getRecognitionObjects()[0]
                     # print('found object', firstObject)

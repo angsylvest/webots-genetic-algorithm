@@ -57,6 +57,10 @@ led.set(1) # led to turned on
 light_sensor = robot.getDevice('light sensor')
 light_sensor.enable(timestep)
 
+# gps info 
+gps = robot.getDevice('gps')
+gps.enable(timestep)
+
 # sim statistics 
 fitness = 0 
 forward_speed = 5

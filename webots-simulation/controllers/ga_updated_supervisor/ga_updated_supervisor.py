@@ -57,7 +57,7 @@ taken = False # getting second child assigned
 updated = False
 fit_update = False 
 
-    
+
 # set up environments 
 def generate_robot_central(num_robots):
     global fitness_scores 
@@ -369,7 +369,7 @@ def update_geno_list(genotype_list):
                 pop_genotypes[i] = new_offspring
                      
     # update parameters to hopefully improve performance
-    print('curr population --', population, len(population))
+    # print('curr population --', population, len(population))
     
     # fitness_scores = []
     fitness_scores = ["!" for i in range(len(population))]

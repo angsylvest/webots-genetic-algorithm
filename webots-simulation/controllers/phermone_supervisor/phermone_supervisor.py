@@ -14,7 +14,7 @@ Angel Sylvester 2022
 overall_f = open('../../graph-generation/collection-data/overall-ant-info.csv', 'w') 
 overall_f.write('trial' + ',time' + ',objects retrieved' + ',size' + ',type' + '\n')
 overall_f.close()
-overall_f = open('overall-ant-info.csv', 'a') 
+overall_f = open('../../graph-generation/collection-data/overall-ant-info.csv', 'a') 
 
 # individual robot collision counts  
 strategy_f = open("../../graph-generation/collision-data/ant-info.csv", 'w')
@@ -35,7 +35,7 @@ arena_area = robot.getFromDef("arena")
 
 # set up timing so consistent with ga 
 num_generations = 10
-simulation_time = 30
+simulation_time = 60
 trials = 30
 curr_size = 5
 robot_population_sizes = [5, 10, 15]

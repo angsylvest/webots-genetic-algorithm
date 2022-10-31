@@ -128,10 +128,10 @@ def calc_robot_fitness():
     global obstacle_weight
     
     
-    if fitness != 0 and n_observations_block != 0: 
+    if fitness != 0 and n_observations_block != 0 and t_elapsed_block_total != 0: 
         return obj_weight*(1 / (t_elapsed_block_total / n_observations_block)) + obstacle_weight*(1 / fitness)
     
-    elif n_observations_block != 0: 
+    elif n_observations_block != 0 and t_elapsed_block_total != 0: 
         return obj_weight*(1 / (t_elapsed_block_total / n_observations_block)) 
     
     else: 
@@ -546,9 +546,9 @@ while robot.step(timestep) != -1 and sim_complete != True:
                         id = "$" + str(given_id) + "-" + str(id) # indication that it is a object to be deleted 
                         emitter.send(str(id).encode('utf-8'))
                         
-            else:
-                time_elapsed_since_block += 1
-                print('adding val')
+        else:
+            time_elapsed_since_block += 1 # on a per sec basis 
+            print('adding val')
 
         i+=1
         

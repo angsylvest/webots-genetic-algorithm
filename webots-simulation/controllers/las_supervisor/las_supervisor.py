@@ -35,7 +35,7 @@ arena_area = robot.getFromDef("arena")
 # set up timing so consistent with ga 
 num_generations = 10
 simulation_time = 15
-trials = 30
+trials = 60
 curr_size = 5
 robot_population_sizes = [5, 10, 15]
 
