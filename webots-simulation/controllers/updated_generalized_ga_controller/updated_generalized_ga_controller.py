@@ -90,7 +90,7 @@ strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'a')
 time_elapsed_since_block = 0 
 time_elapsed_since_robot = 0
 weights = [0.25, 0.25, 0.25, 0.25] 
-observations_per_strategy = [0, 0, 0, 0] # num successes using each 
+observations_per_strategy = [1, 1, 1, 1] # num successes using each (set to 1 so that there is still likelihood for gathering strategy) 
 total_observations = sum(observations_per_strategy)
 current_strat_index = 0 # set arbitrarily 
 curr_best_weights = [] # set initially as empty 
@@ -110,7 +110,7 @@ obj_weight = 2
 obstacle_weight = 1 
 num_observations = 0 # will be used to
 fitness = 0  # represents total # of collisions so far 
-observations_threshold = 20
+observations_threshold = 5
 overall_fitness = 0
 
 # MVT intuition statistics (overall) 
@@ -118,6 +118,7 @@ energy_per_item = 10
 energy_cost = 0.5 # per sec 
 energy_collected_gen = 0
 time_elapsed = 0 # on a per sec basis 
+
 
 # parameters reset when strategy changes (after a generation) 
 def calc_robot_fitness():
@@ -127,15 +128,14 @@ def calc_robot_fitness():
     global obj_weight 
     global obstacle_weight
     
-    
-    if fitness != 0 and n_observations_block != 0 and t_elapsed_block_total != 0: 
-        return obj_weight*(1 / (t_elapsed_block_total / n_observations_block)) + obstacle_weight*(1 / fitness)
-    
-    elif n_observations_block != 0 and t_elapsed_block_total != 0: 
-        return obj_weight*(1 / (t_elapsed_block_total / n_observations_block)) 
+    if fitness != 0: 
+        return obj_weight*(n_observations_block) + obstacle_weight*(1 / fitness)
     
     else: 
-        return 0 
+        return obj_weight*(n_observations_block) 
+    
+    # else: 
+        # return 0 
 
 # determines whether new strategy should be attempted based off given costs/benefits
 def energy_expenditure():
@@ -144,7 +144,10 @@ def energy_expenditure():
     global energy_collected_gen 
     global time_elapsed 
     
-    return (energy_collected_gen - (energy_cost*time_elapsed))/time_elapsed 
+    if time_elapsed != 0: 
+        return (energy_collected_gen*energy_per_item - (energy_cost*time_elapsed))
+    else: 
+        return energy_collected_gen*energy_per_item
     
 
 # direction selection 
@@ -280,8 +283,8 @@ def parse_genotype(gen):
     curr_robot_genotype = gen
     
     forward_speed = gen[0].count('1')
-    if forward_speed < 2: 
-        forward_speed = 2
+    if forward_speed < 5: 
+        forward_speed = 5
     energy_cost = gen[1].count('1')
     energy_per_item = gen[2].count('1')
     observations_threshold = gen[3].count('1')
@@ -316,10 +319,12 @@ def interpret(timestep):
         
         # print('incoming messages: ', given_id, message) 
     
+        # intertrial changes 
         if message[0:2] == "#" + str(given_id):
             message = message[2:].split("*")
             parse_genotype(message)
             obj_found_so_far = []
+            
             receiver.nextPacket()
             
         elif message == "return_fitness": # happpens at end of generation 
@@ -327,29 +332,44 @@ def interpret(timestep):
                 best_prev_genotype = 'none'
             
             response = "k" + str(int(given_id)) + "-fitness" + str(fitness) + '-other' + str(best_prev_genotype) + '-overall' + str(calc_robot_fitness())
+            print('calculating fitness', calc_robot_fitness())
             strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(weights[0]) + ',' + str(weights[1]) + ',' + str(weights[2]) + ',' + str(weights[3]) + ','+ str(time_elapsed_since_block) + ',' + str(curr_sim_size) + ',' + str(calc_robot_fitness())+ ',' + str(curr_sim_size) + ',ga' + '\n')
             strategy_f.close()
             strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'a')
             
-            t_elapsed_block_total = 0
-            n_observations_block = 0
+            # t_elapsed_block_total = 0
+            # n_observations_block = 0
             fitness = 0
             overall_fitness = 0
             best_prev_genotype = '!'
             best_prev_score = -1000
             
-            energy_collected_gen = 0
-            time_elapsed = 0 # on a per sec basis 
+            # energy_collected_gen = 1
+            # time_elapsed = 0 # on a per sec basis 
             
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
-            
-            
+
         elif message == 'sim-complete':
             sim_complete = True 
             strategy_f.close()
             receiver.nextPacket()
-            # strategy_df.to_csv('strategy_df' + str(given_id) + '.csv')
+            
+        elif 'trial' in message: 
+            # resets relevant statistics 
+            fitness = 0 # number of obstacles 
+            best_prev_genotype = '!'
+            best_prev_score = -1000
+            observations_per_strategy = [1, 1, 1, 1]
+            current_strat_index = 0
+            
+            t_elapsed_block_total = 0
+            n_observations_block = 0
+            
+            energy_collected_gen = 1
+            
+            time_elapsed = 0 # on a per sec basis 
+            overall_fitness = 0
             
         elif 'partner' in message: 
             # assesses if this is best so far in generation 
@@ -368,16 +388,12 @@ def interpret(timestep):
             print('currently holding obj--', given_id)
             observations_per_strategy[current_strat_index] += 1
             
-            obj_id = message.split('-')[1]
-            
+            obj_id = message.split('-')[1] 
             obj_found_so_far.append(obj_id) 
-            # t_elapsed_block_total += time_elapsed_since_block 
-            # n_observations_block += 1
-            
-            # time_elapsed_since_block = 0
             emitter.send(str(id).encode('utf-8'))
+           
             
-            observations_per_strategy[current_strat_index] += 1
+            # observations_per_strategy[current_strat_index] += 1
             energy_collected_gen += 1
             
             receiver.nextPacket()
@@ -390,13 +406,14 @@ def interpret(timestep):
             fitness = 0 # number of obstacles 
             best_prev_genotype = '!'
             best_prev_score = -1000
-            observations_per_strategy = [0, 0, 0, 0]
+            observations_per_strategy = [1, 1, 1, 1]
             current_strat_index = 0
             
             t_elapsed_block_total = 0
             n_observations_block = 0
             
-            energy_collected_gen = 0
+            energy_collected_gen = 1
+            
             time_elapsed = 0 # on a per sec basis 
             overall_fitness = 0
             
@@ -420,6 +437,7 @@ def communicate_with_robot():
 # controller tracker variables 
 i = 0 
 prev_i = 0 # to keep track of timesteps elapsed before new direction 
+back_i = 0
 orientation_found = False 
 holding_something = False
 object_encountered = False 
@@ -431,14 +449,15 @@ curr_index = 0
 initial_step_size = 500
 start_count = robot.getTime()
 reversing = False 
+moving_forward = False  
 
 while robot.step(timestep) != -1 and sim_complete != True:
     interpret(str(robot.step(timestep)))
     
     # homing mechanism 
-    if holding_something == True and not reversing: # move towards nest (constant vector towards home) 
+    if holding_something == True and not reversing and not moving_forward: # move towards nest (constant vector towards home) 
         cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
-        if math.dist([cd_x, cd_y], [0,0]) > 0.05: 
+        if math.dist([cd_x, cd_y], [0,0]) > 0.05:  
             chosen_direction = round(math.atan2(-cd_y,-cd_x),2)
             # print('homing towards center of map --', given_id, chosen_direction )
             # also want to avoid other obstacles in the meantime as well 
@@ -448,16 +467,22 @@ while robot.step(timestep) != -1 and sim_complete != True:
             t_elapsed_block_total += time_elapsed_since_block 
             n_observations_block += 1
             time_elapsed_since_block = 0
+            time_elapsed = 0 # on a per sec basis 
+            
+            # weights = [0.25, 0.25, 0.25, 0.25] # reset since starting at same 
             
             print('successfully dropped off object', given_id)
         
     
-    if curr_index >= len(strategy) and not holding_something and not reversing: 
+    if curr_index >= len(strategy) and not holding_something and not reversing and not moving_forward: # maintain strategy for initial
         curr_index = 0 
+        # used to determine when to update strategy 
         if energy_expenditure() < 0: # update the weights based off success so far 
-            strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = True) # chooses a new strategy      
+            strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = True) # chooses a new strategy   
+            # time_elapsed = 0    
         else: 
             strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = False)
+            # time_elapsed = 0 
 
     time_elapsed_since_robot +=1
     
@@ -468,6 +493,15 @@ while robot.step(timestep) != -1 and sim_complete != True:
     if yaw != chosen_direction and orientation_found != True and object_encountered != True and not reversing: 
         begin_rotating()
         
+        # handles avoidance  
+    elif (i - back_i >= 50 and object_encountered != True and orientation_found == True and not reversing and moving_forward):
+        moving_forward = False
+        
+        # proceeds with previous strategy 
+        orientation_found = False 
+        chosen_direction = strategy[curr_index]
+        # print('proceeding with previous navigation')
+        
     elif (i - prev_i == time_switch and object_encountered != True and holding_something == False and orientation_found == True and not reversing):
         orientation_found = False 
         chosen_direction = strategy[curr_index]
@@ -476,7 +510,11 @@ while robot.step(timestep) != -1 and sim_complete != True:
     elif orientation_found != True and yaw == chosen_direction and object_encountered != True and not reversing: 
         orientation_found = True 
         prev_i = i
+        
+        # for avoidance strategy 
+        back_i = i 
         move_forward()    
+        # moving_forward = True 
         
     # collision avoidance mechanism     
     dist_val = ds.getValue()
@@ -485,11 +523,14 @@ while robot.step(timestep) != -1 and sim_complete != True:
     # print(chosen_direction, 'cur facing', yaw, 'dist', dist_val, 'reverse', reversing, 'collision', collision.getValue())
             
     if min(dist_vals) > 500 and reversing: # no longer within range of obstacle
-        print('proceeding with navigation')
+        # print('proceeding with navigation')
         reversing = False
+
         chosen_direction = rotate_random() 
         orientation_found = False 
-        # begin_rotating()
+        
+        # if not moving_forward: 
+        moving_forward = True 
         
     elif reversing: 
         move_backwards()
@@ -500,31 +541,31 @@ while robot.step(timestep) != -1 and sim_complete != True:
         reversing = True 
         move_backwards()
         
-    if collision.getValue() == 1 and not reversing:
-        fitness += 1 
-        reversing = True 
+    # if collision.getValue() == 1 and not reversing:
+        # fitness += 1 
+        # reversing = True 
         # chosen_direction = rotate_random() # obstacle avoidance mechanism 
-        move_backwards()
+        # move_backwards()
        
-        print('collision from collision sensor')
+        # print('collision from collision sensor')
     
     # communication threshold  
-    if time_elapsed_since_robot > 300 and not holding_something and not reversing: # max value for light 
-        if light_sensor.getValue() > 800: 
+    if not holding_something and not reversing: # max value for light 
+        if light_sensor.getValue() > 800 and time_elapsed_since_robot > 500 : 
             communicate_with_robot()
             time_elapsed_since_robot = 0 # reset time step 
-        else: 
+        elif light_sensor.getValue() > 800: 
             time_elapsed_since_robot += 1 
             
-    if time_elapsed_since_robot <= 300 and light_sensor.getValue() > 800 and not reversing: # congested area 
+    # if time_elapsed_since_robot <= 500 and light_sensor.getValue() > 800 and not reversing: # congested area 
         # want to be repulsed by robots 
        # chosen_direction = rotate_random() 
-       move_backwards() 
-       reversing = True 
+       # move_backwards() 
+       # reversing = True 
             
         # does each behavior after 1 sec    
     if robot.getTime() - start_count >= 1: 
-        start_count = robot.getTime()   
+        start_count = robot.getTime()  
         
         if not holding_something:  # don't take into account homing state 
             time_elapsed += 1
@@ -536,7 +577,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             if (object_encountered == False):
       
                 # attempt to get object detected 
-                if min(dist_vals) < 400 and len(list) != 0:
+                if min(dist_vals) < 500 and len(list) != 0:
                  
                     firstObject = camera.getRecognitionObjects()[0]
                     count = len(camera.getRecognitionObjects())
@@ -548,14 +589,16 @@ while robot.step(timestep) != -1 and sim_complete != True:
                         
                     else: 
                         time_elapsed_since_block += 1 # on a per sec basis 
+                        # print('time added')
                         
                 else: 
                     time_elapsed_since_block += 1 # on a per sec basis 
+                    # print('time added 2x')
                         
 
-        i+=1
+    i+=1
         
-        pass
+    pass
     
 # Enter here exit cleanup code.
 

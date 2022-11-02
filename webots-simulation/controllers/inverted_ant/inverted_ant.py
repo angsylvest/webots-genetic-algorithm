@@ -250,7 +250,8 @@ has_collected = False
 sim_complete = False
 start_count = robot.getTime()
 reversing = False 
-
+moving_forward = False 
+ 
 while robot.step(timestep) != -1 and sim_complete != True:
     interpret()
     # initializes ant class 
@@ -272,7 +273,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
     # print(yaw, 'vs: ', chosen_direction)
     current_tile = ant.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
     
-    if holding_something and not reversing: # move towards nest (constant vector towards home) 
+    if holding_something and not reversing and not moving_forward: # move towards nest (constant vector towards home) 
         cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
         if math.dist([cd_x, cd_y], [0,0]) > 0.05: 
             chosen_direction = math.atan2(-cd_y,-cd_x)
@@ -287,9 +288,9 @@ while robot.step(timestep) != -1 and sim_complete != True:
     if yaw != chosen_direction and orientation_found != True and object_encountered != True and not reversing: 
         begin_rotating()
         
-    # elif (i - prev_i == time_switch and object_encountered != True):
-        # orientation_found = False 
-        # chosen_direction = correlated_random(chosen_direction)
+    # handles avoidance  
+    elif (i - prev_i == 200 and object_encountered != True and orientation_found == True and not reversing and moving_forward == True):
+        moving_forward = False
         
     elif orientation_found != True and yaw == chosen_direction and object_encountered != True and not reversing: 
         orientation_found = True 
@@ -309,6 +310,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
         chosen_direction = rotate_random() 
         orientation_found = False 
         # begin_rotating()
+        moving_forward = True 
         
     elif reversing: 
         move_backwards()
@@ -338,7 +340,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             # behavior in response to stimuli in front of robot 
             if (object_encountered == False):
                 # if retrievable object within range, gets picked up 
-                if min(dist_vals) < 400 and len(list) != 0:
+                if min(dist_vals) < 500 and len(list) != 0:
                 
                     firstObject = camera.getRecognitionObjects()[0]
                     # print('found object', firstObject)

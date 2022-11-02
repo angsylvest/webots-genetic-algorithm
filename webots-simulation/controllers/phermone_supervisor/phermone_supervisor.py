@@ -320,7 +320,7 @@ def run_optimization():
             
             overall_f.write(str(i) + ',' + str(robot.getTime()) + ',' + str(total_found) + ',' + str(size)+ ',invert-ant' + '\n')   
             overall_f.close()
-            overall_f = open('overall-ant-info.csv', 'a')  
+            overall_f = open('../../graph-generation/collection-data/overall-ant-info.csv', 'a')  
             # new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
             print('items collected', total_found)
             # overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)

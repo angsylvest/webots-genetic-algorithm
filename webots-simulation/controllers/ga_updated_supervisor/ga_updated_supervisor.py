@@ -26,10 +26,10 @@ strategy_f.close()
 
 # genetic algorithm-specific parameters 
 num_generations = 10
-simulation_time = 60
+simulation_time = 30
 trials = 30
 robot_population_sizes = [5, 10, 15]
-gene_list = ['control speed 10', 'energy cost 1000', 'food energy 5', 'observations thres 20']
+gene_list = ['control speed 10', 'energy cost 5', 'food energy 30', 'observations thres 5']
 curr_size = robot_population_sizes[0]
 
 # statistics collected 
@@ -282,7 +282,7 @@ def message_listener(time_step):
             partner = message.split('-')[2][5:]
             overall_fitness = message.split('-')[3][7:]
             fitness_scores[int(index)] = fit
-            overall_fitness_scores[int(index)] = int(overall_fitness)
+            overall_fitness_scores[int(index)] = float(overall_fitness)
             
             print('fitness' , message, index, fit)
             
@@ -472,13 +472,14 @@ def run_optimization():
 
             overall_f.write(str(i) + ',' + str(robot.getTime()) + ',' + str(total_found) + ',' + str(size)+ ',' + 'ga' + '\n')    
             overall_f.close()
-            overall_f = open('overall-df.csv', 'a')
+            overall_f = open('../../graph-generation/collection-data/overall-df.csv', 'a')
             print('items collected', total_found)
             regenerate_environment(0.2)  
             total_found = 0 
             reproduce_list = []
             found_list = []
-            reset_genotype()              
+            reset_genotype()   
+            emitter.send('trial'.encode('utf-8'))           
     return 
   
 def main(): 
