@@ -208,7 +208,7 @@ def find_nearest_robot_genotype(r_index):
     curr_robot = population[r_index]
     curr_dist = 1000 # arbitrary value 
     curr_fitness = fitness_scores[r_index]
-    print('overall fitness list', overall_fitness_scores)
+    # print('overall fitness list', overall_fitness_scores)
     curr_overall_fitness = overall_fitness_scores[r_index]
     other_fitness = 0
     

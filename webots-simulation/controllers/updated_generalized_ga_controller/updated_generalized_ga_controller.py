@@ -537,18 +537,11 @@ while robot.step(timestep) != -1 and sim_complete != True:
         
     if min(dist_vals) <= 330 and not reversing: # wall detection 
         fitness += 1 
-        print('collision encountered -- wall or block')
+        # print('collision encountered -- wall or block')
         reversing = True 
         move_backwards()
-        
-    # if collision.getValue() == 1 and not reversing:
-        # fitness += 1 
-        # reversing = True 
-        # chosen_direction = rotate_random() # obstacle avoidance mechanism 
-        # move_backwards()
-       
-        # print('collision from collision sensor')
-    
+
+
     # communication threshold  
     if not holding_something and not reversing: # max value for light 
         if light_sensor.getValue() > 800 and time_elapsed_since_robot > 500 : 
@@ -557,11 +550,6 @@ while robot.step(timestep) != -1 and sim_complete != True:
         elif light_sensor.getValue() > 800: 
             time_elapsed_since_robot += 1 
             
-    # if time_elapsed_since_robot <= 500 and light_sensor.getValue() > 800 and not reversing: # congested area 
-        # want to be repulsed by robots 
-       # chosen_direction = rotate_random() 
-       # move_backwards() 
-       # reversing = True 
             
         # does each behavior after 1 sec    
     if robot.getTime() - start_count >= 1: 

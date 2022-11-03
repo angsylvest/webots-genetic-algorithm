@@ -320,7 +320,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
         
     if min(dist_vals) <= 330 and not reversing: # wall detection 
         fitness += 1 
-        print('collision encountered -- wall or block')
+        # print('collision encountered -- wall or block')
         reversing = True 
         move_backwards()   
         
