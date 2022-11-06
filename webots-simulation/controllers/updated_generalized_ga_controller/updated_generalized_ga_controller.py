@@ -211,13 +211,13 @@ def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False
         current_strat_index = ['straight','alternating-left','alternating-right', 'true random'].index(strat)
     
     if strat == 'straight':
-        return [correlated_random(curr_dir), correlated_random(curr_dir), correlated_random(curr_dir), correlated_random(curr_dir)]
+        return [curr_dir, curr_dir, curr_dir, curr_dir]
     elif strat == 'alternating-right':
         return [round(pi/2, 2), 0, round(-pi/2,2), round(pi,2)]
     elif strat == 'alternating-left':
         return [round(pi/2,2), round(pi,2), round(-pi/2,2), 0]
-    else: # true random 
-        return [random.choice([round(pi/2,2), 0, round(-pi/2,2), round(pi,2)]), random.choice([round(pi/2,2), 0, round(-pi/2,2), round(pi,2)]), random.choice([round(pi/2,2), 0, round(-pi/2,2), round(pi,2)]), random.choice([round(pi/2,2), 0, round(-pi/2,2), round(pi,2)])]
+    else: #  correlated random
+        return [correlated_random(curr_dir), correlated_random(curr_dir), correlated_random(curr_dir), correlated_random(curr_dir)]
     
     
 def create_new_weights(t_block, t_robot, original_weights): 
