@@ -278,7 +278,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
         if math.dist([cd_x, cd_y], [0,0]) > 0.05: 
             chosen_direction = math.atan2(-cd_y,-cd_x)
         else: 
-            holding_someting = False
+            holding_something = False
             
     
     if current_tile != prev_tile and not reversing: 

@@ -66,7 +66,7 @@ gps.enable(timestep)
 fitness = 0 
 forward_speed = 5
 detect_thres = 1000
-time_switch = 150
+time_switch = 200
 t_block = 0
 curr_sim_size = 5
 
@@ -220,20 +220,30 @@ while robot.step(timestep) != -1 and sim_complete != True:
     if holding_something and not reversing and not moving_forward: # move towards nest (constant vector towards home) 
         cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
         if math.dist([cd_x, cd_y], [0,0]) > 0.05: 
-            chosen_direction = math.atan2(-cd_y,-cd_x)
+            chosen_direction = round(math.atan2(-cd_y,-cd_x),2)
+            print('homing --', given_id, chosen_direction, yaw)
+
         else: 
-            holding_someting = False
+            holding_something = False
+            print('successfully dropped off object', given_id)
     
     if yaw != chosen_direction and orientation_found != True and object_encountered != True and not reversing: 
         begin_rotating()
         
     # handles avoidance  
-    elif (i - prev_i == 50 and object_encountered != True and orientation_found == True and not reversing and moving_forward == True):
+    elif (i - prev_i >= 50 and object_encountered != True and orientation_found == True and not reversing and moving_forward == True):
         moving_forward = False
-        
-    elif (i - prev_i == time_switch and object_encountered != True and holding_something == False and not reversing):
         orientation_found = False 
-        chosen_direction = correlated_random(chosen_direction)
+        
+        # proceed with previous behavior 
+        if not holding_something: 
+            chosen_direction = correlated_random(chosen_direction)
+
+    # exploration behavior 
+    elif (i - prev_i == time_switch and object_encountered != True and not reversing and orientation_found):
+        orientation_found = False
+        if holding_something == False: 
+            chosen_direction = correlated_random(chosen_direction)
         
     elif orientation_found != True and yaw == chosen_direction and object_encountered != True and not reversing: 
         orientation_found = True 

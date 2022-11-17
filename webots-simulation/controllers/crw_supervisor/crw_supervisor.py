@@ -33,8 +33,8 @@ receiver.setChannel(2)
 num_generations = 10
 trials = 30
 simulation_time = 30
-curr_size = 5
-robot_population_sizes = [5, 10, 15]
+robot_population_sizes = [1, 10, 15]
+curr_size = robot_population_sizes[0]
 population = []
 initial_genotypes = []
 fitness_scores = []
@@ -220,7 +220,7 @@ def run_seconds(t,waiting=False):
             # constantly checking for messages from robots 
             message_listener(robot.getTime())
                          
-            if total_found == len(block_list):
+            if total_found == len(block_list) and len(block_list) != 0:
                 emitter.send('return_fitness'.encode('utf-8'))
                 print('collected all objects')
                 break      
@@ -269,6 +269,7 @@ def run_optimization():
         curr_size = size
         r_pos_to_generate = []
         generate_robot_central(size)
+        regenerate_environment(0.2) 
         
         for rec_node in population: 
             r_field = rec_node.getField('rotation')

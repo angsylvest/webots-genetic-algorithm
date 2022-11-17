@@ -259,7 +259,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
         if math.dist([cd_x, cd_y], [0,0]) > 0.05: 
             chosen_direction = math.atan2(-cd_y,-cd_x)
         else: 
-            holding_someting = False
+            holding_something = False
                     
     if yaw != chosen_direction and object_encountered != True and orientation_found != True and not reversing: 
         begin_rotating()
