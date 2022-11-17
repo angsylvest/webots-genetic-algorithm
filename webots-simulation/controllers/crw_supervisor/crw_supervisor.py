@@ -33,7 +33,7 @@ receiver.setChannel(2)
 num_generations = 10
 trials = 30
 simulation_time = 30
-robot_population_sizes = [1, 10, 15]
+robot_population_sizes = [5, 10, 15]
 curr_size = robot_population_sizes[0]
 population = []
 initial_genotypes = []

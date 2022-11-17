@@ -516,9 +516,9 @@ while robot.step(timestep) != -1 and sim_complete != True:
         else: 
              object_encountered = False
              time_elapsed_since_block += 1
+
+    i+=1
     
-        i+=1
-        
-        pass
+    pass
     
 # Enter here exit cleanup code.

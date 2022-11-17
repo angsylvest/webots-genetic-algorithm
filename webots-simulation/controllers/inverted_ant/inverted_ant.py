@@ -291,6 +291,11 @@ while robot.step(timestep) != -1 and sim_complete != True:
     # handles avoidance  
     elif (i - prev_i == 200 and object_encountered != True and orientation_found == True and not reversing and moving_forward == True):
         moving_forward = False
+        orientation_found = False 
+        
+        # proceed with previous behavior 
+        if not holding_something: 
+            chosen_direction = ant.re_gather(current_tile)
         
     elif orientation_found != True and yaw == chosen_direction and object_encountered != True and not reversing: 
         orientation_found = True 
@@ -354,9 +359,9 @@ while robot.step(timestep) != -1 and sim_complete != True:
             else: 
                 t_block += 1
         
-        i+=1
         prev_tile = current_tile # will be compared during the next iterations 
         
+        i+=1
         pass
-
+    
 # Enter here exit cleanup code.

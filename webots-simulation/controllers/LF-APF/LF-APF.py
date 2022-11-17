@@ -78,10 +78,10 @@ def calc_step_size():
     omega_v = 1**2
     u = sample_normal_dist(omega_u)
     v = abs(sample_normal_dist(omega_v))
-    
-    z = abs(u / (math.pow(2,1/beta)) )
-    
-    return ((forward_speed/32)*1000) / z
+    scaling_factor = 0.75**1.5
+    z = abs(u / (math.pow(2,1/beta)) ) * scaling_factor
+    print('new time switch', round(((forward_speed/32)*1000) / z))
+    return round(((forward_speed/32)*1000) / z)
 
 def get_gamma_val(input): 
     return math.gamma(input) 
@@ -166,6 +166,7 @@ def interpret():
     global curr_sim_size
     global sim_complete 
     global holding_something 
+    global time_switch 
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -201,8 +202,10 @@ def interpret():
              
             id = message.split('-')[1]
             obj_found_so_far.append(id)
-            holding_something = True        
+            holding_something = True   
+            print(given_id, 'holding item')      
             t_block = 0
+            time_switch = 200 
             receiver.nextPacket()
                 
         else: 
@@ -233,22 +236,31 @@ while robot.step(timestep) != -1 and sim_complete != True:
     if holding_something and not reversing and not moving_forward: # move towards nest (constant vector towards home) 
         cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
         if math.dist([cd_x, cd_y], [0,0]) > 0.05: 
-            chosen_direction = math.atan2(-cd_y,-cd_x)
+            chosen_direction = round(math.atan2(-cd_y,-cd_x),2)
+            # print('homing --', given_id, chosen_direction, yaw)
         else: 
             holding_something = False
+            print('successfully returned', given_id) 
     
     if yaw != chosen_direction and orientation_found != True and object_encountered != True and not reversing: 
         begin_rotating()
         
         # handles avoidance  
-    elif (i - prev_i == 50 and object_encountered != True and orientation_found == True and not reversing and moving_forward == True):
+    elif (i - prev_i >= 50 and object_encountered != True and orientation_found == True and not reversing and moving_forward == True):
         moving_forward = False
-        
-    elif (i - prev_i == time_switch and object_encountered != True and holding_something == False and not reversing):
         orientation_found = False 
-        time_switch = calc_step_size()
-        print('new time switch', time_switch)
-        chosen_direction = rotate_random() 
+        
+        # proceeding with previous behavior after avoidance strategy 
+        if not holding_something:
+            chosen_direction = rotate_random() 
+            time_switch = calc_step_size()
+        
+    elif (i - prev_i == time_switch and object_encountered != True and not reversing):
+        orientation_found = False 
+        
+        if not holding_something: 
+            time_switch = calc_step_size()
+            chosen_direction = rotate_random() 
         
     elif orientation_found != True and yaw == chosen_direction and object_encountered != True and not reversing: 
         orientation_found = True 
@@ -304,7 +316,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
 
             else: 
                 t_block += 1
-    i+=1
-    pass
+        i+=1
+        pass
 
 # Enter here exit cleanup code.

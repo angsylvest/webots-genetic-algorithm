@@ -27,8 +27,8 @@ strategy_f.close()
 num_generations = 10
 simulation_time = 10
 trials = 30
-robot_population_sizes = [5, 10, 15]
-curr_size = 5
+robot_population_sizes = [15]
+curr_size = robot_population_sizes[0] 
 gene_list = ['control speed 10', 'detection threshold 1000', 'time switch 550']
 
 # statistics collected 
@@ -571,7 +571,7 @@ def run_optimization():
     # will be same genotype as normal (for comparison purposes) 
    
         
-    generate_robot_central(5)
+    generate_robot_central(robot_population_sizes[0])
     reset_genotype()
     regenerate_environment(0.2) 
     run_seconds(simulation_time) # runs generation for that given amount of time  

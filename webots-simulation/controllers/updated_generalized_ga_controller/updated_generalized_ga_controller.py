@@ -499,13 +499,17 @@ while robot.step(timestep) != -1 and sim_complete != True:
         
         # proceeds with previous strategy 
         orientation_found = False 
-        chosen_direction = strategy[curr_index]
+        
+        if not holding_something: 
+            chosen_direction = strategy[curr_index]
         # print('proceeding with previous navigation')
         
-    elif (i - prev_i == time_switch and object_encountered != True and holding_something == False and orientation_found == True and not reversing):
+    elif (i - prev_i == time_switch and object_encountered != True and orientation_found == True and not reversing):
         orientation_found = False 
-        chosen_direction = strategy[curr_index]
-        curr_index += 1
+        
+        if not holding_something: 
+            chosen_direction = strategy[curr_index]
+            curr_index += 1
     
     elif orientation_found != True and yaw == chosen_direction and object_encountered != True and not reversing: 
         orientation_found = True 
@@ -540,19 +544,23 @@ while robot.step(timestep) != -1 and sim_complete != True:
         # print('collision encountered -- wall or block')
         reversing = True 
         move_backwards()
-
-
-    # communication threshold  
-    if not holding_something and not reversing: # max value for light 
-        if light_sensor.getValue() > 800 and time_elapsed_since_robot > 500 : 
-            communicate_with_robot()
-            time_elapsed_since_robot = 0 # reset time step 
-        elif light_sensor.getValue() > 800: 
-            time_elapsed_since_robot += 1 
-            
-            
+                    
         # does each behavior after 1 sec    
     if robot.getTime() - start_count >= 1: 
+    
+        # communication threshold  
+        if not holding_something and not reversing: # max value for light 
+        
+            if light_sensor.getValue() > 700 and light_sensor.getValue() < 900:
+                if time_elapsed_since_robot > 500: 
+                      
+                    communicate_with_robot()
+                    time_elapsed_since_robot = 0 # reset time step 
+                    
+            elif light_sensor.getValue() > 800: 
+                time_elapsed_since_robot += 1 
+            
+            
         start_count = robot.getTime()  
         
         if not holding_something:  # don't take into account homing state 
@@ -583,10 +591,10 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     time_elapsed_since_block += 1 # on a per sec basis 
                     # print('time added 2x')
                         
-
-    i+=1
-        
-    pass
+    
+        i+=1
+            
+        pass
     
 # Enter here exit cleanup code.
 

@@ -257,7 +257,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
     if holding_something and not reversing and not moving_forward: # move towards nest (constant vector towards home) 
         cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
         if math.dist([cd_x, cd_y], [0,0]) > 0.05: 
-            chosen_direction = math.atan2(-cd_y,-cd_x)
+            chosen_direction = round(math.atan2(-cd_y,-cd_x),2)
         else: 
             holding_something = False
                     
@@ -265,32 +265,39 @@ while robot.step(timestep) != -1 and sim_complete != True:
         begin_rotating()
         
         # handles avoidance  
-    elif (i - prev_i == 50 and object_encountered != True and orientation_found == True and not reversing and moving_forward == True):
+    elif (i - prev_i >= 50 and object_encountered != True and orientation_found == True and not reversing and moving_forward == True):
         moving_forward = False
+        orientation_found = False 
         
-    elif (i - prev_i == time_switch and object_encountered != True and holding_something == False and not reversing):
-        # orientation_found = False 
+        # proceed with previous behavior 
+        if not holding_something: 
+            las.re_direct(current_tile) 
+        
+    elif (i - prev_i == time_switch and object_encountered != True and not reversing):
+        orientation_found = False 
         
         if current_tile == las.target: 
             # chosen_direction = rotate_random()
-            orientation_found = False 
-            iterations_passed += 1
+            # orientation_found = False 
             
-            if las.iterations_threshold <= iterations_passed:
-
-                if not has_collected: 
-                    # will change direction after max number of iterations passed 
-                    # iterations_passed = 0 
-                    las.penalize(current_tile)
-                    chosen_direction = las.re_gather(current_tile) # updates target 
-                    time_switch = 150
-                    
-                elif has_collected:
-                    iterations_passed = 0 
-                    has_collected = False # resets 
-                    chosen_direction = rotate_random()
-                    # orientation_found = False
-                    time_switch = random.uniform(20, 50)
+            if holding_something == False: 
+                iterations_passed += 1
+            
+                if las.iterations_threshold <= iterations_passed:
+    
+                    if not has_collected: 
+                        # will change direction after max number of iterations passed 
+                        # iterations_passed = 0 
+                        las.penalize(current_tile)
+                        chosen_direction = las.re_gather(current_tile) # updates target 
+                        time_switch = 150
+                        
+                    elif has_collected:
+                        iterations_passed = 0 
+                        has_collected = False # resets 
+                        chosen_direction = rotate_random()
+                        # orientation_found = False
+                        time_switch = random.uniform(20, 50)
         else: 
             chosen_direction = las.re_direct(current_tile)  
         
@@ -348,10 +355,10 @@ while robot.step(timestep) != -1 and sim_complete != True:
                         emitter.send(str(id).encode('utf-8'))
                         
             else: 
-                t_block += 1
-
-    i+=1
-        
-    pass
+                    t_block += 1
+    
+        i+=1
+            
+        pass
 
 # Enter here exit cleanup code.

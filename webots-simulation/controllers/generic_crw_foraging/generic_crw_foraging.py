@@ -221,7 +221,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
         cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
         if math.dist([cd_x, cd_y], [0,0]) > 0.05: 
             chosen_direction = round(math.atan2(-cd_y,-cd_x),2)
-            print('homing --', given_id, chosen_direction, yaw)
+            # print('homing --', given_id, chosen_direction, yaw)
 
         else: 
             holding_something = False
