@@ -10,7 +10,8 @@ import random
 #  from controller import Robot, Motor, DistanceSensor
 from controller import Robot, Motor, DistanceSensor, Camera, CameraRecognitionObject, InertialUnit, GPS 
 from math import sin, cos, pi  
-import random 
+import random
+import math 
 
 # create the Robot instance.
 robot = Robot()
@@ -172,6 +173,7 @@ def interpret():
             strategy_f.close()
             strategy_f = open("../../graph-generation/collision-data/crw-info.csv", 'a')
             fitness = 0
+            receiver.nextPacket()
             
         elif 'size' in message:
             curr_sim_size = message[4:]

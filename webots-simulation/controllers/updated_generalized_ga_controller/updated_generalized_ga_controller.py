@@ -370,7 +370,7 @@ def interpret(timestep):
             
             time_elapsed = 0 # on a per sec basis 
             overall_fitness = 0
-            
+            receiver.nextPacket()
         elif 'partner' in message: 
             # assesses if this is best so far in generation 
             msg = message.split('-')
@@ -381,7 +381,7 @@ def interpret(timestep):
             if (other_collected_count - other_fitness) > best_prev_score: 
                 best_prev_genotype = other_robot_index 
                 best_prev_score = other_collected_count
-            
+            receiver.nextPacket()
         elif message[0] == "%" and str(message.split('-')[0][1:]) == str(given_id):
             # strategy_f.write('agent id:' + str(given_id) + ',time step: '+ timestep + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block) + ',size' + str(curr_sim_size))
             holding_something = True 

@@ -308,7 +308,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
     dist_vals = [ds.getValue(), ds_left.getValue(), ds_right.getValue()]
     
     if min(dist_vals) > 500 and reversing: # no longer within range of obstacle
-        print('proceeding with navigation')
+        # print('proceeding with navigation')
         reversing = False
         chosen_direction = rotate_random() 
         orientation_found = False 

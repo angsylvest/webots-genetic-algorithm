@@ -168,7 +168,7 @@ class LAS():
              
             return round(direction, 2)
         else: 
-            re_gather(curr_tile)
+            self.re_gather(curr_tile)
         
 
     def re_direct(self, curr_tile): 
