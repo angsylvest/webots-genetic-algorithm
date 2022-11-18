@@ -361,7 +361,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
         
         prev_tile = current_tile # will be compared during the next iterations 
         
-        i+=1
-        pass
+    i+=1
+    pass
     
 # Enter here exit cleanup code.

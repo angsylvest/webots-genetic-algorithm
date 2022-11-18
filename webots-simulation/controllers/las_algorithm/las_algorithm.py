@@ -357,8 +357,8 @@ while robot.step(timestep) != -1 and sim_complete != True:
             else: 
                     t_block += 1
     
-        i+=1
-            
-        pass
+    i+=1
+        
+    pass
 
 # Enter here exit cleanup code.

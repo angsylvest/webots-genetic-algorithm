@@ -502,6 +502,9 @@ while robot.step(timestep) != -1 and sim_complete != True:
         
         if not holding_something: 
             chosen_direction = strategy[curr_index]
+            
+        # else:
+            # chosen_direction = round(math.atan2(-cd_y,-cd_x),2)
         # print('proceeding with previous navigation')
         
     elif (i - prev_i == time_switch and object_encountered != True and orientation_found == True and not reversing):
@@ -592,9 +595,9 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     # print('time added 2x')
                         
     
-        i+=1
-            
-        pass
+    i+=1
+        
+    pass
     
 # Enter here exit cleanup code.
 
