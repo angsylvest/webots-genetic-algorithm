@@ -86,7 +86,23 @@ else:
 
 strategy_f = open("../../graph-generation/collision-data/las-info.csv", 'a')
 
+# calculates angle normal to current orientation 
+def calc_normal(curr_angle): 
 
+    if (curr_angle + round(pi/2, 2) <= round(pi, 2) and curr_angle <= round(pi, 2) and curr_angle >= 0): 
+        return round(curr_angle + round(pi/2, 2), 2)
+    
+    elif (curr_angle + round(pi/2, 2) > round(pi, 2) and curr_angle < round(pi, 2) and curr_angle > 0): 
+        diff = round(pi/2, 2) - (round(pi,2) - curr_angle) 
+        return round((-1*round(pi/2, 2) + diff),2)
+    
+    elif (curr_angle + round(pi/2, 2) < 0 and curr_angle < 0): 
+        return round((-1*round(pi, 2) + curr_angle + round(pi/2, 2)),2)
+        
+    elif (curr_angle + round(pi/2, 2) >= 0 and curr_angle <= 0): 
+        diff = abs(round(pi/2, 2) - curr_angle) 
+        return round(diff,2) 
+        
 def rotate_random():
     # will choose direction following biased random walk 
     directions = [pi/2, pi, -pi/2, 0] # more preference to move straight 
@@ -317,7 +333,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
     if min(dist_vals) > 500 and reversing: # no longer within range of obstacle
         # print('proceeding with navigation')
         reversing = False
-        chosen_direction = rotate_random() 
+        chosen_direction = calc_normal(yaw)
         orientation_found = False 
         # begin_rotating()
         moving_forward = True 

@@ -119,7 +119,24 @@ energy_cost = 0.5 # per sec
 energy_collected_gen = 0
 time_elapsed = 0 # on a per sec basis 
 
+# calculates angle normal to current orientation 
+def calc_normal(curr_angle): 
 
+    if (curr_angle + round(pi/2, 2) <= round(pi, 2) and curr_angle <= round(pi, 2) and curr_angle >= 0): 
+        return round(curr_angle + round(pi/2, 2), 2)
+    
+    elif (curr_angle + round(pi/2, 2) > round(pi, 2) and curr_angle < round(pi, 2) and curr_angle > 0): 
+        diff = round(pi/2, 2) - (round(pi,2) - curr_angle) 
+        return round((-1*round(pi/2, 2) + diff),2)
+    
+    elif (curr_angle + round(pi/2, 2) < 0 and curr_angle < 0): 
+        return round((-1*round(pi, 2) + curr_angle + round(pi/2, 2)),2)
+        
+    elif (curr_angle + round(pi/2, 2) >= 0 and curr_angle <= 0): 
+        diff = abs(round(pi/2, 2) - curr_angle) 
+        return round(diff,2) 
+        
+     
 # parameters reset when strategy changes (after a generation) 
 def calc_robot_fitness():
     global t_elapsed_block_total
@@ -533,7 +550,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
         # print('proceeding with navigation')
         reversing = False
 
-        chosen_direction = rotate_random() 
+        chosen_direction = calc_normal(yaw)
         orientation_found = False 
         
         # if not moving_forward: 
