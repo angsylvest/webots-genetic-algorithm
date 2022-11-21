@@ -53,6 +53,7 @@ collected_count = []
 r_pos_to_generate = []
 population = []
 fitness_scores = []
+start = 0
 
 def generate_robot_central(num_robots):
     global fitness_scores 
@@ -159,8 +160,10 @@ def message_listener(time_step):
     global fitness_scores
     global curr_size
     global population  
+    global start 
+    global simulation_time
 
-    if receiver.getQueueLength()>0:
+    if receiver.getQueueLength()>0 and (robot.getTime() - start < simulation_time):
         message = receiver.getData().decode('utf-8')
         
         # print('incoming messages', message) 
@@ -208,12 +211,22 @@ def message_listener(time_step):
             
         else: 
             receiver.nextPacket()
+            
+    elif (robot.getTime() - start > simulation_time):
+    # if over time would want to reset 
+        emitter.send('cleaning'.encode('utf-8'))
+        
+        while receiver.getQueueLength()>0:
+            receiver.nextPacket()
+            
+        emitter.send('clean finish'.encode('utf-8'))
 
 # runs simulation for designated amount of time 
 def run_seconds(t,waiting=False):
     global fitness_scores
     global updated
     global fit_update 
+    global start 
     
     n = TIME_STEP / 1000*32 # convert ms to s 
     start = robot.getTime()

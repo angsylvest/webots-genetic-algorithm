@@ -117,7 +117,10 @@ overall_fitness = 0
 energy_per_item = 10 
 energy_cost = 0.5 # per sec 
 energy_collected_gen = 0
-time_elapsed = 0 # on a per sec basis 
+time_elapsed = 0 # on a per sec basis
+
+# prev message (limit overloading receiver/emitter system) 
+prev_msg = "" 
 
 # calculates angle normal to current orientation 
 def calc_normal(curr_angle): 
@@ -330,6 +333,7 @@ def interpret(timestep):
     global time_elapsed
     global t_elapsed_block_total
     global n_observations_block
+    global cleaning 
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -388,6 +392,7 @@ def interpret(timestep):
             time_elapsed = 0 # on a per sec basis 
             overall_fitness = 0
             receiver.nextPacket()
+            
         elif 'partner' in message: 
             # assesses if this is best so far in generation 
             msg = message.split('-')
@@ -399,6 +404,7 @@ def interpret(timestep):
                 best_prev_genotype = other_robot_index 
                 best_prev_score = other_collected_count
             receiver.nextPacket()
+            
         elif message[0] == "%" and str(message.split('-')[0][1:]) == str(given_id):
             # strategy_f.write('agent id:' + str(given_id) + ',time step: '+ timestep + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block) + ',size' + str(curr_sim_size))
             holding_something = True 
@@ -407,7 +413,7 @@ def interpret(timestep):
             
             obj_id = message.split('-')[1] 
             obj_found_so_far.append(obj_id) 
-            emitter.send(str(id).encode('utf-8'))
+            # emitter.send(str(id).encode('utf-8'))
            
             
             # observations_per_strategy[current_strat_index] += 1
@@ -435,6 +441,18 @@ def interpret(timestep):
             overall_fitness = 0
             
             receiver.nextPacket()
+            
+        elif message == 'clean': 
+            # want to pause controller until finished 
+            cleaning = True 
+            # stop()
+            print('robot has stopped, waiting for next generation')
+            receiver.nextPacket()
+            
+        elif message == 'clean finish': 
+            cleaning = False 
+            print('robot is ready to proceed')
+            receiver.nextPacket() 
         
         else: 
             receiver.nextPacket()
@@ -442,9 +460,12 @@ def interpret(timestep):
 
 def communicate_with_robot():
     global given_id 
+    global prev_msg
     # find closest robot to exchange info with 
     response = str(given_id) + "-encounter"
-    emitter.send(response.encode('utf-8'))
+    if prev_msg != response: 
+        emitter.send(response.encode('utf-8'))
+        prev_msg = response 
     # print('found neighbor')
 
     
@@ -467,154 +488,159 @@ initial_step_size = 500
 start_count = robot.getTime()
 reversing = False 
 moving_forward = False  
+cleaning = False
 
 while robot.step(timestep) != -1 and sim_complete != True:
-    interpret(str(robot.step(timestep)))
-    
-    # homing mechanism 
-    if holding_something == True and not reversing and not moving_forward: # move towards nest (constant vector towards home) 
-        cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
-        if math.dist([cd_x, cd_y], [0,0]) > 0.05:  
-            chosen_direction = round(math.atan2(-cd_y,-cd_x),2)
-            # print('homing towards center of map --', given_id, chosen_direction )
-            # also want to avoid other obstacles in the meantime as well 
-            
-        else: 
-            holding_something = False
-            t_elapsed_block_total += time_elapsed_since_block 
-            n_observations_block += 1
-            time_elapsed_since_block = 0
-            time_elapsed = 0 # on a per sec basis 
-            
-            # weights = [0.25, 0.25, 0.25, 0.25] # reset since starting at same 
-            
-            print('successfully dropped off object', given_id)
-        
-    
-    if curr_index >= len(strategy) and not holding_something and not reversing and not moving_forward: # maintain strategy for initial
-        curr_index = 0 
-        # used to determine when to update strategy 
-        if energy_expenditure() < 0: # update the weights based off success so far 
-            strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = True) # chooses a new strategy   
-            # time_elapsed = 0    
-        else: 
-            strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = False)
-            # time_elapsed = 0 
 
-    time_elapsed_since_robot +=1
-    
-    # biased random walk movement (each time step, cert prob of turning that direction) 
-    roll, pitch, yaw = inertia.getRollPitchYaw()
-    yaw = round(yaw, 2) 
-
-    if yaw != chosen_direction and orientation_found != True and object_encountered != True and not reversing: 
-        begin_rotating()
+    if not cleaning: 
+        interpret(str(robot.step(timestep)))
         
-        # handles avoidance  
-    elif (i - back_i >= 50 and object_encountered != True and orientation_found == True and not reversing and moving_forward):
-        moving_forward = False
-        
-        # proceeds with previous strategy 
-        orientation_found = False 
-        
-        if not holding_something: 
-            chosen_direction = strategy[curr_index]
+        # homing mechanism 
+        if holding_something == True and not reversing and not moving_forward: # move towards nest (constant vector towards home) 
+            cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
+            if math.dist([cd_x, cd_y], [0,0]) > 0.05:  
+                chosen_direction = round(math.atan2(-cd_y,-cd_x),2)
+                # print('homing towards center of map --', given_id, chosen_direction )
+                # also want to avoid other obstacles in the meantime as well 
+                
+            else: 
+                holding_something = False
+                t_elapsed_block_total += time_elapsed_since_block 
+                n_observations_block += 1
+                time_elapsed_since_block = 0
+                time_elapsed = 0 # on a per sec basis 
+                
+                # weights = [0.25, 0.25, 0.25, 0.25] # reset since starting at same 
+                
+                print('successfully dropped off object', given_id)
             
-        # else:
-            # chosen_direction = round(math.atan2(-cd_y,-cd_x),2)
-        # print('proceeding with previous navigation')
         
-    elif (i - prev_i == time_switch and object_encountered != True and orientation_found == True and not reversing):
-        orientation_found = False 
-        
-        if not holding_something: 
-            chosen_direction = strategy[curr_index]
-            curr_index += 1
+        if curr_index >= len(strategy) and not holding_something and not reversing and not moving_forward: # maintain strategy for initial
+            curr_index = 0 
+            # used to determine when to update strategy 
+            if energy_expenditure() < 0: # update the weights based off success so far 
+                strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = True) # chooses a new strategy   
+                # time_elapsed = 0    
+            else: 
+                strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = False)
+                # time_elapsed = 0 
     
-    elif orientation_found != True and yaw == chosen_direction and object_encountered != True and not reversing: 
-        orientation_found = True 
-        prev_i = i
+        time_elapsed_since_robot +=1
         
-        # for avoidance strategy 
-        back_i = i 
-        move_forward()    
-        # moving_forward = True 
-        
-    # collision avoidance mechanism     
-    dist_val = ds.getValue()
-    dist_vals = [ds.getValue(), ds_left.getValue(), ds_right.getValue()]
+        # biased random walk movement (each time step, cert prob of turning that direction) 
+        roll, pitch, yaw = inertia.getRollPitchYaw()
+        yaw = round(yaw, 2) 
     
-    # print(chosen_direction, 'cur facing', yaw, 'dist', dist_val, 'reverse', reversing, 'collision', collision.getValue())
+        if yaw != chosen_direction and orientation_found != True and object_encountered != True and not reversing: 
+            begin_rotating()
             
-    if min(dist_vals) > 500 and reversing: # no longer within range of obstacle
-        # print('proceeding with navigation')
-        reversing = False
-
-        chosen_direction = calc_normal(yaw)
-        orientation_found = False 
+            # handles avoidance  
+        elif (i - back_i >= 50 and object_encountered != True and orientation_found == True and not reversing and moving_forward):
+            moving_forward = False
+            
+            # proceeds with previous strategy 
+            orientation_found = False 
+            
+            if not holding_something: 
+                chosen_direction = strategy[curr_index]
+                
+            # else:
+                # chosen_direction = round(math.atan2(-cd_y,-cd_x),2)
+            # print('proceeding with previous navigation')
+            
+        elif (i - prev_i == time_switch and object_encountered != True and orientation_found == True and not reversing):
+            orientation_found = False 
+            
+            if not holding_something: 
+                chosen_direction = strategy[curr_index]
+                curr_index += 1
         
-        # if not moving_forward: 
-        moving_forward = True 
+        elif orientation_found != True and yaw == chosen_direction and object_encountered != True and not reversing: 
+            orientation_found = True 
+            prev_i = i
+            
+            # for avoidance strategy 
+            back_i = i 
+            move_forward()    
+            # moving_forward = True 
+            
+        # collision avoidance mechanism     
+        dist_val = ds.getValue()
+        dist_vals = [ds.getValue(), ds_left.getValue(), ds_right.getValue()]
         
-    elif reversing: 
-        move_backwards()
-        
-    if min(dist_vals) <= 330 and not reversing: # wall detection 
-        fitness += 1 
-        # print('collision encountered -- wall or block')
-        reversing = True 
-        move_backwards()
-                    
-        # does each behavior after 1 sec    
-    if robot.getTime() - start_count >= 1: 
+        # print(chosen_direction, 'cur facing', yaw, 'dist', dist_val, 'reverse', reversing, 'collision', collision.getValue())
+                
+        if min(dist_vals) > 500 and reversing: # no longer within range of obstacle
+            # print('proceeding with navigation')
+            reversing = False
     
-        # communication threshold  
-        if not holding_something and not reversing: # max value for light 
-        
-            if light_sensor.getValue() > 700 and light_sensor.getValue() < 900:
-                if time_elapsed_since_robot > 500: 
-                      
-                    communicate_with_robot()
-                    time_elapsed_since_robot = 0 # reset time step 
-                    
-            elif light_sensor.getValue() > 800: 
-                time_elapsed_since_robot += 1 
+            chosen_direction = calc_normal(yaw)
+            orientation_found = False 
             
+            # if not moving_forward: 
+            moving_forward = True 
             
-        start_count = robot.getTime()  
-        
-        if not holding_something:  # don't take into account homing state 
-            time_elapsed += 1
-        
-        # check for collisions with other robot 
-        list = camera.getRecognitionObjects()
-        if holding_something == False and not reversing: 
-            # stop()
-            if (object_encountered == False):
-      
-                # attempt to get object detected 
-                if min(dist_vals) < 500 and len(list) != 0:
-                 
-                    firstObject = camera.getRecognitionObjects()[0]
-                    count = len(camera.getRecognitionObjects())
-                    id = str(firstObject.get_id())
-                    
-                    if id not in obj_found_so_far:
-                        id = "$" + str(given_id) + "-" + str(id) # indication that it is a object to be deleted 
-                        emitter.send(str(id).encode('utf-8'))
+        elif reversing: 
+            move_backwards()
+            
+        if min(dist_vals) <= 330 and not reversing: # wall detection 
+            fitness += 1 
+            # print('collision encountered -- wall or block')
+            reversing = True 
+            move_backwards()
                         
+            # does each behavior after 1 sec    
+        if robot.getTime() - start_count >= 1: 
+        
+            # communication threshold  
+            if not holding_something and not reversing: # max value for light 
+            
+                if light_sensor.getValue() > 700 and light_sensor.getValue() < 900:
+                    if time_elapsed_since_robot > 500: 
+                          
+                        communicate_with_robot()
+                        time_elapsed_since_robot = 0 # reset time step 
+                        
+                elif light_sensor.getValue() > 800: 
+                    time_elapsed_since_robot += 1 
+                
+                
+            start_count = robot.getTime()  
+            
+            if not holding_something:  # don't take into account homing state 
+                time_elapsed += 1
+            
+            # check for collisions with other robot 
+            list = camera.getRecognitionObjects()
+            if holding_something == False and not reversing: 
+                # stop()
+                if (object_encountered == False):
+          
+                    # attempt to get object detected 
+                    if min(dist_vals) < 500 and len(list) != 0:
+                     
+                        firstObject = camera.getRecognitionObjects()[0]
+                        count = len(camera.getRecognitionObjects())
+                        id = str(firstObject.get_id())
+                        
+                        if id not in obj_found_so_far:
+                            id = "$" + str(given_id) + "-" + str(id) # indication that it is a object to be deleted 
+                            if prev_msg != id: 
+                                emitter.send(str(id).encode('utf-8'))
+                                prev_msg = id
+                            
+                        else: 
+                            time_elapsed_since_block += 1 # on a per sec basis 
+                            # print('time added')
+                            
                     else: 
                         time_elapsed_since_block += 1 # on a per sec basis 
-                        # print('time added')
-                        
-                else: 
-                    time_elapsed_since_block += 1 # on a per sec basis 
-                    # print('time added 2x')
-                        
-    
-    i+=1
+                        # print('time added 2x')
+                            
         
-    pass
+        i+=1
+            
+        pass
     
 # Enter here exit cleanup code.
 

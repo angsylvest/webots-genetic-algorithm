@@ -26,7 +26,7 @@ strategy_f.close()
 
 # genetic algorithm-specific parameters 
 num_generations = 10
-simulation_time = 30
+simulation_time = 10
 trials = 30
 robot_population_sizes = [5, 10, 15]
 gene_list = ['control speed 10', 'energy cost 5', 'food energy 30', 'observations thres 5']
@@ -310,7 +310,7 @@ def message_listener(time_step):
     # if over time would want to reset 
         emitter.send('cleaning'.encode('utf-8'))
         
-        while receiver.getQueueLength()>0: 
+        while receiver.getQueueLength()>0:
             receiver.nextPacket()
             
         emitter.send('clean finish'.encode('utf-8'))
@@ -481,13 +481,16 @@ def run_optimization():
                 print('found genotypes')
                 print('new generation starting -')
                 reproduce_list = []
+                
                 # generate_robot_central(size)
-                # regenerate_environment(0.2)  
+                regenerate_environment(0.2)  
 
             overall_f.write(str(i) + ',' + str(robot.getTime()) + ',' + str(total_found) + ',' + str(size)+ ',' + 'ga' + '\n')    
             overall_f.close()
             overall_f = open('../../graph-generation/collection-data/overall-df.csv', 'a')
             print('items collected', total_found)
+            
+            # generate_robot_central(size)
             regenerate_environment(0.2)  
             total_found = 0 
             reproduce_list = []

@@ -38,6 +38,7 @@ simulation_time = 30
 trials = 30
 curr_size = 5
 robot_population_sizes = [5, 10, 15]
+start = 0
 
 # sim statistics 
 population = []
@@ -156,8 +157,10 @@ def message_listener(time_step):
     global collected_count
     global curr_size 
     global population
+    global start 
+    global simulation_time
 
-    if receiver.getQueueLength()>0:
+    if receiver.getQueueLength()>0 and (robot.getTime() - start < simulation_time):
         message = receiver.getData().decode('utf-8')
         
         # print('incoming messages', message) 
@@ -189,6 +192,15 @@ def message_listener(time_step):
             
         else: 
             receiver.nextPacket()
+            
+    elif (robot.getTime() - start > simulation_time):
+    # if over time would want to reset 
+        emitter.send('cleaning'.encode('utf-8'))
+        
+        while receiver.getQueueLength()>0:
+            receiver.nextPacket()
+            
+        emitter.send('clean finish'.encode('utf-8'))
 
 # runs simulation for designated amount of time 
 def run_seconds(t,waiting=False):
@@ -196,6 +208,7 @@ def run_seconds(t,waiting=False):
     global fitness_scores
     global updated
     global fit_update 
+    global start 
     
     n = TIME_STEP / 1000*32 # convert ms to s 
     start = robot.getTime()

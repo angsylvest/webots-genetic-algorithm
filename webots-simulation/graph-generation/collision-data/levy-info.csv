@@ -1,6 +1,1 @@
 agent id,time step, time since last block,size,collisions,type
-0,31.14,0,5,1,levy
-2,31.14,0,5,3,levy
-1,31.14,0,5,0,levy
-4,31.14,0,5,0,levy
-3,31.14,0,5,0,levy

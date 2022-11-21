@@ -87,6 +87,7 @@ else:
     given_id = robot.getName()[3:-1]   
 
 strategy_f = open("../../graph-generation/collision-data/ant-info.csv", 'a')
+prev_msg = ""
 
 # calculates angle normal to current orientation 
 def calc_normal(curr_angle): 
@@ -200,6 +201,7 @@ def interpret():
     global ant 
     global sim_complete
     global holding_something 
+    global cleaning 
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -247,6 +249,18 @@ def interpret():
             current_tile = message.split('-')[0][1:]
             ant.addPhermone(current_tile)
             receiver.nextPacket()
+            
+        elif message == 'clean': 
+            # want to pause controller until finished 
+            cleaning = True 
+            stop()
+            print('robot has stopped, waiting for next generation')
+            receiver.nextPacket()
+            
+        elif message == 'clean finish': 
+            cleaning = False 
+            print('robot is ready to proceed') 
+            receiver.nextPacket()
 
         else: 
             receiver.nextPacket()
@@ -268,117 +282,123 @@ sim_complete = False
 start_count = robot.getTime()
 reversing = False 
 moving_forward = False 
+cleaning = False 
  
 while robot.step(timestep) != -1 and sim_complete != True:
-    interpret()
-    # initializes ant class 
-    if not start and not reversing:
-        ant = InvertedAnt(curr_pos = (float(gps.getValues()[0]),float(gps.getValues()[1])))
+    if not cleaning: 
+        interpret()
+        # initializes ant class 
+        if not start and not reversing:
+            ant = InvertedAnt(curr_pos = (float(gps.getValues()[0]),float(gps.getValues()[1])))
+            current_tile = ant.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
+            prev_tile = ant.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
+            chosen_direction = ant.re_gather(current_tile)
+            print('the current tile robot is on: ', current_tile, 'target is ', ant.target, 'chosen direction: ', chosen_direction) 
+            location = '*' + str(current_tile) + '-' + str(given_id)
+            emitter.send(str(location).encode('utf-8'))
+            
+            start = True
+            
+         
+        # constantly checking to make sure correctly oriented     
+        roll, pitch, yaw = inertia.getRollPitchYaw()
+        yaw = round(yaw, 2)
+        # print(yaw, 'vs: ', chosen_direction)
         current_tile = ant.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
-        prev_tile = ant.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
-        chosen_direction = ant.re_gather(current_tile)
-        print('the current tile robot is on: ', current_tile, 'target is ', ant.target, 'chosen direction: ', chosen_direction) 
-        location = '*' + str(current_tile) + '-' + str(given_id)
-        emitter.send(str(location).encode('utf-8'))
         
-        start = True
-        
-     
-    # constantly checking to make sure correctly oriented     
-    roll, pitch, yaw = inertia.getRollPitchYaw()
-    yaw = round(yaw, 2)
-    # print(yaw, 'vs: ', chosen_direction)
-    current_tile = ant.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
-    
-    if holding_something and not reversing and not moving_forward: # move towards nest (constant vector towards home) 
-        cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
-        if math.dist([cd_x, cd_y], [0,0]) > 0.05: 
-            chosen_direction = math.atan2(-cd_y,-cd_x)
-        else: 
-            holding_something = False
-            
-    
-    if current_tile != prev_tile and not reversing: 
-        location = '*' + str(current_tile) + '-' + str(given_id)
-        emitter.send(str(location).encode('utf-8'))
-
-    if yaw != chosen_direction and orientation_found != True and object_encountered != True and not reversing: 
-        begin_rotating()
-        
-    # handles avoidance  
-    elif (i - prev_i == 200 and object_encountered != True and orientation_found == True and not reversing and moving_forward == True):
-        moving_forward = False
-        orientation_found = False 
-        
-        # proceed with previous behavior 
-        if not holding_something: 
-            chosen_direction = ant.re_gather(current_tile)
-        
-    elif orientation_found != True and yaw == chosen_direction and object_encountered != True and not reversing: 
-        orientation_found = True 
-        prev_i = i
-        move_forward()
-        
-    else: 
-        pass
-    
-    # read distance sensor value 
-    dist_val = ds.getValue()
-    dist_vals = [ds.getValue(), ds_left.getValue(), ds_right.getValue()]
-    
-    if min(dist_vals) > 500 and reversing: # no longer within range of obstacle
-        print('proceeding with navigation')
-        reversing = False
-        chosen_direction = calc_normal(yaw) 
-        orientation_found = False 
-        # begin_rotating()
-        moving_forward = True 
-        
-    elif reversing: 
-        move_backwards()
-        
-    if min(dist_vals) <= 330 and not reversing: # wall detection 
-        fitness += 1 
-        print('collision encountered -- wall or block')
-        reversing = True 
-        move_backwards()         
-        
-        
-    # does each behavior after 1 sec    
-    if robot.getTime() - start_count >= 1: 
-        start_count = robot.getTime()
-        
-        if holding_something == False and not reversing: 
-            ant.declinePhermone(current_tile)
-            chosen_direction = ant.re_gather(current_tile)
-            
-        light_sensor_value = light_sensor.getValue()
-        # check for collisions with other robot 
-        list = camera.getRecognitionObjects()
-        current_tile = ant.update(current_tile, (gps.getValues()[0], gps.getValues()[1]))
-  
-        # handles other obstacles     
-        if holding_something == False and not reversing: 
-            # behavior in response to stimuli in front of robot 
-            if (object_encountered == False):
-                # if retrievable object within range, gets picked up 
-                if min(dist_vals) < 500 and len(list) != 0:
-                
-                    firstObject = camera.getRecognitionObjects()[0]
-                    # print('found object', firstObject)
-                    id = str(firstObject.get_id())
-                    
-                    if id not in obj_found_so_far:
-            
-                        id = "$" + str(given_id) + "-" + str(id) + "-" + str(current_tile) + "-" + str(iterations_passed) # indication that it is a object to be deleted 
-                        emitter.send(str(id).encode('utf-8'))
-                        holding_something = False      
+        if holding_something and not reversing and not moving_forward: # move towards nest (constant vector towards home) 
+            cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
+            if math.dist([cd_x, cd_y], [0,0]) > 0.05: 
+                chosen_direction = math.atan2(-cd_y,-cd_x)
             else: 
-                t_block += 1
+                holding_something = False
+                
         
-        prev_tile = current_tile # will be compared during the next iterations 
+        if current_tile != prev_tile and not reversing: 
+            location = '*' + str(current_tile) + '-' + str(given_id)
+            if prev_msg != location: 
+                emitter.send(str(location).encode('utf-8'))
+                prev_msg = location 
+    
+        if yaw != chosen_direction and orientation_found != True and object_encountered != True and not reversing: 
+            begin_rotating()
+            
+        # handles avoidance  
+        elif (i - prev_i == 200 and object_encountered != True and orientation_found == True and not reversing and moving_forward == True):
+            moving_forward = False
+            orientation_found = False 
+            
+            # proceed with previous behavior 
+            if not holding_something: 
+                chosen_direction = ant.re_gather(current_tile)
+            
+        elif orientation_found != True and yaw == chosen_direction and object_encountered != True and not reversing: 
+            orientation_found = True 
+            prev_i = i
+            move_forward()
+            
+        else: 
+            pass
         
-    i+=1
-    pass
+        # read distance sensor value 
+        dist_val = ds.getValue()
+        dist_vals = [ds.getValue(), ds_left.getValue(), ds_right.getValue()]
+        
+        if min(dist_vals) > 500 and reversing: # no longer within range of obstacle
+            print('proceeding with navigation')
+            reversing = False
+            chosen_direction = calc_normal(yaw) 
+            orientation_found = False 
+            # begin_rotating()
+            moving_forward = True 
+            
+        elif reversing: 
+            move_backwards()
+            
+        if min(dist_vals) <= 330 and not reversing: # wall detection 
+            fitness += 1 
+            print('collision encountered -- wall or block')
+            reversing = True 
+            move_backwards()         
+            
+            
+        # does each behavior after 1 sec    
+        if robot.getTime() - start_count >= 1: 
+            start_count = robot.getTime()
+            
+            if holding_something == False and not reversing: 
+                ant.declinePhermone(current_tile)
+                chosen_direction = ant.re_gather(current_tile)
+                
+            light_sensor_value = light_sensor.getValue()
+            # check for collisions with other robot 
+            list = camera.getRecognitionObjects()
+            current_tile = ant.update(current_tile, (gps.getValues()[0], gps.getValues()[1]))
+      
+            # handles other obstacles     
+            if holding_something == False and not reversing: 
+                # behavior in response to stimuli in front of robot 
+                if (object_encountered == False):
+                    # if retrievable object within range, gets picked up 
+                    if min(dist_vals) < 500 and len(list) != 0:
+                    
+                        firstObject = camera.getRecognitionObjects()[0]
+                        # print('found object', firstObject)
+                        id = str(firstObject.get_id())
+                        
+                        if id not in obj_found_so_far:
+                
+                            id = "$" + str(given_id) + "-" + str(id) + "-" + str(current_tile) + "-" + str(iterations_passed) # indication that it is a object to be deleted 
+                            if id != prev_msg: 
+                                emitter.send(str(id).encode('utf-8'))
+                                prev_msg = i
+                            # holding_something = False      
+                else: 
+                    t_block += 1
+            
+            prev_tile = current_tile # will be compared during the next iterations 
+            
+        i+=1
+        pass
     
 # Enter here exit cleanup code.

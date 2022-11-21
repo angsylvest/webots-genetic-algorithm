@@ -1,6 +1,6 @@
 #VRML_OBJ R2022a utf8
 DEF khepera Robot {
-  translation 0.20982997456560878 0.19990761179517164 0.0022615451531803055
+  translation 0 -0.12 0.02
   rotation -0.138277053041347 -0.9902275660242557 -0.01813350732426061 0.05624012137004426
   children [
     GPS {
@@ -71,7 +71,7 @@ DEF khepera Robot {
                   LinearMotor {
                     name "right grip"
                     maxVelocity 0.1
-                    minPosition -6.244776062687065e-14
+                    minPosition -7.034710173844742e-08
                     maxPosition 0.029
                     maxForce 100
                   }
@@ -133,8 +133,6 @@ DEF khepera Robot {
                       0.01 0 0
                     ]
                   }
-                  linearVelocity 0.016240833408146048 0.008741996249007778 -0.5398141932659763
-                  angularVelocity -0.12880980846080656 0.24133276884204796 -0.02202782266374861
                 }
               }
               DEF LEFT_GRIP SliderJoint {
@@ -198,8 +196,6 @@ DEF khepera Robot {
                       -0.01 0 0
                     ]
                   }
-                  linearVelocity 0.016240831914657475 0.008741996314330975 -0.5398141837817703
-                  angularVelocity -0.12880980846080675 0.2413327688420536 -0.02202782266375023
                 }
               }
               Shape {
@@ -255,8 +251,6 @@ DEF khepera Robot {
                 0 0 -0.02
               ]
             }
-            linearVelocity 0.007123886211792645 0.003973192951569244 -0.5387391428503386
-            angularVelocity -0.12880980837228662 0.24133276879757376 -0.022027822673624898
           }
         }
         DEF GRIPPER_BASE Transform {
@@ -362,8 +356,6 @@ DEF khepera Robot {
         boundingObject USE WHEEL
         physics Physics {
         }
-        linearVelocity -0.0005026467183165774 -0.0005889951927076358 -0.5441243801953027
-        angularVelocity -0.12880978271538793 0.24133277356765323 -0.02202781629454096
       }
     }
     HingeJoint {
@@ -391,8 +383,6 @@ DEF khepera Robot {
         boundingObject USE WHEEL
         physics Physics {
         }
-        linearVelocity -0.0015594151299151823 -0.0005403319521002566 -0.5374120003679191
-        angularVelocity -0.1288098057087024 0.24133277354801524 -0.02202782301578118
       }
     }
     Transform {
@@ -557,7 +547,6 @@ DEF khepera Robot {
   }
   controller "generic_crw_foraging"
   supervisor TRUE
-  synchronization FALSE
   linearVelocity 0.0003622241727133894 0.0002478736257749122 -0.5400135211146482
   angularVelocity -0.1288098055381457 0.24133277354906507 -0.02202782283087696
 }

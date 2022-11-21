@@ -30,6 +30,7 @@ receiver.enable(TIME_STEP)
 receiver.setChannel(2) 
 
 # set up timing so consistent with ga 
+start = 0
 num_generations = 10
 trials = 30
 simulation_time = 30
@@ -148,8 +149,10 @@ def message_listener(time_step):
     global block_list
     global collected_count 
     global curr_size 
+    global start 
+    global simulation_time
 
-    if receiver.getQueueLength()>0:
+    if receiver.getQueueLength()>0 and (robot.getTime() - start < simulation_time):
         message = receiver.getData().decode('utf-8')
         if message[0] == "$": # handles deletion of objects when grabbed
             obj_node = robot.getFromId(int(message.split("-")[1]))
@@ -186,6 +189,15 @@ def message_listener(time_step):
             
         else: 
             receiver.nextPacket()
+            
+    elif (robot.getTime() - start > simulation_time):
+    # if over time would want to reset 
+        emitter.send('cleaning'.encode('utf-8'))
+        
+        while receiver.getQueueLength()>0:
+            receiver.nextPacket()
+            
+        emitter.send('clean finish'.encode('utf-8'))
 
 # runs simulation for designated amount of time 
 def run_seconds(t,waiting=False):
@@ -193,6 +205,7 @@ def run_seconds(t,waiting=False):
     global fitness_scores
     global updated
     global fit_update 
+    global start 
     
     n = TIME_STEP / 1000*32 # convert ms to s 
     start = robot.getTime()
