@@ -13,14 +13,14 @@ columns = 'agent id' + ',time step' + ',fitness' + ',xpos'+ ',ypos' + ',num col'
 collected_count = []
 
 # collected counts csv generation 
-overall_f = open('../../graph-generation/collection-data/overall-df.csv', 'w')
+overall_f = open('../../graph-generation/collection-data/overall-df-learning.csv', 'w')
 overall_columns = 'trial' + ',time' + ',objects retrieved' + ',size' + ',type'
 overall_f.write(str(overall_columns) + '\n')
 overall_f.close()
-overall_f = open('../../graph-generation/collection-data/overall-df.csv', 'a')
+overall_f = open('../../graph-generation/collection-data/overall-df-learning.csv', 'a')
 
 # for individual robot, statistics about strategy taken over time & individual collision info 
-strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'w')
+strategy_f = open("../../graph-generation/collision-data/ga-info-learning.csv", 'w')
 strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size' + ',fitness'+ ',size'+ ',type' + '\n')
 strategy_f.close()
 
@@ -487,7 +487,7 @@ def run_optimization():
 
             overall_f.write(str(i) + ',' + str(robot.getTime()) + ',' + str(total_found) + ',' + str(size)+ ',' + 'ga' + '\n')    
             overall_f.close()
-            overall_f = open('../../graph-generation/collection-data/overall-df.csv', 'a')
+            overall_f = open('../../graph-generation/collection-data/overall-df-learning.csv', 'a')
             print('items collected', total_found)
             
             # generate_robot_central(size)

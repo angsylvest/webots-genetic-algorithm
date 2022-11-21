@@ -41,7 +41,7 @@ DEF arena RectangleArena {
 }
 DEF supervisor TinkerbotsBase {
   translation -0.41 0 0
-  controller "ga_updated_supervisor"
+  controller "ga_update_learner"
   supervisor TRUE
   synchronization FALSE
   extensionSlot [
@@ -53,4 +53,3 @@ DEF supervisor TinkerbotsBase {
     }
   ]
 }
-
