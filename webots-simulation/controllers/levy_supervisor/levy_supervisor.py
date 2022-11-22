@@ -3,6 +3,7 @@ from controller import Supervisor, Node, Keyboard, Emitter, Receiver, Field
 # import pandas as pd
 import random
 import math 
+from math import pi
 
 """
 Main supervisor base 
@@ -157,7 +158,7 @@ def message_listener(time_step):
     global start 
     global simulation_time
 
-    if if receiver.getQueueLength()>0 and (robot.getTime() - start < simulation_time):
+    if receiver.getQueueLength()>0 and (robot.getTime() - start < simulation_time):
         message = receiver.getData().decode('utf-8')
         if message[0] == "$": # handles deletion of objects when grabbed
             obj_node = robot.getFromId(int(message.split("-")[1]))

@@ -256,6 +256,7 @@ def message_listener(time_step):
 
     if receiver.getQueueLength()>0 and (robot.getTime() - start < simulation_time):
         message = receiver.getData().decode('utf-8')
+        # print('incoming msg', message)
         
         if message[0] == "$": # handles deletion of objects when grabbed
             obj_node = robot.getFromId(int(message.split("-")[1]))
@@ -283,6 +284,7 @@ def message_listener(time_step):
             index = int(message.split('-')[0][1:])
             partner = message.split('-')[2][5:]
             overall_fitness = message.split('-')[3][7:]
+            print(fitness_scores, index)
             fitness_scores[int(index)] = fit
             overall_fitness_scores[int(index)] = float(overall_fitness)
             
