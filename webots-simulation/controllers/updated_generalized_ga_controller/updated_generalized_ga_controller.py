@@ -121,6 +121,7 @@ time_elapsed = 0 # on a per sec basis
 
 # prev message (limit overloading receiver/emitter system) 
 prev_msg = "" 
+curr_strat = ""
 
 # calculates angle normal to current orientation 
 def calc_normal(curr_angle): 
@@ -217,10 +218,13 @@ def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False
     global strategy_f 
     global curr_sim_size
     global current_strat_index 
+    global weights 
+    global curr_strat
     
     # want to update weights based off effectiveness of current strategy 
     if update: 
         new_weights = create_new_weights(t_block, t_robot, original_weights)
+        weights = new_weights 
         strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], new_weights)
         strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(original_weights[0]) + ',' + str(original_weights[1]) + ',' + str(original_weights[2]) + ',' + str(original_weights[3]) + ','+ str(t_block) + ',' + str(curr_sim_size) + ',' + str(calc_robot_fitness())+ ',' + str(curr_sim_size) + ',ga' +'\n')
         strategy_f.close()
@@ -254,10 +258,13 @@ def create_new_weights(t_block, t_robot, original_weights):
     if sum(observations_per_strategy) >= observations_threshold: 
         new_w = [observations_per_strategy[i]/sum(observations_per_strategy) for i in range(len(observations_per_strategy))]
         return new_w
-    else: 
-        return original_weights 
-         
     
+    # want to set weights so more biased towards straight-line motion     
+    else: 
+        adjust = 0.02
+        original_weights[-1] = original_weights[-1] + 0.02 
+        return [float(i)/sum(original_weights) for i in original_weights] 
+         
 def begin_rotating():
     leftMotor.setPosition(float('inf'))
     leftMotor.setVelocity(-2)
@@ -319,7 +326,9 @@ def interpret(timestep):
     global fitness
     global holding_something
     global chosen_direction
-    # global weights 
+    global strategy 
+    global curr_strat
+    global weights 
     global curr_sim_size
     global best_prev_genotype
     global best_prev_score  
@@ -404,7 +413,8 @@ def interpret(timestep):
                 best_prev_genotype = other_robot_index 
                 best_prev_score = other_collected_count
             receiver.nextPacket()
-            
+        
+        # want to enforce strategy by adding for bias to it here     
         elif message[0] == "%" and str(message.split('-')[0][1:]) == str(given_id):
             # strategy_f.write('agent id:' + str(given_id) + ',time step: '+ timestep + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block) + ',size' + str(curr_sim_size))
             holding_something = True 
@@ -414,7 +424,10 @@ def interpret(timestep):
             obj_id = message.split('-')[1] 
             obj_found_so_far.append(obj_id) 
             # emitter.send(str(id).encode('utf-8'))
-           
+            ind_strat = ['straight','alternating-left','alternating-right', 'true random'].index(curr_strat)
+            inc = 0.2
+            weights[ind_strat] = weights[ind_strat] + inc
+            weights = [float(i)/sum(weights) for i in weights] 
             
             # observations_per_strategy[current_strat_index] += 1
             energy_collected_gen += 1

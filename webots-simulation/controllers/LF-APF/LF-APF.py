@@ -4,6 +4,7 @@
 #  from controller import Robot, Motor, DistanceSensor
 from controller import Robot
 import math 
+from math import pi 
 import random 
 
 # create the Robot instance.
