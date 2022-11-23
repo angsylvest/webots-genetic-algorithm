@@ -121,7 +121,6 @@ time_elapsed = 0 # on a per sec basis
 
 # prev message (limit overloading receiver/emitter system) 
 prev_msg = "" 
-curr_strat = ""
 
 # calculates angle normal to current orientation 
 def calc_normal(curr_angle): 
@@ -219,13 +218,13 @@ def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False
     global curr_sim_size
     global current_strat_index 
     global weights 
-    global curr_strat
     
     # want to update weights based off effectiveness of current strategy 
     if update: 
         new_weights = create_new_weights(t_block, t_robot, original_weights)
         weights = new_weights 
         strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], new_weights)
+        current_strat_index = strat 
         strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(original_weights[0]) + ',' + str(original_weights[1]) + ',' + str(original_weights[2]) + ',' + str(original_weights[3]) + ','+ str(t_block) + ',' + str(curr_sim_size) + ',' + str(calc_robot_fitness())+ ',' + str(curr_sim_size) + ',ga' +'\n')
         strategy_f.close()
         strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'a')
@@ -256,10 +255,11 @@ def create_new_weights(t_block, t_robot, original_weights):
     # hope to ensure that good weights continue to persist in the pool 
     
     if sum(observations_per_strategy) >= observations_threshold: 
+        new_w = [observations_per_strategy[i] + 0.25 for i in range(len(observations_per_strategy))]
         new_w = [observations_per_strategy[i]/sum(observations_per_strategy) for i in range(len(observations_per_strategy))]
         return new_w
     
-    # want to set weights so more biased towards straight-line motion     
+    # want to set weights so more biased towards straight-line motion (no energy)  
     else: 
         adjust = 0.02
         original_weights[-1] = original_weights[-1] + 0.02 
@@ -327,7 +327,6 @@ def interpret(timestep):
     global holding_something
     global chosen_direction
     global strategy 
-    global curr_strat
     global weights 
     global curr_sim_size
     global best_prev_genotype
@@ -423,10 +422,8 @@ def interpret(timestep):
             
             obj_id = message.split('-')[1] 
             obj_found_so_far.append(obj_id) 
-            # emitter.send(str(id).encode('utf-8'))
-            ind_strat = ['straight','alternating-left','alternating-right', 'true random'].index(curr_strat)
-            inc = 0.2
-            weights[ind_strat] = weights[ind_strat] + inc
+            inc = 0.02
+            weights[current_strat_index] = weights[current_strat_index] + inc
             weights = [float(i)/sum(weights) for i in weights] 
             
             # observations_per_strategy[current_strat_index] += 1
@@ -556,10 +553,6 @@ while robot.step(timestep) != -1 and sim_complete != True:
             
             if not holding_something: 
                 chosen_direction = strategy[curr_index]
-                
-            # else:
-                # chosen_direction = round(math.atan2(-cd_y,-cd_x),2)
-            # print('proceeding with previous navigation')
             
         elif (i - prev_i == time_switch and object_encountered != True and orientation_found == True and not reversing):
             orientation_found = False 
