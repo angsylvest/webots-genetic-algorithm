@@ -58,6 +58,8 @@ updated = False
 fit_update = False 
 start = 0 
 
+prev_msg = ""
+
 # set up environments 
 def generate_robot_central(num_robots):
     global fitness_scores 
@@ -67,9 +69,13 @@ def generate_robot_central(num_robots):
     global r_pos_to_generate
     global pairs 
     global overall_fitness_scores
+    global prev_msg 
     
     initialize_genotypes(num_robots)
-    emitter.send(str("size-" + str(num_robots)).encode('utf-8'))
+    curr_msg = str("size-" + str(num_robots))
+    if curr_msg != prev_msg: 
+        emitter.send(str("size-" + str(num_robots)).encode('utf-8'))
+        prev_msg = curr_msg
     
     if len(population) != 0: 
     
@@ -203,6 +209,7 @@ def find_nearest_robot_genotype(r_index):
     global collected_count 
     global pairs 
     global overall_fitness_scores
+    global prev_msg 
 
     closest_neigh = " "
     curr_robot = population[r_index]
@@ -231,8 +238,10 @@ def find_nearest_robot_genotype(r_index):
                 other_index = i
     # use emitter to send genotype to corresponding robot if fitness is better and if nearby 
     if type(curr_fitness) == 'int' and type (other_fitness) == 'int' and (other_fitness > curr_overall_fitness) : 
-        emitter.send('potential partner-' + str(pop_genotypes[other_index]) + '-' + str(other_fitness) + '-' + str(collected_count[other_index]))
-        pairs.append(r_index) # this robot now has a potential partner 
+        curr_msg = 'potential partner-' + str(pop_genotypes[other_index]) + '-' + str(other_fitness) + '-' + str(collected_count[other_index])
+        if curr_msg != prev_msg: 
+            emitter.send('potential partner-' + str(pop_genotypes[other_index]) + '-' + str(other_fitness) + '-' + str(collected_count[other_index]))
+            pairs.append(r_index) # this robot now has a potential partner 
                 
     
 def save_progress():
@@ -253,6 +262,7 @@ def message_listener(time_step):
     global overall_fitness_scores
     global start 
     global simulation_time
+    global prev_msg 
 
     if receiver.getQueueLength()>0 and (robot.getTime() - start < simulation_time):
         message = receiver.getData().decode('utf-8')
@@ -274,7 +284,9 @@ def message_listener(time_step):
                         found_list.append(obj_node)
                         collected_count[int(message.split("-")[0][1:])] = collected_count[int(message.split("-")[0][1:])] + 1
                         msg = "%" + message[1:]
-                        emitter.send(str(msg).encode('utf-8'))
+                        if prev_msg != msg: 
+                            emitter.send(str(msg).encode('utf-8'))
+                            prev_msg = msg
                     
             receiver.nextPacket()
         
@@ -293,6 +305,8 @@ def message_listener(time_step):
                 new_geno = reproduce(pop_genotypes[index], pop_genotypes[partner])
                 pop_genotypes[index] = new_geno
             
+            eval_fitness(time_step)
+            
             receiver.nextPacket()
             
         elif 'encounter' in message: 
@@ -306,14 +320,21 @@ def message_listener(time_step):
         else: 
             receiver.nextPacket() 
             
-    elif (robot.getTime() - start > simulation_time):
+    elif (robot.getTime() - start > simulation_time and prev_msg != 'clean finish'):
     # if over time would want to reset 
-        emitter.send('cleaning'.encode('utf-8'))
+        msg = 'cleaning'
+        
+        if prev_msg != msg: 
+            emitter.send('cleaning'.encode('utf-8'))
+            prev_msg = msg
         
         while receiver.getQueueLength()>0: 
             receiver.nextPacket()
-            
-        emitter.send('clean finish'.encode('utf-8'))
+        
+        msg = 'clean finish'
+        if prev_msg != msg: 
+            emitter.send('clean finish'.encode('utf-8'))
+            prev_msg = msg 
         
     
 # runs simulation for designated amount of time 
@@ -325,6 +346,7 @@ def run_seconds(t,waiting=False):
     global fit_update 
     global block_list
     global start 
+    global prev_msg 
     
     n = TIME_STEP / 1000*32 # convert ms to s 
     start = robot.getTime()
@@ -334,16 +356,20 @@ def run_seconds(t,waiting=False):
         # run robot simulation for 30 seconds (if t = 30)
         increments = TIME_STEP / 1000
         
-        if waiting:
-            if not updated:
-                message_listener(robot.getTime())
-                eval_fitness(robot.getTime())
-                continue 
-            else: 
-                break 
+        # if waiting:
+            # if not updated:
+                # message_listener(robot.getTime())
+                # eval_fitness(robot.getTime())
+                # continue 
+            # else: 
+                # break 
         
-        elif robot.getTime() - start > new_t: 
-            emitter.send('return_fitness'.encode('utf-8'))
+        if robot.getTime() - start > new_t: 
+            msg = 'return_fitness'
+            if prev_msg != msg: 
+                message_listener(robot.getTime()) # will clear out msg until next gen 
+                emitter.send('return_fitness'.encode('utf-8'))
+                prev_msg = msg 
             print('requesting fitness')
             break 
 
@@ -352,10 +378,13 @@ def run_seconds(t,waiting=False):
             message_listener(robot.getTime())
                          
             if total_found == len(block_list):
-                emitter.send('return_fitness'.encode('utf-8'))
-                print('requesting fitness')
-                print('collected all objects')
-                break      
+                msg = 'return_fitness'
+                if prev_msg != msg: 
+                    emitter.send('return_fitness'.encode('utf-8'))
+                    prev_msg = msg 
+                    print('requesting fitness')
+                    print('collected all objects')
+                    break      
     return 
    
 # will use selected partners from each robot and reproduce with that corresponding index, and update population at the end of gen          
@@ -409,12 +438,16 @@ def reset_genotype():
     index = 0 
     global population 
     global pop_genotypes 
+    global prev_msg 
     pop_genotypes = []
     
     for i in range(len(population)):
         genotype = initial_genotypes[i]
         pop_genotypes.append(genotype)
-        emitter.send(str("#"+ str(index) + str(genotype)).encode('utf-8'))
+        msg = str("#"+ str(index) + str(genotype))
+        if prev_msg != msg: 
+            emitter.send(str("#"+ str(index) + str(genotype)).encode('utf-8'))
+            prev_msg = msg
         index +=1 
           
     
@@ -431,6 +464,7 @@ def run_optimization():
     global r_pos_to_generate
     global curr_size
     global population 
+    global prev_msg 
     
     # initialize genotypes 
     # generate_robot_central(robot_population_sizes[0])
@@ -469,14 +503,20 @@ def run_optimization():
                 print('number of genotypes',  len(pop_genotypes), 'for size: ', size)
 
                 for i in range(len(population)):
-                    emitter.send(str("#"+ str(index) + str(pop_genotypes[index])).encode('utf-8'))
-                    index +=1 
+                    msg = str("#"+ str(index) + str(pop_genotypes[index]))
+                    if msg != prev_msg: 
+                        emitter.send(str("#"+ str(index) + str(pop_genotypes[index])).encode('utf-8'))
+                        prev_msg = msg 
+                        index +=1 
                     
                 run_seconds(simulation_time) 
                 
-                print('waiting for genotypes')
+                # run_seconds(5, True) # is waiting until got genotypes
                 
-                run_seconds(5, True) # is waiting until got genotypes
+                for rec_node in population: 
+                    r_field = rec_node.getField('rotation')
+                    if r_field.getSFRotation() != [0, 0, -1]:
+                        r_field.setSFRotation([0, 0, -1])
                 
                 print('found genotypes')
                 print('new generation starting -')
@@ -493,7 +533,8 @@ def run_optimization():
             reproduce_list = []
             found_list = []
             reset_genotype()   
-            emitter.send('trial'.encode('utf-8'))           
+            emitter.send('trial'.encode('utf-8')) 
+            prev_msg = 'trial'          
     return 
   
 def main(): 

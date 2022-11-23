@@ -52,6 +52,7 @@ block_list = []
 arena_area = robot.getFromDef("arena")
 collected_count = []
 r_pos_to_generate = []
+prev_msg = ""
 
 
 def generate_robot_central(num_robots):
@@ -150,7 +151,9 @@ def message_listener(time_step):
     global collected_count 
     global curr_size 
     global start 
+    global prev_msg 
     global simulation_time
+    global prev_msg
 
     if receiver.getQueueLength()>0 and (robot.getTime() - start < simulation_time):
         message = receiver.getData().decode('utf-8')
@@ -172,8 +175,10 @@ def message_listener(time_step):
                         found_list.append(obj_node)
                         collected_count[int(message.split("-")[0][1:])] = collected_count[int(message.split("-")[0][1:])] + 1
                         msg_info = "%" + message[1:]
-                        emitter.send(str(msg_info).encode('utf-8'))
-                        print('removing object') 
+                        if prev_msg != msg_info: 
+                            emitter.send(str(msg_info).encode('utf-8'))
+                            prev_msg = msg_info
+                            print('removing object') 
 
             receiver.nextPacket()
             
@@ -184,13 +189,15 @@ def message_listener(time_step):
             fitness_scores[int(index)] = fit
             print('fitness scores', fitness_scores)
             
+            eval_fitness(time_step)
+            
             receiver.nextPacket()
             # will be generalized 
             
         else: 
             receiver.nextPacket()
             
-    elif (robot.getTime() - start > simulation_time):
+    elif (robot.getTime() - start > simulation_time and prev_msg != 'clean finish'):
     # if over time would want to reset 
         emitter.send('cleaning'.encode('utf-8'))
         
@@ -198,6 +205,7 @@ def message_listener(time_step):
             receiver.nextPacket()
             
         emitter.send('clean finish'.encode('utf-8'))
+        prev_msg = 'clean finish'
 
 # runs simulation for designated amount of time 
 def run_seconds(t,waiting=False):
@@ -206,6 +214,7 @@ def run_seconds(t,waiting=False):
     global updated
     global fit_update 
     global start 
+    global prev_msg 
     
     n = TIME_STEP / 1000*32 # convert ms to s 
     start = robot.getTime()
@@ -216,16 +225,18 @@ def run_seconds(t,waiting=False):
         # run robot simulation for 30 seconds (if t = 30)
         increments = TIME_STEP / 1000
         
-        if waiting:
-            if not updated:
-                message_listener(robot.getTime())
-                eval_fitness(robot.getTime())
-                continue 
-            else: 
-                break 
+        # if waiting:
+            # if not updated:
+                # message_listener(robot.getTime())
+                # eval_fitness(robot.getTime())
+                # continue 
+            # else: 
+                # break 
         
-        elif robot.getTime() - start > new_t: 
+        if robot.getTime() - start > new_t: 
+            message_listener(robot.getTime())
             emitter.send('return_fitness'.encode('utf-8'))
+            prev_msg = 'return_fitness' 
             print('requesting fitness')
             break 
 
@@ -235,6 +246,7 @@ def run_seconds(t,waiting=False):
                          
             if total_found == len(block_list) and len(block_list) != 0:
                 emitter.send('return_fitness'.encode('utf-8'))
+                prev_msg = 'return_fitness' 
                 print('collected all objects')
                 break      
     return 
@@ -296,9 +308,14 @@ def run_optimization():
                 updated = False     
                 run_seconds(simulation_time) 
                 
-                print('waiting for genotypes')
+                # print('waiting for genotypes')
                 
-                run_seconds(5, True) # is waiting until got genotypes
+                # run_seconds(5, True) # is waiting until got genotypes
+                
+             for rec_node in population: 
+                r_field = rec_node.getField('rotation')
+                if r_field.getSFRotation() != [0, 0, -1]:
+                    r_field.setSFRotation([0, 0, -1])              
                 
                 print('found genotypes')
                 print('new generation starting -')
