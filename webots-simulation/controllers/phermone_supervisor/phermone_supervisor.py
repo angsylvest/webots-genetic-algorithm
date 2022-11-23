@@ -332,7 +332,7 @@ def run_optimization():
         
         for i in range(trials): 
             print('beginning new trial', i)
-            for gen in range(num_generations-1): 
+            for gen in range(num_generations): 
                 
                 updated = False     
                 run_seconds(simulation_time) 
