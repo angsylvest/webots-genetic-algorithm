@@ -223,8 +223,9 @@ def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False
     if update: 
         new_weights = create_new_weights(t_block, t_robot, original_weights)
         weights = new_weights 
-        strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], new_weights)
-        current_strat_index = strat 
+        strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], new_weights)[0]
+        print('current strat', strat)
+        current_strat_index = ['straight','alternating-left','alternating-right', 'true random'].index(strat) 
         strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(original_weights[0]) + ',' + str(original_weights[1]) + ',' + str(original_weights[2]) + ',' + str(original_weights[3]) + ','+ str(t_block) + ',' + str(curr_sim_size) + ',' + str(calc_robot_fitness())+ ',' + str(curr_sim_size) + ',ga' +'\n')
         strategy_f.close()
         strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'a')
