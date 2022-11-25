@@ -595,10 +595,10 @@ def run_optimization():
         initialize_genotypes(size)
         r_pos_to_generate = []
         generate_robot_central(size)
-        # regenerate_environment(0.2)
+        regenerate_environment(0.2)
         # regenerate_blocks_power_law()
         # regenerate_blocks_single_source()
-        regenerate_blocks_dual_source()
+        # regenerate_blocks_dual_source()
         
         for rec_node in population: 
             r_field = rec_node.getField('rotation')
@@ -640,10 +640,10 @@ def run_optimization():
             overall_f.close()
             overall_f = open('../../graph-generation/collection-data/overall-df.csv', 'a')
             print('items collected', total_found)
-            # regenerate_environment(0.2)  
+            regenerate_environment(0.2)  
             # regenerate_blocks_power_law()
             # regenerate_blocks_single_source()
-            regenerate_blocks_dual_source()
+            # regenerate_blocks_dual_source()
             total_found = 0 
             reproduce_list = []
             found_list = []

@@ -1,0 +1,99 @@
+#VRML_SIM R2022a utf8
+WorldInfo {
+  info [
+    "A Khepera robot equipped with a gripper"
+  ]
+  title "Khepera Gripper"
+  CFM 0.001
+  ERP 0.4
+  basicTimeStep 10
+  contactProperties [
+    ContactProperties {
+      material1 "gripper"
+      material2 "stick"
+      coulombFriction [
+        10
+      ]
+    }
+    ContactProperties {
+      material1 "khepera"
+      coulombFriction [
+        0.1
+      ]
+    }
+  ]
+}
+Viewpoint {
+  orientation -0.2792467747975422 0.35649088590488587 0.891591547196316 1.4417009865901282
+  position -0.6336508905725575 -2.7599530610415908 2.2824330640529227
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  floorSize 2 2
+}
+CardboardBox {
+  translation 0.77 -0.66 0.07
+  size 0.1 0.1 0.45
+}
+CardboardBox {
+  translation 0.77 -0.32 0.07
+  name "cardboard box(2)"
+  size 0.1 0.1 0.45
+}
+CardboardBox {
+  translation 0.52 0.26 0.07
+  name "cardboard box(3)"
+  size 0.1 0.1 1
+}
+CardboardBox {
+  translation 0.92 0.74 0
+  name "cardboard box(5)"
+  size 0.1 0.16 1
+}
+CardboardBox {
+  translation -0.35 0.58 0
+  rotation 0 0 1 -1.5707953071795862
+  name "cardboard box(7)"
+  size 0.1 0.2 1
+}
+CardboardBox {
+  translation 0.52 0.26 0.07
+  name "cardboard box(6)"
+  size 0.2 0.3 1
+}
+CardboardBox {
+  translation 0.4 0.25 0.07
+  name "cardboard box(4)"
+  size 0.1 0.1 0.7
+}
+CardboardBox {
+  translation 0.77 -0.5 0.07
+  name "cardboard box(1)"
+  size 0.1 0.1 0.45
+}
+PipeSection {
+  translation 0.51 0.18 0.25
+}
+PipeSection {
+  translation -0.75 -0.56 0.1
+  name "pipe section(1)"
+  height 0.2
+  radius 0.15
+}
+DEF supervisor TinkerbotsBase {
+  translation -0.41 0 0
+  controller "las_supervisor"
+  supervisor TRUE
+  synchronization FALSE
+  extensionSlot [
+    Receiver {
+      channel 2
+    }
+    Emitter {
+      channel 1
+    }
+  ]
+}
