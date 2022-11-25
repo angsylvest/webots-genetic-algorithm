@@ -6,5 +6,5 @@ minimizedPerspectives: 000000ff00000000fd000000030000000000000087000002ecfc01000
 maximizedDockId: -1
 centralWidgetVisible: 1
 orthographicViewHeight: 1
-textFiles: 8 "controllers/crw_supervisor/crw_supervisor.py" "controllers/generic_crw_foraging/generic_crw_foraging.py" "controllers/levy_supervisor/levy_supervisor.py" "controllers/LF-APF/LF-APF.py" "controllers/las_algorithm/las_algorithm.py" "controllers/las_supervisor/las_supervisor.py" "controllers/phermone_supervisor/phermone_supervisor.py" "controllers/updated_generalized_ga_learning/updated_generalized_ga_learning.py" "controllers/ga_update_learner/ga_update_learner.py"
+textFiles: 2 "controllers/crw_supervisor/crw_supervisor.py" "controllers/generic_crw_foraging/generic_crw_foraging.py" "controllers/levy_supervisor/levy_supervisor.py" "controllers/LF-APF/LF-APF.py" "controllers/las_algorithm/las_algorithm.py" "controllers/las_supervisor/las_supervisor.py" "controllers/phermone_supervisor/phermone_supervisor.py" "controllers/updated_generalized_ga_learning/updated_generalized_ga_learning.py" "controllers/ga_update_learner/ga_update_learner.py"
 consoles: Console:All:All

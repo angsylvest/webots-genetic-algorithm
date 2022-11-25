@@ -317,9 +317,9 @@ def message_listener(time_step):
             # will be generalized 
             
         elif message[0] == '*':
-            new_reponse = message 
+            new_response = message 
             if prev_msg != new_response: 
-                emitter.send(str(new_reponse).encode('utf-8'))
+                emitter.send(str(new_response).encode('utf-8'))
                 prev_msg = new_response
             receiver.nextPacket()
             

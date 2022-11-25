@@ -6,7 +6,7 @@ minimizedPerspectives: 000000ff00000000fd000000030000000000000087000002ecfc01000
 maximizedDockId: -1
 centralWidgetVisible: 1
 orthographicViewHeight: 1
-textFiles: 6 "controllers/updated_generalized_ga_controller/updated_generalized_ga_controller.py" "controllers/ga_updated_supervisor/ga_updated_supervisor.py" "controllers/generic_crw_foraging/generic_crw_foraging.py" "controllers/las_algorithm/las_algorithm.py" "controllers/LF-APF/LF-APF.py" "controllers/inverted_ant/inverted_ant.py" "controllers/ga_updated_supervisor/robot_pop.py" "controllers/levy_supervisor/levy_supervisor.py" "controllers/crw_supervisor/crw_supervisor.py"
+textFiles: 7 "controllers/updated_generalized_ga_controller/updated_generalized_ga_controller.py" "controllers/ga_updated_supervisor/ga_updated_supervisor.py" "controllers/generic_crw_foraging/generic_crw_foraging.py" "controllers/las_algorithm/las_algorithm.py" "controllers/LF-APF/LF-APF.py" "controllers/inverted_ant/inverted_ant.py" "controllers/ga_updated_supervisor/robot_pop.py" "controllers/levy_supervisor/levy_supervisor.py" "controllers/crw_supervisor/crw_supervisor.py"
 globalOptionalRendering: DistanceSensorRays
 consoles: Console:All:All
 renderingDevicePerspectives: k0(1):camera;1;1;0;0
