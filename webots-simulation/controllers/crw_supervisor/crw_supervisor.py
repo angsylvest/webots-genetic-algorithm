@@ -53,6 +53,7 @@ arena_area = robot.getFromDef("arena")
 collected_count = []
 r_pos_to_generate = []
 prev_msg = ""
+random.seed(10)
 
 
 def generate_robot_central(num_robots):

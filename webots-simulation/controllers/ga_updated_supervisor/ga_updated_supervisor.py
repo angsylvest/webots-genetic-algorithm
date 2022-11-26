@@ -60,6 +60,7 @@ fit_update = False
 start = 0 
 
 prev_msg = ""
+random.seed(10)
 
 # set up environments 
 def generate_robot_central(num_robots):
@@ -607,7 +608,7 @@ def run_optimization():
         
         for i in range(trials): 
             print('beginning new trial', i)
-            for gen in range(num_generations-1): 
+            for gen in range(num_generations): 
                 updated = False 
                 index = 0 
                 

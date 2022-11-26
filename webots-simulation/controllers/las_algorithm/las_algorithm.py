@@ -239,10 +239,12 @@ def interpret():
             cleaning = True 
             # stop()
             print('robot has stopped, waiting for next generation')
+            receiver.nextPacket()
             
         elif message == 'clean finish': 
             cleaning = False 
             print('robot is ready to proceed') 
+            receiver.nextPacket()
 
         else: 
             receiver.nextPacket()

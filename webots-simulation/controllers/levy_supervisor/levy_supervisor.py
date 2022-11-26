@@ -57,6 +57,8 @@ r_pos_to_generate = []
 start = 0
 prev_msg = "" 
 
+random.seed(10)
+
 
 def generate_robot_central(num_robots):
     global fitness_scores 
