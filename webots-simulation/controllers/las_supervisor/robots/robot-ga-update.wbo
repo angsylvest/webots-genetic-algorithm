@@ -1,8 +1,14 @@
 #VRML_OBJ R2022a utf8
 DEF khepera Robot {
-  translation 0.25221431143801254 0.19003256112438086 0.00102747212657113
-  rotation 0.022115829741932668 -0.7722625333534955 0.6349184748085906 0.08163199063285326
+  translation -0.019987015882350155 0.010023810289006407 -0.0010344861582008962
+  rotation 0.022943592634373056 -0.570393840963951 0.8210508253131588 0.11483866441582982
   children [
+    Emitter {
+      name "emitter_processor"
+    }
+    Receiver {
+      name "receiver_processor"
+    }
     GPS {
       name "gps(1)"
     }
@@ -50,7 +56,7 @@ DEF khepera Robot {
         }
         DEF LIFT_HINGE_JOINT HingeJoint {
           jointParameters HingeJointParameters {
-            position -1.3999963619548577
+            position -1.3999963543450258
             axis 0 1 0
             anchor -0.01 0 0.022
           }
@@ -60,12 +66,12 @@ DEF khepera Robot {
             }
           ]
           endPoint Solid {
-            translation -0.010000272344820595 2.437851864822671e-09 0.021999275509447126
-            rotation 0.7058147873603386 -0.7058147873602517 -0.060423272727341645 3.020892744101862
+            translation -0.010000272344826108 2.43785186482267e-09 0.021999275509449197
+            rotation 0.7058147872449662 -0.7058147872448792 -0.06042327542271249 3.02089273873073
             children [
               DEF RIGHT_GRIP SliderJoint {
                 jointParameters JointParameters {
-                  position 0.0001686411772471193
+                  position 0.00016848702506826413
                   axis 1 0 0
                 }
                 device [
@@ -78,7 +84,7 @@ DEF khepera Robot {
                   }
                 ]
                 endPoint Solid {
-                  translation 0.00016864117762363311 0 -0.048
+                  translation 0.00016848702544477795 0 -0.048
                   rotation 0 1 0 1.5708
                   children [
                     Shape {
@@ -134,26 +140,26 @@ DEF khepera Robot {
                       0.01 0 0
                     ]
                   }
-                  linearVelocity -0.0012752275864879256 -0.0023150016989986026 0.04894203912098111
-                  angularVelocity -0.003406109353969874 -0.018826808162913867 0.5698739274599787
+                  linearVelocity 0.0002734317174452206 -0.002921484587606149 0.3183573217046375
+                  angularVelocity 0.0052794894595073975 0.0009247017972587035 0.5364660991099367
                 }
               }
               DEF LEFT_GRIP SliderJoint {
                 jointParameters JointParameters {
-                  position -0.00016864583241887318
+                  position -0.0001684916865150082
                   axis -1 0 0
                 }
                 device [
                   LinearMotor {
                     name "left grip"
                     maxVelocity 0.1
-                    minPosition -0.0001679239624319296
+                    minPosition -0.00016864583241887318
                     maxPosition 0.029
                     maxForce 100
                   }
                 ]
                 endPoint Solid {
-                  translation 0.0001686458327953872 0 -0.048
+                  translation 0.00016849168689152223 0 -0.048
                   rotation 0 1 0 -1.5708
                   children [
                     Shape {
@@ -199,8 +205,8 @@ DEF khepera Robot {
                       -0.01 0 0
                     ]
                   }
-                  linearVelocity -0.0012751831193745426 -0.0023149995735033953 0.04894203943187096
-                  angularVelocity -0.003406109354053133 -0.018826808162901883 0.5698739274599155
+                  linearVelocity 0.0002734734580640539 -0.002921480808026374 0.31835732129464533
+                  angularVelocity 0.005279489460152028 0.0009247017972941057 0.5364660991101738
                 }
               }
               Shape {
@@ -256,8 +262,8 @@ DEF khepera Robot {
                 0 0 -0.02
               ]
             }
-            linearVelocity -0.0005498310567873768 -0.0047877253690031055 0.048866691157623945
-            angularVelocity -0.0034061093302708433 -0.01882680232382365 0.5698739274564601
+            linearVelocity 0.00035537040101737776 -0.004860338123948406 0.3183706246875164
+            angularVelocity 0.005279490708628551 0.0009246816881623779 0.5364660990873928
           }
         }
         DEF GRIPPER_BASE Transform {
@@ -325,7 +331,7 @@ DEF khepera Robot {
     }
     HingeJoint {
       jointParameters HingeJointParameters {
-        position -40.67908057894577
+        position -40.79907988019871
         axis 0 1 0
         anchor 0 0 0.0075
       }
@@ -339,8 +345,8 @@ DEF khepera Robot {
         }
       ]
       endPoint Solid {
-        translation 0 0.025999999999999916 0.0075
-        rotation 0.4075893215413771 -0.4075894467821925 -0.8171546902742627 1.771364758778919
+        translation 0 0.02599999999999993 0.0075
+        rotation 0.44664349959805866 -0.44664362268310975 -0.7752541896586609 1.8226549398058822
         children [
           DEF WHEEL Transform {
             rotation 0.5773869352700204 -0.5773319352761864 0.5773319352761864 -2.094339
@@ -363,13 +369,13 @@ DEF khepera Robot {
         boundingObject USE WHEEL
         physics Physics {
         }
-        linearVelocity -0.014913140772687466 -0.0006519044212170552 0.04810970660170402
-        angularVelocity 0.0944237282293471 -2.016440366589187 0.5696746969083888
+        linearVelocity -0.014316197955353443 -0.0013514899206284268 0.31978949926974687
+        angularVelocity 0.18781131474895335 -1.9907322484205332 0.5377778677054599
       }
     }
     HingeJoint {
       jointParameters HingeJointParameters {
-        position 157.55914023623978
+        position 157.67913953102223
         axis 0 1 0
         anchor 0 0 0.0075
       }
@@ -383,8 +389,8 @@ DEF khepera Robot {
         }
       ]
       endPoint Solid {
-        translation 0 -0.025999999999999683 0.0075
-        rotation 0.686881953219089 -0.6868819182419795 0.2374582336625705 3.607872910760202
+        translation 0 -0.02599999999999969 0.0075
+        rotation 0.693658755439113 -0.6936587123321641 0.1941008032140634 3.5250261327148604
         children [
           USE WHEEL
         ]
@@ -392,8 +398,8 @@ DEF khepera Robot {
         boundingObject USE WHEEL
         physics Physics {
         }
-        linearVelocity 0.014581559021446524 0.0007928878495454778 0.048316556833874424
-        angularVelocity -0.10122945721673415 1.9787871088995033 0.5705884080355955
+        linearVelocity 0.014224096517884343 0.001323312736246108 0.31951913509462293
+        angularVelocity -0.1772605246678392 1.9925788824102022 0.5355508537939127
       }
     }
     Transform {
@@ -558,6 +564,6 @@ DEF khepera Robot {
   }
   controller "updated_generalized_ga_controller"
   supervisor TRUE
-  linearVelocity -0.0001809161638832577 -0.001730122697899581 0.0489043297574204
-  angularVelocity -0.0034061091931174643 -0.018826723567875025 0.5698739264818187
+  linearVelocity 6.222079452499797e-05 -0.0017028594671920777 0.31868755145834393
+  angularVelocity 0.005279563895309555 0.0009239450834570423 0.536466098152102
 }

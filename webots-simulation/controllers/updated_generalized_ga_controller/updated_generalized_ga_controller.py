@@ -76,12 +76,21 @@ obj_found_so_far = []
 curr_sim_size = 5
 # follow_thres = 3
 
+next_child = ""
+
 # generalize id acquisition
 if robot.getName() == "k0":
     given_id = 0
     
 else: 
     given_id = robot.getName()[3:-1]
+    
+### emitter to be sent to individual supervisor #### 
+emitter_individual = robot.getDevice("emitter_processor")
+emitter_individual.setChannel(int(given_id)*10)
+receiver_individual = robot.getDevice("receiver_processor")
+receiver_individual.enable(timestep)
+receiver_individual.setChannel((int(given_id) * 10) - 1)
 
 # collects statistics about strategy and collisions 
 strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'a')
@@ -343,6 +352,7 @@ def interpret(timestep):
     global t_elapsed_block_total
     global n_observations_block
     global cleaning 
+    global next_child 
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -378,6 +388,9 @@ def interpret(timestep):
             # time_elapsed = 0 # on a per sec basis 
             
             emitter.send(response.encode('utf-8'))
+            
+            parse_genotype(next_child)
+            obj_found_so_far = []
             receiver.nextPacket()
 
         elif message == 'sim-complete':
@@ -467,7 +480,17 @@ def interpret(timestep):
         
         else: 
             receiver.nextPacket()
-
+            
+    if receiver_individual.getQueueLength()>0:
+        message = receiver_individual.getData().decode('utf-8')
+        if 'child' in message: 
+            next_child = message[5:].split("*")
+            # parse_genotype(message)
+            receiver_individual.nextPacket()
+        else: 
+            receiver_individual.nextPacket()
+            
+            
 
 def communicate_with_robot():
     global given_id 
@@ -475,7 +498,7 @@ def communicate_with_robot():
     # find closest robot to exchange info with 
     response = str(given_id) + "-encounter"
     if prev_msg != response: 
-        emitter.send(response.encode('utf-8'))
+        emitter_individual.send(response.encode('utf-8'))
         prev_msg = response 
     # print('found neighbor')
 

@@ -18,7 +18,7 @@ strategy_f = open("../../graph-generation/collision-data/crw-info.csv", 'w')
 strategy_f.write('agent id,'+ 'time step,' +' time since last block' + ',size' + ',collisions'+ ',type'+ '\n')
 strategy_f.close()
 
-# set-up robot
+# set-up robot2
 TIME_STEP = 32
 robot = Supervisor()  # create Supervisor instance
 # emitter to send info to robots 

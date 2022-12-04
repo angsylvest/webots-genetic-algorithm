@@ -25,7 +25,7 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.3650554127892243 -0.2056985839550119 0.907977223366419 4.087400981479784
+  orientation -0.37097714124612396 -0.16179106585996908 0.9144395068459962 3.900554644376135
   position 1.8953435423056462 2.533208948744944 3.3393802677767774
 }
 TexturedBackground {
@@ -45,6 +45,10 @@ DEF supervisor TinkerbotsBase {
   supervisor TRUE
   synchronization FALSE
   extensionSlot [
+    Emitter {
+      name "emitter_processor"
+      channel 5
+    }
     Receiver {
       channel 2
     }
@@ -53,4 +57,3 @@ DEF supervisor TinkerbotsBase {
     }
   ]
 }
-
