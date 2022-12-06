@@ -22,7 +22,7 @@ overall_f = open('../../graph-generation/collection-data/overall-df.csv', 'a')
 
 # for individual robot, statistics about strategy taken over time & individual collision info 
 strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'w')
-strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size' + ',fitness'+ ',size'+ ',type' + '\n')
+strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size' + ',fitness'+ ',size'+ ',type' + ',trial'+ '\n')
 strategy_f.close()
 
 # genetic algorithm-specific parameters 
@@ -604,6 +604,8 @@ def run_optimization():
     # print('new generation beginning')
     # run_seconds(5, True) # is waiting until got genotypes
     
+    ind_sup = []
+    
     for size in robot_population_sizes:
         curr_size = size  
         initialize_genotypes(size)
@@ -617,6 +619,7 @@ def run_optimization():
             rootChildrenField = rootNode.getField('children')
             rootChildrenField.importMFNode(-1, '../las_supervisor/robots/ga-individual.wbo')
             individual = rootChildrenField.getMFNode(-1)
+            ind_sup.append(individual)
           
             individual.getField('translation').setSFVec3f([0, 2, 0])
         emitter_individual.send(id_msg.encode('utf-8'))
@@ -687,8 +690,12 @@ def run_optimization():
             reproduce_list = []
             found_list = []
             reset_genotype()   
-            emitter.send('trial'.encode('utf-8')) 
-            prev_msg = 'trial'          
+            msg = 'trial' + str(potential_times[i])
+            emitter.send(msg.encode('utf-8')) 
+            prev_msg = msg
+            
+        for node in ind_sup: 
+            node.remove()      
     return 
   
 def main(): 

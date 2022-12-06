@@ -126,6 +126,12 @@ def message_listener(time_step):
             curr_best = -1 
             pop_genotypes = message.split(" ")[1:]
             overall_fitness_scores = [0 for i in range(len(pop_genotypes))]
+            
+            # initial child
+            child = reproduce(pop_genotypes[int(given_id)], pop_genotypes[int(given_id)])
+            child = "child" + str(child) 
+            emitter_individual.send(child.encode('utf-8'))
+            
             receiver.nextPacket()
         
         ## access to robot id for node acquisition    
@@ -159,6 +165,7 @@ def message_listener(time_step):
             if overall_fitness_scores[other_index] > curr_best: 
                 curr_best = other_index
                 child = 'child' + str(reproduce(pop_genotypes[robo_index], pop_genotypes[curr_best]))
+                print('child ---', child) 
                 
                 emitter_individual.send(child.encode('utf-8'))
                    

@@ -130,6 +130,7 @@ time_elapsed = 0 # on a per sec basis
 
 # prev message (limit overloading receiver/emitter system) 
 prev_msg = "" 
+trial_num = 0 
 
 # calculates angle normal to current orientation 
 def calc_normal(curr_angle): 
@@ -235,9 +236,9 @@ def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False
         strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], new_weights)[0]
         print('current strat', strat)
         current_strat_index = ['straight','alternating-left','alternating-right', 'true random'].index(strat) 
-        strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(original_weights[0]) + ',' + str(original_weights[1]) + ',' + str(original_weights[2]) + ',' + str(original_weights[3]) + ','+ str(t_block) + ',' + str(curr_sim_size) + ',' + str(calc_robot_fitness())+ ',' + str(curr_sim_size) + ',ga' +'\n')
-        strategy_f.close()
-        strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'a')
+        # strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(original_weights[0]) + ',' + str(original_weights[1]) + ',' + str(original_weights[2]) + ',' + str(original_weights[3]) + ','+ str(t_block) + ',' + str(curr_sim_size) + ',' + str(calc_robot_fitness())+ ',' + str(curr_sim_size) + ',ga' +'\n')
+        # strategy_f.close()
+        # strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'a')
 
     if not update: 
         strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], original_weights)[0]
@@ -352,7 +353,8 @@ def interpret(timestep):
     global t_elapsed_block_total
     global n_observations_block
     global cleaning 
-    global next_child 
+    global next_child
+    global trial_num 
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -373,7 +375,7 @@ def interpret(timestep):
             
             response = "k" + str(int(given_id)) + "-fitness" + str(fitness) + '-other' + str(best_prev_genotype) + '-overall' + str(calc_robot_fitness())
             print('calculating fitness', calc_robot_fitness())
-            strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(weights[0]) + ',' + str(weights[1]) + ',' + str(weights[2]) + ',' + str(weights[3]) + ','+ str(time_elapsed_since_block) + ',' + str(curr_sim_size) + ',' + str(calc_robot_fitness())+ ',' + str(curr_sim_size) + ',ga' + '\n')
+            strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(weights[0]) + ',' + str(weights[1]) + ',' + str(weights[2]) + ',' + str(weights[3]) + ','+ str(time_elapsed_since_block) + ',' + str(curr_sim_size) + ',' + str(calc_robot_fitness())+ ',' + str(curr_sim_size) + ',ga' + ',' + str(trial_num) + '\n')
             strategy_f.close()
             strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'a')
             
@@ -390,6 +392,7 @@ def interpret(timestep):
             emitter.send(response.encode('utf-8'))
             
             parse_genotype(next_child)
+            
             obj_found_so_far = []
             receiver.nextPacket()
 
@@ -400,6 +403,7 @@ def interpret(timestep):
             
         elif 'trial' in message: 
             # resets relevant statistics 
+            trial_num = int(message[5:])
             fitness = 0 # number of obstacles 
             best_prev_genotype = '!'
             best_prev_score = -1000

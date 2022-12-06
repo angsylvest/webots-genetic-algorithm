@@ -55,7 +55,7 @@ population = []
 fitness_scores = []
 start = 0
 prev_msg = "" 
-random.seed(10)
+random.seed(11)
 
 def generate_robot_central(num_robots):
     global fitness_scores 
