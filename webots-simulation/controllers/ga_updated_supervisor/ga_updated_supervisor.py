@@ -22,7 +22,7 @@ overall_f = open('../../graph-generation/collection-data/overall-df.csv', 'a')
 
 # for individual robot, statistics about strategy taken over time & individual collision info 
 strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'w')
-strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size' + ',fitness'+ ',size'+ ',type' + ',trial'+ '\n')
+strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size' + ',fitness'+ ',size'+ ',type' + ',trial' + ',collected' + '\n')
 strategy_f.close()
 
 # genetic algorithm-specific parameters 
@@ -263,8 +263,6 @@ def regenerate_blocks_power_law():
             t_field = rec_node.getField('translation')
             
             # want to have additional parts centralized (at most 4 others) 
-
-            
             t_field.setSFVec3f(pot[i]) 
             block_list.append(rec_node)
             
@@ -321,47 +319,6 @@ def initialize_genotypes(size):
         new_geno = create_individal_genotype(gene_list)
         initial_genotypes.append(new_geno)
         pop_genotypes.append(new_geno)
-     
-    
-def find_nearest_robot_genotype(r_index):
-    global population 
-    global reproduce_list 
-    global collected_count 
-    global pairs 
-    global overall_fitness_scores
-    global prev_msg 
-
-    closest_neigh = " "
-    curr_robot = population[r_index]
-    curr_dist = 1000 # arbitrary value 
-    curr_fitness = fitness_scores[r_index]
-    # print('overall fitness list', overall_fitness_scores)
-    curr_overall_fitness = overall_fitness_scores[r_index]
-    other_fitness = 0
-    
-    curr_pos = [curr_robot.getPosition()[0], curr_robot.getPosition()[1]]
-    other_index = r_index
-    
-    for i in range(len(population)):
-        if (i != r_index): 
-            other_pos = [population[i].getPosition()[0], population[i].getPosition()[0]]
-            dis = math.dist(curr_pos, other_pos)
-            if closest_neigh == " ":
-                closest_neigh = str(population[i].getId())
-                curr_dist = dis
-                other_fitness = overall_fitness_scores[i]
-                other_index = i
-            elif dis < curr_dist: 
-                closest_neigh = str(population[i].getId())
-                curr_dist = dis 
-                other_fitness = overall_fitness_scores[i]
-                other_index = i
-    # use emitter to send genotype to corresponding robot if fitness is better and if nearby 
-    if type(curr_fitness) == 'int' and type (other_fitness) == 'int' and (other_fitness > curr_overall_fitness) : 
-        curr_msg = 'potential partner-' + str(pop_genotypes[other_index]) + '-' + str(other_fitness) + '-' + str(collected_count[other_index])
-        if curr_msg != prev_msg: 
-            emitter.send('potential partner-' + str(pop_genotypes[other_index]) + '-' + str(other_fitness) + '-' + str(collected_count[other_index]))
-            pairs.append(r_index) # this robot now has a potential partner 
                 
     
 def save_progress():
@@ -424,18 +381,8 @@ def message_listener(time_step):
             if partner != 'none':
                 new_geno = reproduce(pop_genotypes[index], pop_genotypes[partner])
                 pop_genotypes[index] = new_geno
-            
             eval_fitness(time_step)
-            
             receiver.nextPacket()
-            
-        # elif 'encounter' in message: 
-            # print('robot found -- checking genotype') 
-            # robo_index = int(message.split('-')[0])
-            # reproduce_list.append(robo_index) 
-            # new_geno = find_nearest_robot_genotype(robo_index)
-            
-            # receiver.nextPacket()
             
         else: 
             receiver.nextPacket() 
@@ -443,14 +390,11 @@ def message_listener(time_step):
     elif (robot.getTime() - start > simulation_time and prev_msg != 'clean finish'):
     # if over time would want to reset 
         msg = 'cleaning'
-        
         if prev_msg != msg: 
             emitter.send('cleaning'.encode('utf-8'))
             prev_msg = msg
-        
         while receiver.getQueueLength()>0: 
             receiver.nextPacket()
-        
         msg = 'clean finish'
         if prev_msg != msg: 
             emitter.send('clean finish'.encode('utf-8'))
@@ -475,14 +419,6 @@ def run_seconds(t,waiting=False):
     while robot.step(TIME_STEP) != -1:
         # run robot simulation for 30 seconds (if t = 30)
         increments = TIME_STEP / 1000
-        
-        # if waiting:
-            # if not updated:
-                # message_listener(robot.getTime())
-                # eval_fitness(robot.getTime())
-                # continue 
-            # else: 
-                # break 
         
         if robot.getTime() - start > new_t: 
             msg = 'return_fitness'
@@ -589,29 +525,13 @@ def run_optimization():
     global population 
     global prev_msg 
     
-    # initialize genotypes 
-    # generate_robot_central(robot_population_sizes[0])
-    # reset_genotype()
-    # regenerate_environment(0.2)
-    
-    # fixes robots falling over
-    # for rec_node in population: 
-        # r_field = rec_node.getField('rotation')
-        # if r_field.getSFRotation() != [0, 0, -1]:
-            # r_field.setSFRotation([0, 0, -1])
-            
-    # run_seconds(simulation_time) # runs generation for that given amount of time  
-    # print('new generation beginning')
-    # run_seconds(5, True) # is waiting until got genotypes
-    
-    ind_sup = []
-    
     for size in robot_population_sizes:
         curr_size = size  
         initialize_genotypes(size)
         r_pos_to_generate = []
         generate_robot_central(size)
         regenerate_environment(0.2)
+        ind_sup = []
         
         for i in range(len(population)):
             ### generate supervisor for parallelization ####
@@ -628,72 +548,65 @@ def run_optimization():
         # regenerate_blocks_single_source()
         # regenerate_blocks_dual_source()
   
-        potential_times = [i for i in range(20, (trials + 20) * 10, 10)]
+        potential_times = [i for i in range(20, 100, 10)]
         
-        for i in range(trials): 
-            print('beginning new trial', i)
-            
-            msg = 'generation-complete '+ ' '.join(pop_genotypes)
-            emitter_individual.send(str(msg).encode('utf-8'))
-            
-            for rec_node in population: 
-                r_field = rec_node.getField('rotation')
-                if r_field.getSFRotation() != [0, 0, -1]:
-                    r_field.setSFRotation([0, 0, -1])
-                
-                
-            for gen in range(num_generations): 
-                updated = False 
-                # index = 0 
-                
-                print('number in population', len(population))
-                print('number of genotypes',  len(pop_genotypes), 'for size: ', size)
-                
-                # msg = 'generation-complete '+ ' '.join(pop_genotypes)
-                # for i in range(len(population)):
-                    # msg = str("#"+ str(index) + str(pop_genotypes[index]))
-                    # if msg != prev_msg: 
-                        # emitter.send(str("#"+ str(index) + str(pop_genotypes[index])).encode('utf-8'))
-                        # prev_msg = msg 
-                        # index +=1 
+        for p in potential_times: 
         
-                    
-                run_seconds(potential_times[i]) 
+            for i in range(trials): 
+                print('beginning new trial', i)
                 
-                # run_seconds(5, True) # is waiting until got genotypes
+                msg = 'generation-complete '+ ' '.join(pop_genotypes)
+                emitter_individual.send(str(msg).encode('utf-8'))
                 
                 for rec_node in population: 
                     r_field = rec_node.getField('rotation')
                     if r_field.getSFRotation() != [0, 0, -1]:
                         r_field.setSFRotation([0, 0, -1])
-                       
-                                          
-                print('found genotypes')
-                print('new generation starting -')
-                reproduce_list = []
-                # generate_robot_central(size)
-                # regenerate_environment(0.2)  
+                    
+                    
+                for gen in range(num_generations): 
+                    updated = False 
+                    # index = 0 
+                    
+                    print('number in population', len(population))
+                    print('number of genotypes',  len(pop_genotypes), 'for size: ', size)
 
-            overall_f.write(str(i) + ',' + str(robot.getTime()) + ',' + str(total_found) + ',' + str(size)+ ',' + 'ga' + ',' + str(potential_times[i]) + '\n')    
-            overall_f.close()
-            overall_f = open('../../graph-generation/collection-data/overall-df.csv', 'a')
-            print('items collected', total_found)
-            regenerate_environment(0.2)  
-            
-            ### reset individual robot controllers and respective supervisors 
-            
-            
-            # regenerate_blocks_power_law()
-            # regenerate_blocks_single_source()
-            # regenerate_blocks_dual_source()
-            total_found = 0 
-            reproduce_list = []
-            found_list = []
-            reset_genotype()   
-            msg = 'trial' + str(potential_times[i])
-            emitter.send(msg.encode('utf-8')) 
-            prev_msg = msg
-            
+                    run_seconds(p) 
+                    
+                    # run_seconds(5, True) # is waiting until got genotypes
+                    
+                    for rec_node in population: 
+                        r_field = rec_node.getField('rotation')
+                        if r_field.getSFRotation() != [0, 0, -1]:
+                            r_field.setSFRotation([0, 0, -1])
+                           
+                                              
+                    print('found genotypes')
+                    print('new generation starting -')
+                    reproduce_list = []
+                    # generate_robot_central(size)
+                    # regenerate_environment(0.2)  
+    
+                overall_f.write(str(i) + ',' + str(robot.getTime()) + ',' + str(total_found) + ',' + str(size)+ ',' + 'ga' + ',' + str(p) + '\n')    
+                overall_f.close()
+                overall_f = open('../../graph-generation/collection-data/overall-df.csv', 'a')
+                print('items collected', total_found)
+                regenerate_environment(0.2)  
+                
+                ### reset individual robot controllers and respective supervisors 
+                
+                
+                # regenerate_blocks_power_law()
+                # regenerate_blocks_single_source()
+                # regenerate_blocks_dual_source()
+                total_found = 0 
+                reproduce_list = []
+                found_list = []
+                reset_genotype()   
+                msg = 'trial' + str(potential_times[i])
+                emitter.send(msg.encode('utf-8')) 
+                prev_msg = msg
+                
         for node in ind_sup: 
             node.remove()      
     return 

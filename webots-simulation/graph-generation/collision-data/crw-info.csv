@@ -1,1 +1,6 @@
 agent id,time step, time since last block,size,collisions,type
+2,30.07,0,-5,3,crw
+0,30.07,0,-5,0,crw
+1,30.07,0,-5,0,crw
+3,30.07,0,-5,1,crw
+4,30.07,0,-5,3,crw

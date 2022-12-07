@@ -92,13 +92,7 @@ def find_nearest_robot_genotype(r_index):
                 other_index = i
                 
     return other_index
-    # use emitter to send genotype to corresponding robot if fitness is better and if nearby 
-    # if type(curr_fitness) == 'int' and type (other_fitness) == 'int' and (other_fitness > curr_overall_fitness) : 
-        # curr_msg = 'potential partner-' + str(pop_genotypes[other_index]) + '-' + str(other_fitness) + '-' + str(collected_count[other_index])
-        # if curr_msg != prev_msg: 
-            # emitter.send('potential partner-' + str(pop_genotypes[other_index]) + '-' + str(other_fitness) + '-' + str(collected_count[other_index]))
-            # pairs.append(r_index) # this robot now has a potential partner 
-                
+
 
 def message_listener(time_step):
     global total_found 
@@ -165,7 +159,7 @@ def message_listener(time_step):
             if overall_fitness_scores[other_index] > curr_best: 
                 curr_best = other_index
                 child = 'child' + str(reproduce(pop_genotypes[robo_index], pop_genotypes[curr_best]))
-                print('child ---', child) 
+                # print('child ---', child) 
                 
                 emitter_individual.send(child.encode('utf-8'))
                    
