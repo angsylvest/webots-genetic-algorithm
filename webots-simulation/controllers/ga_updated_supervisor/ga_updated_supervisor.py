@@ -603,7 +603,7 @@ def run_optimization():
                 reproduce_list = []
                 found_list = []
                 reset_genotype()   
-                msg = 'trial' + str(potential_times[i])
+                msg = 'trial' + str(p)
                 emitter.send(msg.encode('utf-8')) 
                 prev_msg = msg
                 

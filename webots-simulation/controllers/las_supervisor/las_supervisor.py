@@ -19,7 +19,7 @@ overall_f = open('../../graph-generation/collection-data/overall-las-info.csv', 
 
 # individual robot collision counts 
 strategy_f = open("../../graph-generation/collision-data/las-info.csv", 'w')
-strategy_f.write('agent id,'+ 'time step,' + 'time since last block' + ',size' + ',collisions'+ ',type' +'\n')
+strategy_f.write('agent id,'+ 'time step,' + 'time since last block' + ',size' + ',collisions'+ ',type' + ',collected' +'\n')
 strategy_f.close()
 
 # set-up robot
