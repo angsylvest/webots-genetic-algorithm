@@ -205,6 +205,7 @@ def interpret():
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
+        # print('incoming messages --', given_id, message) 
 
         if message[0] == "#" + str(given_id):
             message = message[2:].split("*")
