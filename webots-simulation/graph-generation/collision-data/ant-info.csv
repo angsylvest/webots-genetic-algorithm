@@ -1,6 +1,1 @@
 agent id,time step, time since last block,size,collisions,type,collected
-0,30.07,0,-5,0,invert-ant,0
-1,30.07,0,-5,0,invert-ant,0
-3,30.07,0,-5,2,invert-ant,0
-2,30.07,0,-5,4,invert-ant,0
-4,30.07,0,-5,0,invert-ant,0

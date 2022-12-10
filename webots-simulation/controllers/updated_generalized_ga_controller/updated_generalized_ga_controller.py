@@ -357,7 +357,7 @@ def interpret(timestep):
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
-        # print('incoming messages: ', given_id, message) 
+        print('incoming messages: ', given_id, message) 
     
         # intertrial changes 
         if message[0:2] == "#" + str(given_id):

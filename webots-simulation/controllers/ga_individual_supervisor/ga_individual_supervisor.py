@@ -131,6 +131,7 @@ def message_listener(time_step):
         ## access to robot id for node acquisition    
         elif 'ids' in message: 
             id_msg = message.split(" ")[1:]
+            population = []
             
             for id in id_msg: # will convert to nodes to eventual calculation 
                 node = robot.getFromId(int(id))

@@ -39,15 +39,18 @@ def reproduce(r1, r2):
     # if pass a certain threshold, will increment/decrement randomly by 
     # smaller amount 
     
+    print('genotype 1', r1) 
+    print('genotype 2', r2) 
+    
     # if below, resample again 
     new_genotype = ''
     mom = r1.split("*")
     dad = r2.split("*")
         
     for i in range(len(mom)-1): # assuming this is a list of genotypes 
-        if i == 0:
-            mom[i] = mom[i][1:]
-            dad[i] = dad[i][1:]
+        # if i == 0:
+            # mom[i] = mom[i][1:]
+            # dad[i] = dad[i][1:]
         
         child = crossover(mom[i], dad[i]) 
         child = mutate(child, 0.2) + "*"

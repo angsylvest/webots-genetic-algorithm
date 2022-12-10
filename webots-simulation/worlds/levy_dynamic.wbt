@@ -43,7 +43,6 @@ DEF supervisor TinkerbotsBase {
   translation -0.41 0 0
   controller "levy_supervisor"
   supervisor TRUE
-  synchronization FALSE
   extensionSlot [
     Receiver {
       channel 2
