@@ -389,7 +389,7 @@ def interpret(timestep):
             
             emitter.send(response.encode('utf-8'))
             
-            obj_found_so_far = []
+            # obj_found_so_far = []
             receiver.nextPacket()
 
         elif message == 'sim-complete':
@@ -413,6 +413,7 @@ def interpret(timestep):
             
             time_elapsed = 0 # on a per sec basis 
             overall_fitness = 0
+            obj_found_so_far = []
             receiver.nextPacket()
             
         elif 'partner' in message: 
@@ -445,7 +446,7 @@ def interpret(timestep):
             receiver.nextPacket()
             
         elif 'size' in message:
-            curr_sim_size = message[4:]
+            curr_sim_size = message[5:]
             obj_found_so_far = []
             
             # resets relevant statistics 

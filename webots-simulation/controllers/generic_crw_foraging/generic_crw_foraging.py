@@ -196,8 +196,14 @@ def interpret():
             receiver.nextPacket()
             
         elif 'size' in message:
-            curr_sim_size = message[4:]
+            curr_sim_size = message[5:]
+            obj_found_so_far = []
             receiver.nextPacket()
+            
+        elif message == "trial_complete":
+            # resets prob distrib 
+            obj_found_so_far = []
+            receiver.nextPacket() 
 
         elif message == 'sim-complete':
             sim_complete = True 

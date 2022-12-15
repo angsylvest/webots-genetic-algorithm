@@ -22,7 +22,7 @@ overall_f = open('../../graph-generation/collection-data/overall-df-learning.csv
 
 # for individual robot, statistics about strategy taken over time & individual collision info 
 strategy_f = open("../../graph-generation/collision-data/ga-info-learning.csv", 'w')
-strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size' + ',fitness'+ ',size'+ ',type' + ',trial' + ',collected' + '\n')
+strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size' + ',fitness'+ ',size'+ ',type' + ',trial' + ',collected' + ',potential time' + '\n')
 strategy_f.close()
 
 # genetic algorithm-specific parameters 
@@ -613,73 +613,73 @@ def run_optimization():
         # regenerate_blocks_single_source()
         # regenerate_blocks_dual_source()
   
-        # potential_times = [i for i in range(20, 100, 10)]
+        potential_times = [i for i in range(90, 150, 10)]
         total_elapsed = 600
         
-        # for p in potential_times: 
+        for p in potential_times: 
             
-        num_generations = total_elapsed // simulation_time
-        
-        for i in range(trials): 
-            print('beginning new trial', i)
+            num_generations = total_elapsed // simulation_time
             
-            msg = 'generation-complete '+ ' '.join(pop_genotypes)
-            emitter_individual.send(str(msg).encode('utf-8'))
-            
-            for rec_node in population: 
-                r_field = rec_node.getField('rotation')
-                if r_field.getSFRotation() != [0, 0, -1]:
-                    r_field.setSFRotation([0, 0, -1])
+            for i in range(trials): 
+                print('beginning new trial', i)
                 
-                
-            for gen in range(num_generations): 
-                updated = False 
-                # index = 0 
-                
-                print('number in population', len(population))
-                print('number of genotypes',  len(pop_genotypes), 'for size: ', size)
-
-                run_seconds(simulation_time) 
-                
-                # run_seconds(5, True) # is waiting until got genotypes
+                msg = 'generation-complete '+ ' '.join(pop_genotypes)
+                emitter_individual.send(str(msg).encode('utf-8'))
                 
                 for rec_node in population: 
                     r_field = rec_node.getField('rotation')
                     if r_field.getSFRotation() != [0, 0, -1]:
                         r_field.setSFRotation([0, 0, -1])
-                       
-                                          
-                print('found genotypes')
-                print('new generation starting -')
+                    
+                    
+                for gen in range(num_generations): 
+                    updated = False 
+                    # index = 0 
+                    
+                    print('number in population', len(population))
+                    print('number of genotypes',  len(pop_genotypes), 'for size: ', size)
+    
+                    run_seconds(simulation_time) 
+                    
+                    # run_seconds(5, True) # is waiting until got genotypes
+                    
+                    for rec_node in population: 
+                        r_field = rec_node.getField('rotation')
+                        if r_field.getSFRotation() != [0, 0, -1]:
+                            r_field.setSFRotation([0, 0, -1])
+                           
+                                              
+                    print('found genotypes')
+                    print('new generation starting -')
+                    reproduce_list = []
+                    # generate_robot_central(size)
+                    # regenerate_environment(0.2)  
+    
+                overall_f.write(str(i) + ',' + str(robot.getTime()) + ',' + str(total_found) + ',' + str(size)+ ',' + 'ga' + ',' + str(p) + '\n')    
+                overall_f.close()
+                overall_f = open('../../graph-generation/collection-data/overall-df-learning.csv', 'a')
+                print('items collected', total_found)
+                regenerate_environment(0.2)  
+                
+                ### reset individual robot controllers and respective supervisors 
+                
+                
+                # regenerate_blocks_power_law()
+                # regenerate_blocks_single_source()
+                # regenerate_blocks_dual_source()
+                total_found = 0 
                 reproduce_list = []
-                # generate_robot_central(size)
-                # regenerate_environment(0.2)  
-
-            overall_f.write(str(i) + ',' + str(robot.getTime()) + ',' + str(total_found) + ',' + str(size)+ ',' + 'ga' + ',' + str(20) + '\n')    
-            overall_f.close()
-            overall_f = open('../../graph-generation/collection-data/overall-df-learning.csv', 'a')
-            print('items collected', total_found)
-            regenerate_environment(0.2)  
-            
-            ### reset individual robot controllers and respective supervisors 
-            
-            
-            # regenerate_blocks_power_law()
-            # regenerate_blocks_single_source()
-            # regenerate_blocks_dual_source()
-            total_found = 0 
-            reproduce_list = []
-            found_list = []
-            reset_genotype()   
-            # msg = 'trial' + str(p)
-            msg = 'trial' + str(i)
-            emitter.send(msg.encode('utf-8')) 
-            prev_msg = msg
-            
-        for node in ind_sup: 
-            node.remove() 
-            
-        run_seconds(5)     
+                found_list = []
+                reset_genotype()   
+                # msg = 'trial' + str(p)
+                msg = 'trial' + str(i) + '-' + str(p)
+                emitter.send(msg.encode('utf-8')) 
+                prev_msg = msg
+                
+            for node in ind_sup: 
+                node.remove() 
+                
+            run_seconds(5)     
          
     return 
   

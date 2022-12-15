@@ -74,6 +74,7 @@ time_switch = 200
 sim_complete = False 
 obj_found_so_far = []
 curr_sim_size = 5
+potential_time = 90
 # follow_thres = 3
 
 next_child = ""
@@ -354,6 +355,7 @@ def interpret(timestep):
     global cleaning 
     global next_child
     global trial_num 
+    global potential_time
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -363,7 +365,6 @@ def interpret(timestep):
         if message[0:2] == "#" + str(given_id):
             message = message[2:].split("*")
             parse_genotype(message)
-            obj_found_so_far = []
             
             receiver.nextPacket()
             
@@ -373,7 +374,7 @@ def interpret(timestep):
             
             response = "k" + str(int(given_id)) + "-fitness" + str(fitness) + '-other' + str(best_prev_genotype) + '-overall' + str(calc_robot_fitness())
             print('calculating fitness', calc_robot_fitness())
-            strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(weights[0]) + ',' + str(weights[1]) + ',' + str(weights[2]) + ',' + str(weights[3]) + ','+ str(time_elapsed_since_block) + ',' + str(curr_sim_size) + ',' + str(calc_robot_fitness())+ ',' + str(curr_sim_size) + ',ga' + ',' + str(trial_num) + ',' + str(n_observations_block) + '\n')
+            strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(weights[0]) + ',' + str(weights[1]) + ',' + str(weights[2]) + ',' + str(weights[3]) + ','+ str(time_elapsed_since_block) + ',' + str(curr_sim_size) + ',' + str(calc_robot_fitness())+ ',' + str(curr_sim_size) + ',ga' + ',' + str(trial_num) + ',' + str(n_observations_block) + ',' + str(potential_time) + '\n')
             strategy_f.close()
             strategy_f = open("../../graph-generation/collision-data/ga-info-learning.csv", 'a')
 
@@ -400,6 +401,7 @@ def interpret(timestep):
         elif 'trial' in message: 
             # resets relevant statistics 
             trial_num = int(message[5:])
+            potential_time = int(message.split('-')[0])
             fitness = 0 # number of obstacles 
             best_prev_genotype = '!'
             best_prev_score = -1000
@@ -413,6 +415,7 @@ def interpret(timestep):
             
             time_elapsed = 0 # on a per sec basis 
             overall_fitness = 0
+            obj_found_so_far = []
             receiver.nextPacket()
             
         elif 'partner' in message: 

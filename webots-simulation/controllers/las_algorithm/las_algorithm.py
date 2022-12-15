@@ -213,10 +213,12 @@ def interpret():
         elif message == "trial_complete":
             # resets prob distrib 
             start = False 
+            obj_found_so_far = []
             receiver.nextPacket()            
             
         elif "size" in message: 
-            curr_sim_size = message[4:]
+            curr_sim_size = message[5:]
+            obj_found_so_far = []
             receiver.nextPacket()
             
         elif message[0] == "%" and message.split('-')[0][1:] == str(given_id):
