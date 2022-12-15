@@ -244,6 +244,7 @@ def interpret():
         elif message == "trial_complete":
             # resets prob distrib 
             start = False 
+            obj_found_so_far = []
             receiver.nextPacket()            
             
         elif message[0] == '*' and message.split('-')[1] != str(given_id): # updates prob distrib after encounter received 
@@ -387,12 +388,12 @@ while robot.step(timestep) != -1 and sim_complete != True:
                         # print('found object', firstObject)
                         id = str(firstObject.get_id())
                         
-                        if id not in obj_found_so_far:
+                        # if id not in obj_found_so_far:
                 
-                            id = "$" + str(given_id) + "-" + str(id) + "-" + str(current_tile) + "-" + str(iterations_passed) # indication that it is a object to be deleted 
-                            if id != prev_msg: 
-                                emitter.send(str(id).encode('utf-8'))
-                                prev_msg = i
+                        id = "$" + str(given_id) + "-" + str(id) + "-" + str(current_tile) + "-" + str(iterations_passed) # indication that it is a object to be deleted 
+                        if id != prev_msg: 
+                            emitter.send(str(id).encode('utf-8'))
+                            prev_msg = i
                             # holding_something = False      
                 else: 
                     t_block += 1

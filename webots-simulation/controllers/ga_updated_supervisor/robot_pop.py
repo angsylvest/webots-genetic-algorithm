@@ -39,9 +39,6 @@ def reproduce(r1, r2):
     # if pass a certain threshold, will increment/decrement randomly by 
     # smaller amount 
     
-    print('genotype 1', r1) 
-    print('genotype 2', r2) 
-    
     # if below, resample again 
     new_genotype = ''
     mom = r1.split("*")

@@ -326,11 +326,11 @@ while robot.step(timestep) != -1 and sim_complete != True:
                         firstObject = camera.getRecognitionObjects()[0]
                         id = str(firstObject.get_id())
                         
-                        if id not in obj_found_so_far:            
-                            id = "$" + str(given_id) + "-" + str(id) # indication that it is a object to be deleted 
-                            if prev_msg != id: 
-                                emitter.send(str(id).encode('utf-8'))
-                                prev_msg = id 
+                        # if id not in obj_found_so_far:            
+                        id = "$" + str(given_id) + "-" + str(id) # indication that it is a object to be deleted 
+                        if prev_msg != id: 
+                            emitter.send(str(id).encode('utf-8'))
+                            prev_msg = id 
                         
                 else: 
                     t_block += 1

@@ -357,7 +357,7 @@ def interpret(timestep):
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
-        print('incoming messages: ', given_id, message) 
+        # print('incoming messages: ', given_id, message) 
     
         # intertrial changes 
         if message[0:2] == "#" + str(given_id):
@@ -382,8 +382,12 @@ def interpret(timestep):
             best_prev_genotype = '!'
             best_prev_score = -1000
             
+           
+            if next_child != "":
+                parse_genotype(next_child)
+                print('current child', next_child)
+            
             emitter.send(response.encode('utf-8'))
-            parse_genotype(next_child)
             
             obj_found_so_far = []
             receiver.nextPacket()

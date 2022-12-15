@@ -8,26 +8,26 @@ Main supervisor base
 Optimization algorithm - Collaboration-oriented 
 Angel Sylvester 2022
 """
-columns = 'agent id' + ',time step' + ',fitness' + ',xpos'+ ',ypos' + ',num col' + ',genotype' 
+columns = 'agent id' + ',time step' + ',fitness' + ',xpos'+ ',ypos' + ',num col' + ',genotype' + ',potential time'
 
 # global collected_count 
 collected_count = []
 
 # collected counts csv generation 
 overall_f = open('../../graph-generation/collection-data/overall-df-learning.csv', 'w')
-overall_columns = 'trial' + ',time' + ',objects retrieved' + ',size' + ',type'
+overall_columns = 'trial' + ',time' + ',objects retrieved' + ',size' + ',type' + ',potential time'
 overall_f.write(str(overall_columns) + '\n')
 overall_f.close()
 overall_f = open('../../graph-generation/collection-data/overall-df-learning.csv', 'a')
 
 # for individual robot, statistics about strategy taken over time & individual collision info 
-strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'w')
-strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size' + ',fitness'+ ',size'+ ',type' + '\n')
+strategy_f = open("../../graph-generation/collision-data/ga-info-learning.csv", 'w')
+strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size' + ',fitness'+ ',size'+ ',type' + ',trial' + ',collected' + '\n')
 strategy_f.close()
 
 # genetic algorithm-specific parameters 
 num_generations = 10
-simulation_time = 30
+simulation_time = 20
 trials = 30
 robot_population_sizes = [5, 10, 15]
 gene_list = ['control speed 10', 'energy cost 5', 'food energy 30', 'observations thres 5']
@@ -42,6 +42,7 @@ total_found = 0
 block_list = []
 reproduce_list = []
 r_pos_to_generate = []
+b_pos_to_generate = []
 pairs = []
 fitness_scores = []
 overall_fitness_scores = []
@@ -60,7 +61,12 @@ fit_update = False
 start = 0 
 
 prev_msg = ""
-random.seed(10)
+random.seed(11)
+id_msg = ""
+
+emitter_individual = robot.getDevice("emitter_processor")
+emitter_individual.setChannel(5)
+
 
 # set up environments 
 def generate_robot_central(num_robots):
@@ -72,11 +78,13 @@ def generate_robot_central(num_robots):
     global pairs 
     global overall_fitness_scores
     global prev_msg 
+    global id_msg
     
     initialize_genotypes(num_robots)
     curr_msg = str("size-" + str(num_robots))
     if curr_msg != prev_msg: 
         emitter.send(str("size-" + str(num_robots)).encode('utf-8'))
+        emitter_individual.send(str("size-" + str(num_robots)).encode('utf-8'))
         prev_msg = curr_msg
     
     if len(population) != 0: 
@@ -89,12 +97,14 @@ def generate_robot_central(num_robots):
     overall_fitness_scores = []
     collected_count = []
     pairs = []
+    id_msg = "ids"
         
     for i in range(num_robots):
         rootNode = robot.getRoot()
         rootChildrenField = rootNode.getField('children')
-        rootChildrenField.importMFNode(-1, '../las_supervisor/robots/robot-ga-update.wbo') 
+        rootChildrenField.importMFNode(-1, '../las_supervisor/robots/robot-updated-learning.wbo') 
         rec_node = rootChildrenField.getMFNode(-1)
+        
     
         t_field = rec_node.getField('translation')
         pose = [round(random.uniform(0.1, -0.2),2), round(random.uniform(0.1, -0.2) ,2), 0.02]
@@ -110,6 +120,7 @@ def generate_robot_central(num_robots):
         pairs.append("!")
         collected_count.append(0)
         population.append(rec_node)
+        id_msg += " " + str(rec_node.getId()) 
         
     
 def regenerate_blocks_random(): 
@@ -145,6 +156,7 @@ def regenerate_blocks_random():
 def regenerate_blocks_single_source():
     global block_list
     global r_pos_to_generate
+    global b_pos_to_generate
     
     for obj in block_list: 
         obj.remove()
@@ -154,54 +166,81 @@ def regenerate_blocks_single_source():
     for i in range(len(r_pos_to_generate)):
         population[i].getField('translation').setSFVec3f(r_pos_to_generate[i])
         
-
-    for i in range(40): 
-        rootNode = robot.getRoot()
-        rootChildrenField = rootNode.getField('children')
-        rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
-        rec_node = rootChildrenField.getMFNode(-1)
-    
-        t_field = rec_node.getField('translation')
-        t_field.setSFVec3f([round(random.uniform(-0.5, -0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]) 
-        block_list.append(rec_node)
+    if len(b_pos_to_generate) == 0: 
+        for i in range(40): 
+            rootNode = robot.getRoot()
+            rootChildrenField = rootNode.getField('children')
+            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+            rec_node = rootChildrenField.getMFNode(-1)
+        
+            t_field = rec_node.getField('translation')
+            t_field.setSFVec3f([round(random.uniform(-0.5, -0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]) 
+            block_list.append(rec_node)
+            
+    else: 
+        # if already generated, use the previously saved positions 
+        for i in b_pos_to_generate: 
+            rootNode = robot.getRoot()
+            rootChildrenField = rootNode.getField('children')
+            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+            rec_node = rootChildrenField.getMFNode(-1)
+        
+            t_field = rec_node.getField('translation')
+            t_field.setSFVec3f(i) 
+            block_list.append(rec_node)
         
 def regenerate_blocks_dual_source():
     global block_list
     global r_pos_to_generate
+    global b_pos_to_generate
     
     for obj in block_list: 
         obj.remove()
     
     block_list = []
     
-    for i in range(len(r_pos_to_generate)):
-        population[i].getField('translation').setSFVec3f(r_pos_to_generate[i])
-        
-
-    for i in range(20): 
-        rootNode = robot.getRoot()
-        rootChildrenField = rootNode.getField('children')
-        rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
-        rec_node = rootChildrenField.getMFNode(-1)
+    if len(b_pos_to_generate) == 0: 
+        for i in range(len(r_pos_to_generate)):
+            population[i].getField('translation').setSFVec3f(r_pos_to_generate[i])
+            
     
-        t_field = rec_node.getField('translation')
-        t_field.setSFVec3f([round(random.uniform(-0.5, -0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]) 
-        block_list.append(rec_node)        
-      
-    for i in range(20): 
-        rootNode = robot.getRoot()
-        rootChildrenField = rootNode.getField('children')
-        rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
-        rec_node = rootChildrenField.getMFNode(-1)
+        for i in range(20): 
+            rootNode = robot.getRoot()
+            rootChildrenField = rootNode.getField('children')
+            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+            rec_node = rootChildrenField.getMFNode(-1)
         
-        t_field = rec_node.getField('translation')
-        t_field.setSFVec3f([round(random.uniform(0.5, 0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]) 
-        block_list.append(rec_node)    
-    
+            t_field = rec_node.getField('translation')
+            t_field.setSFVec3f([round(random.uniform(-0.5, -0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]) 
+            block_list.append(rec_node)        
+          
+        for i in range(20): 
+            rootNode = robot.getRoot()
+            rootChildrenField = rootNode.getField('children')
+            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+            rec_node = rootChildrenField.getMFNode(-1)
+            
+            t_field = rec_node.getField('translation')
+            t_field.setSFVec3f([round(random.uniform(0.5, 0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]) 
+            block_list.append(rec_node)    
+ 
+    else: 
+        # if already generated, use the previously saved positions 
+        for i in b_pos_to_generate: 
+            rootNode = robot.getRoot()
+            rootChildrenField = rootNode.getField('children')
+            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+            rec_node = rootChildrenField.getMFNode(-1)
+        
+            t_field = rec_node.getField('translation')
+            t_field.setSFVec3f(i) 
+            block_list.append(rec_node)
+               
 # creates random clustering         
 def regenerate_blocks_power_law():
     global block_list
     global r_pos_to_generate
+    global b_pos_to_generate
     
     for obj in block_list: 
         obj.remove()
@@ -214,48 +253,62 @@ def regenerate_blocks_power_law():
     x_min = 1
     alpha = 2.5
     centers = []
+    
+    if len(b_pos_to_generate) == 0: 
 
-    for i in range(40): # will be number of clusters instead of disparate blocks 
-        r = random.random()
-        x_smp = round(x_min * (1 - r) ** (-1 / (alpha - 1)))
-        print(x_smp)
-        if x_smp > 5: 
-            x_smp = 5 
+        for i in range(40): # will be number of clusters instead of disparate blocks 
+            r = random.random()
+            x_smp = round(x_min * (1 - r) ** (-1 / (alpha - 1)))
+            print(x_smp)
+            if x_smp > 5: 
+                x_smp = 5 
+                
+            center = random.choices([[round(random.uniform(0.9, -0.9),2), round(random.uniform(0.3, 0.85),2), 0.02], [round(random.uniform(0.9, -0.9),2), round(random.uniform(-1, 0.23),2), 0.02]])[0]
+            other = center
+            if len(centers) != 0:
+                while all(math.dist(center, other) < 0.2 and math.dist(center, (0,0,0.02)) < 0.8 for other in centers): # generate center until appropriate distance away 
+                     center = random.choices([[round(random.uniform(0.9, -0.9),2), round(random.uniform(0.3, 0.85),2), 0.02], [round(random.uniform(0.9, -0.9),2), round(random.uniform(-1, 0.23),2), 0.02]])[0]
+            else: 
+                while math.dist(center, (0,0,0.02)) < 0.8: # generate center until appropriate distance away 
+                     center = random.choices([[round(random.uniform(0.9, -0.9),2), round(random.uniform(0.3, 0.85),2), 0.02], [round(random.uniform(0.9, -0.9),2), round(random.uniform(-1, 0.23),2), 0.02]])[0]
+            centers.append(center)
+    
+            x, y, z = center[0],center[1], center[2]
+            x_smp -= 1
+            pot = []
+            new_c = [x+0.05, y, z]
+            new_c1 = [x, y + 0.05, z]
+            new_c2 = [x-0.05, y, z]
+            new_c3 = [x, y - 0.05, z]
+            pot.append(new_c)
+            pot.append(new_c1)
+            pot.append(new_c2)
+            pot.append(new_c3)
             
-        center = random.choices([[round(random.uniform(0.9, -0.9),2), round(random.uniform(0.3, 0.85),2), 0.02], [round(random.uniform(0.9, -0.9),2), round(random.uniform(-1, 0.23),2), 0.02]])[0]
-        other = center
-        if len(centers) != 0:
-            while all(math.dist(center, other) < 0.2 and math.dist(center, (0,0,0.02)) < 0.8 for other in centers): # generate center until appropriate distance away 
-                 center = random.choices([[round(random.uniform(0.9, -0.9),2), round(random.uniform(0.3, 0.85),2), 0.02], [round(random.uniform(0.9, -0.9),2), round(random.uniform(-1, 0.23),2), 0.02]])[0]
-        else: 
-            while math.dist(center, (0,0,0.02)) < 0.8: # generate center until appropriate distance away 
-                 center = random.choices([[round(random.uniform(0.9, -0.9),2), round(random.uniform(0.3, 0.85),2), 0.02], [round(random.uniform(0.9, -0.9),2), round(random.uniform(-1, 0.23),2), 0.02]])[0]
-        centers.append(center)
-
-        x, y, z = center[0],center[1], center[2]
-        x_smp -= 1
-        pot = []
-        new_c = [x+0.05, y, z]
-        new_c1 = [x, y + 0.05, z]
-        new_c2 = [x-0.05, y, z]
-        new_c3 = [x, y - 0.05, z]
-        pot.append(new_c)
-        pot.append(new_c1)
-        pot.append(new_c2)
-        pot.append(new_c3)
-        
-        for i in range(x_smp): # will be clumped in same location
+            for i in range(x_smp): # will be clumped in same location
+                rootNode = robot.getRoot()
+                rootChildrenField = rootNode.getField('children')
+                rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+                rec_node = rootChildrenField.getMFNode(-1)
+            
+                t_field = rec_node.getField('translation')
+                
+                # want to have additional parts centralized (at most 4 others) 
+    
+                
+                t_field.setSFVec3f(pot[i]) 
+                block_list.append(rec_node)
+            
+    else: 
+        # if already generated, use the previously saved positions 
+        for i in b_pos_to_generate: 
             rootNode = robot.getRoot()
             rootChildrenField = rootNode.getField('children')
             rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
             rec_node = rootChildrenField.getMFNode(-1)
         
             t_field = rec_node.getField('translation')
-            
-            # want to have additional parts centralized (at most 4 others) 
-
-            
-            t_field.setSFVec3f(pot[i]) 
+            t_field.setSFVec3f(i) 
             block_list.append(rec_node)
             
     for rec_node in block_list: # set to be upright
@@ -267,7 +320,9 @@ def regenerate_environment(block_dist):
     # creates a equally distributed set of blocks 
     # avoiding areas where a robot is already present 
     global block_list
+    global population 
     global r_pos_to_generate
+    global b_pos_to_generate
     
     for obj in block_list: 
         obj.remove()
@@ -276,27 +331,43 @@ def regenerate_environment(block_dist):
     
     for i in range(len(r_pos_to_generate)):
         population[i].getField('translation').setSFVec3f(r_pos_to_generate[i])
-    
+        
     # generates block on opposite sides of arena (randomly generated) 
-    for i in range(10): 
-        rootNode = robot.getRoot()
-        rootChildrenField = rootNode.getField('children')
-        rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
-        rec_node = rootChildrenField.getMFNode(-1)
-    
-        t_field = rec_node.getField('translation')
-        t_field.setSFVec3f([round(random.uniform(0.9, -0.9),2), round(random.uniform(0.3, 0.85),2), 0.02]) 
-        block_list.append(rec_node)
-    
-    for i in range(10): 
-        rootNode = robot.getRoot()
-        rootChildrenField = rootNode.getField('children')
-        rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
-        rec_node = rootChildrenField.getMFNode(-1)
-    
-        t_field = rec_node.getField('translation')
-        t_field.setSFVec3f([round(random.uniform(0.9, -0.9),2), round(random.uniform(-1, 0.23),2), 0.02]) 
-        block_list.append(rec_node)
+    if len(b_pos_to_generate) == 0: 
+        for i in range(10): 
+            rootNode = robot.getRoot()
+            rootChildrenField = rootNode.getField('children')
+            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+            rec_node = rootChildrenField.getMFNode(-1)
+        
+            t_field = rec_node.getField('translation')
+            pose = [round(random.uniform(0.9, -0.9),2), round(random.uniform(0.3, 0.85),2), 0.02]
+            t_field.setSFVec3f(pose) 
+            b_pos_to_generate.append(pose)
+            block_list.append(rec_node)
+        
+        for i in range(10): 
+            rootNode = robot.getRoot()
+            rootChildrenField = rootNode.getField('children')
+            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+            rec_node = rootChildrenField.getMFNode(-1)
+        
+            t_field = rec_node.getField('translation')
+            pose = [round(random.uniform(0.9, -0.9),2), round(random.uniform(-1, 0.23),2), 0.02]
+            t_field.setSFVec3f(pose) 
+            b_pos_to_generate.append(pose)
+            block_list.append(rec_node)
+    else: 
+        # if already generated, use the previously saved positions 
+        for i in b_pos_to_generate: 
+            rootNode = robot.getRoot()
+            rootChildrenField = rootNode.getField('children')
+            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+            rec_node = rootChildrenField.getMFNode(-1)
+        
+            t_field = rec_node.getField('translation')
+            t_field.setSFVec3f(i) 
+            block_list.append(rec_node)
         
 
 def initialize_genotypes(size):
@@ -311,47 +382,6 @@ def initialize_genotypes(size):
         new_geno = create_individal_genotype(gene_list)
         initial_genotypes.append(new_geno)
         pop_genotypes.append(new_geno)
-     
-    
-def find_nearest_robot_genotype(r_index):
-    global population 
-    global reproduce_list 
-    global collected_count 
-    global pairs 
-    global overall_fitness_scores
-    global prev_msg 
-
-    closest_neigh = " "
-    curr_robot = population[r_index]
-    curr_dist = 1000 # arbitrary value 
-    curr_fitness = fitness_scores[r_index]
-    # print('overall fitness list', overall_fitness_scores)
-    curr_overall_fitness = overall_fitness_scores[r_index]
-    other_fitness = 0
-    
-    curr_pos = [curr_robot.getPosition()[0], curr_robot.getPosition()[1]]
-    other_index = r_index
-    
-    for i in range(len(population)):
-        if (i != r_index): 
-            other_pos = [population[i].getPosition()[0], population[i].getPosition()[0]]
-            dis = math.dist(curr_pos, other_pos)
-            if closest_neigh == " ":
-                closest_neigh = str(population[i].getId())
-                curr_dist = dis
-                other_fitness = overall_fitness_scores[i]
-                other_index = i
-            elif dis < curr_dist: 
-                closest_neigh = str(population[i].getId())
-                curr_dist = dis 
-                other_fitness = overall_fitness_scores[i]
-                other_index = i
-    # use emitter to send genotype to corresponding robot if fitness is better and if nearby 
-    if type(curr_fitness) == 'int' and type (other_fitness) == 'int' and (other_fitness > curr_overall_fitness) : 
-        curr_msg = 'potential partner-' + str(pop_genotypes[other_index]) + '-' + str(other_fitness) + '-' + str(collected_count[other_index])
-        if curr_msg != prev_msg: 
-            emitter.send('potential partner-' + str(pop_genotypes[other_index]) + '-' + str(other_fitness) + '-' + str(collected_count[other_index]))
-            pairs.append(r_index) # this robot now has a potential partner 
                 
     
 def save_progress():
@@ -376,6 +406,7 @@ def message_listener(time_step):
 
     if receiver.getQueueLength()>0 and (robot.getTime() - start < simulation_time):
         message = receiver.getData().decode('utf-8')
+        # print('supervisor msgs --', message) 
         
         if message[0] == "$": # handles deletion of objects when grabbed
             obj_node = robot.getFromId(int(message.split("-")[1]))
@@ -414,17 +445,7 @@ def message_listener(time_step):
             if partner != 'none':
                 new_geno = reproduce(pop_genotypes[index], pop_genotypes[partner])
                 pop_genotypes[index] = new_geno
-            
             eval_fitness(time_step)
-            
-            receiver.nextPacket()
-            
-        elif 'encounter' in message: 
-            print('robot found -- checking genotype') 
-            robo_index = int(message.split('-')[0])
-            # reproduce_list.append(robo_index) 
-            new_geno = find_nearest_robot_genotype(robo_index)
-            
             receiver.nextPacket()
             
         else: 
@@ -433,14 +454,11 @@ def message_listener(time_step):
     elif (robot.getTime() - start > simulation_time and prev_msg != 'clean finish'):
     # if over time would want to reset 
         msg = 'cleaning'
-        
         if prev_msg != msg: 
             emitter.send('cleaning'.encode('utf-8'))
             prev_msg = msg
-        
         while receiver.getQueueLength()>0: 
             receiver.nextPacket()
-        
         msg = 'clean finish'
         if prev_msg != msg: 
             emitter.send('clean finish'.encode('utf-8'))
@@ -466,20 +484,12 @@ def run_seconds(t,waiting=False):
         # run robot simulation for 30 seconds (if t = 30)
         increments = TIME_STEP / 1000
         
-        # if waiting:
-            # if not updated:
-                # message_listener(robot.getTime())
-                # eval_fitness(robot.getTime())
-                # continue 
-            # else: 
-                # break 
-        
         if robot.getTime() - start > new_t: 
             msg = 'return_fitness'
-            if prev_msg != msg: 
-                message_listener(robot.getTime()) # will clear out msg until next gen 
-                emitter.send('return_fitness'.encode('utf-8'))
-                prev_msg = msg 
+            # if prev_msg != msg: 
+            message_listener(robot.getTime()) # will clear out msg until next gen 
+            emitter.send('return_fitness'.encode('utf-8'))
+            prev_msg = msg 
             print('requesting fitness')
             break 
 
@@ -489,12 +499,12 @@ def run_seconds(t,waiting=False):
                          
             if total_found == len(block_list):
                 msg = 'return_fitness'
-                if prev_msg != msg: 
-                    emitter.send('return_fitness'.encode('utf-8'))
-                    prev_msg = msg 
-                    print('requesting fitness')
-                    print('collected all objects')
-                    break      
+                # if prev_msg != msg: 
+                emitter.send('return_fitness'.encode('utf-8'))
+                prev_msg = msg 
+                print('requesting fitness')
+                print('collected all objects')
+                break      
     return 
    
 # will use selected partners from each robot and reproduce with that corresponding index, and update population at the end of gen          
@@ -510,19 +520,22 @@ def update_geno_list(genotype_list):
     
     # only makes executive changes if it's better off to just re-randomize population   
     print('getting overall fitness scores --', overall_fitness_scores)
-    if max(overall_fitness_scores) <= 0:
-        cp_genotypes = pop_genotypes.copy()
-        for i in range(len(population)):
-            if i not in pairs: 
-                g = create_individal_genotype(gene_list)
-                new_offspring = reproduce(cp_genotypes[i], g)
-                # print('updated genolist --', g)
-                pop_genotypes[i] = new_offspring
-                     
+    
+    # if max(overall_fitness_scores) <= 0:
+    cp_genotypes = pop_genotypes.copy()
+    for i in range(len(population)):
+        if i not in pairs: 
+            g = create_individal_genotype(gene_list)
+            new_offspring = reproduce(cp_genotypes[i], cp_genotypes[i])
+            print('updated genolist --', g)
+            pop_genotypes[i] = new_offspring
+                 
     # update parameters to hopefully improve performance
     # print('curr population --', population, len(population))
     
     # fitness_scores = []
+    fs_msg = 'fitness-scores ' + " ".join(fitness_scores)
+    emitter_individual.send(fs_msg.encode('utf-8'))
     fitness_scores = ["!" for i in range(len(population))]
     overall_fitness_scores = ["!" for i in range(len(population))]
     pairs = ["!" for i in range(len(population))]
@@ -544,6 +557,7 @@ def eval_fitness(time_step):
         fit_update = True 
         update_geno_list(pop_genotypes)
 
+# TODO: send genotype to each individual 
 def reset_genotype():
     index = 0 
     global population 
@@ -576,54 +590,55 @@ def run_optimization():
     global population 
     global prev_msg 
     
-    # initialize genotypes 
-    # generate_robot_central(robot_population_sizes[0])
-    # reset_genotype()
-    # regenerate_environment(0.2)
-    
-    # fixes robots falling over
-    # for rec_node in population: 
-        # r_field = rec_node.getField('rotation')
-        # if r_field.getSFRotation() != [0, 0, -1]:
-            # r_field.setSFRotation([0, 0, -1])
-            
-    # run_seconds(simulation_time) # runs generation for that given amount of time  
-    # print('new generation beginning')
-    # run_seconds(5, True) # is waiting until got genotypes
-    
     for size in robot_population_sizes:
         curr_size = size  
         initialize_genotypes(size)
         r_pos_to_generate = []
         generate_robot_central(size)
         regenerate_environment(0.2)
+        ind_sup = []
+        
+        for i in range(len(population)):
+            ### generate supervisor for parallelization ####
+            rootNode = robot.getRoot()
+            rootChildrenField = rootNode.getField('children')
+            rootChildrenField.importMFNode(-1, '../las_supervisor/robots/ga-individual.wbo')
+            individual = rootChildrenField.getMFNode(-1)
+            ind_sup.append(individual)
+          
+            individual.getField('translation').setSFVec3f([0, 2, 0])
+        emitter_individual.send(id_msg.encode('utf-8'))
+            
         # regenerate_blocks_power_law()
         # regenerate_blocks_single_source()
         # regenerate_blocks_dual_source()
+  
+        # potential_times = [i for i in range(20, 100, 10)]
+        total_elapsed = 600
         
-        for rec_node in population: 
-            r_field = rec_node.getField('rotation')
-            if r_field.getSFRotation() != [0, 0, -1]:
-                r_field.setSFRotation([0, 0, -1])
+        # for p in potential_times: 
+            
+        num_generations = total_elapsed // simulation_time
         
         for i in range(trials): 
             print('beginning new trial', i)
+            
+            msg = 'generation-complete '+ ' '.join(pop_genotypes)
+            emitter_individual.send(str(msg).encode('utf-8'))
+            
+            for rec_node in population: 
+                r_field = rec_node.getField('rotation')
+                if r_field.getSFRotation() != [0, 0, -1]:
+                    r_field.setSFRotation([0, 0, -1])
+                
+                
             for gen in range(num_generations): 
                 updated = False 
-                index = 0 
+                # index = 0 
                 
                 print('number in population', len(population))
                 print('number of genotypes',  len(pop_genotypes), 'for size: ', size)
-                
-                # reset_genotype()   
 
-                for i in range(len(population)):
-                    msg = str("#"+ str(index) + str(pop_genotypes[index]))
-                    if msg != prev_msg: 
-                        emitter.send(str("#"+ str(index) + str(pop_genotypes[index])).encode('utf-8'))
-                        prev_msg = msg 
-                        index +=1 
-                    
                 run_seconds(simulation_time) 
                 
                 # run_seconds(5, True) # is waiting until got genotypes
@@ -632,27 +647,40 @@ def run_optimization():
                     r_field = rec_node.getField('rotation')
                     if r_field.getSFRotation() != [0, 0, -1]:
                         r_field.setSFRotation([0, 0, -1])
-                
+                       
+                                          
                 print('found genotypes')
                 print('new generation starting -')
                 reproduce_list = []
                 # generate_robot_central(size)
                 # regenerate_environment(0.2)  
 
-            overall_f.write(str(i) + ',' + str(robot.getTime()) + ',' + str(total_found) + ',' + str(size)+ ',' + 'ga' + '\n')    
+            overall_f.write(str(i) + ',' + str(robot.getTime()) + ',' + str(total_found) + ',' + str(size)+ ',' + 'ga' + ',' + str(20) + '\n')    
             overall_f.close()
             overall_f = open('../../graph-generation/collection-data/overall-df-learning.csv', 'a')
             print('items collected', total_found)
             regenerate_environment(0.2)  
+            
+            ### reset individual robot controllers and respective supervisors 
+            
+            
             # regenerate_blocks_power_law()
-            # regenerate_blocks_single_source()1
+            # regenerate_blocks_single_source()
             # regenerate_blocks_dual_source()
             total_found = 0 
             reproduce_list = []
             found_list = []
             reset_genotype()   
-            emitter.send('trial'.encode('utf-8')) 
-            prev_msg = 'trial'          
+            # msg = 'trial' + str(p)
+            msg = 'trial' + str(i)
+            emitter.send(msg.encode('utf-8')) 
+            prev_msg = msg
+            
+        for node in ind_sup: 
+            node.remove() 
+            
+        run_seconds(5)     
+         
     return 
   
 def main(): 
@@ -663,3 +691,4 @@ main()
                     
             
             
+
