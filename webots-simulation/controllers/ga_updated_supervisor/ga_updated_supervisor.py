@@ -28,8 +28,8 @@ strategy_f.close()
 # genetic algorithm-specific parameters 
 num_generations = 10
 simulation_time = 20
-trials = 30
-robot_population_sizes = [5, 10, 15]
+trials = 12 # 30
+robot_population_sizes = [10, 15]
 gene_list = ['control speed 10', 'energy cost 5', 'food energy 30', 'observations thres 5']
 curr_size = robot_population_sizes[0]
 

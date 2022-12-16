@@ -39,7 +39,7 @@ num_generations = 10
 simulation_time = 60
 trials = 50
 curr_size = 5
-robot_population_sizes = [5, 10, 15]
+robot_population_sizes = [15] # [5, 10, 15]
 
 
 # sim statistics 
