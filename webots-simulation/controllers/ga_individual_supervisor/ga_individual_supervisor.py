@@ -108,7 +108,7 @@ def message_listener(time_step):
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
-        # print('individual messages', message)
+        # print('individual messages', message, given_id)
             
         if 'fitness-scores' in message:
             fs = message.split(" ")[1:]
