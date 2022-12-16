@@ -613,7 +613,7 @@ def run_optimization():
         # regenerate_blocks_single_source()
         # regenerate_blocks_dual_source()
   
-        potential_times = [i for i in range(90, 150, 10)]
+        potential_times = [i for i in range(20, 150, 10)]
         total_elapsed = 600
         
         for p in potential_times: 
