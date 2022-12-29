@@ -607,6 +607,7 @@ def run_optimization():
             ind_sup.append(individual)
           
             individual.getField('translation').setSFVec3f([0, 2, 0])
+            
         emitter_individual.send(id_msg.encode('utf-8'))
             
         # regenerate_blocks_power_law()

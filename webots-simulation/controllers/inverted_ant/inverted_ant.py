@@ -202,6 +202,7 @@ def interpret():
     global sim_complete
     global holding_something 
     global cleaning 
+    global start
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')

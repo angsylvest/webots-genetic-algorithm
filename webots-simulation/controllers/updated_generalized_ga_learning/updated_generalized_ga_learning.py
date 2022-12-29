@@ -400,8 +400,8 @@ def interpret(timestep):
             
         elif 'trial' in message: 
             # resets relevant statistics 
-            trial_num = int(message[5:])
-            potential_time = int(message.split('-')[0])
+            trial_num = int(message.split('-')[0][5:])
+            potential_time = int(message.split('-')[1])
             fitness = 0 # number of obstacles 
             best_prev_genotype = '!'
             best_prev_score = -1000

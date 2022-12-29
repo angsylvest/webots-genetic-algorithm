@@ -186,6 +186,7 @@ def interpret():
     global obj_found_so_far
     global sim_complete
     global cleaning 
+    global start
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')

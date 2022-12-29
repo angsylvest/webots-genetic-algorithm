@@ -613,10 +613,12 @@ def run_optimization():
         # regenerate_blocks_single_source()
         # regenerate_blocks_dual_source()
   
-        potential_times = [i for i in range(20, 150, 10)]
+        potential_times = [i for i in range(30, 150, 10)]
         total_elapsed = 600
         
         for p in potential_times: 
+            
+            simulation_time = p 
             
             num_generations = total_elapsed // simulation_time
             
@@ -639,7 +641,7 @@ def run_optimization():
                     print('number in population', len(population))
                     print('number of genotypes',  len(pop_genotypes), 'for size: ', size)
     
-                    run_seconds(simulation_time) 
+                    run_seconds(p) 
                     
                     # run_seconds(5, True) # is waiting until got genotypes
                     
