@@ -22,16 +22,18 @@ overall_f = open('../../graph-generation/collection-data/overall-df.csv', 'a')
 
 # for individual robot, statistics about strategy taken over time & individual collision info 
 strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'w')
-strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size' + ',fitness'+ ',size'+ ',type' + ',trial' + ',collected' + '\n')
+strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size' + ',fitness'+ ',size'+ ',type' + ',trial' + ',collected' + ',genotype' + '\n')
 strategy_f.close()
 
 # genetic algorithm-specific parameters 
 num_generations = 10
-simulation_time = 20
-trials = 12 # 30
-robot_population_sizes = [10, 15]
+simulation_time = 50
+trials = 100
+curr_trial = 0 
+robot_population_sizes = [5, 10, 15]
 gene_list = ['control speed 10', 'energy cost 5', 'food energy 30', 'observations thres 5']
 curr_size = robot_population_sizes[0]
+
 
 # statistics collected 
 population = []
@@ -43,6 +45,7 @@ block_list = []
 reproduce_list = []
 r_pos_to_generate = []
 b_pos_to_generate = []
+b_pos_to_generate_alternative = []
 pairs = []
 fitness_scores = []
 overall_fitness_scores = []
@@ -66,6 +69,7 @@ id_msg = ""
 
 emitter_individual = robot.getDevice("emitter_processor")
 emitter_individual.setChannel(5)
+assessing = True 
 
 
 # set up environments 
@@ -122,7 +126,51 @@ def generate_robot_central(num_robots):
         population.append(rec_node)
         id_msg += " " + str(rec_node.getId()) 
         
+# initially reads from file for re-producibility, and then continues to re-read (will be second)        
+def regenerate_environment_alternate(block_dist): # will stay constant based off seed 
+    # creates a equally distributed set of blocks 
+    # avoiding areas where a robot is already present 
+    global block_list
+    global population 
+    global r_pos_to_generate
+    global b_pos_to_generate_alternative
     
+    for obj in block_list: 
+        obj.remove()
+    
+    block_list = []
+    
+    for i in range(len(r_pos_to_generate)):
+        population[i].getField('translation').setSFVec3f(r_pos_to_generate[i])
+        
+    # generates block on opposite sides of arena (randomly generated) 
+    if len(b_pos_to_generate_alternative) == 0: 
+        seed_file = open('../../graph-generation/seed-15.csv', 'r') 
+        list = seed_file.readlines()
+        for pos in list: 
+            res = [float(i) for i in pos.strip('][\n').split(', ')]
+            b_pos_to_generate_alternative.append(res)
+            rootNode = robot.getRoot()
+            rootChildrenField = rootNode.getField('children')
+            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+            rec_node = rootChildrenField.getMFNode(-1)
+        
+            t_field = rec_node.getField('translation')
+            t_field.setSFVec3f(res) 
+            block_list.append(rec_node)   
+        
+    else: 
+        # if already generated, use the previously saved positions 
+        for i in b_pos_to_generate_alternative: 
+            rootNode = robot.getRoot()
+            rootChildrenField = rootNode.getField('children')
+            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+            rec_node = rootChildrenField.getMFNode(-1)
+        
+            t_field = rec_node.getField('translation')
+            t_field.setSFVec3f(i) 
+            block_list.append(rec_node)
+               
 def regenerate_blocks_random(): 
 
     global block_list
@@ -294,8 +342,6 @@ def regenerate_blocks_power_law():
                 t_field = rec_node.getField('translation')
                 
                 # want to have additional parts centralized (at most 4 others) 
-    
-                
                 t_field.setSFVec3f(pot[i]) 
                 block_list.append(rec_node)
             
@@ -309,6 +355,11 @@ def regenerate_blocks_power_law():
         
             t_field = rec_node.getField('translation')
             t_field.setSFVec3f(i) 
+            
+            r_field = rec_node.getField('rotation')
+            if r_field.getSFRotation() != [0, 0, -1]:
+                r_field.setSFRotation([0, 0, -1])
+                
             block_list.append(rec_node)
             
     for rec_node in block_list: # set to be upright
@@ -589,14 +640,25 @@ def run_optimization():
     global curr_size
     global population 
     global prev_msg 
+    global curr_trial 
     
     for size in robot_population_sizes:
         curr_size = size  
         initialize_genotypes(size)
         r_pos_to_generate = []
         generate_robot_central(size)
-        regenerate_environment(0.2)
+        
+        curr_trial = 0
+        if assessing and curr_trial % 2 == 0:
+            # regenerate_environment(0.2)
+            regenerate_environment_alternate(0.2)
+        elif assessing and curr_trial % 2 != 0: 
+            regenerate_environment_alternate(0.2)    
+        else: 
+            regenerate_environment(0.2)
+            
         ind_sup = []
+        
         
         for i in range(len(population)):
             ### generate supervisor for parallelization ####
@@ -615,7 +677,7 @@ def run_optimization():
         # regenerate_blocks_dual_source()
   
         # potential_times = [i for i in range(20, 100, 10)]
-        total_elapsed = 20
+        total_elapsed = 600
         
         # for p in potential_times: 
             
@@ -660,7 +722,14 @@ def run_optimization():
             overall_f.close()
             overall_f = open('../../graph-generation/collection-data/overall-df.csv', 'a')
             print('items collected', total_found)
-            regenerate_environment(0.2)  
+            curr_trial = i + 1
+            if assessing and curr_trial % 2 == 0:
+                # regenerate_environment(0.2)
+                regenerate_environment_alternate(0.2)
+            elif assessing and curr_trial % 2 != 0: 
+                regenerate_environment_alternate(0.2)    
+            else: 
+                regenerate_environment(0.2)
             
             ### reset individual robot controllers and respective supervisors 
             

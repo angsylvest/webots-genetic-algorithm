@@ -354,6 +354,7 @@ def interpret(timestep):
     global cleaning 
     global next_child
     global trial_num 
+    global curr_robot_genotype
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -373,7 +374,7 @@ def interpret(timestep):
             
             response = "k" + str(int(given_id)) + "-fitness" + str(fitness) + '-other' + str(best_prev_genotype) + '-overall' + str(calc_robot_fitness())
             print('calculating fitness', calc_robot_fitness())
-            strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(weights[0]) + ',' + str(weights[1]) + ',' + str(weights[2]) + ',' + str(weights[3]) + ','+ str(time_elapsed_since_block) + ',' + str(curr_sim_size) + ',' + str(calc_robot_fitness())+ ',' + str(curr_sim_size) + ',ga' + ',' + str(trial_num) + ',' + str(n_observations_block) + '\n')
+            strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(weights[0]) + ',' + str(weights[1]) + ',' + str(weights[2]) + ',' + str(weights[3]) + ','+ str(time_elapsed_since_block) + ',' + str(curr_sim_size) + ',' + str(calc_robot_fitness())+ ',' + str(curr_sim_size) + ',ga' + ',' + str(trial_num) + ',' + str(n_observations_block) + ',' + str(curr_robot_genotype) + '\n')
             strategy_f.close()
             strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'a')
 

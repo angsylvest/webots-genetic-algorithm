@@ -26,9 +26,9 @@ strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + 
 strategy_f.close()
 
 # genetic algorithm-specific parameters 
-num_generations = 10
+num_generations = 1 # 10
 simulation_time = 20
-trials = 30
+trials = 1 # 30
 robot_population_sizes = [5, 10, 15]
 gene_list = ['control speed 10', 'energy cost 5', 'food energy 30', 'observations thres 5']
 curr_size = robot_population_sizes[0]
@@ -239,6 +239,7 @@ def regenerate_blocks_dual_source():
 # creates random clustering         
 def regenerate_blocks_power_law():
     global block_list
+    global population 
     global r_pos_to_generate
     global b_pos_to_generate
     
@@ -256,7 +257,7 @@ def regenerate_blocks_power_law():
     
     if len(b_pos_to_generate) == 0: 
 
-        for i in range(40): # will be number of clusters instead of disparate blocks 
+        for i in range(40): # 40 # will be number of clusters instead of disparate blocks 
             r = random.random()
             x_smp = round(x_min * (1 - r) ** (-1 / (alpha - 1)))
             print(x_smp)
@@ -296,7 +297,8 @@ def regenerate_blocks_power_law():
                 # want to have additional parts centralized (at most 4 others) 
     
                 
-                t_field.setSFVec3f(pot[i]) 
+                t_field.setSFVec3f(pot[i])
+                b_pos_to_generate.append(pot[i]) 
                 block_list.append(rec_node)
             
     else: 
@@ -311,6 +313,11 @@ def regenerate_blocks_power_law():
             t_field.setSFVec3f(i) 
             block_list.append(rec_node)
             
+            r_field = rec_node.getField('rotation')
+            if r_field.getSFRotation() != [0, 0, -1]:
+                r_field.setSFRotation([0, 0, -1])
+                   
+            
     for rec_node in block_list: # set to be upright
         r_field = rec_node.getField('rotation')
         if r_field.getSFRotation() != [0, 0, -1]:
@@ -320,7 +327,7 @@ def regenerate_environment(block_dist):
     # creates a equally distributed set of blocks 
     # avoiding areas where a robot is already present 
     global block_list
-    global population 
+    # global population 
     global r_pos_to_generate
     global b_pos_to_generate
     
@@ -595,7 +602,8 @@ def run_optimization():
         initialize_genotypes(size)
         r_pos_to_generate = []
         generate_robot_central(size)
-        regenerate_environment(0.2)
+        # regenerate_environment(0.2)
+        regenerate_blocks_power_law()
         ind_sup = []
         
         for i in range(len(population)):
@@ -613,12 +621,13 @@ def run_optimization():
         # regenerate_blocks_single_source()
         # regenerate_blocks_dual_source()
   
-        potential_times = [i for i in range(30, 150, 10)]
+        potential_times = [i for i in range(20, 150, 10)]
         total_elapsed = 600
         
         for p in potential_times: 
             
             simulation_time = p 
+            total_elapsed = p
             
             num_generations = total_elapsed // simulation_time
             
@@ -661,12 +670,12 @@ def run_optimization():
                 overall_f.close()
                 overall_f = open('../../graph-generation/collection-data/overall-df-learning.csv', 'a')
                 print('items collected', total_found)
-                regenerate_environment(0.2)  
+                # regenerate_environment(0.2)  
                 
                 ### reset individual robot controllers and respective supervisors 
                 
                 
-                # regenerate_blocks_power_law()
+                regenerate_blocks_power_law()
                 # regenerate_blocks_single_source()
                 # regenerate_blocks_dual_source()
                 total_found = 0 
@@ -678,10 +687,12 @@ def run_optimization():
                 emitter.send(msg.encode('utf-8')) 
                 prev_msg = msg
                 
-            for node in ind_sup: 
-                node.remove() 
+            run_seconds(5)   
                 
-            run_seconds(5)     
+        for node in ind_sup: 
+            node.remove() 
+                
+   
          
     return 
   

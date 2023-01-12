@@ -74,21 +74,10 @@ CardboardBox {
   name "cardboard box(1)"
   size 0.1 0.1 0.45
 }
-PipeSection {
-  translation 0.51 0.18 0.25
-}
-PipeSection {
-  translation -0.75 -0.56 0.1
-  name "pipe section(1)"
-  height 0.2
-  radius 0.15
-}
-
 DEF supervisor TinkerbotsBase {
   translation -0.41 0 0
   controller "ga_update_learner"
   supervisor TRUE
-  synchronization TRUE
   extensionSlot [
     Receiver {
       channel 2
@@ -96,10 +85,9 @@ DEF supervisor TinkerbotsBase {
     Emitter {
       channel 1
     }
-   Emitter {
-   name "emitter_processor"
-   channel 5
+    Emitter {
+      name "emitter_processor"
+      channel 5
     }
-
   ]
 }

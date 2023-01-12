@@ -36,9 +36,10 @@ arena_area = robot.getFromDef("arena")
 # set up timing so consistent with ga 
 num_generations = 10
 simulation_time = 60
-trials = 28 # 50
+trials = 100
 curr_size = 5
-robot_population_sizes = [10, 15] # [5, 10, 15]
+robot_population_sizes = [5, 10, 15] # [5, 10, 15]
+curr_trial = 0 
 
 # sim statistics 
 total_collected = 0 
@@ -52,11 +53,13 @@ block_list = []
 collected_count = []
 r_pos_to_generate = []
 b_pos_to_generate = []
+b_pos_to_generate_alternative = []
 population = []
 fitness_scores = []
 start = 0
 prev_msg = "" 
-random.seed(11)
+random.seed(11) # was 11 (changed to 15 to get new configuration) 
+assessing = True 
 
 def generate_robot_central(num_robots):
     global fitness_scores 
@@ -109,6 +112,7 @@ def regenerate_environment(block_dist): # will stay constant based off seed
     for i in range(len(r_pos_to_generate)):
         population[i].getField('translation').setSFVec3f(r_pos_to_generate[i])
         
+        
     # generates block on opposite sides of arena (randomly generated) 
     if len(b_pos_to_generate) == 0: 
         for i in range(10): 
@@ -134,9 +138,56 @@ def regenerate_environment(block_dist): # will stay constant based off seed
             t_field.setSFVec3f(pose) 
             b_pos_to_generate.append(pose)
             block_list.append(rec_node)
+            
+    
     else: 
         # if already generated, use the previously saved positions 
         for i in b_pos_to_generate: 
+            rootNode = robot.getRoot()
+            rootChildrenField = rootNode.getField('children')
+            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+            rec_node = rootChildrenField.getMFNode(-1)
+        
+            t_field = rec_node.getField('translation')
+            t_field.setSFVec3f(i) 
+            block_list.append(rec_node)
+     
+# initially reads from file for re-producibility, and then continues to re-read (will be second)        
+def regenerate_environment_alternate(block_dist): # will stay constant based off seed 
+    # creates a equally distributed set of blocks 
+    # avoiding areas where a robot is already present 
+    global block_list
+    global population 
+    global r_pos_to_generate
+    global b_pos_to_generate_alternative
+    
+    for obj in block_list: 
+        obj.remove()
+    
+    block_list = []
+    
+    for i in range(len(r_pos_to_generate)):
+        population[i].getField('translation').setSFVec3f(r_pos_to_generate[i])
+        
+    # generates block on opposite sides of arena (randomly generated) 
+    if len(b_pos_to_generate_alternative) == 0: 
+        seed_file = open('../../graph-generation/seed-15.csv', 'r') 
+        list = seed_file.readlines()
+        for pos in list: 
+            res = [float(i) for i in pos.strip('][\n').split(', ')]
+            b_pos_to_generate_alternative.append(res)
+            rootNode = robot.getRoot()
+            rootChildrenField = rootNode.getField('children')
+            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+            rec_node = rootChildrenField.getMFNode(-1)
+        
+            t_field = rec_node.getField('translation')
+            t_field.setSFVec3f(res) 
+            block_list.append(rec_node)   
+        
+    else: 
+        # if already generated, use the previously saved positions 
+        for i in b_pos_to_generate_alternative: 
             rootNode = robot.getRoot()
             rootChildrenField = rootNode.getField('children')
             rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
@@ -287,8 +338,7 @@ def regenerate_blocks_power_law():
                 t_field = rec_node.getField('translation')
                 
                 # want to have additional parts centralized (at most 4 others) 
-    
-                
+                b_pos_to_generate.append(pot[i])
                 t_field.setSFVec3f(pot[i]) 
                 block_list.append(rec_node)
             
@@ -480,6 +530,8 @@ def run_optimization():
     global overall_columns
     global curr_size 
     global population 
+    global curr_trial 
+    global assessing 
 
     # generate_robot_central(5)
     # generate_robot_central(robot_population_sizes[0])
@@ -492,7 +544,15 @@ def run_optimization():
         
         r_pos_to_generate = []
         generate_robot_central(size)
-        regenerate_environment(0.2)
+        curr_trial = 0 
+        
+        if assessing and curr_trial % 2 == 0:
+            # regenerate_environment(0.2)
+            regenerate_environment_alternate(0.2) 
+        elif assessing and curr_trial % 2 != 0: 
+            regenerate_environment_alternate(0.2)    
+        else: 
+            regenerate_environment(0.2)
         # regenerate_blocks_power_law()
         # regenerate_blocks_single_source()
         # regenerate_blocks_dual_source()
@@ -528,7 +588,14 @@ def run_optimization():
             print('items collected', total_found)
             # overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)
             # restore_positions()  
-            regenerate_environment(0.2) 
+            curr_trial = i + 1
+            if assessing and curr_trial % 2 == 0:
+                # regenerate_environment(0.2)
+                regenerate_environment_alternate(0.2)
+            elif assessing and curr_trial % 2 != 0: 
+                regenerate_environment_alternate(0.2)    
+            else: 
+                regenerate_environment(0.2)
             # regenerate_blocks_power_law()
             # regenerate_blocks_single_source()
             # regenerate_blocks_dual_source()
