@@ -109,6 +109,7 @@ def regenerate_environment(block_dist):
     
     for i in range(len(r_pos_to_generate)):
         population[i].getField('translation').setSFVec3f(r_pos_to_generate[i])
+    
         
     # generates block on opposite sides of arena (randomly generated) 
     if len(b_pos_to_generate) == 0: 
@@ -146,6 +147,7 @@ def regenerate_environment(block_dist):
             t_field = rec_node.getField('translation')
             t_field.setSFVec3f(i) 
             block_list.append(rec_node)
+
         
 # initially reads from file for re-producibility, and then continues to re-read (will be second)        
 def regenerate_environment_alternate(block_dist): # will stay constant based off seed 
@@ -293,6 +295,7 @@ def regenerate_blocks_power_law():
     alpha = 2.5
     centers = []
     
+    
     if len(b_pos_to_generate) == 0: 
 
         for i in range(40): # will be number of clusters instead of disparate blocks 
@@ -334,9 +337,10 @@ def regenerate_blocks_power_law():
                 
                 # want to have additional parts centralized (at most 4 others) 
     
-                
                 t_field.setSFVec3f(pot[i]) 
+                b_pos_to_generate.append(pot[i])
                 block_list.append(rec_node)
+                
             
     else: 
         # if already generated, use the previously saved positions 
@@ -354,6 +358,7 @@ def regenerate_blocks_power_law():
         r_field = rec_node.getField('rotation')
         if r_field.getSFRotation() != [0, 0, -1]:
             r_field.setSFRotation([0, 0, -1])
+            
 
 def save_progress():
     global overall_f
@@ -515,8 +520,8 @@ def run_optimization():
         curr_trial = 0 
         
         if assessing and curr_trial % 2 == 0:
-            # regenerate_environment(0.2)
-            regenerate_environment_alternate(0.2) 
+            regenerate_environment(0.2)
+            # regenerate_environment_alternate(0.2) 
         elif assessing and curr_trial % 2 != 0: 
             regenerate_environment_alternate(0.2)    
         else: 
@@ -558,8 +563,7 @@ def run_optimization():
             print('items collected', total_found)
             curr_trial = i + 1  
             if assessing and curr_trial % 2 == 0:
-                # regenerate_environment(0.2)
-                regenerate_environment_alternate(0.2) 
+                regenerate_environment(0.2)
             elif assessing and curr_trial % 2 != 0: 
                 regenerate_environment_alternate(0.2)    
             else: 

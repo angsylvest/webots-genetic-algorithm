@@ -59,7 +59,7 @@ fitness_scores = []
 start = 0
 prev_msg = "" 
 random.seed(11) # was 11 (changed to 15 to get new configuration) 
-assessing = True 
+assessing = False 
 
 def generate_robot_central(num_robots):
     global fitness_scores 
