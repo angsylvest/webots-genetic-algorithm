@@ -608,13 +608,13 @@ def run_optimization():
         generate_robot_central(size)
         
         curr_trial = 0
-        # if assessing and curr_trial % 2 == 0:
-            # regenerate_environment(0.2)
-        # elif assessing and curr_trial % 2 != 0: 
-            # regenerate_environment_alternate(0.2)    
-        # else: 
-            # regenerate_environment(0.2)
-        regenerate_blocks_power_law()   
+        if assessing and curr_trial % 2 == 0:
+            regenerate_environment(0.2)
+        elif assessing and curr_trial % 2 != 0: 
+            regenerate_environment_alternate(0.2)    
+        else: 
+            regenerate_environment(0.2)
+        # regenerate_blocks_power_law()   
         ind_sup = []
         
         
@@ -643,9 +643,10 @@ def run_optimization():
         
         for i in range(trials): 
             print('beginning new trial', i)
-            
             msg = 'generation-complete '+ ' '.join(pop_genotypes)
-            emitter_individual.send(str(msg).encode('utf-8'))
+            
+            if (assessing and trial % 2) == 0 or not assessing: 
+                emitter_individual.send(str(msg).encode('utf-8'))
             
             for rec_node in population: 
                 r_field = rec_node.getField('rotation')
@@ -680,18 +681,18 @@ def run_optimization():
             overall_f.close()
             overall_f = open('../../graph-generation/collection-data/overall-df.csv', 'a')
             print('items collected', total_found)
-            # curr_trial = i + 1
-            # if assessing and curr_trial % 2 == 0:
-                # regenerate_environment(0.2)
-            # elif assessing and curr_trial % 2 != 0: 
-                # regenerate_environment_alternate(0.2)    
-            # else: 
-                # regenerate_environment(0.2)
+            curr_trial = i + 1
+            if assessing and curr_trial % 2 == 0:
+                regenerate_environment(0.2)
+            elif assessing and curr_trial % 2 != 0: 
+                regenerate_environment_alternate(0.2)    
+            else: 
+                regenerate_environment(0.2)
             
             ### reset individual robot controllers and respective supervisors 
             
             
-            regenerate_blocks_power_law()
+            # regenerate_blocks_power_law()
             # regenerate_blocks_single_source()
             # regenerate_blocks_dual_source()
             total_found = 0 
