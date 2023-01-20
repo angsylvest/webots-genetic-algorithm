@@ -211,9 +211,10 @@ def interpret():
             strategy_f.close()
             receiver.nextPacket()
             
-        elif message == "trial_complete":
+        elif "trial_complete" in message:
             # resets prob distrib 
-            start = False 
+            if message[-1] == '-':
+                start = False 
             obj_found_so_far = []
             receiver.nextPacket()            
             

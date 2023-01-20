@@ -64,7 +64,7 @@ fit_update = False
 start = 0 
 
 prev_msg = ""
-random.seed(11)
+random.seed(15)
 id_msg = ""
 
 emitter_individual = robot.getDevice("emitter_processor")
@@ -352,6 +352,7 @@ def regenerate_environment(block_dist):
     for i in range(len(r_pos_to_generate)):
         population[i].getField('translation').setSFVec3f(r_pos_to_generate[i])
         
+          
     # generates block on opposite sides of arena (randomly generated) 
     if len(b_pos_to_generate) == 0: 
         seed_file = open('../../graph-generation/seed-11-rn.csv', 'r') 
@@ -367,6 +368,8 @@ def regenerate_environment(block_dist):
             t_field = rec_node.getField('translation')
             t_field.setSFVec3f(res) 
             block_list.append(rec_node)  
+            
+
     else: 
         # if already generated, use the previously saved positions 
         for i in b_pos_to_generate: 
@@ -378,7 +381,13 @@ def regenerate_environment(block_dist):
             t_field = rec_node.getField('translation')
             t_field.setSFVec3f(i) 
             block_list.append(rec_node)
-        
+            
+    # seed_11.close()
+    
+    for rec_node in block_list: # set to be upright
+        r_field = rec_node.getField('rotation')
+        if r_field.getSFRotation() != [0, 0, -1]:
+            r_field.setSFRotation([0, 0, -1])   
 
 def initialize_genotypes(size):
     global initial_genotypes
@@ -613,7 +622,8 @@ def run_optimization():
         elif assessing and curr_trial % 2 != 0: 
             regenerate_environment_alternate(0.2)    
         else: 
-            regenerate_environment(0.2)
+            # regenerate_environment(0.2)
+            regenerate_environment_alternate(0.2)
         # regenerate_blocks_power_law()   
         ind_sup = []
         
@@ -684,10 +694,12 @@ def run_optimization():
             curr_trial = i + 1
             if assessing and curr_trial % 2 == 0:
                 regenerate_environment(0.2)
+                reset_genotype() 
             elif assessing and curr_trial % 2 != 0: 
                 regenerate_environment_alternate(0.2)    
             else: 
                 regenerate_environment(0.2)
+                reset_genotype() 
             
             ### reset individual robot controllers and respective supervisors 
             
@@ -698,7 +710,7 @@ def run_optimization():
             total_found = 0 
             reproduce_list = []
             found_list = []
-            reset_genotype()   
+            # reset_genotype()   
             # msg = 'trial' + str(p)
             msg = 'trial' + str(i)
             emitter.send(msg.encode('utf-8')) 

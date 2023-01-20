@@ -570,12 +570,13 @@ def run_optimization():
             if assessing and curr_trial % 2 == 0:
                 # regenerate_environment(0.2)
                 regenerate_environment_alternate(0.2)
-                emitter.send('trial_complete'.encode('utf-8'))
+                emitter.send('trial_complete-'.encode('utf-8'))
             elif assessing and curr_trial % 2 != 0: 
-                regenerate_environment_alternate(0.2)    
+                regenerate_environment_alternate(0.2)  
+                emitter.send('trial_complete'.encode('utf-8'))  
             else: 
                 regenerate_environment(0.2)
-                emitter.send('trial_complete'.encode('utf-8'))
+                emitter.send('trial_complete-'.encode('utf-8'))
             # regenerate_blocks_power_law()
             # regenerate_blocks_single_source()
             # regenerate_blocks_dual_source()
