@@ -30,7 +30,7 @@ num_generations = 10
 simulation_time = 50
 trials = 100
 curr_trial = 0 
-robot_population_sizes = [5, 10, 15]
+robot_population_sizes = [10, 15]
 gene_list = ['control speed 10', 'energy cost 5', 'food energy 30', 'observations thres 5']
 curr_size = robot_population_sizes[0]
 
@@ -64,12 +64,12 @@ fit_update = False
 start = 0 
 
 prev_msg = ""
-random.seed(15)
+random.seed(11)
 id_msg = ""
 
 emitter_individual = robot.getDevice("emitter_processor")
 emitter_individual.setChannel(5)
-assessing = False 
+assessing = True 
 
 
 # set up environments 
@@ -622,8 +622,8 @@ def run_optimization():
         elif assessing and curr_trial % 2 != 0: 
             regenerate_environment_alternate(0.2)    
         else: 
-            # regenerate_environment(0.2)
-            regenerate_environment_alternate(0.2)
+            regenerate_environment(0.2)
+            # regenerate_environment_alternate(0.2)
         # regenerate_blocks_power_law()   
         ind_sup = []
         

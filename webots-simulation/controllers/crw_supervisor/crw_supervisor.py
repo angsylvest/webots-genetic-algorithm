@@ -34,7 +34,7 @@ start = 0
 num_generations = 10
 trials = 100
 simulation_time = 60
-robot_population_sizes = [5, 10, 15] # [5, 10, 15]
+robot_population_sizes = [10, 15] # [5, 10, 15]
 curr_size = robot_population_sizes[0]
 curr_trial = 0 
 population = []
@@ -57,7 +57,7 @@ b_pos_to_generate = []
 b_pos_to_generate_alternative = []
 prev_msg = ""
 random.seed(11)
-assessing = False 
+assessing = True 
 
 
 def generate_robot_central(num_robots):

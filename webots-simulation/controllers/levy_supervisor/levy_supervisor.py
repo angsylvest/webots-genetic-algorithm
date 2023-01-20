@@ -40,7 +40,7 @@ simulation_time = 60
 trials = 100
 curr_size = 5
 curr_trial = 0 
-robot_population_sizes = [5, 10, 15] # [5, 10, 15]
+robot_population_sizes = [10, 15] # [5, 10, 15]
 b_pos_to_generate_alternative = []
 
 
@@ -518,8 +518,8 @@ def run_optimization():
         
         curr_trial = 0 
         if assessing and curr_trial % 2 == 0:
-            # regenerate_environment(0.2)
-            regenerate_environment_alternate(0.2) 
+            regenerate_environment(0.2)
+            # regenerate_environment_alternate(0.2) 
         elif assessing and curr_trial % 2 != 0: 
             regenerate_environment_alternate(0.2)    
         else: 
@@ -560,8 +560,8 @@ def run_optimization():
             
             curr_trial = i + 1  
             if assessing and curr_trial % 2 == 0:
-                # regenerate_environment(0.2)
-                regenerate_environment_alternate(0.2) 
+                regenerate_environment(0.2)
+                # regenerate_environment_alternate(0.2) 
             elif assessing and curr_trial % 2 != 0: 
                 regenerate_environment_alternate(0.2)    
             else: 

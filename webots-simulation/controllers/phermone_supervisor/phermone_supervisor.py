@@ -38,7 +38,7 @@ num_generations = 10
 simulation_time = 60
 trials = 100
 curr_size = 5
-robot_population_sizes = [5, 10, 15] # [5, 10, 15]
+robot_population_sizes = [10, 15] # [5, 10, 15]
 curr_trial = 0 
 
 # sim statistics 
@@ -59,7 +59,7 @@ fitness_scores = []
 start = 0
 prev_msg = "" 
 random.seed(11) # was 11 (changed to 15 to get new configuration) 
-assessing = False 
+assessing = True 
 
 def generate_robot_central(num_robots):
     global fitness_scores 
@@ -547,8 +547,8 @@ def run_optimization():
         curr_trial = 0 
         
         if assessing and curr_trial % 2 == 0:
-            # regenerate_environment(0.2)
-            regenerate_environment_alternate(0.2) 
+            regenerate_environment(0.2)
+            # regenerate_environment_alternate(0.2) 
         elif assessing and curr_trial % 2 != 0: 
             regenerate_environment_alternate(0.2)    
         else: 
@@ -590,8 +590,8 @@ def run_optimization():
             # restore_positions()  
             curr_trial = i + 1
             if assessing and curr_trial % 2 == 0:
-                # regenerate_environment(0.2)
-                regenerate_environment_alternate(0.2)
+                regenerate_environment(0.2)
+                # regenerate_environment_alternate(0.2)
                 emitter.send('trial_complete-'.encode('utf-8')) 
             elif assessing and curr_trial % 2 != 0: 
                 regenerate_environment_alternate(0.2
