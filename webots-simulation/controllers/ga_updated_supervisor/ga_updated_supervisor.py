@@ -22,7 +22,7 @@ overall_f = open('../../graph-generation/collection-data/overall-df.csv', 'a')
 
 # for individual robot, statistics about strategy taken over time & individual collision info 
 strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'w')
-strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',size' + ',fitness'+ ',size'+ ',type' + ',trial' + ',collected' + ',genotype' + '\n')
+strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',num encounters' + ',size' + ',fitness'+ ',size'+ ',type' + ',trial' + ',collected' + ',genotype' + '\n')
 strategy_f.close()
 
 # genetic algorithm-specific parameters 
@@ -70,6 +70,7 @@ id_msg = ""
 emitter_individual = robot.getDevice("emitter_processor")
 emitter_individual.setChannel(5)
 assessing = True 
+repopulate = True
 
 
 # set up environments 
@@ -436,7 +437,11 @@ def message_listener(time_step):
                 t_node_loc = t_field.getSFVec3f()
                 
                 if (math.dist(r_node_loc, t_node_loc) < 0.15):
-                    t_field.setSFVec3f([-0.9199,-0.92, 0.059]) 
+                    if repopulate: 
+                        t_field.setSFVec3f(t_node_loc) 
+                    
+                    else:
+                        t_field.setSFVec3f([-0.9199,-0.92, 0.059]) 
                     # obj_node.remove()
                     # remove redundant requests 
                     if obj_node not in found_list:
@@ -655,8 +660,8 @@ def run_optimization():
             print('beginning new trial', i)
             msg = 'generation-complete '+ ' '.join(pop_genotypes)
             
-            if (assessing and trial % 2) == 0 or not assessing: 
-                emitter_individual.send(str(msg).encode('utf-8'))
+            # if (assessing and trial % 2) == 0 or not assessing: 
+            emitter_individual.send(str(msg).encode('utf-8'))
             
             for rec_node in population: 
                 r_field = rec_node.getField('rotation')

@@ -58,6 +58,7 @@ b_pos_to_generate_alternative = []
 prev_msg = ""
 random.seed(11)
 assessing = True 
+repopulate = True
 
 
 def generate_robot_central(num_robots):
@@ -389,7 +390,16 @@ def message_listener(time_step):
                 
                 # print(math.dist(r_node_loc, t_node_loc))
                 if (math.dist(r_node_loc, t_node_loc) < 0.15): # only count if actually in range 
-                    t_field.setSFVec3f([-0.9199,-0.92, 0.059]) 
+                    if repopulate: 
+                        # will be placed somewhere random 
+                        side = random.randint(0,1)
+                        if side == 1:
+                            t_field.setSFVec3f([round(random.uniform(-0.5, -0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]) 
+                        else: 
+                            t_field.setSFVec3f([round(random.uniform(0.5, 0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02])   
+                    else:
+                        t_field.setSFVec3f([-0.9199,-0.92, 0.059]) 
+  
                     # obj_node.remove()
                     # remove redundant requests 
                     if obj_node not in found_list:

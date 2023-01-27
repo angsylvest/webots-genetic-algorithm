@@ -59,7 +59,8 @@ fitness_scores = []
 start = 0
 prev_msg = "" 
 random.seed(11) # was 11 (changed to 15 to get new configuration) 
-assessing = True 
+assessing = True # change once finished gathering data  
+repopulate = True 
 
 def generate_robot_central(num_robots):
     global fitness_scores 
@@ -399,7 +400,16 @@ def message_listener(time_step):
                 
                 # print(math.dist(r_node_loc, t_node_loc))
                 if (math.dist(r_node_loc, t_node_loc) < 0.15): # only count if actually in range 
-                    t_field.setSFVec3f([-0.9199,-0.92, 0.059]) 
+                    if repopulate: 
+                        # will be placed somewhere random 
+                        side = random.randint(0,1)
+                        if side == 1:
+                            t_field.setSFVec3f([round(random.uniform(-0.5, -0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]) 
+                        else: 
+                            t_field.setSFVec3f([round(random.uniform(0.5, 0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02])   
+                    else:
+                        t_field.setSFVec3f([-0.9199,-0.92, 0.059]) 
+                                            
                     if obj_node not in found_list:
                         total_found += 1
                         found_list.append(obj_node)
@@ -552,8 +562,8 @@ def run_optimization():
         elif assessing and curr_trial % 2 != 0: 
             regenerate_environment_alternate(0.2)    
         else: 
-            regenerate_environment(0.2)
-        # regenerate_blocks_power_law()
+            # regenerate_environment(0.2)
+            regenerate_blocks_power_law()
         # regenerate_blocks_single_source()
         # regenerate_blocks_dual_source()
         
@@ -594,10 +604,11 @@ def run_optimization():
                 # regenerate_environment_alternate(0.2)
                 emitter.send('trial_complete-'.encode('utf-8')) 
             elif assessing and curr_trial % 2 != 0: 
-                regenerate_environment_alternate(0.2
+                regenerate_environment_alternate(0.2)
                 emitter.send('trial_complete'.encode('utf-8'))     
             else: 
-                regenerate_environment(0.2)
+                # regenerate_environment(0.2)
+                regenerate_blocks_power_law()
                 emitter.send('trial_complete-'.encode('utf-8')) 
             # regenerate_blocks_power_law()
             # regenerate_blocks_single_source()
