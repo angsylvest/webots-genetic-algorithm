@@ -411,6 +411,26 @@ def save_progress():
     print('progress saved to csv')
     emitter.send('sim-complete'.encode('utf-8'))
 
+        for i in range(20): 
+            rootNode = robot.getRoot()
+            rootChildrenField = rootNode.getField('children')
+            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+            rec_node = rootChildrenField.getMFNode(-1)
+        
+            t_field = rec_node.getField('translation')
+            t_field.setSFVec3f([round(random.uniform(-0.5, -0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]) 
+            block_list.append(rec_node)        
+          
+        for i in range(20): 
+            rootNode = robot.getRoot()
+            rootChildrenField = rootNode.getField('children')
+            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+            rec_node = rootChildrenField.getMFNode(-1)
+            
+            t_field = rec_node.getField('translation')
+            t_field.setSFVec3f([round(random.uniform(0.5, 0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]) 
+            block_list.append(rec_node)  
+            
 def message_listener(time_step):
     global total_found 
     global collected_count 
@@ -438,8 +458,12 @@ def message_listener(time_step):
                 
                 if (math.dist(r_node_loc, t_node_loc) < 0.15):
                     if repopulate: 
-                        t_field.setSFVec3f(t_node_loc) 
-                    
+                        # will be placed somewhere random 
+                        side = random.randint(0,1)
+                        if side == 1:
+                            t_field.setSFVec3f([round(random.uniform(-0.5, -0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]) 
+                        else: 
+                            t_field.setSFVec3f([round(random.uniform(0.5, 0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02])   
                     else:
                         t_field.setSFVec3f([-0.9199,-0.92, 0.059]) 
                     # obj_node.remove()
