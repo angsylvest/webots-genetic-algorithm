@@ -82,7 +82,8 @@ prev_msg = ""
 ## PSO parameters ## 
 individual_best = [0, 0]
 group_best = [0, 0] 
-group_assigned = '' # will identify group # or if in excluded group (-1) 
+group_assigned = '' # will identify group # or if in excluded group (0) 
+
 
 inertial_comp = 0.2 # c1 
 exploration_coefficient = 0.8 # c2 
@@ -91,6 +92,7 @@ magnet_connectivity_component = 0.005 # c4, r4
 alpha = 0.9
 
 avoid_pos = []
+group_performance = {}
 
 # generalize id acquisition
 if robot.getName() == "k0":
@@ -250,6 +252,8 @@ def interpret():
     global chosen_direction
     global pso_heading
     global group_assigned
+    global group_dic
+    global group_best 
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -284,10 +288,33 @@ def interpret():
             assignments = message[5:] 
             group_assigned = assignments.split('*')[int(given_id)] 
             
+            emitter_individual = robot.getDevice("emitter_processor")
+            emitter_individual.setChannel(int(group_assigned)*10)
+            receiver_individual = robot.getDevice("receiver_processor")
+            receiver_individual.enable(timestep)
+            receiver_individual.setChannel((int(group_assigned) * 10) - 1)
+            
         elif 'size' in message:
             curr_sim_size = message[5:]
             obj_found_so_far = []
             receiver.nextPacket()
+            
+        elif 'group update' in message: 
+            group_best = [message.strip('][').split(',')[0], message.strip('][').split(',')[1]]
+            
+        elif 'subbed' in message and int(group_assigned) == -1: 
+            ids = message.split('*')[1:-1] 
+            if given_id in ids: 
+                group_assigned = message.split('*')[-1] 
+                
+                emitter_individual = robot.getDevice("emitter_processor")
+                emitter_individual.setChannel(int(group_assigned)*10)
+                receiver_individual = robot.getDevice("receiver_processor")
+                receiver_individual.enable(timestep)
+                receiver_individual.setChannel((int(group_assigned) * 10) - 1)
+                
+        elif 'punished' in message: 
+            ids = message.split('*')[1:-1] 
             
         elif message == "trial_complete":
             # resets prob distrib 
@@ -367,13 +394,19 @@ while robot.step(timestep) != -1 and sim_complete != True:
             orientation_found = False 
             
             # proceed with previous behavior 
-            if not holding_something: 
-                chosen_direction = pso_heading
+            if not holding_something and group_assigned != 0: 
+                correlated_random(chosen_direction)
+                # chosen_direction = pso_heading
+            elif not holding_something: 
+                 chosen_direction = pso_heading
+            
     
         # exploration behavior 
         elif (i - prev_i == time_switch and object_encountered != True and not reversing and orientation_found):
             orientation_found = False
-            if holding_something == False: 
+            if holding_something == False and group_assigned != 0: 
+                chosen_direction = correlated_random(chosen_direction)
+            elif holding_something == False: 
                 chosen_direction = pso_heading
             
         elif orientation_found != True and yaw == chosen_direction and object_encountered != True and not reversing: 

@@ -411,25 +411,25 @@ def save_progress():
     print('progress saved to csv')
     emitter.send('sim-complete'.encode('utf-8'))
 
-        for i in range(20): 
-            rootNode = robot.getRoot()
-            rootChildrenField = rootNode.getField('children')
-            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
-            rec_node = rootChildrenField.getMFNode(-1)
+    for i in range(20): 
+        rootNode = robot.getRoot()
+        rootChildrenField = rootNode.getField('children')
+        rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+        rec_node = rootChildrenField.getMFNode(-1)
+    
+        t_field = rec_node.getField('translation')
+        t_field.setSFVec3f([round(random.uniform(-0.5, -0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]) 
+        block_list.append(rec_node)        
+      
+    for i in range(20): 
+        rootNode = robot.getRoot()
+        rootChildrenField = rootNode.getField('children')
+        rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+        rec_node = rootChildrenField.getMFNode(-1)
         
-            t_field = rec_node.getField('translation')
-            t_field.setSFVec3f([round(random.uniform(-0.5, -0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]) 
-            block_list.append(rec_node)        
-          
-        for i in range(20): 
-            rootNode = robot.getRoot()
-            rootChildrenField = rootNode.getField('children')
-            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
-            rec_node = rootChildrenField.getMFNode(-1)
-            
-            t_field = rec_node.getField('translation')
-            t_field.setSFVec3f([round(random.uniform(0.5, 0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]) 
-            block_list.append(rec_node)  
+        t_field = rec_node.getField('translation')
+        t_field.setSFVec3f([round(random.uniform(0.5, 0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]) 
+        block_list.append(rec_node)  
             
 def message_listener(time_step):
     global total_found 

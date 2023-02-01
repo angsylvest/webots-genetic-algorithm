@@ -55,6 +55,7 @@ n_i = 2
 n_min = 1 
 nmax = 6
 group_dic = {}
+trial_count = 0 
 
 # sim statistics 
 total_collected = 0 
@@ -64,6 +65,7 @@ updated = False
 fit_update = False 
 found_list = []
 block_list = []
+ind_sup = []
 arena_area = robot.getFromDef("arena")
 collected_count = []
 r_pos_to_generate = []
@@ -104,6 +106,7 @@ def calc_global_local():
         
     msg += str(global_best)
     emitter.send(str("pso-" + str(msg)).encode('utf-8'))    
+
  
 def find_neighbor(curr_r, curr_loc): 
     global population 
@@ -139,11 +142,14 @@ def generate_robot_central(num_robots):
     global fitness_scores 
     global collected_count 
     global population 
+    global ind_sup
     global r_pos_to_generate
     global n_i 
     global n_min = 1 
     global nmax = 6
     global group_dic 
+    global trial_count
+    
     
     # initialize_genotypes(num_robots)
     emitter.send(str("size-" + str(num_robots)).encode('utf-8'))
@@ -152,12 +158,29 @@ def generate_robot_central(num_robots):
     
         for r in population: 
             r.remove()
+            
+    if len(ind_sup) != 0:
+        
+        for r in ind_sup: 
+            r.remove()
+            
     
     population = []
     fitness_scores = []
     collected_count = []
     
     num_whole_groups = num_robots // n_i 
+    
+    ## TODO: create a supervisor that corresponds to num_group
+    for i in range(len(num_whole_groups) + 1):
+        rootNode = robot.getRoot()
+        rootChildrenField = rootNode.getField('children')
+        rootChildrenField.importMFNode(-1, '../las_supervisor/robots/pso-rdpso-group.wbo')
+        individual = rootChildrenField.getMFNode(-1)
+        ind_sup.append(individual)
+      
+        individual.getField('translation').setSFVec3f([0, 2, 0])
+
     g_index = 0 
     msg = "" 
     
@@ -181,11 +204,11 @@ def generate_robot_central(num_robots):
         collected_count.append(0)
         population.append(rec_node)
         
-        # will allocate robot to each group 
-        msg = str(g_index) + '*' 
-        
+        # will allocate robot to each group
+        msg = str(g_index) 
         
     emitter.send('group' + str(msg).encode('utf-8'))
+    emitter.send('robot-info' + '*' + str(num_robots) + '*' + str(trial_count).encode('utf-8'))
     
     
 def reward_subswarm():
@@ -270,6 +293,7 @@ def regenerate_environment_alternate(block_dist): # will stay constant based off
         obj.remove()
     
     block_list = []
+    id_msg = "ids"
     
     for i in range(len(r_pos_to_generate)):
         population[i].getField('translation').setSFVec3f(r_pos_to_generate[i])
@@ -285,6 +309,7 @@ def regenerate_environment_alternate(block_dist): # will stay constant based off
             rootChildrenField = rootNode.getField('children')
             rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
             rec_node = rootChildrenField.getMFNode(-1)
+            id_msg += " " + str(rec_node.getId()) 
         
             t_field = rec_node.getField('translation')
             t_field.setSFVec3f(res) 
@@ -301,6 +326,8 @@ def regenerate_environment_alternate(block_dist): # will stay constant based off
             t_field = rec_node.getField('translation')
             t_field.setSFVec3f(i) 
             block_list.append(rec_node)
+            
+    emitter_individual.send(id_msg.encode('utf-8'))
                   
 def regenerate_blocks_single_source():
     global block_list
@@ -535,7 +562,7 @@ def message_listener(time_step):
             
             receiver.nextPacket()
             # will be generalized 
-            
+             
         else: 
             receiver.nextPacket()
             
@@ -630,6 +657,7 @@ def run_optimization():
     global population 
     global spawn_prob 
     global nmax
+    global trial_count 
 
     for size in robot_population_sizes: 
         nmax = size
@@ -637,7 +665,7 @@ def run_optimization():
                 # creates a csv specific to the robot 
         curr_size = size
         r_pos_to_generate = []
-        generate_robot_central(size)
+        # generate_robot_central(size)
         
         curr_trial = 0 
         
@@ -652,38 +680,55 @@ def run_optimization():
         # regenerate_blocks_single_source()
         # regenerate_blocks_dual_source()
         
-        for rec_node in population: 
-            r_field = rec_node.getField('rotation')
-            if r_field.getSFRotation() != [0, 0, -1]:
-                r_field.setSFRotation([0, 0, -1])
+
         
         total_time_elapsed = 0 
         
         for i in range(trials): 
+            trial_count = i
+            generate_robot_central()
+            
+            for rec_node in population: 
+                r_field = rec_node.getField('rotation')
+                if r_field.getSFRotation() != [0, 0, -1]:
+                    r_field.setSFRotation([0, 0, -1])
+                    
+                        
+            if assessing and curr_trial % 2 == 0:
+                regenerate_environment(0.2)
+                # regenerate_environment_alternate(0.2) 
+            elif assessing and curr_trial % 2 != 0: 
+                regenerate_environment_alternate(0.2)    
+            else: 
+                regenerate_environment(0.2)
+                
+            
             print('beginning new trial', i)
             spawn_prob = random.uniform(0,1) / size 
             
             
             while total_time > total_time_elapsed: 
-                
-                updated = False     
-                run_seconds(simulation_time) 
-                calc_global_local() # updates each robot to pivot toward successful place 
-                search_counter()
-                total_time_elapsed += simulation_time
-                
-                # print('waiting for genotypes')
-                
-                run_seconds(5, True) # time to re-orient 
-                
+                                
                 for rec_node in population: 
                     r_field = rec_node.getField('rotation')
                     if r_field.getSFRotation() != [0, 0, -1]:
                         r_field.setSFRotation([0, 0, -1])
                 
-                print('found genotypes')
-                print('new generation starting -')
-                reproduce_list = []
+                
+                
+                # updated = False     
+            run_seconds(total_time) 
+            # calc_global_local() # updates each robot to pivot toward successful place 
+            # search_counter()
+            # total_time_elapsed += simulation_time
+            
+            # print('waiting for genotypes')
+            
+            run_seconds(5, True) # time to re-orient 
+            
+            # print('found genotypes')
+            # print('new generation starting -')
+            reproduce_list = []
                 # generate_robot_central(size)
                 # regenerate_environment(0.2)  
             
@@ -705,7 +750,10 @@ def run_optimization():
             found_list = [] 
             index = 0 
             emitter.send('trial_complete'.encode('utf-8')) 
+            
+            
             # TODO: delete all robots and group supervisor for next sim 
+            for 
                 
     overall_f.close()
     emitter.send('sim-complete'.encode('utf-8'))    
