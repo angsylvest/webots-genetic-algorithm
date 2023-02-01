@@ -76,12 +76,6 @@ random.seed(11)
 assessing = False 
 repopulate = True
 
-def search_counter():
-    global sc_max
-    global simulation_time
-    global num_excluded
-    
-    simulation_time = sc_max*(1 - (1 / (num_excluded + 1)))
 
 
 # for PSO, after end of each iteration, recalculate global and local best for each agent #
@@ -111,9 +105,9 @@ def calc_global_local():
 def find_neighbor(curr_r, curr_loc): 
     global population 
     neighs = [] # will correspond to robot id 
-    
-    robo_id = 0 
     dists = []
+    
+    
     for r in population: 
     
         if curr_r != r: 
@@ -124,7 +118,6 @@ def find_neighbor(curr_r, curr_loc):
         else: 
             dists.append(math.inf) # super large to make sure 
             
-        robo_id += 1 
         
     # find min and min2 of list and corresponding index 
     while len(neighs) != 1: # finding top 2 
@@ -154,6 +147,7 @@ def generate_robot_central(num_robots):
     # initialize_genotypes(num_robots)
     emitter.send(str("size-" + str(num_robots)).encode('utf-8'))
 
+    # resets everything 
     if len(population) != 0: 
     
         for r in population: 
