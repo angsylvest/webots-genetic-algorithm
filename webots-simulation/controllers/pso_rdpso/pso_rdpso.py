@@ -42,6 +42,7 @@ emitter.setChannel(2)
 receiver = robot.getDevice("receiver")
 receiver.enable(timestep)
 receiver.setChannel(1)
+
 inertia = robot.getDevice("inertial unit")
 inertia.enable(timestep)
 # camera info 
@@ -99,6 +100,12 @@ if robot.getName() == "k0":
     given_id = 0
 else: 
     given_id = robot.getName()[3:-1] 
+    
+emitter_individual = robot.getDevice("emitter_processor")
+emitter_individual.setChannel(int(given_id)*10)
+receiver_individual = robot.getDevice("receiver_processor")
+receiver_individual.enable(timestep)
+receiver_individual.setChannel((int(given_id) * 10) - 1)
 
 # Agent Level File Appended Set-up 
 strategy_f = open("../../graph-generation/collision-data/pso-rdpso-info.csv", 'a')
@@ -254,7 +261,10 @@ def interpret():
     global group_assigned
     global group_dic
     global group_best 
+    global receiver 
+    global receiver_individual
     
+    # sent from overall supervisor 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
             
@@ -270,24 +280,13 @@ def interpret():
             fitness = 0
             
             receiver.nextPacket()
-        
-        elif 'pso' in message: 
-            # strip pso key word & only get location relevant to given id 
-            personal_updates = list(message[4:].split('*')[int(given_id)])
-            psx, psy = personal_updates[0], personal_updates[1]
-            
-            # update heading to move towards direction sent 
-            curr_posx, curr_posy = gps.getValues()[0], gps.getValues()[1]
-            new_x, new_y = calc_pso_params(psx, psy)
-            
-            direction = math.atan2((new_y - curr_posx),(new_x - curr_posx))
-            chosen_direction = round(direction, 2)
-            pso_heading = round(direction, 2)
+       
             
         elif 'group' in message: # assigns group 
             assignments = message[5:] 
-            group_assigned = assignments.split('*')[int(given_id)] 
+            group_assigned = assignments[int(given_id)] 
             
+          
             emitter_individual = robot.getDevice("emitter_processor")
             emitter_individual.setChannel(int(group_assigned)*10)
             receiver_individual = robot.getDevice("receiver_processor")
@@ -299,32 +298,9 @@ def interpret():
             obj_found_so_far = []
             receiver.nextPacket()
             
-        elif 'group update' in message: 
-            group_best = [message.strip('][').split(',')[0], message.strip('][').split(',')[1]]
-            
-        elif 'subbed' in message and int(group_assigned) == -1: 
-            ids = message.split('*')[1:-1] 
-            if given_id in ids: 
-                group_assigned = message.split('*')[-1] 
-                
-                emitter_individual = robot.getDevice("emitter_processor")
-                emitter_individual.setChannel(int(group_assigned)*10)
-                receiver_individual = robot.getDevice("receiver_processor")
-                receiver_individual.enable(timestep)
-                receiver_individual.setChannel((int(group_assigned) * 10) - 1)
                 
         elif 'punished' in message: 
             ids = message.split('*')[1:-1] 
-            
-        elif message == "trial_complete":
-            # resets prob distrib 
-            obj_found_so_far = []
-            receiver.nextPacket() 
-
-        elif message == 'sim-complete':
-            sim_complete = True 
-            strategy_f.close()
-            receiver.nextPacket()
 
         elif message[0] == "%" and message.split('-')[0][1:] == str(given_id):
              
@@ -348,6 +324,41 @@ def interpret():
                 
         else: 
             receiver.nextPacket()
+            
+    # sent from group supervisor 
+    if receiver_individual.getQueueLength()>0:
+        message = receiver_individual.getData().decode('utf-8')
+        if 'pso' in message: 
+            # strip pso key word & only get location relevant to given id 
+            personal_updates = message[4:].split('*')
+            for up in personal_updates: 
+                if given_id in up: 
+                    personal_updates = up.split('%') # done on purpose to catch errors if this isn't happening correctly 
+            
+            psx, psy = personal_updates[0], personal_updates[1]
+            
+            # update heading to move towards direction sent 
+            curr_posx, curr_posy = gps.getValues()[0], gps.getValues()[1]
+            new_x, new_y = calc_pso_params(psx, psy)
+            
+            direction = math.atan2((new_y - curr_posx),(new_x - curr_posx))
+            chosen_direction = round(direction, 2)
+            pso_heading = round(direction, 2)
+            
+        elif 'group update' in message: 
+            group_best = [message.strip('][').split(',')[0], message.strip('][').split(',')[1]]
+            
+        elif 'subbed' in message and int(group_assigned) == 0: 
+            ids = message.split('*')[1:-1] 
+            if given_id in ids: 
+                group_assigned = message.split('*')[-1] 
+                
+                # update channel so listening to new supervisor 
+                emitter_individual = robot.getDevice("emitter_processor")
+                emitter_individual.setChannel(int(group_assigned)*10)
+                receiver_individual = robot.getDevice("receiver_processor")
+                receiver_individual.enable(timestep)
+                receiver_individual.setChannel((int(group_assigned) * 10) - 1)
     
 # Main loop:
 # - perform simulation steps until Webots is stopping the controller

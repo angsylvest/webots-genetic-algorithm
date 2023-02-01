@@ -68,6 +68,7 @@ random.seed(11)
 assessing = False 
 repopulate = False
 success = False 
+size = 5 
 
 group_id = int(robot.getName()[11:-1]) - 1
 #### allow personal supervisor to send important encounter info back to supervisor ## 
@@ -216,7 +217,7 @@ def reward_subswarm():
         if (reward_count - punish_count) > 0: 
             spawn_prob = random.uniform(0,1) / size 
             choice = random.choices([0,1], [spawn_prob, 1 - spawn_prob])
-             if choice == 0: # will generate sub-swarm 
+            if choice == 0: # will generate sub-swarm 
                 rootNode = robot.getRoot()
                 rootChildrenField = rootNode.getField('children')
                 rootChildrenField.importMFNode(-1, '../las_supervisor/robots/ga-pso-rpso-group.wbo')
@@ -278,7 +279,7 @@ def message_listener(time_step):
     global reward_count 
     global punish_count
     global trial_count 
-    global success = True 
+    global success 
 
     if receiver.getQueueLength()>0 and (robot.getTime() - start < simulation_time):
         message = receiver.getData().decode('utf-8')
@@ -313,7 +314,7 @@ def message_listener(time_step):
                         found_list.append(obj_node)
                         reward_subswarm()
                         r = robot.getFromId(int(given_id))
-                        group_dic[r] + = 1
+                        group_dic[r] += 1
                         success = True
                 
                         collected_count[int(message.split("-")[0][1:])] = collected_count[int(message.split("-")[0][1:])] + 1
@@ -386,14 +387,17 @@ def message_listener(time_step):
             
             receiver.nextPacket()
             # will be generalized 
-            
-        
-            
+
         else: 
             receiver.nextPacket()
-            
+        
+    # send from individual robots belonging to respective group 
+    # if receiver_individual.getQueueLength()>0:  
+        
+    
+    
     elif (robot.getTime() - start > simulation_time and prev_msg != 'clean finish'):
-    # if over time would want to reset 
+        # if over time would want to reset 
         emitter.send('cleaning'.encode('utf-8'))
         
         while receiver.getQueueLength()>0:
@@ -401,7 +405,8 @@ def message_listener(time_step):
             
         emitter.send('clean finish'.encode('utf-8'))
         prev_msg = 'clean finish'
-
+        
+    
 # runs simulation for designated amount of time 
 def run_seconds(t,waiting=False):
     global pop_genotypes
@@ -476,6 +481,7 @@ def run_optimization():
     global spawn_prob 
     global nmax
     global success
+    global size 
 
     
     # for i in range(trials): 
@@ -483,7 +489,7 @@ def run_optimization():
     simulation_time = sc_max
     spawn_prob = random.uniform(0,1) / size 
     success = False 
-    
+    total_time_elapsed = 0
     
     while total_time > total_time_elapsed: 
         

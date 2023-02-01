@@ -534,7 +534,7 @@ DEF khepera Robot {
       baudRate 57600
     }
   ]
-  name "k0"
+  name "k0(1)"
   model "Khepera"
   description "A mini mobile robot by K-Team SA"
   contactMaterial "khepera"
@@ -553,7 +553,7 @@ DEF khepera Robot {
       0 0 0.005
     ]
   }
-  controller "pso_rdpso"
+  controller "pso_pugh_controller"
   supervisor TRUE
   linearVelocity 6.222079452499797e-05 -0.0017028594671920777 0.31868755145834393
   angularVelocity 0.005279563895309555 0.0009239450834570423 0.536466098152102

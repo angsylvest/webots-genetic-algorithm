@@ -71,13 +71,13 @@ def calc_global_local():
     msg = ""
     index = 0
     
-    global_best = population[collected_count.index(max(collected_count))].getField('translation')
+    global_best = population[collected_count.index(max(collected_count))].getField('translation').getSFVec3f()
      
     for r in population: 
-        t_field = r.getField('translation')
+        t_field = r.getField('translation').getSFVec3f()
         neighs = find_two_neighbors(r, t_field) 
         loc_best = max(collected_count[neighs[0]], collected_count[neighs[1]])
-        pos = population[loc_best].getField('translation')
+        pos = population[loc_best].getField('translation').getSFVec3f()
         msg += str(pos) + '*'
         index += 1 
         
@@ -93,7 +93,7 @@ def find_two_neighbors(curr_r, curr_loc):
     for r in population: 
     
         if curr_r != r: 
-            t_field = rec_node.getField('translation')
+            t_field = r.getField('translation').getSFVec3f()
             d = math.dist(curr_loc, t_field)
             dists.append(d) 
             
@@ -105,8 +105,8 @@ def find_two_neighbors(curr_r, curr_loc):
     # find min and min2 of list and corresponding index 
     while len(neighs) != 2: # finding top 2 
         
-        min = min(dists) 
-        index = dists.index(min)
+        min_d = min(dists) 
+        index = dists.index(min_d)
         dists[index] = math.inf # remove as candidate 
         
         neighs.append(index)
