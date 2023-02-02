@@ -23,16 +23,16 @@ TIME_STEP = 32
 robot = Supervisor()  # create Supervisor instance
 # emitter to send info to robots 
 emitter = robot.getDevice("emitter")
-emitter.setChannel(1)
+emitter.setChannel(5)
 # set receiver to receive info 
 receiver = robot.getDevice("receiver") 
 receiver.enable(TIME_STEP)
-receiver.setChannel(2) 
+receiver.setChannel(4) 
 
 # set up timing so consistent with ga 
 start = 0
 num_generations = 60
-total_time = 600 
+total_time = 60 
 trials = 50
 simulation_time = 10
 robot_population_sizes = [5, 10, 15] # [5, 10, 15]
@@ -122,13 +122,14 @@ def generate_robot_central(num_robots):
       
         individual.getField('translation').setSFVec3f([0, 2, 0])
 
-    g_index = 0 
+    g_index = 1 
     msg = "" 
+    id_msg = 'ids'
     
     for i in range(num_robots):
     
-        if g_index == num_whole_groups:
-            g_index = 0 
+        if g_index == (num_whole_groups + 1):
+            g_index = 1 
             
         rootNode = robot.getRoot()
         rootChildrenField = rootNode.getField('children')
@@ -144,16 +145,23 @@ def generate_robot_central(num_robots):
         fitness_scores.append("!")
         collected_count.append(0)
         population.append(rec_node)
+        id_msg += " " + str(rec_node.getId()) 
         
         # will allocate robot to each group
         msg += str(g_index) 
         g_index += 1
-    
+        
+    emitter.send(id_msg.encode('utf-8'))
+    print(id_msg)    
+  
     msg = 'group' + str(msg)  
     emitter.send(msg.encode('utf-8'))
+    print(msg)
     msg = 'robot-info' + '*' + str(num_robots) + '*' + str(trial_count)
+    print(msg)
     emitter.send(msg.encode('utf-8'))
     
+
     
 def reward_subswarm():
     # incorporate new swarm generation if num time rewarded > penalized 
@@ -459,6 +467,7 @@ def message_listener(time_step):
 
     if receiver.getQueueLength()>0 and (robot.getTime() - start < simulation_time):
         message = receiver.getData().decode('utf-8')
+        print('supervisor msgs', message)
         if message[0] == "$": # handles deletion of objects when grabbed
             obj_node = robot.getFromId(int(message.split("-")[1]))
             given_id = message.split("-")[0][1:]
@@ -506,19 +515,26 @@ def message_listener(time_step):
             
             receiver.nextPacket()
             # will be generalized 
+            
+                    
+        elif 'punished' in message: 
+            # remove worst and send to 0 
+            emitter.send(message.encode('utf-8')) # send back   
+            receiver.nextPacket() 
+            
              
         else: 
             receiver.nextPacket()
             
-    elif (robot.getTime() - start > simulation_time and prev_msg != 'clean finish'):
+    # elif (robot.getTime() - start > simulation_time and prev_msg != 'clean finish'):
     # if over time would want to reset 
-        emitter.send('cleaning'.encode('utf-8'))
+        # emitter.send('cleaning'.encode('utf-8'))
         
-        while receiver.getQueueLength()>0:
-            receiver.nextPacket()
+        # while receiver.getQueueLength()>0:
+            # receiver.nextPacket()
             
-        emitter.send('clean finish'.encode('utf-8'))
-        prev_msg = 'clean finish'
+        # emitter.send('clean finish'.encode('utf-8'))
+        # prev_msg = 'clean finish'
 
 # runs simulation for designated amount of time 
 def run_seconds(t,waiting=False):
@@ -636,13 +652,12 @@ def run_optimization():
                     r_field.setSFRotation([0, 0, -1])
                     
                         
-            if assessing and curr_trial % 2 == 0:
-                regenerate_environment(0.2)
-                # regenerate_environment_alternate(0.2) 
-            elif assessing and curr_trial % 2 != 0: 
-                regenerate_environment_alternate(0.2)    
-            else: 
-                regenerate_environment(0.2)
+            # if assessing and curr_trial % 2 == 0:
+                # regenerate_environment(0.2)
+            # elif assessing and curr_trial % 2 != 0: 
+                # regenerate_environment_alternate(0.2)    
+            # else: 
+                # regenerate_environment(0.2)
                 
             
             print('beginning new trial', i)
@@ -678,6 +693,7 @@ def run_optimization():
             found_list = [] 
             index = 0 
             emitter.send('trial_complete'.encode('utf-8')) 
+            print('finished trial 60 sec')
             
             
             # TODO: delete all robots and group supervisor for next sim 

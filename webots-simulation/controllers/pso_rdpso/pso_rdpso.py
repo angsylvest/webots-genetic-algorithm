@@ -38,10 +38,10 @@ ds_left.enable(timestep)
 
 # initialize emitter and reciever 
 emitter = robot.getDevice("emitter")
-emitter.setChannel(2)
+emitter.setChannel(4)
 receiver = robot.getDevice("receiver")
 receiver.enable(timestep)
-receiver.setChannel(1)
+receiver.setChannel(5)
 
 inertia = robot.getDevice("inertial unit")
 inertia.enable(timestep)
@@ -267,6 +267,7 @@ def interpret():
     # sent from overall supervisor 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
+        print('personal msgs', message) 
             
         if message == "return_fitness":
             print('request received') 
@@ -285,13 +286,14 @@ def interpret():
         elif 'group' in message: # assigns group 
             assignments = message[5:] 
             group_assigned = assignments[int(given_id)] 
-            
-          
+
+            print('group assigned', group_assigned)
             emitter_individual = robot.getDevice("emitter_processor")
             emitter_individual.setChannel(int(group_assigned)*10)
             receiver_individual = robot.getDevice("receiver_processor")
             receiver_individual.enable(timestep)
-            receiver_individual.setChannel((int(group_assigned) * 10) - 1)
+            receiver_individual.setChannel((int(group_assigned) * 10) + 1)
+            receiver.nextPacket()
             
         elif 'size' in message:
             curr_sim_size = message[5:]
@@ -300,7 +302,20 @@ def interpret():
             
                 
         elif 'punished' in message: 
+            print('punished', given_id) 
             ids = message.split('*')[1:-1] 
+            gp_id = message.split('*')[-1] 
+            if given_id in ids: # move to -1 
+                # update channel so listening to new supervisor 
+                group_assigned = 0 
+                
+                emitter_individual = robot.getDevice("emitter_processor")
+                emitter_individual.setChannel(int(group_assigned)*10)
+                receiver_individual = robot.getDevice("receiver_processor")
+                receiver_individual.enable(timestep)
+                receiver_individual.setChannel((int(group_assigned) * 10) + 1)
+                
+            receiver.nextPacket()   
 
         elif message[0] == "%" and message.split('-')[0][1:] == str(given_id):
              
@@ -335,7 +350,7 @@ def interpret():
                 if given_id in up: 
                     personal_updates = up.split('%') # done on purpose to catch errors if this isn't happening correctly 
             
-            psx, psy = personal_updates[0], personal_updates[1]
+            psx, psy = personal_updates[1], personal_updates[2]
             
             # update heading to move towards direction sent 
             curr_posx, curr_posy = gps.getValues()[0], gps.getValues()[1]
@@ -344,22 +359,29 @@ def interpret():
             direction = math.atan2((new_y - curr_posx),(new_x - curr_posx))
             chosen_direction = round(direction, 2)
             pso_heading = round(direction, 2)
+            receiver.nextPacket()
             
         elif 'group update' in message: 
             group_best = [message.strip('][').split(',')[0], message.strip('][').split(',')[1]]
+            receiver.nextPacket()
             
         elif 'subbed' in message and int(group_assigned) == 0: 
             ids = message.split('*')[1:-1] 
+            old = group_assigned
             if given_id in ids: 
                 group_assigned = message.split('*')[-1] 
+                print('new group assigned', group_assigned, given_id, old)
                 
                 # update channel so listening to new supervisor 
                 emitter_individual = robot.getDevice("emitter_processor")
                 emitter_individual.setChannel(int(group_assigned)*10)
                 receiver_individual = robot.getDevice("receiver_processor")
                 receiver_individual.enable(timestep)
-                receiver_individual.setChannel((int(group_assigned) * 10) - 1)
-    
+                receiver_individual.setChannel((int(group_assigned) * 10) + 1)
+            receiver.nextPacket()
+            
+        else: 
+            receiver.nextPacket()
 # Main loop:
 # - perform simulation steps until Webots is stopping the controller
 
