@@ -101,6 +101,9 @@ emitter_individual.setChannel((int(group_id) * 10) + 1)
 robots_in_group = []
 id_name_dic = {}
 
+initial_group_dic = {}
+initial_population = []
+
 # for PSO, after end of each iteration, recalculate global and local best for each agent #
 def calc_global_local():
     # will send bulk msg to be parsed by robot (index correspond to robot id) 
@@ -315,6 +318,8 @@ def message_listener(time_step):
     global group_id
     global population
     global group_dic
+    global initial_group_dic
+    global initial_population
 
     if receiver.getQueueLength()>0 and (robot.getTime() - start < simulation_time):
         message = receiver.getData().decode('utf-8')
@@ -433,16 +438,30 @@ def message_listener(time_step):
                     group_dic[overall_population[ind]] = 0
                 ind += 1 
             print('initial group;', group_dic)
+            
+            initial_group_dic = group_dic
+            initial_population = population
+            
             receiver.nextPacket()
+            
+        elif message == 'trial_complete': 
+            # reset number collected 
+            # reset dictionary, and population (only include those that were included initiailly
+            
+            group_dic = initial_group_dic
+            population = initial_population
+            
+            receiver.nextPacket()
+            
           
         elif 'fitness' in message:
-            print('message', message, group_dic) 
-            fit = message.split('-')[1][7:] 
-            index = message.split('-')[0][1:]
-            fitness_scores[int(index)] = fit
-            print('fitness scores', fitness_scores)
+            # print('message', message, group_dic) 
+            # fit = message.split('-')[1][7:] 
+            # index = message.split('-')[0][1:]
+            # fitness_scores[int(index)] = fit
+            # print('fitness scores', fitness_scores)
             
-            eval_fitness(time_step)
+            # eval_fitness(time_step)
             
             receiver.nextPacket()
             # will be generalized 
@@ -569,10 +588,10 @@ def run_optimization():
         
         run_seconds(5, True) # time to re-orient 
         
-        for rec_node in population: 
-            r_field = rec_node.getField('rotation')
-            if r_field.getSFRotation() != [0, 0, -1]:
-                r_field.setSFRotation([0, 0, -1])
+        # for rec_node in population: 
+            # r_field = robot.getFromId(rec_node).getField('rotation')
+            # if r_field.getSFRotation() != [0, 0, -1]:
+                # r_field.setSFRotation([0, 0, -1])
         
         # regenerate_blocks_power_law()
         # regenerate_blocks_single_source()
@@ -583,7 +602,7 @@ def run_optimization():
     num_excluded = 0 
     
     # will be deleted for subsequent trial 
-    emitter.send('trial_complete'.encode('utf-8')) 
+    # emitter.send('trial_complete'.encode('utf-8')) 
    
     return 
 

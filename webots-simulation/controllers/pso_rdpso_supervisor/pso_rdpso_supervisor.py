@@ -504,7 +504,7 @@ def message_listener(time_step):
 
             receiver.nextPacket()
             
-        elif 'fitness' in message:
+        elif '-fitness' in message:
             print('message', message) 
             fit = message.split('-')[1][7:] 
             index = message.split('-')[0][1:]
@@ -625,7 +625,7 @@ def run_optimization():
                 # creates a csv specific to the robot 
         curr_size = size
         r_pos_to_generate = []
-        # generate_robot_central(size)
+        generate_robot_central(size)
         
         curr_trial = 0 
         
@@ -644,7 +644,6 @@ def run_optimization():
         
         for i in range(trials): 
             trial_count = i
-            generate_robot_central(size)
             
             for rec_node in population: 
                 r_field = rec_node.getField('rotation')

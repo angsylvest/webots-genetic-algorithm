@@ -1,1 +1,11 @@
 agent id,time step, time since last block,size,collisions,type,collected
+0,60.050000000000004,0,5,3,pso-rdpso,0
+2,60.050000000000004,0,5,7,pso-rdpso,0
+1,60.050000000000004,0,5,2,pso-rdpso,0
+3,60.050000000000004,0,5,2,pso-rdpso,0
+4,60.050000000000004,0,5,0,pso-rdpso,0
+1,65.05,0,5,0,pso-rdpso,0
+0,65.05,0,5,1,pso-rdpso,0
+2,65.05,0,5,1,pso-rdpso,0
+3,65.05,0,5,0,pso-rdpso,0
+4,65.05,0,5,0,pso-rdpso,0

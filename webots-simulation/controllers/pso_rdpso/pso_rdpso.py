@@ -84,6 +84,7 @@ prev_msg = ""
 individual_best = [0, 0]
 group_best = [0, 0] 
 group_assigned = '' # will identify group # or if in excluded group (0) 
+initial_group = ''
 
 
 inertial_comp = 0.2 # c1 
@@ -286,6 +287,7 @@ def interpret():
         elif 'group' in message: # assigns group 
             assignments = message[5:] 
             group_assigned = assignments[int(given_id)] 
+            initial_group = group_assigned
 
             print('group assigned', group_assigned)
             emitter_individual = robot.getDevice("emitter_processor")
@@ -331,6 +333,24 @@ def interpret():
             # stop()
             print('robot has stopped, waiting for next generation')
             receiver.nextPacket()
+            
+        elif message == 'trial_complete': 
+            # want to reset parameters to initial values 
+            # reset group number 
+            # reset number collected 
+            # reset relevant positions 
+            group_assigned = initial_group 
+
+            print('group assigned', group_assigned)
+            emitter_individual = robot.getDevice("emitter_processor")
+            emitter_individual.setChannel(int(group_assigned)*10)
+            receiver_individual = robot.getDevice("receiver_processor")
+            receiver_individual.enable(timestep)
+            receiver_individual.setChannel((int(group_assigned) * 10) + 1)
+            receiver.nextPacket()
+
+            receiver.nextPacket()
+            
             
         elif message == 'clean finish': 
             cleaning = False 

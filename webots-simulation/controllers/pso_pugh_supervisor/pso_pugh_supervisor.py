@@ -572,6 +572,11 @@ def run_optimization():
     global curr_size
     global population 
 
+    # added for testing purposes . 
+    simulation_time = 10 
+    total_time = 60 
+    num_generations = total_time // simulation_time
+    
     for size in robot_population_sizes: 
     
         # initialize_genotypes(size)
@@ -608,12 +613,12 @@ def run_optimization():
                 
                 # print('waiting for genotypes')
                 
-                run_seconds(5, True) # time to re-orient 
+                # run_seconds(5, True) # time to re-orient 
                 
-                for rec_node in population: 
-                    r_field = rec_node.getField('rotation')
-                    if r_field.getSFRotation() != [0, 0, -1]:
-                        r_field.setSFRotation([0, 0, -1])
+                # for rec_node in population: 
+                    # r_field = rec_node.getField('rotation')
+                    # if r_field.getSFRotation() != [0, 0, -1]:
+                        # r_field.setSFRotation([0, 0, -1])
                 
                 print('found genotypes')
                 print('new generation starting -')
