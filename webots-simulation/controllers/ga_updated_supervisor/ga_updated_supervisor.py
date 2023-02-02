@@ -70,7 +70,7 @@ id_msg = ""
 emitter_individual = robot.getDevice("emitter_processor")
 emitter_individual.setChannel(5)
 assessing = True 
-repopulate = True
+repopulate = False
 
 
 # set up environments 

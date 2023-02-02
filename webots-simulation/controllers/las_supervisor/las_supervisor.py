@@ -62,7 +62,7 @@ count = 0
 prev_msg = ""
 random.seed(11)
 assessing = True 
-repopulate = True
+repopulate = False
 
 def generate_robot_central(num_robots):
     global fitness_scores 

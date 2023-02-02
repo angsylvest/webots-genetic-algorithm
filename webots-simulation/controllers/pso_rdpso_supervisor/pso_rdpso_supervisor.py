@@ -32,7 +32,7 @@ receiver.setChannel(4)
 # set up timing so consistent with ga 
 start = 0
 num_generations = 60
-total_time = 60 
+total_time = 600 
 trials = 50
 simulation_time = 10
 robot_population_sizes = [5, 10, 15] # [5, 10, 15]
@@ -494,7 +494,9 @@ def message_listener(time_step):
                     # remove redundant requests 
                     if obj_node not in found_list:
                         total_found += 1
-                        found_list.append(obj_node)
+                        if not repopulate: 
+                            found_list.append(obj_node)
+
                         collected_count[int(message.split("-")[0][1:])] = collected_count[int(message.split("-")[0][1:])] + 1
                         msg_info = "%" + message[1:]
                         if prev_msg != msg_info: 
@@ -670,7 +672,7 @@ def run_optimization():
                     r_field.setSFRotation([0, 0, -1])
                     
             run_seconds(total_time) 
-            run_seconds(5, True) # time to re-orient 
+            # run_seconds(5, True) # time to re-orient 
             reproduce_list = []
 
             

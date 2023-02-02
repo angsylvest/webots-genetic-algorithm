@@ -59,7 +59,7 @@ b_pos_to_generate_alternative = []
 prev_msg = ""
 random.seed(11)
 assessing = False 
-repopulate = True
+repopulate = False
 
 # for PSO, after end of each iteration, recalculate global and local best for each agent #
 def calc_global_local():
@@ -457,7 +457,10 @@ def message_listener(time_step):
                     # remove redundant requests 
                     if obj_node not in found_list:
                         total_found += 1
-                        found_list.append(obj_node)
+                        
+                        if not repopulate: 
+                            found_list.append(obj_node)
+                            
                         collected_count[int(message.split("-")[0][1:])] = collected_count[int(message.split("-")[0][1:])] + 1
                         msg_info = "%" + message[1:]
                         if prev_msg != msg_info: 
@@ -573,9 +576,9 @@ def run_optimization():
     global population 
 
     # added for testing purposes . 
-    simulation_time = 10 
-    total_time = 60 
-    num_generations = total_time // simulation_time
+    # simulation_time = 10 
+    # total_time = 60 
+    # num_generations = total_time // simulation_time
     
     for size in robot_population_sizes: 
     

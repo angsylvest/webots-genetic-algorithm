@@ -60,7 +60,7 @@ start = 0
 prev_msg = "" 
 random.seed(11) # was 11 (changed to 15 to get new configuration) 
 assessing = True # change once finished gathering data  
-repopulate = True 
+repopulate = False 
 
 def generate_robot_central(num_robots):
     global fitness_scores 

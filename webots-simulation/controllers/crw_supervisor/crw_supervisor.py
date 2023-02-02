@@ -58,7 +58,7 @@ b_pos_to_generate_alternative = []
 prev_msg = ""
 random.seed(11)
 assessing = True 
-repopulate = True
+repopulate = False
 
 
 def generate_robot_central(num_robots):
