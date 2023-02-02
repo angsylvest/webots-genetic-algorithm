@@ -339,6 +339,7 @@ def interpret():
             # reset group number 
             # reset number collected 
             # reset relevant positions 
+            obj_found_so_far = []
             group_assigned = initial_group 
 
             print('group assigned', group_assigned)
