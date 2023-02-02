@@ -95,6 +95,7 @@ alpha = 0.9
 
 avoid_pos = []
 group_performance = {}
+overall_population = []
 
 # generalize id acquisition
 if robot.getName() == "k0":
@@ -103,10 +104,10 @@ else:
     given_id = robot.getName()[3:-1] 
     
 emitter_individual = robot.getDevice("emitter_processor")
-emitter_individual.setChannel(int(given_id)*10)
+emitter_individual.setChannel(int(given_id)*10 + 5)
 receiver_individual = robot.getDevice("receiver_processor")
 receiver_individual.enable(timestep)
-receiver_individual.setChannel((int(given_id) * 10) - 1)
+receiver_individual.setChannel((int(given_id) * 10) + 6)
 
 # Agent Level File Appended Set-up 
 strategy_f = open("../../graph-generation/collision-data/pso-rdpso-info.csv", 'a')
@@ -207,13 +208,14 @@ def calc_pso_params(closest_neighx, closest_neighy):
     global group_best
     global alpha 
     global avoid_pos
+    global avoiding 
  
     global inertial_comp  # 1
     global exploration_coefficient #2 
     global avoidance_coefficient #3  
     global magnet_connectivity_component # c4, r4 is 0 if currently in avoiding state 
     
-    if not avoiding: 
+    if not reversing: 
         coef_3 = 0
     else: 
         coef_3 = avoidance_coefficient
@@ -227,15 +229,15 @@ def calc_pso_params(closest_neighx, closest_neighy):
     sum_x = 0
     sum_y = 0 
      
-    sum_x+= inertial_comp * random.uniform(0,1)*random.choices([-1, 1]) * (grp_x - curr_posx)
-    sum_x+= exploration_coefficient * random.uniform(0,1)*random.choices([-1, 1]) * (ind_x - curr_posx)
-    sum_x+= coef_3 * random.uniform(0,1)*random.choices([-1, 1]) * (obs_x - curr_posx)
-    sum_x+= magnet_connectivity_component * random.uniform(0,1)*random.choices([-1, 1]) * (nei_x - curr_posx)
+    sum_x+= inertial_comp * random.uniform(0,1)*random.choices([-1, 1])[0] * (grp_x - curr_posx)
+    sum_x+= exploration_coefficient * random.uniform(0,1)*random.choices([-1, 1])[0]  * (ind_x - curr_posx)
+    sum_x+= coef_3 * random.uniform(0,1)*random.choices([-1, 1])[0] * (obs_x - curr_posx)
+    sum_x+= magnet_connectivity_component * random.uniform(0,1)*random.choices([-1, 1])[0]  * (float(nei_x) - float(curr_posx))
     
-    sum_y+= inertial_comp * random.uniform(0,1)*random.choices([-1, 1]) * (grp_y - curr_posy)
-    sum_y+= exploration_coefficient * random.uniform(0,1)*random.choices([-1, 1]) * (grp_y - curr_posy)
-    sum_y+= coef_3 * random.uniform(0,1)*random.choices([-1, 1]) * (grp_y - curr_posy)
-    sum_y+= magnet_connectivity_component * random.uniform(0,1)*random.choices([-1, 1]) * (grp_y - curr_posy)
+    sum_y+= inertial_comp * random.uniform(0,1)*random.choices([-1, 1])[0]  * (grp_y - curr_posy)
+    sum_y+= exploration_coefficient * random.uniform(0,1)*random.choices([-1, 1])[0] * (grp_y - curr_posy)
+    sum_y+= coef_3 * random.uniform(0,1)*random.choices([-1, 1])[0]  * (grp_y - curr_posy)
+    sum_y+= magnet_connectivity_component * random.uniform(0,1)*random.choices([-1, 1])[0]  * (float(grp_y) - float(curr_posy))
     
     forward_speed_2 = forward_speed_1 
     forward_speed_1 = forward_speed 
@@ -245,7 +247,7 @@ def calc_pso_params(closest_neighx, closest_neighy):
     
     new_x, newy = curr_posx + forward_speedx, curr_posy + forward_speedy
     
-    return new_x, new_y 
+    return new_x, newy 
     
 def interpret(): 
     global fitness
@@ -264,6 +266,8 @@ def interpret():
     global group_best 
     global receiver 
     global receiver_individual
+    global emitter_individual 
+    global overall_population 
     
     # sent from overall supervisor 
     if receiver.getQueueLength()>0:
@@ -286,7 +290,7 @@ def interpret():
             
         elif 'group' in message: # assigns group 
             assignments = message[5:] 
-            group_assigned = assignments[int(given_id)] 
+            group_assigned = int(assignments[int(given_id)]) 
             initial_group = group_assigned
 
             print('group assigned', group_assigned)
@@ -295,6 +299,8 @@ def interpret():
             receiver_individual = robot.getDevice("receiver_processor")
             receiver_individual.enable(timestep)
             receiver_individual.setChannel((int(group_assigned) * 10) + 1)
+            
+            print(emitter_individual.getChannel(), receiver_individual.getChannel())
             receiver.nextPacket()
             
         elif 'size' in message:
@@ -302,22 +308,7 @@ def interpret():
             obj_found_so_far = []
             receiver.nextPacket()
             
-                
-        elif 'punished' in message: 
-            print('punished', given_id) 
-            ids = message.split('*')[1:-1] 
-            gp_id = message.split('*')[-1] 
-            if given_id in ids: # move to -1 
-                # update channel so listening to new supervisor 
-                group_assigned = 0 
-                
-                emitter_individual = robot.getDevice("emitter_processor")
-                emitter_individual.setChannel(int(group_assigned)*10)
-                receiver_individual = robot.getDevice("receiver_processor")
-                receiver_individual.enable(timestep)
-                receiver_individual.setChannel((int(group_assigned) * 10) + 1)
-                
-            receiver.nextPacket()   
+                  
 
         elif message[0] == "%" and message.split('-')[0][1:] == str(given_id):
              
@@ -348,10 +339,16 @@ def interpret():
             receiver_individual = robot.getDevice("receiver_processor")
             receiver_individual.enable(timestep)
             receiver_individual.setChannel((int(group_assigned) * 10) + 1)
-            receiver.nextPacket()
 
             receiver.nextPacket()
             
+        elif 'ids' in message: 
+            id_msg = message.split(" ")[1:]
+            
+            for id in id_msg: # will convert to nodes to eventual calculation 
+                overall_population.append(int(id))
+ 
+            receiver.nextPacket()       
             
         elif message == 'clean finish': 
             cleaning = False 
@@ -364,32 +361,69 @@ def interpret():
     # sent from group supervisor 
     if receiver_individual.getQueueLength()>0:
         message = receiver_individual.getData().decode('utf-8')
+        print('group msgs to personal robot', message) 
+        
         if 'pso' in message: 
             # strip pso key word & only get location relevant to given id 
-            personal_updates = message[4:].split('*')
+            personal_updates = message[4:].split('*')[:-1]
+            # personal_updates = personal_updates.split('%')
             for up in personal_updates: 
-                if given_id in up: 
+                if int(given_id) == int(up.split('%')[0]): 
                     personal_updates = up.split('%') # done on purpose to catch errors if this isn't happening correctly 
             
-            psx, psy = personal_updates[1], personal_updates[2]
+                    psx, psy = personal_updates[1], personal_updates[2]
+                    
+                    # update heading to move towards direction sent 
+                    curr_posx, curr_posy = gps.getValues()[0], gps.getValues()[1]
+                    new_x, new_y = calc_pso_params(psx, psy)
+                    
+                    direction = math.atan2((new_y - curr_posx),(new_x - curr_posx))
+                    chosen_direction = round(direction, 2)
+                    pso_heading = round(direction, 2)
+            receiver_individual.nextPacket()       
             
-            # update heading to move towards direction sent 
-            curr_posx, curr_posy = gps.getValues()[0], gps.getValues()[1]
-            new_x, new_y = calc_pso_params(psx, psy)
+        elif 'punished' in message:  
+            co = message[9:]
             
-            direction = math.atan2((new_y - curr_posx),(new_x - curr_posx))
-            chosen_direction = round(direction, 2)
-            pso_heading = round(direction, 2)
-            receiver.nextPacket()
+            ids = [int(i) for i in ''.join(co.split('*')[:-1]).split('%')[:-1]] 
             
+            gp_id = message.split('*')[-1] 
+            print(ids, gp_id) 
+           
+            print('punish stats', message, int(overall_population[int(given_id)]))
+            if int(overall_population[int(given_id)]) in ids: # move to -1 
+                # update channel so listening to new supervisor 
+                print('group assigned', group_assigned)
+                group_assigned = 0 
+                
+                emitter_individual = robot.getDevice("emitter_processor")
+                emitter_individual.setChannel(int(group_assigned)*10)
+                receiver_individual = robot.getDevice("receiver_processor")
+                receiver_individual.enable(timestep)
+                receiver_individual.setChannel((int(group_assigned) * 10) + 1)
+                
+            # send back to group 
+                emitter_individual.send(message.encode('utf-8'))
+                    
+            receiver_individual.nextPacket()
+            
+        elif 'rewarded' in message: # send back to find best 0 
+            emitter_individual.send(message.encode('utf-8'))
+            receiver_individual.nextPacket()
+            
+        elif 'subswarm' in message: # send back to find best 0 
+            emitter_individual.send(message.encode('utf-8'))
+            receiver_individual.nextPacket()
+                
         elif 'group update' in message: 
             group_best = [message.strip('][').split(',')[0], message.strip('][').split(',')[1]]
-            receiver.nextPacket()
+            receiver_individual.nextPacket()
             
         elif 'subbed' in message and int(group_assigned) == 0: 
-            ids = message.split('*')[1:-1] 
+            ids = [int(i) for i in message.split('*')[1:-1]]  
             old = group_assigned
-            if given_id in ids: 
+            gd = ids[given_id]
+            if int(overall_population[int(given_id)]) in ids:
                 group_assigned = message.split('*')[-1] 
                 print('new group assigned', group_assigned, given_id, old)
                 
@@ -399,10 +433,12 @@ def interpret():
                 receiver_individual = robot.getDevice("receiver_processor")
                 receiver_individual.enable(timestep)
                 receiver_individual.setChannel((int(group_assigned) * 10) + 1)
-            receiver.nextPacket()
+                
+                emitter_individual.send(message.encode('utf-8'))
+            receiver_individual.nextPacket()
             
         else: 
-            receiver.nextPacket()
+            receiver_individual.nextPacket()
 # Main loop:
 # - perform simulation steps until Webots is stopping the controller
 

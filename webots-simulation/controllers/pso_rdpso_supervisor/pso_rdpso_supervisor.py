@@ -125,6 +125,7 @@ def generate_robot_central(num_robots):
     g_index = 1 
     msg = "" 
     id_msg = 'ids'
+    node_msg = 'nodes' 
     
     for i in range(num_robots):
     
@@ -519,10 +520,10 @@ def message_listener(time_step):
             # will be generalized 
             
                     
-        elif 'punished' in message: 
+        # elif 'punished' in message: 
             # remove worst and send to 0 
-            emitter.send(message.encode('utf-8')) # send back   
-            receiver.nextPacket() 
+            # emitter.send(message.encode('utf-8')) # send back   
+            # receiver.nextPacket() 
             
              
         else: 

@@ -72,6 +72,7 @@ success = False
 size = 5 
  
 group_id = int(robot.getName()[11:-1]) - 1
+print('group ids', group_id) 
 #### allow personal supervisor to send important encounter info back to supervisor ## 
 emitter = robot.getDevice("emitter")
 emitter.setChannel(4)
@@ -87,6 +88,8 @@ receiver_individual.enable(TIME_STEP)
 receiver_individual.setChannel(int(group_id * 10)) # will be updated to be robot_id * 10 
 emitter_individual = robot.getDevice("emitter_processor")
 emitter_individual.setChannel((int(group_id) * 10) + 1)
+
+print('groups', emitter_individual.getChannel(), receiver_individual.getChannel())
 
 # must possess connection to overal supervisor (to be actually generated) & connection to each robot 
 # then adds collection statistics that are unique to given trial 
@@ -128,12 +131,13 @@ def calc_global_local():
             # pos = population[loc_best].getField('translation')
             given_id = overall_population.index(int(r))
                 
-            msg += str(given_id) + '%' + str(neighs[0]) + '%' + str(neighs[0]) + '*'
+            msg += str(given_id) + '%' + str(neighs[0]) + '%' + str(neighs[1]) + '*'
             index += 1 
             
-        msg += str(global_best.getSFVec3f())
-        print('pso calcs', group_id, msg) 
-        emitter_individual.send(str("pso-" + str(msg)).encode('utf-8'))    
+            msg += str(global_best.getSFVec3f())
+            print('pso calcs', group_id, msg, neighs) 
+            emitter_individual.send(str("pso-" + str(msg)).encode('utf-8'))  
+            msg = ""   
 
  
 def find_neighbor(curr_r, curr_loc): 
@@ -196,7 +200,7 @@ def get_best_in_excluded(select):
             
         new_group += str(r.getId()) + '*' 
         del group_dic[r.getId()]
-        population.remove(r)
+        population.remove(r.getId())
         size += 1
         
     return new_group 
@@ -243,7 +247,7 @@ def reward_subswarm():
         # send request to id 
         # will get best from excluded group 
         request = 'rewarded*' + str(group_id)
-        emitter.send(request.encode('utf-8'))
+        emitter_individual.send(request.encode('utf-8'))
         
         if (reward_count - punish_count) > 0: 
             spawn_prob = random.uniform(0,1) / size 
@@ -258,7 +262,7 @@ def reward_subswarm():
                 
                 # want to send to overall supervisor to send too all other agents 
                 msg = 'sub-swarm' + str(int(individual.getName()[11:-1]) - 1)
-                emitter.send(msg.encode('utf-8'))
+                emitter_individual.send(msg.encode('utf-8'))
                 
                  # create another supervisor group (+1 from previous) 
                  # send info to -1 so that this information can be sent to new supervisor and individual controllers are updated 
@@ -286,7 +290,7 @@ def punish_subswarm():
         print('punished', group_id, w)
         msg = 'punished*' + str(w) + '*' + str(group_id)
         emitter_individual.send(msg.encode('utf-8'))
-        emitter.send(msg.encode('utf-8'))
+        # emitter.send(msg.encode('utf-8'))
             # if size of sub swarm less than n_min, send agents to -1 and request overall supervisor to delete it completely 
     
     pass 
@@ -320,6 +324,10 @@ def message_listener(time_step):
     global group_dic
     global initial_group_dic
     global initial_population
+    global receiver
+    global receiver_individual 
+    global emitter 
+    global emitter_individual 
 
     if receiver.getQueueLength()>0 and (robot.getTime() - start < simulation_time):
         message = receiver.getData().decode('utf-8')
@@ -355,69 +363,26 @@ def message_listener(time_step):
                         found_list.append(obj_node)
                         reward_subswarm()
                         r = robot.getFromId(int(given_id))
-                        group_dic[given_id] += 1
+                        group_dic[overall_population[given_id]] += 1
                         success = True
                 
                         collected_count[int(message.split("-")[0][1:])] = collected_count[int(message.split("-")[0][1:])] + 1
                         msg_info = "%" + message[1:]
                         if prev_msg != msg_info: 
                             emitter.send(str(msg_info).encode('utf-8'))
-                            emitter_individual('group update' + str(max(group_dic).getField('translation').getSFVec3f()).encode('utf-8')) # allow ind to keep track of best 
+                            global_best = robot.getFromId(int(max(group_dic, key=group_dic.get))).getField('translation')
+                            emitter_individual.send('group update' + str(global_best).encode('utf-8')) # allow ind to keep track of best 
                             prev_msg = msg_info
                             print('removing object') 
 
             receiver.nextPacket()
           
-        elif 'sub-swarm' in message and group_id == 0:
-            best_n = get_best_in_excluded() # will get given ids (broken up by *) 
-            # send to agents that are relevant 
-            msg = 'subbed*' + str(best_n) + '*' + str(message[9:]) 
-            
-            emitter_individual.send(msg.encode('utf-8')) # will send to individual robot 
-            emitter.send(str(msg).encode('utf-8')) # will send to supervisor to update team layout 
-            
-            # will find best (atmost initialized value, and create new supervisor) 
-            # get group id and robot id num to send as msg, will be changed to new supervisor group id 
-            receiver.nextPacket()
             
         elif 'robot-info' in message: 
             size = message.split('*')[1]
             trial_count = message.split('*')[2]
             receiver.nextPacket()
-            
-        elif 'punished' in message and group_id == 0: 
-            # remove worst and send to 0 
-            given_robot = message.split('*')[1].split('%')
-            gp_id = message.split('*')[-1]
-            print('adding removed items to 0')
-            # msg = 'punished*' + str(w) + '*' + str(group_id)
-            
-            if group_id == gp_id:
-                for g in given_robot: 
-                    group_dic[g] = 0 
-                    population.append(int(g))
-            
-            
-            receiver.nextPacket() 
-            
-        elif 'rewarded' in message and group_id == 0: 
-            destination = message.split('*')[1]
-            best_n = get_best_in_excluded()
-            print('found excluded to add', best_n) 
-            msg = 'subbed*' + str(best_n) + '*' + str(destination) 
-            
-            emitter_individual.send(msg.encode('utf-8')) # will send to individual robot 
-        
-            receiver.nextPacket()
-            
-        elif 'subbed' in message: 
-            dest = message.split('*')[-1]
-            r = message.split('*')[1]
-            if int(dest) == group_id: 
-                group_dic[int(r)] = 0
-                population.append(int(r)) # get robot form id 
-          
-            receiver.nextPacket()   
+              
         
         elif 'ids' in message: 
             id_msg = message.split(" ")[1:]
@@ -472,14 +437,66 @@ def message_listener(time_step):
     # send from individual robots belonging to respective group 
     # if receiver_individual.getQueueLength()>0:  
         
+    if receiver_individual.getQueueLength()>0 and (robot.getTime() - start < simulation_time):
+        message = receiver_individual.getData().decode('utf-8')
+        print('personal msgs to group', message) 
+        
+        if 'punished' in message and group_id == 0: 
+            # remove worst and send to 0 
+            co = message[9:]
+            ids = [int(i) for i in ''.join(co.split('*')[:-1]).split('%')[:-1]] 
+            gp_id = message.split('*')[-1] 
+            # msg = 'punished*' + str(w) + '*' + str(group_id)
+            print(group_id, gp_id, ids) 
+            for g in ids: 
+                group_dic[g] = 0 
+                population.append(int(g))
+            print('adding removed items to 0', group_dic)
+            
+            receiver_individual.nextPacket() 
+            
+        elif 'rewarded' in message and group_id == 0: 
+            destination = message.split('*')[1]
+            best_n = get_best_in_excluded()
+            print('found excluded to add', best_n) 
+            msg = 'subbed*' + str(best_n) + '*' + str(destination) 
+            
+            emitter_individual.send(msg.encode('utf-8')) # will send to individual robot 
+        
+            receiver_individual.nextPacket()
+            
+        elif 'subbed' in message: 
+            dest = message.split('*')[-1]
+            r = message.split('*')[1]
+            if int(dest) == group_id: 
+                group_dic[int(r)] = 0
+                population.append(int(r)) # get robot form id 
+          
+            receiver_individual.nextPacket() 
+            
+        elif 'sub-swarm' in message and group_id == 0:
+            best_n = get_best_in_excluded() # will get given ids (broken up by *) 
+            # send to agents that are relevant 
+            msg = 'subbed*' + str(best_n) + '*' + str(message[9:]) 
+            print('getting best in 0 to sub') 
+            emitter_individual.send(msg.encode('utf-8')) # will send to individual robot 
+            emitter.send(str(msg).encode('utf-8')) # will send to supervisor to update team layout 
+            
+            # will find best (atmost initialized value, and create new supervisor) 
+            # get group id and robot id num to send as msg, will be changed to new supervisor group id 
+            receiver_individual.nextPacket()
+            
+        else: 
+            receiver_individual.nextPacket()
+            
     
-    
-    elif (robot.getTime() - start > simulation_time and prev_msg != 'clean finish'):
+    if (robot.getTime() - start > simulation_time and prev_msg != 'clean finish'):
         # if over time would want to reset 
         emitter.send('cleaning'.encode('utf-8'))
         
-        while receiver.getQueueLength()>0:
+        while receiver.getQueueLength()>0 and receiver_individual.getQueueLength()>0:
             receiver.nextPacket()
+            receiver_individual.nextPacket()
             
         emitter.send('clean finish'.encode('utf-8'))
         prev_msg = 'clean finish'
@@ -577,7 +594,7 @@ def run_optimization():
         # if unsuccessful, punish 
         if not success: 
             punish_subswarm()
-            print('given group', group_id, 'failed')
+            # print('given group', group_id, 'failed')
             
         print('overall groups', group_id, group_dic)
         calc_global_local() # updates each robot to pivot toward successful place 
@@ -586,7 +603,7 @@ def run_optimization():
         
         # print('waiting for genotypes')
         
-        run_seconds(5, True) # time to re-orient 
+        # run_seconds(5, True) # time to re-orient 
         
         # for rec_node in population: 
             # r_field = robot.getFromId(rec_node).getField('rotation')
