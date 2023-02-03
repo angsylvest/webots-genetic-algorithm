@@ -600,16 +600,17 @@ def run_optimization():
     total_time_elapsed = 0
     
     while robot.step(TIME_STEP) != -1: 
+        it_count = 0 
         while total_time > total_time_elapsed: 
             
             updated = False  
             
-            for i in range(int(round(num_iterations))):
-                run_seconds(simulation_time // num_iterations) 
-                calc_global_local()
+            #for i in range(int(round(num_iterations))):
+            run_seconds(simulation_time) 
+            calc_global_local()
             
             # if unsuccessful, punish 
-            if not success: 
+            if not success and it_count == : 
                 punish_subswarm()
                 search_counter()
                 # print('given group', group_id, 'failed')
@@ -618,6 +619,8 @@ def run_optimization():
             # calc_global_local() # updates each robot to pivot toward successful place 
             total_time_elapsed += simulation_time
             success = False
+            
+            it_count += 1
             
             # print('waiting for genotypes')
             
@@ -637,7 +640,7 @@ def run_optimization():
         num_excluded = 0 
         success= False
         total_time_elapsed = 0
-    
+        it_count = 0 
     # will be deleted for subsequent trial 
     # emitter.send('trial_complete'.encode('utf-8')) 
    
