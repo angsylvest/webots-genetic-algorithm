@@ -32,7 +32,7 @@ receiver.setChannel(4)
 # set up timing so consistent with ga 
 start = 0
 num_generations = 60
-total_time = 600 
+total_time = 600
 trials = 50
 simulation_time = 10
 robot_population_sizes = [5, 10, 15] # [5, 10, 15]
@@ -473,11 +473,13 @@ def message_listener(time_step):
             obj_node = robot.getFromId(int(message.split("-")[1]))
             given_id = message.split("-")[0][1:]
             group_id = message.split("-")[2]
-            # print(obj_node)
+            print(obj_node)
             if obj_node is not None:
                 r_node_loc = population[int(message.split("-")[0][1:])].getField('translation').getSFVec3f()
                 t_field = obj_node.getField('translation')
                 t_node_loc = t_field.getSFVec3f()
+                
+                print( math.dist(r_node_loc, t_node_loc))
                 
                 # print(math.dist(r_node_loc, t_node_loc))
                 if (math.dist(r_node_loc, t_node_loc) < 0.15): # only count if actually in range 
@@ -677,7 +679,7 @@ def run_optimization():
             reproduce_list = []
 
             
-            overall_f.write(str(i) + ',' + str(robot.getTime()) + ','  + str(total_found) + ','  + str(size)+ ',crw' + '\n')    
+            overall_f.write(str(i) + ',' + str(robot.getTime()) + ','  + str(total_found) + ','  + str(size)+ ',pso-rdpso' + '\n')    
             overall_f.close()
             overall_f = open('../../graph-generation/collection-data/overall-pso-rdpso-info.csv', 'a') 
             print('items collected', total_found)
@@ -695,7 +697,7 @@ def run_optimization():
             found_list = [] 
             index = 0 
             emitter.send('trial_complete'.encode('utf-8')) 
-            print('finished trial 60 sec')
+            # print('finished trial 60 sec')
             
             
             # TODO: delete all robots and group supervisor for next sim 

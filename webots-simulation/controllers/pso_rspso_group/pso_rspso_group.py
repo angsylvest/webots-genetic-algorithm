@@ -26,7 +26,7 @@ start = 0
 num_generations = 60
 total_time = 600 
 trials = 50
-simulation_time = 10
+simulation_time = 90
 robot_population_sizes = [5, 10, 15] # [5, 10, 15]
 curr_size = robot_population_sizes[0]
 curr_trial = 0 
@@ -34,7 +34,7 @@ population = []
 initial_genotypes = []
 fitness_scores = []
 pop_genotypes = []
-sc_max = 30 # max number of time before punishment (might not be fine-tuned)
+sc_max = 10 # max number of time before punishment (might not be fine-tuned)
 num_excluded = 0
 spawn_prob = 0 
 reward_count = 0 
@@ -49,6 +49,7 @@ nmax = 6
 group_dic = {}
 n_kills = 0 
 trial_count = 0
+num_iterations = sc_max
 
 # sim statistics 
 total_collected = 0 
@@ -174,10 +175,13 @@ def search_counter():
     global simulation_time
     global num_excluded
     global group_dic 
+    global num_iterations
     
     if len(group_dic) != 0: 
-        simulation_time = sc_max*(1 - (1 / (num_excluded + 1)))
-        print('updated simulation time', simulation_time) 
+        if (num_excluded - 1) != 0: # only update if mathematically allowed
+            num_iterations = sc_max*(1 - (1 / (num_excluded - 1)))
+            print('updated simulation time', simulation_time) 
+        
 
 def get_best_in_excluded(select):
     global group_dic
@@ -210,6 +214,7 @@ def get_worst_in_group():
     global population 
     global n_i 
     global n_min 
+    global num_excluded
     
     new_group = ''
     size = 0 
@@ -224,6 +229,7 @@ def get_worst_in_group():
         del group_dic[int(min(group_dic, key=group_dic.get))]
         print('worst', group_dic, group_id)
         size += 1
+        num_excluded += 1
         
     if len(population) < n_min:
         for r in population: 
@@ -331,7 +337,7 @@ def message_listener(time_step):
 
     if receiver.getQueueLength()>0 and (robot.getTime() - start < simulation_time):
         message = receiver.getData().decode('utf-8')
-        print('group messages ', message)
+        # print('group messages ', message)
         if message[0] == "$": # handles deletion of objects when grabbed
             obj_node = robot.getFromId(int(message.split("-")[1]))
             given_id = message.split("-")[0][1:]
@@ -415,6 +421,7 @@ def message_listener(time_step):
             
             group_dic = initial_group_dic
             population = initial_population
+            simulation_time = sc_max
             
             receiver.nextPacket()
             
@@ -457,7 +464,7 @@ def message_listener(time_step):
             
         elif 'rewarded' in message and group_id == 0: 
             destination = message.split('*')[1]
-            best_n = get_best_in_excluded()
+            best_n = get_best_in_excluded(1)
             print('found excluded to add', best_n) 
             msg = 'subbed*' + str(best_n) + '*' + str(destination) 
             
@@ -467,15 +474,19 @@ def message_listener(time_step):
             
         elif 'subbed' in message: 
             dest = message.split('*')[-1]
-            r = message.split('*')[1]
-            if int(dest) == group_id: 
-                group_dic[int(r)] = 0
-                population.append(int(r)) # get robot form id 
+            robots = message.split('*')[1:-1]
+            
+            for r in robots: 
+                if int(dest) == group_id: 
+                    group_dic[int(r)] = 0
+                    population.append(int(r)) # get robot form id 
           
             receiver_individual.nextPacket() 
-            
+        
+
+                
         elif 'sub-swarm' in message and group_id == 0:
-            best_n = get_best_in_excluded() # will get given ids (broken up by *) 
+            best_n = get_best_in_excluded(0) # will get given ids (broken up by *) 
             # send to agents that are relevant 
             msg = 'subbed*' + str(best_n) + '*' + str(message[9:]) 
             print('getting best in 0 to sub') 
@@ -577,46 +588,55 @@ def run_optimization():
     global nmax
     global success
     global size 
+    global num_excluded
+    global num_iterations
 
     
     # for i in range(trials): 
         # print('beginning new trial', i)
-    simulation_time = sc_max
+    num_iterations = sc_max
     spawn_prob = random.uniform(0,1) / size 
     success = False 
     total_time_elapsed = 0
     
-    while total_time > total_time_elapsed: 
-        
-        updated = False     
-        run_seconds(simulation_time) 
-        
-        # if unsuccessful, punish 
-        if not success: 
-            punish_subswarm()
-            # print('given group', group_id, 'failed')
+    while robot.step(TIME_STEP) != -1: 
+        while total_time > total_time_elapsed: 
             
-        print('overall groups', group_id, group_dic)
-        calc_global_local() # updates each robot to pivot toward successful place 
-        search_counter()
-        total_time_elapsed += simulation_time
-        
-        # print('waiting for genotypes')
-        
-        # run_seconds(5, True) # time to re-orient 
-        
-        # for rec_node in population: 
-            # r_field = robot.getFromId(rec_node).getField('rotation')
-            # if r_field.getSFRotation() != [0, 0, -1]:
-                # r_field.setSFRotation([0, 0, -1])
-        
-        # regenerate_blocks_power_law()
-        # regenerate_blocks_single_source()
-        # regenerate_blocks_dual_source()
-    total_found = 0 
-    found_list = [] 
-    index = 0 
-    num_excluded = 0 
+            updated = False  
+            
+            for i in range(int(round(num_iterations))):
+                run_seconds(simulation_time // num_iterations) 
+                calc_global_local()
+            
+            # if unsuccessful, punish 
+            if not success: 
+                punish_subswarm()
+                search_counter()
+                # print('given group', group_id, 'failed')
+                
+            print('overall groups', group_id, group_dic)
+            # calc_global_local() # updates each robot to pivot toward successful place 
+            total_time_elapsed += simulation_time
+            success = False
+            
+            # print('waiting for genotypes')
+            
+            # run_seconds(5, True) # time to re-orient 
+            
+            # for rec_node in population: 
+                # r_field = robot.getFromId(rec_node).getField('rotation')
+                # if r_field.getSFRotation() != [0, 0, -1]:
+                    # r_field.setSFRotation([0, 0, -1])
+            
+            # regenerate_blocks_power_law()
+            # regenerate_blocks_single_source()
+            # regenerate_blocks_dual_source()
+        total_found = 0 
+        found_list = [] 
+        index = 0 
+        num_excluded = 0 
+        success= False
+        total_time_elapsed = 0
     
     # will be deleted for subsequent trial 
     # emitter.send('trial_complete'.encode('utf-8')) 

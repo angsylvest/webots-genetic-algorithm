@@ -411,7 +411,7 @@ def interpret():
             emitter_individual.send(message.encode('utf-8'))
             receiver_individual.nextPacket()
             
-        elif 'subswarm' in message: # send back to find best 0 
+        elif 'sub-swarm' in message: # send back to find best 0 
             emitter_individual.send(message.encode('utf-8'))
             receiver_individual.nextPacket()
                 

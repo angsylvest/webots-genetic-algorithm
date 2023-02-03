@@ -76,7 +76,7 @@ def calc_global_local():
     for r in population: 
         t_field = r.getField('translation').getSFVec3f()
         neighs = find_two_neighbors(r, t_field) 
-        loc_best = max(collected_count[neighs[0]], collected_count[neighs[1]])
+        loc_best = index.collected_count(max(collected_count[neighs[0]], collected_count[neighs[1]]))
         pos = population[loc_best].getField('translation').getSFVec3f()
         msg += str(pos) + '*'
         index += 1 
@@ -629,7 +629,7 @@ def run_optimization():
                 # generate_robot_central(size)
                 # regenerate_environment(0.2)  
             
-            overall_f.write(str(i) + ',' + str(robot.getTime()) + ','  + str(total_found) + ','  + str(size)+ ',crw' + '\n')    
+            overall_f.write(str(i) + ',' + str(robot.getTime()) + ','  + str(total_found) + ','  + str(size)+ ',pso-pugh' + '\n')    
             overall_f.close()
             overall_f = open('../../graph-generation/collection-data/overall-pso-pugh-info.csv', 'a') 
             print('items collected', total_found)
