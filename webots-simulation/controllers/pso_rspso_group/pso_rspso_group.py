@@ -610,9 +610,10 @@ def run_optimization():
             calc_global_local()
             
             # if unsuccessful, punish 
-            if not success and it_count == : 
+            if not success and it_count == num_iterations: 
                 punish_subswarm()
                 search_counter()
+                it_count = 0 
                 # print('given group', group_id, 'failed')
                 
             print('overall groups', group_id, group_dic)
