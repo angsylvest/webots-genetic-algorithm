@@ -26,7 +26,7 @@ start = 0
 num_generations = 60
 total_time = 600 
 trials = 50
-simulation_time = 90
+simulation_time = 30
 robot_population_sizes = [5, 10, 15] # [5, 10, 15]
 curr_size = robot_population_sizes[0]
 curr_trial = 0 
@@ -34,7 +34,7 @@ population = []
 initial_genotypes = []
 fitness_scores = []
 pop_genotypes = []
-sc_max = 10 # max number of time before punishment (might not be fine-tuned)
+sc_max = 1 # max number of time before punishment (might not be fine-tuned)
 num_excluded = 0
 spawn_prob = 0 
 reward_count = 0 
@@ -136,7 +136,7 @@ def calc_global_local():
             index += 1 
             
             msg += str(global_best.getSFVec3f())
-            print('pso calcs', group_id, msg, neighs) 
+            # print('pso calcs', group_id, msg, neighs) 
             emitter_individual.send(str("pso-" + str(msg)).encode('utf-8'))  
             msg = ""   
 
@@ -151,7 +151,7 @@ def find_neighbor(curr_r, curr_loc):
     
         if curr_r != r: 
             t_field = robot.getFromId(r).getField('translation').getSFVec3f()
-            print(curr_loc, t_field) 
+            # print(curr_loc, t_field) 
             d = math.dist(curr_loc, t_field)
             dists.append(d) 
             
@@ -342,7 +342,7 @@ def message_listener(time_step):
             obj_node = robot.getFromId(int(message.split("-")[1]))
             given_id = message.split("-")[0][1:]
             group_id = message.split("-")[2]
-            # print(obj_node)
+            print('group has msg', obj_node)
             if obj_node is not None:
                 
                 # r_node_loc = population[int(message.split("-")[0][1:])].getField('translation').getSFVec3f()
@@ -363,7 +363,9 @@ def message_listener(time_step):
   
                     # obj_node.remove()
                     # remove redundant requests 
+                    print('working on removing objects') 
                     if obj_node not in found_list:
+                        print('group updating dic') 
                         total_found += 1
                         reward_count += 1
                         found_list.append(obj_node)

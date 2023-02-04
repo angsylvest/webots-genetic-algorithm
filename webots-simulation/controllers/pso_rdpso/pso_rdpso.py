@@ -268,11 +268,12 @@ def interpret():
     global receiver_individual
     global emitter_individual 
     global overall_population 
+    global prev_msg
     
     # sent from overall supervisor 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
-        print('personal msgs', message) 
+        # print('personal msgs', message) 
             
         if message == "return_fitness":
             print('request received') 
@@ -292,6 +293,7 @@ def interpret():
             assignments = message[5:] 
             group_assigned = int(assignments[int(given_id)]) 
             initial_group = group_assigned
+            obj_found_so_far = []
 
             print('group assigned', group_assigned)
             emitter_individual = robot.getDevice("emitter_processor")
@@ -300,7 +302,7 @@ def interpret():
             receiver_individual.enable(timestep)
             receiver_individual.setChannel((int(group_assigned) * 10) + 1)
             
-            print(emitter_individual.getChannel(), receiver_individual.getChannel())
+            # print(emitter_individual.getChannel(), receiver_individual.getChannel())
             receiver.nextPacket()
             
         elif 'size' in message:
@@ -357,7 +359,7 @@ def interpret():
                 
         else: 
             receiver.nextPacket()
-            
+           
     # sent from group supervisor 
     if receiver_individual.getQueueLength()>0:
         message = receiver_individual.getData().decode('utf-8')
@@ -550,12 +552,14 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     
                         firstObject = camera.getRecognitionObjects()[0]
                         id = str(firstObject.get_id())
+                        print('potential obj detected', id, gps.getValues()[0], gps.getValues()[1]) 
                         
                         if id not in obj_found_so_far:            
                             id = "$" + str(given_id) + "-" + str(id) + "-" + str(group_assigned) # indication that it is a object to be deleted 
                             if prev_msg != id: 
                                 emitter.send(str(id).encode('utf-8'))
                                 prev_msg = id 
+                                print(given_id, 'send to supervisor') 
                         
                 else: 
                     t_block += 1

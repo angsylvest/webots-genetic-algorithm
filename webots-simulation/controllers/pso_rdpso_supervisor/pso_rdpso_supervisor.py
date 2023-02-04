@@ -92,6 +92,7 @@ def generate_robot_central(num_robots):
     
     
     # initialize_genotypes(num_robots)
+    
     emitter.send(str("size-" + str(num_robots)).encode('utf-8'))
 
     # resets everything 
@@ -466,18 +467,20 @@ def message_listener(time_step):
     global prev_msg
     global group_dic
 
-    if receiver.getQueueLength()>0 and (robot.getTime() - start < simulation_time):
+    if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
         print('supervisor msgs', message)
         if message[0] == "$": # handles deletion of objects when grabbed
             obj_node = robot.getFromId(int(message.split("-")[1]))
             given_id = message.split("-")[0][1:]
             group_id = message.split("-")[2]
-            print(obj_node)
+            print(obj_node, 'belongs to', given_id, int(message.split("-")[0][1:]))
             if obj_node is not None:
                 r_node_loc = population[int(message.split("-")[0][1:])].getField('translation').getSFVec3f()
                 t_field = obj_node.getField('translation')
+                # print('robot loc', given_id, t_field)
                 t_node_loc = t_field.getSFVec3f()
+                print('robot loc', given_id, t_node_loc)
                 
                 print( math.dist(r_node_loc, t_node_loc))
                 
@@ -530,6 +533,7 @@ def message_listener(time_step):
              
         else: 
             receiver.nextPacket()
+           
             
     # elif (robot.getTime() - start > simulation_time and prev_msg != 'clean finish'):
     # if over time would want to reset 
@@ -540,6 +544,9 @@ def message_listener(time_step):
             
         # emitter.send('clean finish'.encode('utf-8'))
         # prev_msg = 'clean finish'
+        
+    else: 
+       receiver.nextPacket() 
 
 # runs simulation for designated amount of time 
 def run_seconds(t,waiting=False):
