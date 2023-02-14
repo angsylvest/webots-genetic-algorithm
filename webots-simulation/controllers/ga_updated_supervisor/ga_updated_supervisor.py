@@ -71,7 +71,7 @@ emitter_individual = robot.getDevice("emitter_processor")
 emitter_individual.setChannel(5)
 assessing = True 
 repopulate = False
-phase_one_times = [600, 700, 800, 900]
+phase_one_times = [620]
 
 
 # set up environments 
@@ -737,7 +737,7 @@ def run_optimization():
                 reset_genotype() 
             
             if curr_trial % 20 == 0: 
-                total_elapsed += 10 
+                total_elapsed += 20 
             ### reset individual robot controllers and respective supervisors 
             
             
