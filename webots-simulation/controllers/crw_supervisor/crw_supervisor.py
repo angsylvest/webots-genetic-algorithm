@@ -15,7 +15,7 @@ overall_f = open('../../graph-generation/collection-data/overall-crw-info.csv', 
 
 # individual robot collision counts 
 strategy_f = open("../../graph-generation/collision-data/crw-info.csv", 'w')
-strategy_f.write('agent id,'+ 'time step,' +' time since last block' + ',size' + ',collisions'+ ',type' + ',collected' + '\n')
+strategy_f.write('agent id,'+ 'time step,' +' time since last block' + ',size' + ',collisions'+ ',type' + ',collected' + ',pos x' + ',pos y' + '\n')
 strategy_f.close()
 
 # set-up robot2
@@ -31,9 +31,9 @@ receiver.setChannel(2)
 
 # set up timing so consistent with ga 
 start = 0
-num_generations = 10
+num_generations = 20
 trials = 100
-simulation_time = 60
+simulation_time = 30
 robot_population_sizes = [10, 15] # [5, 10, 15]
 curr_size = robot_population_sizes[0]
 curr_trial = 0 

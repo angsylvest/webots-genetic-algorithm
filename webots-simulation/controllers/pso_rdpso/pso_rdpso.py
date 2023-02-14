@@ -281,12 +281,12 @@ def interpret():
             print('response is', response)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
-            strategy_f.write(str(given_id) + ',' + str(robot.getTime()) + ',' + str(t_block) + ',' + str(curr_sim_size) + ',' + str(fitness) + ',pso-rdpso' + ',' + str(len(obj_found_so_far)) + '\n')
+            strategy_f.write(str(given_id) + ',' + str(robot.getTime()) + ',' + str(t_block) + ',' + str(curr_sim_size) + ',' + str(fitness) + ',pso-rdpso' + ',' + str(len(obj_found_so_far)) + ',' + str(gps.getValues()[0]) + ',' + str(gps.getValues()[1]) + '\n')
             strategy_f.close()
             strategy_f = open("../../graph-generation/collision-data/pso-rdpso-info.csv", 'a')
             fitness = 0
             
-            receiver.nextPacket()
+            # receiver.nextPacket()
        
             
         elif 'group' in message: # assigns group 
@@ -366,8 +366,12 @@ def interpret():
         print('group msgs to personal robot', message) 
         
         if 'pso' in message: 
-            # strip pso key word & only get location relevant to given id 
+            strategy_f.write(str(given_id) + ',' + str(robot.getTime()) + ',' + str(t_block) + ',' + str(curr_sim_size) + ',' + str(fitness) + ',pso-rdpso' + ',' + str(len(obj_found_so_far)) + ',' + str(gps.getValues()[0]) + ',' + str(gps.getValues()[1]) + '\n')
+            strategy_f.close()
+            strategy_f = open("../../graph-generation/collision-data/pso-rdpso-info.csv", 'a')
             personal_updates = message[4:].split('*')[:-1]
+            
+            # strip pso key word & only get location relevant to given id 
             # personal_updates = personal_updates.split('%')
             for up in personal_updates: 
                 if int(given_id) == int(up.split('%')[0]): 

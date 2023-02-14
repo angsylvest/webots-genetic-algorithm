@@ -217,7 +217,7 @@ def interpret():
             print('response is', response)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
-            strategy_f.write(str(given_id) + ',' + str(robot.getTime()) + ',' + str(t_block) + ',' + str(curr_sim_size) + ',' + str(fitness) + ',pso-pugh' + ',' + str(len(obj_found_so_far)) + '\n')
+            strategy_f.write(str(given_id) + ',' + str(robot.getTime()) + ',' + str(t_block) + ',' + str(curr_sim_size) + ',' + str(fitness) + ',pso-pugh' + ',' + str(len(obj_found_so_far)) + ',' + str(gps.getValues()[0]) + ',' + str(gps.getValues()[1]) + '\n')
             strategy_f.close()
             strategy_f = open("../../graph-generation/collision-data/pso-pugh-info.csv", 'a')
             fitness = 0

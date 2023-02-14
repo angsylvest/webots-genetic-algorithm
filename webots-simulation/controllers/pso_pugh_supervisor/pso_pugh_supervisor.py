@@ -15,7 +15,7 @@ overall_f = open('../../graph-generation/collection-data/overall-pso-pugh-info.c
 
 # individual robot collision counts 
 strategy_f = open("../../graph-generation/collision-data/pso-pugh-info.csv", 'w')
-strategy_f.write('agent id,'+ 'time step,' +' time since last block' + ',size' + ',collisions'+ ',type' + ',collected' + '\n')
+strategy_f.write('agent id,'+ 'time step,' +' time since last block' + ',size' + ',collisions'+ ',type' + ',collected' + ',pos x' + ',pos y' + '\n')
 strategy_f.close()
 
 # set-up robot2

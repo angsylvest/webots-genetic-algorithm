@@ -375,8 +375,6 @@ def interpret(timestep):
             
             receiver.nextPacket()
             
-        elif 'repopulate' in message: 
-            repopulate = True 
             
         elif message == "return_fitness": # happpens at end of generation 
             if best_prev_genotype == '!': 
@@ -384,7 +382,7 @@ def interpret(timestep):
             
             response = "k" + str(int(given_id)) + "-fitness" + str(fitness) + '-other' + str(best_prev_genotype) + '-overall' + str(calc_robot_fitness())
             print('calculating fitness', calc_robot_fitness())
-            strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(weights[0]) + ',' + str(weights[1]) + ',' + str(weights[2]) + ',' + str(weights[3]) + ','+ str(time_elapsed_since_block) + ',' + str(n_observations_robot)  + ',' + str(curr_sim_size) + ',' + str(calc_robot_fitness())+ ',' + str(curr_sim_size) + ',ga' + ',' + str(trial_num) + ',' + str(n_observations_block) + ',' + str(curr_robot_genotype) + ',' + str(num_better) + '\n')
+            strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(weights[0]) + ',' + str(weights[1]) + ',' + str(weights[2]) + ',' + str(weights[3]) + ','+ str(time_elapsed_since_block) + ',' + str(n_observations_robot)  + ',' + str(curr_sim_size) + ',' + str(calc_robot_fitness())+ ',' + str(curr_sim_size) + ',ga' + ',' + str(trial_num) + ',' + str(n_observations_block) + ',' + str(curr_robot_genotype) + ',' + str(num_better) + ',' + str(gps.getValues()[0]) + ',' + str(gps.getValues()[1]) + '\n')
             strategy_f.close()
             strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'a')
 

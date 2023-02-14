@@ -201,7 +201,7 @@ def interpret():
             response = "k" + str(int(given_id)) + "-fitness" + str(fitness)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
-            strategy_f.write(str(given_id) + ',' + str(robot.getTime()) + ',' + str(t_block) + ',' + str(curr_sim_size) + ',' + str(fitness)+ ',las' + ',' + str(len(obj_found_so_far)) + '\n')
+            strategy_f.write(str(given_id) + ',' + str(robot.getTime()) + ',' + str(t_block) + ',' + str(curr_sim_size) + ',' + str(fitness)+ ',las' + ',' + str(len(obj_found_so_far)) + ',' + str(gps.getValues()[0]) + ',' + str(gps.getValues()[1]) + '\n')
             strategy_f.close()
             strategy_f = open("../../graph-generation/collision-data/las-info.csv", 'a')
             fitness = 0

@@ -18,7 +18,7 @@ overall_f = open('../../graph-generation/collection-data/overall-ant-info.csv', 
 
 # individual robot collision counts  
 strategy_f = open("../../graph-generation/collision-data/ant-info.csv", 'w')
-strategy_f.write('agent id,'+ 'time step,' +' time since last block' + ',size' + ',collisions'+ ',type' + ',collected' + '\n')
+strategy_f.write('agent id,'+ 'time step,' +' time since last block' + ',size' + ',collisions'+ ',type' + ',collected' + ',pos x' + ',pos y' + '\n')
 strategy_f.close()
 
 # set-up robot
@@ -34,8 +34,8 @@ receiver.setChannel(2)
 arena_area = robot.getFromDef("arena")
 
 # set up timing so consistent with ga 
-num_generations = 10
-simulation_time = 60
+num_generations = 20
+simulation_time = 30
 trials = 100
 curr_size = 5
 robot_population_sizes = [10, 15] # [5, 10, 15]

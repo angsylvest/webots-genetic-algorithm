@@ -22,7 +22,7 @@ overall_f = open('../../graph-generation/collection-data/overall-df.csv', 'a')
 
 # for individual robot, statistics about strategy taken over time & individual collision info 
 strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'w')
-strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',num encounters' + ',size' + ',fitness'+ ',size'+ ',type' + ',trial' + ',collected' + ',genotype' + ',num better' + '\n')
+strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',num encounters' + ',size' + ',fitness'+ ',size'+ ',type' + ',trial' + ',collected' + ',genotype' + ',num better' + ',pos x' + ',pos y' + '\n')
 strategy_f.close()
 
 # genetic algorithm-specific parameters 
@@ -70,7 +70,7 @@ id_msg = ""
 emitter_individual = robot.getDevice("emitter_processor")
 emitter_individual.setChannel(5)
 assessing = True 
-repopulate = False
+repopulate = False # keep False for now 
 phase_one_times = [620]
 
 
