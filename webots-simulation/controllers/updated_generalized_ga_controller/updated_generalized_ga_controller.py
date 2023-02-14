@@ -74,6 +74,7 @@ time_switch = 200
 sim_complete = False 
 obj_found_so_far = []
 curr_sim_size = 5
+repopulate = False 
 # follow_thres = 3
 
 next_child = ""
@@ -358,6 +359,7 @@ def interpret(timestep):
     global curr_robot_genotype
     global n_observations_robot
     global num_better
+    global repopulate 
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -372,6 +374,9 @@ def interpret(timestep):
             num_better = 0 
             
             receiver.nextPacket()
+            
+        elif 'repopulate' in message: 
+            repopulate = True 
             
         elif message == "return_fitness": # happpens at end of generation 
             if best_prev_genotype == '!': 
@@ -445,7 +450,7 @@ def interpret(timestep):
             observations_per_strategy[current_strat_index] += 1
             
             obj_id = message.split('-')[1] 
-            obj_found_so_far.append(obj_id) 
+            
             inc = 0.02
             weights[current_strat_index] = weights[current_strat_index] + inc
             weights = [float(i)/sum(weights) for i in weights] 

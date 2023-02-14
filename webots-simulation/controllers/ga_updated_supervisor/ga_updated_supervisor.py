@@ -15,7 +15,7 @@ collected_count = []
 
 # collected counts csv generation 
 overall_f = open('../../graph-generation/collection-data/overall-df.csv', 'w')
-overall_columns = 'trial' + ',time' + ',objects retrieved' + ',size' + ',type' + ',potential time'
+overall_columns = 'trial' + ',time' + ',objects retrieved' + ',size' + ',type' + ',potential time' + ',total elapsed'
 overall_f.write(str(overall_columns) + '\n')
 overall_f.close()
 overall_f = open('../../graph-generation/collection-data/overall-df.csv', 'a')
@@ -71,6 +71,7 @@ emitter_individual = robot.getDevice("emitter_processor")
 emitter_individual.setChannel(5)
 assessing = True 
 repopulate = False
+phase_one_times = [600, 700, 800, 900]
 
 
 # set up environments 
@@ -470,7 +471,9 @@ def message_listener(time_step):
                     # remove redundant requests 
                     if obj_node not in found_list:
                         total_found += 1
-                        found_list.append(obj_node)
+                        if not repopulate: 
+                            found_list.append(obj_node)
+                            
                         collected_count[int(message.split("-")[0][1:])] = collected_count[int(message.split("-")[0][1:])] + 1
                         msg = "%" + message[1:]
                         if prev_msg != msg: 
@@ -638,6 +641,7 @@ def run_optimization():
     global population 
     global prev_msg 
     global curr_trial 
+    global phase_one_times
     
     for size in robot_population_sizes:
         curr_size = size  
@@ -674,7 +678,8 @@ def run_optimization():
         # regenerate_blocks_dual_source()
   
         # potential_times = [i for i in range(20, 100, 10)]
-        total_elapsed = 600
+        
+        total_elapsed = phase_one_times[0]
         
         # for p in potential_times: 
             
@@ -686,6 +691,7 @@ def run_optimization():
             
             # if (assessing and trial % 2) == 0 or not assessing: 
             emitter_individual.send(str(msg).encode('utf-8'))
+            
             
             for rec_node in population: 
                 r_field = rec_node.getField('rotation')
@@ -716,7 +722,7 @@ def run_optimization():
                 # generate_robot_central(size)
                 # regenerate_environment(0.2)  
 
-            overall_f.write(str(i) + ',' + str(robot.getTime()) + ',' + str(total_found) + ',' + str(size)+ ',' + 'ga' + ',' + str(20) + '\n')    
+            overall_f.write(str(i) + ',' + str(robot.getTime()) + ',' + str(total_found) + ',' + str(size)+ ',' + 'ga' + ',' + str(20) + ',' + str(total_elapsed) + '\n')    
             overall_f.close()
             overall_f = open('../../graph-generation/collection-data/overall-df.csv', 'a')
             print('items collected', total_found)
@@ -730,6 +736,8 @@ def run_optimization():
                 regenerate_environment(0.2)
                 reset_genotype() 
             
+            if curr_trial % 20 == 0: 
+                total_elapsed += 10 
             ### reset individual robot controllers and respective supervisors 
             
             
