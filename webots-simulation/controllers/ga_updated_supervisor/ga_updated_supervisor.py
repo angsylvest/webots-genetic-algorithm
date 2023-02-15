@@ -27,7 +27,7 @@ strategy_f.close()
 
 # genetic algorithm-specific parameters 
 num_generations = 10
-simulation_time = 50
+simulation_time = 30
 trials = 100
 curr_trial = 0 
 robot_population_sizes = [10, 15]
@@ -147,7 +147,7 @@ def regenerate_environment_alternate(block_dist): # will stay constant based off
         
     # generates block on opposite sides of arena (randomly generated) 
     if len(b_pos_to_generate_alternative) == 0: 
-        seed_file = open('../../graph-generation/seed-15.csv', 'r') 
+        seed_file = open('../../graph-generation/seed-15-pl.csv', 'r') 
         list = seed_file.readlines()
         for pos in list: 
             res = [float(i) for i in pos.strip('][\n').split(', ')]
@@ -651,7 +651,8 @@ def run_optimization():
         
         curr_trial = 0
         if assessing and curr_trial % 2 == 0:
-            regenerate_environment(0.2)
+            # regenerate_environment(0.2)
+            regenerate_blocks_power_law()
         elif assessing and curr_trial % 2 != 0: 
             regenerate_environment_alternate(0.2)    
         else: 
@@ -679,7 +680,7 @@ def run_optimization():
   
         # potential_times = [i for i in range(20, 100, 10)]
         
-        total_elapsed = phase_one_times[0]
+        total_elapsed = 600
         
         # for p in potential_times: 
             
@@ -728,7 +729,8 @@ def run_optimization():
             print('items collected', total_found)
             curr_trial = i + 1
             if assessing and curr_trial % 2 == 0:
-                regenerate_environment(0.2)
+                # regenerate_environment(0.2)
+                regenerate_blocks_power_law()
                 reset_genotype() 
             elif assessing and curr_trial % 2 != 0: 
                 regenerate_environment_alternate(0.2)    
@@ -736,8 +738,8 @@ def run_optimization():
                 regenerate_environment(0.2)
                 reset_genotype() 
             
-            if curr_trial % 20 == 0: 
-                total_elapsed += 20 
+            # if curr_trial % 20 == 0: 
+                # total_elapsed += 20 
             ### reset individual robot controllers and respective supervisors 
             
             
