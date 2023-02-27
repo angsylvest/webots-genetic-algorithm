@@ -397,7 +397,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                             id = "$" + str(given_id) + "-" + str(id) + "-" + str(current_tile) + "-" + str(iterations_passed) # indication that it is a object to be deleted 
                             if id != prev_msg: 
                                 emitter.send(str(id).encode('utf-8'))
-                                prev_msg = i
+                                prev_msg = id
                                 # holding_something = False      
                 else: 
                     t_block += 1

@@ -286,7 +286,7 @@ def interpret():
             strategy_f = open("../../graph-generation/collision-data/pso-rdpso-info.csv", 'a')
             fitness = 0
             
-            # receiver.nextPacket()
+            receiver.nextPacket()
        
             
         elif 'group' in message: # assigns group 

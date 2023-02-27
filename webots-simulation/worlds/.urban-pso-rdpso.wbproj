@@ -8,8 +8,3 @@ centralWidgetVisible: 1
 orthographicViewHeight: 1
 textFiles: 6 "controllers/crw_supervisor/crw_supervisor.py" "controllers/generic_crw_foraging/generic_crw_foraging.py" "controllers/levy_supervisor/levy_supervisor.py" "controllers/LF-APF/LF-APF.py" "controllers/las_algorithm/las_algorithm.py" "controllers/las_supervisor/las_supervisor.py" "controllers/phermone_supervisor/phermone_supervisor.py" "controllers/updated_generalized_ga_learning/updated_generalized_ga_learning.py" "controllers/ga_update_learner/ga_update_learner.py"
 consoles: Console:All:All
-renderingDevicePerspectives: k0(1):camera;1;1;0;0
-renderingDevicePerspectives: k0(2):camera;1;1;0;0
-renderingDevicePerspectives: k0(3):camera;1;1;0;0
-renderingDevicePerspectives: k0(4):camera;1;1;0;0
-renderingDevicePerspectives: k0:camera;1;1;0;0

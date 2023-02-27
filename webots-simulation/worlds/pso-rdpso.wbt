@@ -7,6 +7,8 @@ WorldInfo {
   CFM 0.001
   ERP 0.4
   basicTimeStep 10
+  FPS 30
+  optimalThreadCount 3
   contactProperties [
     ContactProperties {
       material1 "gripper"

@@ -318,18 +318,18 @@ while robot.step(timestep) != -1 and sim_complete != True:
         if robot.getTime() - start_count >= 1: 
             start_count = robot.getTime()
             light_sensor_value = light_sensor.getValue()
-            # check for collisions with other robot 
-            list = camera.getRecognitionObjects()
             
-                
-            # handles other obstacles     
+            # based off what object sees, how many are deemed 'recognizeable' 
+            list = camera.getRecognitionObjects()
+              
+            # checks if robot is already holding an object or avoiding obstacle    
             if holding_something == False and not reversing: 
                 # behavior in response to stimuli in front of robot 
                 if (object_encountered == False):
                 
-                    if min(dist_vals) < 500 and len(list) != 0: 
+                    if min(dist_vals) < 500 and len(list) != 0: # checks if within range and list has items 
                     
-                        firstObject = camera.getRecognitionObjects()[0]
+                        firstObject = camera.getRecognitionObjects()[0] # corresponds to the first recognizable obj 
                         id = str(firstObject.get_id())
                         
                         if id not in obj_found_so_far:            

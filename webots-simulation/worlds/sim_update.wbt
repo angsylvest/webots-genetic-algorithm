@@ -7,6 +7,8 @@ WorldInfo {
   CFM 0.001
   ERP 0.4
   basicTimeStep 10
+  FPS 30
+  optimalThreadCount 3
   contactProperties [
     ContactProperties {
       material1 "gripper"
@@ -25,8 +27,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.4318129648253755 -0.2196877081490217 0.8747999052908896 3.9790760855160565
-  position 1.4564456115111526 1.8802596886738943 3.2002206620452385
+  orientation -0.43596765408385607 -0.2218014534526285 0.8722019948606634 3.976868632741304
+  position 1.4375327452017082 1.8542948815663671 3.220904927248047
 }
 TexturedBackground {
   luminosity 0.5

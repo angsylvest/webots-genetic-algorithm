@@ -28,9 +28,9 @@ strategy_f.close()
 # genetic algorithm-specific parameters 
 num_generations = 10
 simulation_time = 30
-trials = 100
+trials = 50
 curr_trial = 0 
-robot_population_sizes = [10, 15]
+robot_population_sizes = [20]
 gene_list = ['control speed 10', 'energy cost 5', 'food energy 30', 'observations thres 5']
 curr_size = robot_population_sizes[0]
 
@@ -69,7 +69,7 @@ id_msg = ""
 
 emitter_individual = robot.getDevice("emitter_processor")
 emitter_individual.setChannel(5)
-assessing = True 
+assessing = False 
 repopulate = False # keep False for now 
 phase_one_times = [620]
 
@@ -113,9 +113,9 @@ def generate_robot_central(num_robots):
         
     
         t_field = rec_node.getField('translation')
-        pose = [round(random.uniform(0.1, -0.2),2), round(random.uniform(0.1, -0.2) ,2), 0.02]
+        pose = [round(random.uniform(0.3, -0.3),2), round(random.uniform(0.3, -0.3) ,2), 0.02]
         while pose in r_pos_to_generate: # remove any duplicates
-            pose = [round(random.uniform(0.1, -0.2),2), round(random.uniform(0.1, -0.2) ,2), 0.02]
+            pose = [round(random.uniform(0.3, -0.3),2), round(random.uniform(0.3, -0.3) ,2), 0.02]
         r_pos_to_generate.append(pose)
         t_field.setSFVec3f(pose)
                 # print(r_field)
