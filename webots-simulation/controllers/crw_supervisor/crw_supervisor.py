@@ -116,7 +116,7 @@ def regenerate_environment(block_dist):
         
     # generates block on opposite sides of arena (randomly generated) 
     if len(b_pos_to_generate) == 0: 
-        for i in range(10): 
+        # for i in range(10): 
         seed_file = open('../../graph-generation/seed-11-rn.csv', 'r') 
         list = seed_file.readlines()
         for pos in list: 
@@ -374,16 +374,16 @@ def message_listener(time_step):
                         if prev_msg != msg_info: 
                             emitter.send(str(msg_info).encode('utf-8'))
                             prev_msg = msg_info
-                            print('removing object') 
+                            # print('removing object') 
 
             receiver.nextPacket()
             
         elif 'fitness' in message:
-            print('message', message) 
+            # print('message', message) 
             fit = message.split('-')[1][7:] 
             index = message.split('-')[0][1:]
             fitness_scores[int(index)] = fit
-            print('fitness scores', fitness_scores)
+            # print('fitness scores', fitness_scores)
             
             eval_fitness(time_step)
             
@@ -433,7 +433,7 @@ def run_seconds(t,waiting=False):
             message_listener(robot.getTime())
             emitter.send('return_fitness'.encode('utf-8'))
             prev_msg = 'return_fitness' 
-            print('requesting fitness')
+            # print('requesting fitness')
             break 
 
         elif not waiting: 
@@ -443,7 +443,7 @@ def run_seconds(t,waiting=False):
             if total_found == len(block_list) and len(block_list) != 0:
                 emitter.send('return_fitness'.encode('utf-8'))
                 prev_msg = 'return_fitness' 
-                print('collected all objects')
+                # print('collected all objects')
                 break      
     return 
             
@@ -455,7 +455,7 @@ def update_geno_list():
     # update parameters to hopefully improve performance
     fitness_scores = ["!" for i in range(len(population))]
     fit_update = False 
-    print('gene pool updated', fitness_scores) 
+    # print('gene pool updated', fitness_scores) 
     updated = True
 
 # fitness function for each individual robot 
@@ -468,7 +468,7 @@ def eval_fitness(time_step):
             
     if '!' not in fitness_scores: 
         # receiver.nextPacket()
-        print('will update gene pool --')
+        # print('will update gene pool --')
         fit_update = True 
         update_geno_list()
 

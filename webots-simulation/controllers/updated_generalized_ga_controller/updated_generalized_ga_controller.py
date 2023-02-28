@@ -235,7 +235,7 @@ def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False
         new_weights = create_new_weights(t_block, t_robot, original_weights)
         weights = new_weights 
         strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], new_weights)[0]
-        print('current strat', strat)
+        # print('current strat', strat)
         current_strat_index = ['straight','alternating-left','alternating-right', 'true random'].index(strat) 
         # strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(original_weights[0]) + ',' + str(original_weights[1]) + ',' + str(original_weights[2]) + ',' + str(original_weights[3]) + ','+ str(t_block) + ',' + str(curr_sim_size) + ',' + str(calc_robot_fitness())+ ',' + str(curr_sim_size) + ',ga' +'\n')
         # strategy_f.close()
@@ -381,7 +381,7 @@ def interpret(timestep):
                 best_prev_genotype = 'none'
             
             response = "k" + str(int(given_id)) + "-fitness" + str(fitness) + '-other' + str(best_prev_genotype) + '-overall' + str(calc_robot_fitness())
-            print('calculating fitness', calc_robot_fitness())
+            # print('calculating fitness', calc_robot_fitness())
             strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(weights[0]) + ',' + str(weights[1]) + ',' + str(weights[2]) + ',' + str(weights[3]) + ','+ str(time_elapsed_since_block) + ',' + str(n_observations_robot)  + ',' + str(curr_sim_size) + ',' + str(calc_robot_fitness())+ ',' + str(curr_sim_size) + ',ga' + ',' + str(trial_num) + ',' + str(n_observations_block) + ',' + str(curr_robot_genotype) + ',' + str(num_better) + ',' + str(gps.getValues()[0]) + ',' + str(gps.getValues()[1]) + '\n')
             strategy_f.close()
             strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'a')
@@ -395,7 +395,7 @@ def interpret(timestep):
            
             if next_child != "":
                 parse_genotype(next_child)
-                print('current child', next_child)
+                # print('current child', next_child)
             
             emitter.send(response.encode('utf-8'))
             
@@ -444,7 +444,7 @@ def interpret(timestep):
         elif message[0] == "%" and str(message.split('-')[0][1:]) == str(given_id):
             # strategy_f.write('agent id:' + str(given_id) + ',time step: '+ timestep + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block) + ',size' + str(curr_sim_size))
             holding_something = True 
-            print('currently holding obj--', given_id)
+            # print('currently holding obj--', given_id)
             observations_per_strategy[current_strat_index] += 1
             
             obj_id = message.split('-')[1] 
@@ -547,7 +547,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                 n_observations_block += 1
                 time_elapsed_since_block = 0
                 time_elapsed = 0 # on a per sec basis 
-                print('successfully dropped off object', given_id)
+                # print('successfully dropped off object', given_id)
             
         
         if curr_index >= len(strategy) and not holding_something and not reversing and not moving_forward: # maintain strategy for initial

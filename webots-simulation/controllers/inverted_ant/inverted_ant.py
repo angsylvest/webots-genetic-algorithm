@@ -217,7 +217,7 @@ def interpret():
             
         elif message == "return_fitness":
             response = "k" + str(int(given_id)) + "-fitness" + str(fitness)
-            print('message received', response)
+            # print('message received', response)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
             strategy_f.write(str(given_id) + ',' + str(robot.getTime()) + ',' + str(t_block) + ',' + str(curr_sim_size) + ',' + str(fitness)+ ',invert-ant' + ',' + str(len(obj_found_so_far)) + ',' + str(gps.getValues()[0]) + ',' + str(gps.getValues()[1]) +  '\n')
@@ -260,12 +260,12 @@ def interpret():
             # want to pause controller until finished 
             cleaning = True 
             stop()
-            print('robot has stopped, waiting for next generation')
+            # print('robot has stopped, waiting for next generation')
             receiver.nextPacket()
             
         elif message == 'clean finish': 
             cleaning = False 
-            print('robot is ready to proceed') 
+            # print('robot is ready to proceed') 
             receiver.nextPacket()
 
         else: 
@@ -299,7 +299,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             current_tile = ant.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
             prev_tile = ant.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
             chosen_direction = ant.re_gather(current_tile)
-            print('the current tile robot is on: ', current_tile, 'target is ', ant.target, 'chosen direction: ', chosen_direction) 
+            # print('the current tile robot is on: ', current_tile, 'target is ', ant.target, 'chosen direction: ', chosen_direction) 
             location = '*' + str(current_tile) + '-' + str(given_id)
             emitter.send(str(location).encode('utf-8'))
             
@@ -351,7 +351,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
         dist_vals = [ds.getValue(), ds_left.getValue(), ds_right.getValue()]
         
         if min(dist_vals) > 500 and reversing: # no longer within range of obstacle
-            print('proceeding with navigation')
+            # print('proceeding with navigation')
             reversing = False
             chosen_direction = calc_normal(yaw) 
             orientation_found = False 
@@ -363,7 +363,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             
         if min(dist_vals) <= 330 and not reversing: # wall detection 
             fitness += 1 
-            print('collision encountered -- wall or block')
+            # print('collision encountered -- wall or block')
             reversing = True 
             move_backwards()         
             

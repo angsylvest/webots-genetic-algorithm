@@ -212,9 +212,9 @@ def interpret():
         message = receiver.getData().decode('utf-8')
             
         if message == "return_fitness":
-            print('request received') 
+            # print('request received') 
             response = "k" + str(given_id) + "-fitness" + str(fitness)
-            print('response is', response)
+            # print('response is', response)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
             strategy_f.write(str(given_id) + ',' + str(robot.getTime()) + ',' + str(t_block) + ',' + str(curr_sim_size) + ',' + str(fitness) + ',pso-pugh' + ',' + str(len(obj_found_so_far)) + ',' + str(gps.getValues()[0]) + ',' + str(gps.getValues()[1]) + '\n')
@@ -266,12 +266,12 @@ def interpret():
             # want to pause controller until finished 
             cleaning = True 
             # stop()
-            print('robot has stopped, waiting for next generation')
+            # print('robot has stopped, waiting for next generation')
             receiver.nextPacket()
             
         elif message == 'clean finish': 
             cleaning = False 
-            print('robot is ready to proceed') 
+            # print('robot is ready to proceed') 
             receiver.nextPacket()
                 
         else: 
@@ -310,7 +310,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
     
             else: 
                 holding_something = False
-                print('successfully dropped off object', given_id)
+                # print('successfully dropped off object', given_id)
         
         if yaw != chosen_direction and orientation_found != True and object_encountered != True and not reversing: 
             begin_rotating()
@@ -343,7 +343,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
         dist_vals = [ds.getValue(), ds_left.getValue(), ds_right.getValue()]
         
         if min(dist_vals) > 500 and reversing: # no longer within range of obstacle
-            print('proceeding with navigation')
+            # print('proceeding with navigation')
             reversing = False
             chosen_direction = calc_normal(yaw)
             orientation_found = False 

@@ -73,7 +73,7 @@ success = False
 size = 5 
  
 group_id = int(robot.getName()[11:-1]) - 1
-print('group ids', group_id) 
+# print('group ids', group_id) 
 #### allow personal supervisor to send important encounter info back to supervisor ## 
 emitter = robot.getDevice("emitter")
 emitter.setChannel(4)
@@ -90,7 +90,7 @@ receiver_individual.setChannel(int(group_id * 10)) # will be updated to be robot
 emitter_individual = robot.getDevice("emitter_processor")
 emitter_individual.setChannel((int(group_id) * 10) + 1)
 
-print('groups', emitter_individual.getChannel(), receiver_individual.getChannel())
+# print('groups', emitter_individual.getChannel(), receiver_individual.getChannel())
 
 # must possess connection to overal supervisor (to be actually generated) & connection to each robot 
 # then adds collection statistics that are unique to given trial 
@@ -120,7 +120,7 @@ def calc_global_local():
     msg = ""
     index = 0
     
-    print('group dic', group_dic, group_id)
+    # print('group dic', group_dic, group_id)
     
     if len(group_dic) != 0: 
         global_best = robot.getFromId(int(max(group_dic, key=group_dic.get))).getField('translation')
@@ -180,7 +180,7 @@ def search_counter():
     if len(group_dic) != 0: 
         if (num_excluded - 1) != 0: # only update if mathematically allowed
             num_iterations = sc_max*(1 - (1 / (num_excluded - 1)))
-            print('updated simulation time', simulation_time) 
+            # print('updated simulation time', simulation_time) 
         
 
 def get_best_in_excluded(select):
@@ -188,7 +188,7 @@ def get_best_in_excluded(select):
     global population 
     global n_i 
     
-    print('getting best in excluded', group_dic, group_id)
+    # print('getting best in excluded', group_dic, group_id)
     
     new_group = ''
     size = 0 
@@ -219,7 +219,7 @@ def get_worst_in_group():
     new_group = ''
     size = 0 
     while size < 1 and len(population) > 0:
-        print(group_dic, population)
+        # print(group_dic, population)
         
         r = robot.getFromId(int(min(group_dic, key=group_dic.get)))
         given_id = overall_population.index(min(group_dic, key=group_dic.get))
@@ -227,7 +227,7 @@ def get_worst_in_group():
         new_group += str(int(min(group_dic, key=group_dic.get))) + '%' 
         population.remove(int(min(group_dic, key=group_dic.get)))
         del group_dic[int(min(group_dic, key=group_dic.get))]
-        print('worst', group_dic, group_id)
+        # print('worst', group_dic, group_id)
         size += 1
         num_excluded += 1
         
@@ -237,7 +237,7 @@ def get_worst_in_group():
             
             new_group += str(given_id) + '%' 
             
-        print('removing to new', group_dic, group_id)
+        # print('removing to new', group_dic, group_id)
         
     return new_group 
     
@@ -293,7 +293,7 @@ def punish_subswarm():
         
         # if (punish_count - reward_count) > 7:
         w = get_worst_in_group()
-        print('punished', group_id, w)
+        # print('punished', group_id, w)
         msg = 'punished*' + str(w) + '*' + str(group_id)
         emitter_individual.send(msg.encode('utf-8'))
         # emitter.send(msg.encode('utf-8'))
@@ -342,7 +342,7 @@ def message_listener(time_step):
             obj_node = robot.getFromId(int(message.split("-")[1]))
             given_id = message.split("-")[0][1:]
             group_id = message.split("-")[2]
-            print('group has msg', obj_node)
+            # print('group has msg', obj_node)
             if obj_node is not None:
                 
                 # r_node_loc = population[int(message.split("-")[0][1:])].getField('translation').getSFVec3f()
@@ -363,9 +363,9 @@ def message_listener(time_step):
   
                     # obj_node.remove()
                     # remove redundant requests 
-                    print('working on removing objects') 
+                    # print('working on removing objects') 
                     if obj_node not in found_list:
-                        print('group updating dic') 
+                        # print('group updating dic') 
                         total_found += 1
                         reward_count += 1
                         found_list.append(obj_node)
@@ -381,7 +381,7 @@ def message_listener(time_step):
                             global_best = robot.getFromId(int(max(group_dic, key=group_dic.get))).getField('translation')
                             emitter_individual.send('group update' + str(global_best).encode('utf-8')) # allow ind to keep track of best 
                             prev_msg = msg_info
-                            print('removing object') 
+                            # print('removing object') 
 
             receiver.nextPacket()
           
@@ -410,7 +410,7 @@ def message_listener(time_step):
                     population.append(overall_population[ind]) 
                     group_dic[overall_population[ind]] = 0
                 ind += 1 
-            print('initial group;', group_dic)
+            # print('initial group;', group_dic)
             
             initial_group_dic = group_dic
             initial_population = population
@@ -448,7 +448,7 @@ def message_listener(time_step):
         
     if receiver_individual.getQueueLength()>0 and (robot.getTime() - start < simulation_time):
         message = receiver_individual.getData().decode('utf-8')
-        print('personal msgs to group', message) 
+        # print('personal msgs to group', message) 
         
         if 'punished' in message and group_id == 0: 
             # remove worst and send to 0 
@@ -456,18 +456,18 @@ def message_listener(time_step):
             ids = [int(i) for i in ''.join(co.split('*')[:-1]).split('%')[:-1]] 
             gp_id = message.split('*')[-1] 
             # msg = 'punished*' + str(w) + '*' + str(group_id)
-            print(group_id, gp_id, ids) 
+            # print(group_id, gp_id, ids) 
             for g in ids: 
                 group_dic[g] = 0 
                 population.append(int(g))
-            print('adding removed items to 0', group_dic)
+            # print('adding removed items to 0', group_dic)
             
             receiver_individual.nextPacket() 
             
         elif 'rewarded' in message and group_id == 0: 
             destination = message.split('*')[1]
             best_n = get_best_in_excluded(1)
-            print('found excluded to add', best_n) 
+            # print('found excluded to add', best_n) 
             msg = 'subbed*' + str(best_n) + '*' + str(destination) 
             
             emitter_individual.send(msg.encode('utf-8')) # will send to individual robot 
@@ -491,7 +491,7 @@ def message_listener(time_step):
             best_n = get_best_in_excluded(0) # will get given ids (broken up by *) 
             # send to agents that are relevant 
             msg = 'subbed*' + str(best_n) + '*' + str(message[9:]) 
-            print('getting best in 0 to sub') 
+            # print('getting best in 0 to sub') 
             emitter_individual.send(msg.encode('utf-8')) # will send to individual robot 
             emitter.send(str(msg).encode('utf-8')) # will send to supervisor to update team layout 
             
@@ -537,7 +537,7 @@ def run_seconds(t,waiting=False):
             message_listener(robot.getTime())
             emitter.send('return_fitness'.encode('utf-8'))
             prev_msg = 'return_fitness' 
-            print('requesting fitness')
+            # print('requesting fitness')
             break 
 
         elif not waiting: 
@@ -547,7 +547,7 @@ def run_seconds(t,waiting=False):
             if total_found == len(block_list) and len(block_list) != 0:
                 emitter.send('return_fitness'.encode('utf-8'))
                 prev_msg = 'return_fitness' 
-                print('collected all objects')
+                # print('collected all objects')
                 break      
     return 
             
@@ -559,7 +559,7 @@ def update_geno_list():
     # update parameters to hopefully improve performance
     fitness_scores = ["!" for i in range(len(population))]
     fit_update = False 
-    print('gene pool updated', fitness_scores) 
+    # print('gene pool updated', fitness_scores) 
     updated = True
 
 # fitness function for each individual robot 
@@ -572,7 +572,7 @@ def eval_fitness(time_step):
             
     if '!' not in fitness_scores: 
         # receiver.nextPacket()
-        print('will update gene pool --')
+        # print('will update gene pool --')
         fit_update = True 
         update_geno_list()
 
@@ -618,7 +618,7 @@ def run_optimization():
                 it_count = 0 
                 # print('given group', group_id, 'failed')
                 
-            print('overall groups', group_id, group_dic)
+            # print('overall groups', group_id, group_dic)
             # calc_global_local() # updates each robot to pivot toward successful place 
             total_time_elapsed += simulation_time
             success = False

@@ -276,9 +276,9 @@ def interpret():
         # print('personal msgs', message) 
             
         if message == "return_fitness":
-            print('request received') 
+            # print('request received') 
             response = "k" + str(given_id) + "-fitness" + str(fitness)
-            print('response is', response)
+            # print('response is', response)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
             strategy_f.write(str(given_id) + ',' + str(robot.getTime()) + ',' + str(t_block) + ',' + str(curr_sim_size) + ',' + str(fitness) + ',pso-rdpso' + ',' + str(len(obj_found_so_far)) + ',' + str(gps.getValues()[0]) + ',' + str(gps.getValues()[1]) + '\n')
@@ -295,7 +295,7 @@ def interpret():
             initial_group = group_assigned
             obj_found_so_far = []
 
-            print('group assigned', group_assigned)
+            # print('group assigned', group_assigned)
             emitter_individual = robot.getDevice("emitter_processor")
             emitter_individual.setChannel(int(group_assigned)*10)
             receiver_individual = robot.getDevice("receiver_processor")
@@ -324,7 +324,7 @@ def interpret():
             # want to pause controller until finished 
             cleaning = True 
             # stop()
-            print('robot has stopped, waiting for next generation')
+            # print('robot has stopped, waiting for next generation')
             receiver.nextPacket()
             
         elif message == 'trial_complete': 
@@ -335,7 +335,7 @@ def interpret():
             obj_found_so_far = []
             group_assigned = initial_group 
 
-            print('group assigned', group_assigned)
+            # print('group assigned', group_assigned)
             emitter_individual = robot.getDevice("emitter_processor")
             emitter_individual.setChannel(int(group_assigned)*10)
             receiver_individual = robot.getDevice("receiver_processor")
@@ -354,7 +354,7 @@ def interpret():
             
         elif message == 'clean finish': 
             cleaning = False 
-            print('robot is ready to proceed') 
+            # print('robot is ready to proceed') 
             receiver.nextPacket()
                 
         else: 
@@ -363,7 +363,7 @@ def interpret():
     # sent from group supervisor 
     if receiver_individual.getQueueLength()>0:
         message = receiver_individual.getData().decode('utf-8')
-        print('group msgs to personal robot', message) 
+        # print('group msgs to personal robot', message) 
         
         if 'pso' in message: 
             strategy_f.write(str(given_id) + ',' + str(robot.getTime()) + ',' + str(t_block) + ',' + str(curr_sim_size) + ',' + str(fitness) + ',pso-rdpso' + ',' + str(len(obj_found_so_far)) + ',' + str(gps.getValues()[0]) + ',' + str(gps.getValues()[1]) + '\n')
@@ -394,12 +394,12 @@ def interpret():
             ids = [int(i) for i in ''.join(co.split('*')[:-1]).split('%')[:-1]] 
             
             gp_id = message.split('*')[-1] 
-            print(ids, gp_id) 
+            # print(ids, gp_id) 
            
-            print('punish stats', message, int(overall_population[int(given_id)]))
+            # print('punish stats', message, int(overall_population[int(given_id)]))
             if int(overall_population[int(given_id)]) in ids: # move to -1 
                 # update channel so listening to new supervisor 
-                print('group assigned', group_assigned)
+                # print('group assigned', group_assigned)
                 group_assigned = 0 
                 
                 emitter_individual = robot.getDevice("emitter_processor")
@@ -431,7 +431,7 @@ def interpret():
             gd = ids[given_id]
             if int(overall_population[int(given_id)]) in ids:
                 group_assigned = message.split('*')[-1] 
-                print('new group assigned', group_assigned, given_id, old)
+                # print('new group assigned', group_assigned, given_id, old)
                 
                 # update channel so listening to new supervisor 
                 emitter_individual = robot.getDevice("emitter_processor")
@@ -479,7 +479,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
     
             else: 
                 holding_something = False
-                print('successfully dropped off object', given_id)
+                # print('successfully dropped off object', given_id)
         
         if yaw != chosen_direction and orientation_found != True and object_encountered != True and not reversing: 
             begin_rotating()
@@ -523,7 +523,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             
         if min(dist_vals) > 500 and reversing: # no longer within range of obstacle
             # avoid_pos = gps.getValues()[0], gps.getValues()[1]
-            print('proceeding with navigation')
+            # print('proceeding with navigation')
             reversing = False
             chosen_direction = calc_normal(yaw)
             orientation_found = False 
@@ -556,14 +556,14 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     
                         firstObject = camera.getRecognitionObjects()[0]
                         id = str(firstObject.get_id())
-                        print('potential obj detected', id, gps.getValues()[0], gps.getValues()[1]) 
+                        # print('potential obj detected', id, gps.getValues()[0], gps.getValues()[1]) 
                         
                         if id not in obj_found_so_far:            
                             id = "$" + str(given_id) + "-" + str(id) + "-" + str(group_assigned) # indication that it is a object to be deleted 
                             if prev_msg != id: 
                                 emitter.send(str(id).encode('utf-8'))
                                 prev_msg = id 
-                                print(given_id, 'send to supervisor') 
+                                # print(given_id, 'send to supervisor') 
                         
                 else: 
                     t_block += 1

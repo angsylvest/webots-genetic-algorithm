@@ -153,7 +153,7 @@ def message_listener(time_step):
         if 'encounter' in message_individual: 
             robo_index = int(message_individual.split('-')[0])
             # reproduce_list.append(robo_index) 
-            print('robot found -- checking genotype', robo_index) 
+            # print('robot found -- checking genotype', robo_index) 
             
             # only store best genotype 
             other_index = find_nearest_robot_genotype(robo_index)

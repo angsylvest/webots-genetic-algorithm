@@ -99,7 +99,7 @@ def calc_step_size():
     v = abs(sample_normal_dist(omega_v))
     scaling_factor = 0.75**1.5
     z = abs(u / (math.pow(2,1/beta)) ) * scaling_factor
-    print('new time switch', round(((forward_speed/32)*1000) / z))
+    # print('new time switch', round(((forward_speed/32)*1000) / z))
     return round(((forward_speed/32)*1000) / z)
 
 def get_gamma_val(input): 
@@ -191,7 +191,7 @@ def interpret():
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
        
-        print('income robot' + str(given_id) + 'messages', message)
+        # print('income robot' + str(given_id) + 'messages', message)
     
         if message[0:2] == "#2":
             message = message[1:].split("*")
@@ -199,9 +199,9 @@ def interpret():
             receiver.nextPacket()
             
         elif message == "return_fitness":
-            print('request received') 
+            # print('request received') 
             response = "k" + str(given_id) + "-fitness" + str(fitness)
-            print('response is', response)
+            # print('response is', response)
             emitter.send(response.encode('utf-8'))
             receiver.nextPacket()
             strategy_f.write(str(str(given_id) + ',' + str(robot.getTime()) + ',' + str(t_block) + ',' + str(curr_sim_size) + ',' + str(fitness) + ',levy' + ',' + str(len(obj_found_so_far)))+ ',' + str(gps.getValues()[0]) + ',' + str(gps.getValues()[1]) + '\n')
@@ -229,7 +229,7 @@ def interpret():
             id = message.split('-')[1]
             obj_found_so_far.append(id)
             holding_something = True   
-            print(given_id, 'holding item')      
+            # print(given_id, 'holding item')      
             t_block = 0
             time_switch = 200 
             receiver.nextPacket()
@@ -238,12 +238,12 @@ def interpret():
             # want to pause controller until finished 
             cleaning = True 
             # stop()
-            print('robot has stopped, waiting for next generation')
+            # print('robot has stopped, waiting for next generation')
             receiver.nextPacket()
             
         elif message == 'clean finish': 
             cleaning = False 
-            print('robot is ready to proceed') 
+            # print('robot is ready to proceed') 
             receiver.nextPacket()
                 
         else: 
@@ -280,7 +280,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                 # print('homing --', given_id, chosen_direction, yaw)
             else: 
                 holding_something = False
-                print('successfully returned', given_id) 
+                # print('successfully returned', given_id) 
         
         if yaw != chosen_direction and orientation_found != True and object_encountered != True and not reversing: 
             begin_rotating()
@@ -315,7 +315,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
         dist_vals = [ds.getValue(), ds_left.getValue(), ds_right.getValue()]
         
         if min(dist_vals) > 500 and reversing: # no longer within range of obstacle
-            print('proceeding with navigation')
+            # print('proceeding with navigation')
             reversing = False
             chosen_direction = calc_normal(yaw) 
             orientation_found = False 

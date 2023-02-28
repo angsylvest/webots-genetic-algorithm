@@ -314,7 +314,7 @@ def message_listener(time_step):
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
         
-        print('incoming messages', message) 
+        # print('incoming messages', message) 
         
         if message[0] == "$": # handles deletion of objects when grabbed
             # collected_count[int(message[1])] = collected_count[int(message[1])] + 1

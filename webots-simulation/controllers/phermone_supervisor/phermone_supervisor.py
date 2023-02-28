@@ -382,18 +382,18 @@ def message_listener(time_step):
                         if msg_info != prev_msg: 
                             emitter.send(str(msg_info).encode('utf-8'))
                             prev_msg = msg_info 
-                        print('removing object') 
+                        # print('removing object') 
  
                     
                     # total_found += 1
             receiver.nextPacket()
             
         elif 'fitness' in message:
-            print('message', message) 
+            # print('message', message) 
             fit = message.split('-')[1][7:] 
             index = message.split('-')[0][1:]
             fitness_scores[int(index)] = fit
-            print('fitness scores', fitness_scores)
+            # print('fitness scores', fitness_scores)
             
             eval_fitness(time_step)
             
@@ -452,7 +452,7 @@ def run_seconds(t,waiting=False):
             message_listener(robot.getTime())
             emitter.send('return_fitness'.encode('utf-8'))
             prev_msg = 'return_fitness'
-            print('requesting fitness')
+            # print('requesting fitness')
             break 
 
         elif not waiting: 
@@ -464,7 +464,7 @@ def run_seconds(t,waiting=False):
                 # k1_df.append(new_row, ignore_index=True)
                 emitter.send('return_fitness'.encode('utf-8'))
                 prev_msg = 'return_fitness'
-                print('collected all objects')
+                # print('collected all objects')
                 break      
     return 
             
@@ -477,7 +477,7 @@ def update_geno_list():
     # update parameters to hopefully improve performance
     fitness_scores = ["!" for i in range(len(population))]
     fit_update = False 
-    print('gene pool updated', fitness_scores) 
+    # print('gene pool updated', fitness_scores) 
     updated = True
     
  
@@ -490,7 +490,7 @@ def eval_fitness(time_step):
             
     if '!' not in fitness_scores: 
         # receiver.nextPacket()
-        print('will update gene pool --')
+        # print('will update gene pool --')
         fit_update = True 
         update_geno_list()
   
@@ -555,7 +555,7 @@ def run_optimization():
                 r_field = rec_node.getField('rotation')
                 if r_field.getSFRotation() != [0, 0, -1]:
                     r_field.setSFRotation([0, 0, -1])
-            print('here')
+            # print('here')
             overall_f.write(str(i) + ',' + str(robot.getTime()) + ',' + str(total_found) + ',' + str(size)+ ',invert-ant' + '\n')   
             overall_f.close()
             overall_f = open('../../graph-generation/collection-data/overall-ant-info.csv', 'a')  

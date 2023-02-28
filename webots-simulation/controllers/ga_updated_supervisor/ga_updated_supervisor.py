@@ -490,9 +490,9 @@ def message_listener(time_step):
             fitness_scores[int(index)] = fit
             overall_fitness_scores[int(index)] = float(overall_fitness)
             
-            print('fitness' , message, index, fit)
+            # print('fitness' , message, index, fit)
             
-            print('updated with encountered partner') 
+            # print('updated with encountered partner') 
             if partner != 'none':
                 new_geno = reproduce(pop_genotypes[index], pop_genotypes[partner])
                 pop_genotypes[index] = new_geno
@@ -541,7 +541,7 @@ def run_seconds(t,waiting=False):
             message_listener(robot.getTime()) # will clear out msg until next gen 
             emitter.send('return_fitness'.encode('utf-8'))
             prev_msg = msg 
-            print('requesting fitness')
+            # print('requesting fitness')
             break 
 
         elif not waiting: 
@@ -553,8 +553,8 @@ def run_seconds(t,waiting=False):
                 # if prev_msg != msg: 
                 emitter.send('return_fitness'.encode('utf-8'))
                 prev_msg = msg 
-                print('requesting fitness')
-                print('collected all objects')
+                # print('requesting fitness')
+                # print('collected all objects')
                 break      
     return 
    
@@ -570,7 +570,7 @@ def update_geno_list(genotype_list):
     global pairs 
     
     # only makes executive changes if it's better off to just re-randomize population   
-    print('getting overall fitness scores --', overall_fitness_scores)
+    # print('getting overall fitness scores --', overall_fitness_scores)
     
     # if max(overall_fitness_scores) <= 0:
     cp_genotypes = pop_genotypes.copy()
@@ -578,7 +578,7 @@ def update_geno_list(genotype_list):
         if i not in pairs: 
             g = create_individal_genotype(gene_list)
             new_offspring = reproduce(cp_genotypes[i], cp_genotypes[i])
-            print('updated genolist --', g)
+            # print('updated genolist --', g)
             pop_genotypes[i] = new_offspring
                  
     # update parameters to hopefully improve performance
@@ -591,7 +591,7 @@ def update_geno_list(genotype_list):
     overall_fitness_scores = ["!" for i in range(len(population))]
     pairs = ["!" for i in range(len(population))]
     fit_update = False 
-    print('gene pool updated') 
+    # print('gene pool updated') 
     updated = True
 
 # fitness function for each individual robot 
@@ -604,7 +604,7 @@ def eval_fitness(time_step):
             
     if '!' not in fitness_scores and '!' not in overall_fitness_scores: 
         # receiver.nextPacket()
-        print('will update gene pool --')
+        # print('will update gene pool --')
         fit_update = True 
         update_geno_list(pop_genotypes)
 

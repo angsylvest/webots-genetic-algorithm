@@ -242,12 +242,12 @@ def interpret():
             # want to pause controller until finished 
             cleaning = True 
             # stop()
-            print('robot has stopped, waiting for next generation')
+            # print('robot has stopped, waiting for next generation')
             receiver.nextPacket()
             
         elif message == 'clean finish': 
             cleaning = False 
-            print('robot is ready to proceed') 
+            # print('robot is ready to proceed') 
             receiver.nextPacket()
 
         else: 
@@ -281,7 +281,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             las = LAS(curr_pos = (float(gps.getValues()[0]),float(gps.getValues()[1])))
             current_tile = las.locate_cell((float(gps.getValues()[0]),float(gps.getValues()[1])))
             chosen_direction = las.re_direct(current_tile)
-            print('the current tile robot is on: ', current_tile, 'target is ', las.target, 'chosen direction: ', chosen_direction) 
+            # print('the current tile robot is on: ', current_tile, 'target is ', las.target, 'chosen direction: ', chosen_direction) 
             start = True
         
         roll, pitch, yaw = inertia.getRollPitchYaw()

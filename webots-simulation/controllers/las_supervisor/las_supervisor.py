@@ -443,7 +443,7 @@ def message_listener(time_step):
                         if msg_info != prev_msg: 
                             emitter.send(str(msg_info).encode('utf-8'))
                             prev_msg = msg_info
-                            print('removing object')
+                            # print('removing object')
             receiver.nextPacket()
             
         elif 'fitness' in message:
@@ -495,7 +495,7 @@ def run_seconds(t,waiting=False):
         if robot.getTime() - start > new_t: 
             message_listener(robot.getTime()) # clear out msgs 
             emitter.send('return_fitness'.encode('utf-8'))
-            print('requesting fitness')
+            # print('requesting fitness')
             break 
                 
         # if reset_position: 
@@ -506,7 +506,7 @@ def run_seconds(t,waiting=False):
             message_listener(robot.getTime())          
             if total_found == len(block_list):
                 emitter.send('return_fitness'.encode('utf-8'))
-                print('collected all objects')
+                # print('collected all objects')
                 break      
     return 
             
@@ -521,7 +521,7 @@ def update_geno_list(genotype_list):
     # update parameters to hopefully improve performance
     fitness_scores = ["!" for i in range(len(population))]
     fit_update = False 
-    print('gene pool updated') 
+    # print('gene pool updated') 
     updated = True
     
  
@@ -535,7 +535,7 @@ def eval_fitness(time_step):
             
     if '!' not in fitness_scores: 
         # receiver.nextPacket()
-        print('will update gene pool --')
+        # print('will update gene pool --')
         fit_update = True 
         update_geno_list(pop_genotypes)
           
