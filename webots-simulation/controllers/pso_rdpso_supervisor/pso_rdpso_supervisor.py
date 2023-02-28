@@ -51,7 +51,7 @@ num_swarms = 5
 c_1 = 0.89
 c_2 = 0.8
 c_3 = 0.9 
-n_i = 2
+n_i = 3
 n_min = 1 
 nmax = 6
 group_dic = {}
@@ -112,6 +112,7 @@ def generate_robot_central(num_robots):
     collected_count = []
     
     num_whole_groups = num_robots // n_i 
+    # print('num whole groups', num_whole_groups) 
     
     ## TODO: create a supervisor that corresponds to num_group
     for i in range(num_whole_groups + 1):

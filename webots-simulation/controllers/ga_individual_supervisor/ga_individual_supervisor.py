@@ -56,6 +56,8 @@ random.seed(10)
 curr_fitness = 0
 child = ""
 
+comparing_genes = False 
+
 # based off given id of robot assigned 
 def find_nearest_robot_genotype(r_index):
     global population 
@@ -105,6 +107,7 @@ def message_listener(time_step):
     global overall_fitness_scores
     global curr_best
     global child 
+    global comparing_genes
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -122,9 +125,14 @@ def message_listener(time_step):
             overall_fitness_scores = [0 for i in range(len(pop_genotypes))]
             
             # initial child
-            child = reproduce(pop_genotypes[int(given_id)], pop_genotypes[int(given_id)])
-            child = "child" + str(child) 
-            emitter_individual.send(child.encode('utf-8'))
+            if not comparing_genes: 
+                child = reproduce(pop_genotypes[int(given_id)], pop_genotypes[int(given_id)])
+                child = "child" + str(child) 
+                emitter_individual.send(child.encode('utf-8'))
+            else: 
+                child_1, child_2 = reproduce(pop_genotypes[int(given_id)], pop_genotypes[int(given_id)], comparing_genes)
+                child = "child-" + str(child) + '-' + str(child_2) 
+                emitter_individual.send(child.encode('utf-8'))
             
             receiver.nextPacket()
         
@@ -144,6 +152,11 @@ def message_listener(time_step):
             size = int(message[4:]) 
             receiver.nextPacket()
             
+        elif 'comparing' in message: 
+            comparing_genes = bool(message.split('-')[1])
+            receiver.nextPacket()
+            
+            
         else: 
             receiver.nextPacket()
             
@@ -158,11 +171,18 @@ def message_listener(time_step):
             # only store best genotype 
             other_index = find_nearest_robot_genotype(robo_index)
             if overall_fitness_scores[other_index] > curr_best: 
-                curr_best = other_index
-                child = 'child' + str(reproduce(pop_genotypes[robo_index], pop_genotypes[curr_best]))
-                # print('child ---', child) 
-                
-                emitter_individual.send(child.encode('utf-8'))
+                if comparing_genes: 
+                    curr_best = other_index
+                    child = 'child' + str(reproduce(pop_genotypes[robo_index], pop_genotypes[curr_best]))
+                    # print('child ---', child) 
+                    # uncomment if want to just use curr_best genotype 
+                    # child = 'child' + str(pop_genotypes[curr_best]))
+                    
+                    emitter_individual.send(child.encode('utf-8'))
+                else: 
+                    child_1, child_2 = reproduce(pop_genotypes[int(given_id)], pop_genotypes[int(given_id)], comparing_genes)
+                    child = "child-" + str(child) + '-' + str(child_2) 
+                    emitter_individual.send(child.encode('utf-8'))
                    
             receiver_individual.nextPacket()
             

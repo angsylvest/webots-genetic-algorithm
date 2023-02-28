@@ -404,11 +404,13 @@ def message_listener(time_step):
         elif 'group' in message: # assigns group 
             assignments = message[5:] 
             ind = 0
-
+            # print(overall_population)
+            
             for a in assignments: 
                 if int(a) == int(group_id):
                     population.append(overall_population[ind]) 
                     group_dic[overall_population[ind]] = 0
+                # print(ind)
                 ind += 1 
             # print('initial group;', group_dic)
             

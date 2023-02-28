@@ -25,6 +25,10 @@ strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'w')
 strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',num encounters' + ',size' + ',fitness'+ ',size'+ ',type' + ',trial' + ',collected' + ',genotype' + ',num better' + ',pos x' + ',pos y' + '\n')
 strategy_f.close()
 
+gene_df = open("../../graph-generation/collision-data/ga-gene-info.csv", 'w')
+gene_df.write('agent id'+ ',time step' + ',trial' + ',size' + ',genotype' + '\n')
+gene_df.close()
+
 # genetic algorithm-specific parameters 
 num_generations = 10
 simulation_time = 30
