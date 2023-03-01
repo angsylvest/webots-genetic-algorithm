@@ -111,7 +111,6 @@ def message_listener(time_step):
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
-        print('individual messages', message, given_id)
             
         if 'fitness-scores' in message:
             fs = message.split(" ")[1:]
@@ -173,7 +172,6 @@ def message_listener(time_step):
             # print('robot found -- checking genotype', robo_index) 
             
             # only store best genotype 
-            print('enc check', comparing_genes)
             other_index = find_nearest_robot_genotype(robo_index)
             if overall_fitness_scores[other_index] > curr_best: 
                 if not comparing_genes: 

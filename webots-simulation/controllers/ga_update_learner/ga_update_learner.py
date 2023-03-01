@@ -659,7 +659,6 @@ def reset_prior_gen_distrib():
     i = 0 
     for b in block_list: 
         b.getField('translation').setSFVec3f(prev_block_gen_pos[i]) 
-        print(prev_block_gen_pos[i])
         i += 1 
       
     

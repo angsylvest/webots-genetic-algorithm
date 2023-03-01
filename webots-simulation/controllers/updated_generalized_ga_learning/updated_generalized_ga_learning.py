@@ -419,10 +419,8 @@ def interpret(timestep):
             elif next_child != "" and comparing_genes:
                 if cycle == '0':
                     parse_genotype(next_child)
-                    print('using child 1') 
                 else: 
                     parse_genotype(next_child_2)
-                    print('using child 2, for second cycle')
                 # print('current child', next_child)
             
             emitter.send(response.encode('utf-8'))
@@ -534,7 +532,6 @@ def interpret(timestep):
             
     if receiver_individual.getQueueLength()>0:
         message = receiver_individual.getData().decode('utf-8')
-        print('msgs from individual supervisor', message)
         if ('child' in message and not comparing_genes): 
             next_child = message[5:].split("*")
             num_better += 1

@@ -54,8 +54,7 @@ def reproduce(r1, r2, multi=False):
         child = crossover(mom[i], dad[i]) 
         child = mutate(child, 0.2) + "*"
         new_genotype += child 
-    
-    print('multi', multi)    
+     
     if not multi: 
         return new_genotype 
     else: 
