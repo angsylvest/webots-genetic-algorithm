@@ -377,6 +377,7 @@ def interpret(timestep):
     global cycle 
     global gen_num 
     global comparing_genes  
+    global gene_df
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -403,7 +404,7 @@ def interpret(timestep):
             strategy_f.close()
             strategy_f = open("../../graph-generation/collision-data/ga-info-learning.csv", 'a')
             
-            gene_df.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(trial_num) + ',' + str(curr_sim_size) + ',' + str(cycle) ',' + str(gen_num) + str(curr_robot_genotype) + '\n')
+            gene_df.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(trial_num) + ',' + str(curr_sim_size) + ',' + str(cycle) + ',' + str(gen_num) + str(curr_robot_genotype) + '\n')
             gene_df.close()
             gene_df = open("../../graph-generation/collision-data/ga-gene-learner-info.csv", 'a')
 
@@ -413,14 +414,15 @@ def interpret(timestep):
             best_prev_score = -1000
             num_better = 0 
             
-           
             if next_child != "" and not comparing_genes:
                 parse_genotype(next_child)
             elif next_child != "" and comparing_genes:
                 if cycle == '0':
                     parse_genotype(next_child)
+                    print('using child 1') 
                 else: 
                     parse_genotype(next_child_2)
+                    print('using child 2, for second cycle')
                 # print('current child', next_child)
             
             emitter.send(response.encode('utf-8'))
@@ -455,7 +457,11 @@ def interpret(timestep):
             receiver.nextPacket()
             
         elif 'comparing' in message: 
-            comparing_genes = bool(message.split('-')[1])
+            # print('comparing message', message) 
+            if message.split('-')[1] == 'False':
+                comparing_genes = False 
+            else: 
+                comparing_genes = True 
             receiver.nextPacket()
             
         elif 'partner' in message: 
@@ -511,7 +517,7 @@ def interpret(timestep):
         elif 'gen-cycle' in message: 
             
             cycle = message.split(':')[1]
-            gen_num = message.split(':')[2]
+            gen_num = int(message.split(':')[2])
             receiver.nextPacket()
             
         elif message == 'clean': 
@@ -528,14 +534,14 @@ def interpret(timestep):
             
     if receiver_individual.getQueueLength()>0:
         message = receiver_individual.getData().decode('utf-8')
-        if 'child' in message and not comparing_genes: 
+        print('msgs from individual supervisor', message)
+        if ('child' in message and not comparing_genes): 
             next_child = message[5:].split("*")
             num_better += 1
             receiver_individual.nextPacket()
         if 'child' in message and comparing_genes: 
-            child = "child-" + str(child) + '-' + str(child_2)
             next_child = message.split('-')[1].split("*")
-            next_child_2 = message.split('-')[3].split("*")
+            next_child_2 = message.split('-')[2].split("*")
             num_better += 1
             receiver_individual.nextPacket()
         else: 

@@ -1,6 +1,5 @@
 from controller import Supervisor, Node, Keyboard, Emitter, Receiver, Field
 import math 
-from robot_pop import * 
 import random
 
 """
@@ -43,7 +42,7 @@ gene_df.close()
 
 # genetic algorithm-specific parameters 
 num_generations = 10
-simulation_time = 30
+simulation_time = 15 # 30
 trials = 20
 curr_trial = 0 
 robot_population_sizes = [5, 10, 15, 20]
@@ -91,7 +90,7 @@ emitter_individual = robot.getDevice("emitter_processor")
 emitter_individual.setChannel(5)
 assessing = False 
 repopulate = False # keep False for now 
-comparing_genes = False
+comparing_genes = True
 
 
 # set up environments 
@@ -128,7 +127,7 @@ def generate_robot_central(num_robots):
     for i in range(num_robots):
         rootNode = robot.getRoot()
         rootChildrenField = rootNode.getField('children')
-        rootChildrenField.importMFNode(-1, '../las_supervisor/robots/robot-ga-update.wbo') 
+        rootChildrenField.importMFNode(-1, '../las_supervisor/robots/robot-updated-learning.wbo') 
         rec_node = rootChildrenField.getMFNode(-1)
         
     
@@ -464,6 +463,7 @@ def message_listener(time_step):
     global start 
     global simulation_time
     global prev_msg 
+    global comparing_genes
 
     if receiver.getQueueLength()>0 and (robot.getTime() - start < simulation_time):
         message = receiver.getData().decode('utf-8')
@@ -514,7 +514,7 @@ def message_listener(time_step):
             
             # print('updated with encountered partner') 
             if partner != 'none':
-                new_geno = reproduce(pop_genotypes[index], pop_genotypes[partner])
+                new_geno = reproduce(pop_genotypes[index], pop_genotypes[partner], comparing_genes)
                 pop_genotypes[index] = new_geno
             eval_fitness(time_step)
             receiver.nextPacket()
@@ -656,8 +656,11 @@ def reset_prior_gen_distrib():
         population[i].getField('translation').setSFVec3f(prev_robot_gen_pos[i]) 
     
     # moves blocks to original spots 
+    i = 0 
     for b in block_list: 
         b.getField('translation').setSFVec3f(prev_block_gen_pos[i]) 
+        print(prev_block_gen_pos[i])
+        i += 1 
       
     
 def save_prior_positions():
@@ -677,6 +680,7 @@ def save_prior_positions():
     for b in block_list:
         pos_b = b.getField('translation').getSFVec3f()    
         prev_block_gen_pos.append(pos_b)
+        
     
 def run_optimization():
     global pop_genotypes 
@@ -696,6 +700,10 @@ def run_optimization():
     global phase_one_times
     global comparing_genes
     
+    msg = 'comparing-' + str(comparing_genes)
+    emitter_individual.send(str(msg).encode('utf-8'))
+    emitter.send(str(msg).encode('utf-8')) 
+            
     for size in robot_population_sizes:
         curr_size = size  
         initialize_genotypes(size)
@@ -747,9 +755,6 @@ def run_optimization():
             # if (assessing and trial % 2) == 0 or not assessing: 
             emitter_individual.send(str(msg).encode('utf-8'))
             
-            msg = 'comparing-' + str(compare_genes)
-            emitter_individual.send(str(msg).encode('utf-8'))
-            emitter.send(str(msg).encode('utf-8'))
             
             for rec_node in population: 
                 r_field = rec_node.getField('rotation')
@@ -770,8 +775,39 @@ def run_optimization():
                 msg = 'gen-cycle:' + str(0) + ':' + str(gen) 
                 emitter.send(msg.encode('utf-8'))
                 
-                for i in range(2): 
-
+                if comparing_genes: 
+                    for i in range(2): 
+    
+                        run_seconds(simulation_time) 
+                        
+                        # run_seconds(5, True) # is waiting until got genotypes
+                        
+                        for rec_node in population: 
+                            r_field = rec_node.getField('rotation')
+                            if r_field.getSFRotation() != [0, 0, -1]:
+                                r_field.setSFRotation([0, 0, -1])
+                               
+                                                  
+                        print('found genotypes')
+                        print('new generation starting -')
+                        reproduce_list = []
+                        
+                        msg = 'gen-cycle:' + str(i + 1) + ':' + str(gen) 
+                        emitter.send(msg.encode('utf-8'))
+                        print('resetting, with other parent') 
+                        
+                        # reset position of all elements compared to beginning of previous 
+                        reset_prior_gen_distrib() 
+                        # generate_robot_central(size)
+                        # regenerate_environment(0.2)  
+                        
+                else: 
+                    updated = False 
+                    # index = 0 
+                    
+                    print('number in population', len(population))
+                    print('number of genotypes',  len(pop_genotypes), 'for size: ', size)
+    
                     run_seconds(simulation_time) 
                     
                     # run_seconds(5, True) # is waiting until got genotypes
@@ -785,14 +821,8 @@ def run_optimization():
                     print('found genotypes')
                     print('new generation starting -')
                     reproduce_list = []
-                    
-                    # reset position of all elements compared to beginning of previous 
-                    reset_prior_gen_distrib() 
-                    
-                    msg = 'gen-cycle:' + str(i + 1) + ':' + str(gen) 
-                    emitter.send(msg.encode('utf-8'))
                     # generate_robot_central(size)
-                    # regenerate_environment(0.2)  
+                    # regenerate_environment(0.2)
 
             overall_f.write(str(i) + ',' + str(robot.getTime()) + ',' + str(total_found) + ',' + str(size)+ ',' + 'ga' + ',' + str(20) + ',' + str(total_elapsed) + '\n')    
             overall_f.close()

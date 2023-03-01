@@ -35,7 +35,7 @@ def generate_random_act(length):
     return list_binary
     
     
-def reproduce(r1, r2, multi = False ): 
+def reproduce(r1, r2, multi=False): 
     global other_genotype 
     # if pass a certain threshold, will increment/decrement randomly by 
     # smaller amount 
@@ -54,7 +54,8 @@ def reproduce(r1, r2, multi = False ):
         child = crossover(mom[i], dad[i]) 
         child = mutate(child, 0.2) + "*"
         new_genotype += child 
-        
+    
+    print('multi', multi)    
     if not multi: 
         return new_genotype 
     else: 

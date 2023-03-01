@@ -111,7 +111,7 @@ def message_listener(time_step):
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
-        # print('individual messages', message, given_id)
+        print('individual messages', message, given_id)
             
         if 'fitness-scores' in message:
             fs = message.split(" ")[1:]
@@ -130,8 +130,8 @@ def message_listener(time_step):
                 child = "child" + str(child) 
                 emitter_individual.send(child.encode('utf-8'))
             else: 
-                child_1, child_2 = reproduce(pop_genotypes[int(given_id)], pop_genotypes[int(given_id)], comparing_genes)
-                child = "child-" + str(child) + '-' + str(child_2) 
+                child_1, child_2 = reproduce(pop_genotypes[int(given_id)], pop_genotypes[int(given_id)], multi = comparing_genes)
+                child = "child-" + str(child_1) + '-' + str(child_2) 
                 emitter_individual.send(child.encode('utf-8'))
             
             receiver.nextPacket()
@@ -153,7 +153,11 @@ def message_listener(time_step):
             receiver.nextPacket()
             
         elif 'comparing' in message: 
-            comparing_genes = bool(message.split('-')[1])
+            if message.split('-')[1] == 'False':
+                comparing_genes = False
+            else: 
+                comparing_genes = True 
+            
             receiver.nextPacket()
             
             
@@ -169,9 +173,10 @@ def message_listener(time_step):
             # print('robot found -- checking genotype', robo_index) 
             
             # only store best genotype 
+            print('enc check', comparing_genes)
             other_index = find_nearest_robot_genotype(robo_index)
             if overall_fitness_scores[other_index] > curr_best: 
-                if comparing_genes: 
+                if not comparing_genes: 
                     curr_best = other_index
                     child = 'child' + str(reproduce(pop_genotypes[robo_index], pop_genotypes[curr_best]))
                     # print('child ---', child) 
@@ -180,8 +185,8 @@ def message_listener(time_step):
                     
                     emitter_individual.send(child.encode('utf-8'))
                 else: 
-                    child_1, child_2 = reproduce(pop_genotypes[int(given_id)], pop_genotypes[int(given_id)], comparing_genes)
-                    child = "child-" + str(child) + '-' + str(child_2) 
+                    child_1, child_2 = reproduce(pop_genotypes[int(given_id)], pop_genotypes[int(curr_best)], multi = comparing_genes)
+                    child = "child-" + str(child_1) + '-' + str(child_2) 
                     emitter_individual.send(child.encode('utf-8'))
                    
             receiver_individual.nextPacket()

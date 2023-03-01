@@ -7,6 +7,8 @@ WorldInfo {
   CFM 0.001
   ERP 0.4
   basicTimeStep 10
+  FPS 30
+  optimalThreadCount 3
   contactProperties [
     ContactProperties {
       material1 "gripper"
@@ -43,13 +45,17 @@ DEF supervisor TinkerbotsBase {
   translation -0.41 0 0
   controller "ga_update_learner"
   supervisor TRUE
-  synchronization FALSE
+  synchronization TRUE
   extensionSlot [
     Receiver {
       channel 2
     }
     Emitter {
       channel 1
+    }
+    Emitter {
+      name "emitter_processor"
+      channel 5
     }
   ]
 }
