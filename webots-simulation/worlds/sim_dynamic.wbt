@@ -25,8 +25,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.3650554127892243 -0.2056985839550119 0.907977223366419 4.087400981479784
-  position 1.7389477642209799 2.2749621026381113 3.0498016949980213
+  orientation -0.37792933601424045 -0.12945137037890025 0.9167397447950318 3.750118200748251
+  position 2.8743902855260264 1.2800349099608253 3.505696715158228
 }
 TexturedBackground {
   luminosity 0.5
@@ -41,15 +41,23 @@ DEF arena RectangleArena {
 }
 DEF supervisor TinkerbotsBase {
   translation -0.41 0 0
-  controller "ga_supervisor"
+  controller ""
   supervisor TRUE
-  synchronization FALSE
   extensionSlot [
     Receiver {
       channel 2
     }
     Emitter {
       channel 1
+    }
+  ]
+}
+E-puck {
+  translation 0.7 -0.94 0
+  rotation 0 0 1 1.5708
+  controller "dyn_obstacle"
+  turretSlot [
+    InertialUnit {
     }
   ]
 }

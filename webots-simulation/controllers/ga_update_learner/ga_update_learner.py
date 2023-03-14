@@ -41,8 +41,8 @@ gene_df.write('agent id'+ ',time step' + ',trial' + ',size' + ',cycle' + ',gen n
 gene_df.close()
 
 # genetic algorithm-specific parameters 
-num_generations = 10
-simulation_time = 15 # 30
+num_generations = 1 # 20
+simulation_time = 15
 trials = 20
 curr_trial = 0 
 robot_population_sizes = [5, 10, 15, 20]
@@ -91,6 +91,7 @@ emitter_individual.setChannel(5)
 assessing = False 
 repopulate = False # keep False for now 
 comparing_genes = True
+trial_block_list = []
 
 
 # set up environments 
@@ -464,6 +465,7 @@ def message_listener(time_step):
     global simulation_time
     global prev_msg 
     global comparing_genes
+    global trial_block_list
 
     if receiver.getQueueLength()>0 and (robot.getTime() - start < simulation_time):
         message = receiver.getData().decode('utf-8')
@@ -493,6 +495,7 @@ def message_listener(time_step):
                         total_found += 1
                         if not repopulate: 
                             found_list.append(obj_node)
+                            trial_block_list.append(obj_node)
                             
                         collected_count[int(message.split("-")[0][1:])] = collected_count[int(message.split("-")[0][1:])] + 1
                         msg = "%" + message[1:]
@@ -650,6 +653,7 @@ def reset_prior_gen_distrib():
     global prev_block_gen_pos
     global population 
     global block_list
+    global trial_block_list
 
     # moves robots to original spots 
     for i in range(len(population)):
@@ -660,6 +664,13 @@ def reset_prior_gen_distrib():
     for b in block_list: 
         b.getField('translation').setSFVec3f(prev_block_gen_pos[i]) 
         i += 1 
+    
+    # remove found objects from prior trial to this trial 
+    for b in trial_block_list:
+        if b in block_list:
+            block_list.remove(b)
+            
+    trial_block_list = []
       
     
 def save_prior_positions():
@@ -795,8 +806,9 @@ def run_optimization():
                         emitter.send(msg.encode('utf-8'))
                         print('resetting, with other parent') 
                         
-                        # reset position of all elements compared to beginning of previous 
-                        reset_prior_gen_distrib() 
+                        # reset position of all elements compared to beginning of previous
+                        if (i == 0):  
+                            reset_prior_gen_distrib() 
                         # generate_robot_central(size)
                         # regenerate_environment(0.2)  
                         

@@ -334,6 +334,7 @@ def interpret(timestep):
     global sim_complete
     global given_id
     global strategy_f
+    global gene_df
     global obj_found_so_far
     global time_elapsed_since_block
     global fitness
