@@ -40,7 +40,7 @@ simulation_time = 30
 trials = 50
 curr_size = 5
 curr_trial = 0 
-robot_population_sizes = [20] # [5, 10, 15]
+robot_population_sizes = [5, 10, 15] # [5, 10, 15]
 b_pos_to_generate_alternative = []
 
 

@@ -34,7 +34,7 @@ num_generations = 10
 simulation_time = 30
 trials = 50
 curr_trial = 0 
-robot_population_sizes = [10]
+robot_population_sizes = [5. 10, 15]
 gene_list = ['control speed 10', 'energy cost 5', 'food energy 30', 'observations thres 5']
 curr_size = robot_population_sizes[0]
 
