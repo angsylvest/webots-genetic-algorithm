@@ -1,0 +1,21 @@
+#VRML_OBJ R2022a utf8
+DEF supervisor TinkerbotsBase {
+  hidden linearVelocity_0 -0.1403356463442722 9.265493166269262e-07 1.4924542441845437e-05
+  hidden angularVelocity_0 -4.9967842377872946e-05 0.0001939739256235664 -1.3445444413483125e-05
+  translation 0.46968840912076926 -0.8866490563260657 0.02048963985946303
+  rotation -0.00021026392449943353 1.9966319444159918e-05 0.9999999776952139 -3.065140180655414
+  name "Tinkerbots(1)"
+  controller "ga_individual_supervisor"
+  supervisor TRUE
+  extensionSlot [
+    Receiver {
+      name "receiver_processor"
+    }
+    Receiver {
+      channel 2
+    }
+    Emitter {
+      channel 1
+    }
+  ]
+}

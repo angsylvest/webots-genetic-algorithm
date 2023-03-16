@@ -1,0 +1,64 @@
+#VRML_SIM R2022a utf8
+WorldInfo {
+  info [
+    "A Khepera robot equipped with a gripper"
+  ]
+  title "Khepera Gripper"
+  CFM 0.001
+  ERP 0.4
+  basicTimeStep 10
+  optimalThreadCount 3
+  contactProperties [
+    ContactProperties {
+      material1 "gripper"
+      material2 "stick"
+      coulombFriction [
+        10
+      ]
+      bounceVelocity 0.5
+    }
+    ContactProperties {
+      material1 "khepera"
+      coulombFriction [
+        0.1
+      ]
+    }
+  ]
+}
+Viewpoint {
+  orientation -0.37792933601424045 -0.12945137037890025 0.9167397447950318 3.750118200748251
+  position 2.8743902855260264 1.2800349099608253 3.505696715158228
+}
+TexturedBackground {
+  luminosity 0.5
+}
+TexturedBackgroundLight {
+  luminosity 0.4
+}
+DEF arena RectangleArena {
+  translation -0.04 -0.07 0
+  rotation 0 1 0 4.692820414042842e-06
+  floorSize 2 2
+}
+DEF supervisor TinkerbotsBase {
+  translation -0.41 0 0
+  controller "levy_supervisor"
+  supervisor TRUE
+  extensionSlot [
+    Receiver {
+      channel 2
+    }
+    Emitter {
+      channel 1
+    }
+  ]
+}
+E-puck {
+  translation 0.7 -0.94 0
+  rotation 0 0 1 1.5708
+  controller "dyn_obstacle"
+  turretSlot [
+    InertialUnit {
+    }
+  ]
+}

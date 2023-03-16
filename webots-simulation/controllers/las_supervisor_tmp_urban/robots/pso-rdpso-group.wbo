@@ -1,0 +1,22 @@
+#VRML_OBJ R2022a utf8
+DEF supervisor TinkerbotsBase {
+  translation -0.30999999999999994 0 0.1
+  name "Tinkerbots(1)"
+  controller "pso_rspso_group"
+  supervisor TRUE
+  extensionSlot [
+    Receiver {
+      name "receiver_processor"
+    }
+    Emitter {
+      name "emitter_processor"
+      channel 5
+    }
+    Receiver {
+      channel 2
+    }
+    Emitter {
+      channel 1
+    }
+  ]
+}
