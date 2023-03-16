@@ -87,9 +87,9 @@ PipeSection {
 }
 DEF supervisor TinkerbotsBase {
   translation -0.41 0 0
-  controller "phermone_supervisor"
+  controller "phermone_supervisor_tmp_urban"
   supervisor TRUE
-  synchronization FALSE
+  synchronization TRUE
   extensionSlot [
     Receiver {
       channel 2
