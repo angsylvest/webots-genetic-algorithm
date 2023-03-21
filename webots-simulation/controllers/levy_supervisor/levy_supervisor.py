@@ -35,7 +35,7 @@ receiver.setChannel(2)
 arena_area = robot.getFromDef("arena")
 
 # set up timing so consistent with ga 
-num_generations = 1
+num_generations = 20
 simulation_time = 30
 trials = 50
 curr_size = 5

@@ -80,6 +80,8 @@ repopulate = False
 next_child = ""
 num_better = 0 
 
+gens_elapsed = 0 
+
 # generalize id acquisition
 if robot.getName() == "k0":
     given_id = 0
@@ -133,7 +135,7 @@ time_elapsed = 0 # on a per sec basis
 
 # prev message (limit overloading receiver/emitter system) 
 prev_msg = "" 
-trial_num = 0 
+trial_num = -1 
 
 # calculates angle normal to current orientation 
 def calc_normal(curr_angle): 
@@ -397,6 +399,7 @@ def interpret(timestep):
             best_prev_genotype = '!'
             best_prev_score = -1000
             num_better = 0 
+            gens_elapsed += 1 
             
            
             if next_child != "":
@@ -416,6 +419,7 @@ def interpret(timestep):
         elif 'trial' in message: 
             # resets relevant statistics 
             trial_num = int(message[5:])
+            gens_elapsed = 0
             fitness = 0 # number of obstacles 
             best_prev_genotype = '!'
             best_prev_score = -1000
@@ -466,6 +470,7 @@ def interpret(timestep):
         elif 'size' in message:
             curr_sim_size = message[5:]
             obj_found_so_far = []
+            trial_num = -1
             
             # resets relevant statistics 
             fitness = 0 # number of obstacles 
@@ -540,6 +545,12 @@ while robot.step(timestep) != -1 and sim_complete != True:
 
     if not cleaning: 
         interpret(str(robot.step(timestep)))
+        
+        # too long return back and reset prob distrib
+        if gens_elapsed > 5: 
+            holding_something
+            gens_elapsed = 0 
+            weights = [0.25, 0.25, 0.25, 0.25]  
         
         # homing mechanism 
         if holding_something == True and not reversing and not moving_forward: # move towards nest (constant vector towards home) 
