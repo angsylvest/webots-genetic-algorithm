@@ -103,6 +103,7 @@ gene_df = open("../../graph-generation/collision-data/ga-gene-info.csv", 'a')
 # environment statistics garnered 
 time_elapsed_since_block = 0 
 time_elapsed_since_robot = 0
+t_elapsed_constant = 500
 weights = [0.25, 0.25, 0.25, 0.25] 
 observations_per_strategy = [1, 1, 1, 1] # num successes using each (set to 1 so that there is still likelihood for gathering strategy) 
 total_observations = sum(observations_per_strategy)
@@ -136,6 +137,8 @@ time_elapsed = 0 # on a per sec basis
 # prev message (limit overloading receiver/emitter system) 
 prev_msg = "" 
 trial_num = -1 
+
+found_something = False 
 
 # calculates angle normal to current orientation 
 def calc_normal(curr_angle): 
@@ -363,7 +366,10 @@ def interpret(timestep):
     global curr_robot_genotype
     global n_observations_robot
     global num_better
-    global repopulate 
+    global repopulate
+    
+    global found_something
+    global gens_elapsed
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -399,7 +405,9 @@ def interpret(timestep):
             best_prev_genotype = '!'
             best_prev_score = -1000
             num_better = 0 
-            gens_elapsed += 1 
+            
+            if not found_something: 
+                gens_elapsed += 1 
             
            
             if next_child != "":
@@ -407,7 +415,7 @@ def interpret(timestep):
                 # print('current child', next_child)
             
             emitter.send(response.encode('utf-8'))
-            
+            found_something = False 
             # obj_found_so_far = []
             receiver.nextPacket()
 
@@ -433,6 +441,9 @@ def interpret(timestep):
             energy_collected_gen = 1
             num_better = 0 
             
+            found_something = False 
+            gens_elapsed = 0 
+            
             time_elapsed = 0 # on a per sec basis 
             overall_fitness = 0
             obj_found_so_far = []
@@ -454,6 +465,7 @@ def interpret(timestep):
         elif message[0] == "%" and str(message.split('-')[0][1:]) == str(given_id):
             # strategy_f.write('agent id:' + str(given_id) + ',time step: '+ timestep + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block) + ',size' + str(curr_sim_size))
             holding_something = True 
+            found_something = True 
             # print('currently holding obj--', given_id)
             observations_per_strategy[current_strat_index] += 1
             
@@ -462,6 +474,7 @@ def interpret(timestep):
             inc = 0.02
             weights[current_strat_index] = weights[current_strat_index] + inc
             weights = [float(i)/sum(weights) for i in weights] 
+            n_observations_block += 1 
             
             # observations_per_strategy[current_strat_index] += 1
             energy_collected_gen += 1
@@ -487,6 +500,9 @@ def interpret(timestep):
             
             time_elapsed = 0 # on a per sec basis 
             overall_fitness = 0
+            
+            found_something = False 
+            gens_elapsed = 0 
             
             receiver.nextPacket()
             
@@ -547,10 +563,11 @@ while robot.step(timestep) != -1 and sim_complete != True:
         interpret(str(robot.step(timestep)))
         
         # too long return back and reset prob distrib
-        if gens_elapsed > 5: 
-            holding_something
+        if gens_elapsed > 5: # consistent trials spent with no productive behavior 
+            holding_something = True # reset to beginning 
             gens_elapsed = 0 
             weights = [0.25, 0.25, 0.25, 0.25]  
+            t_elapsed_constant = t_elapsed_constant // 2 
         
         # homing mechanism 
         if holding_something == True and not reversing and not moving_forward: # move towards nest (constant vector towards home) 
@@ -561,7 +578,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             else: 
                 holding_something = False
                 t_elapsed_block_total += time_elapsed_since_block 
-                n_observations_block += 1
+                # n_observations_block += 1
                 time_elapsed_since_block = 0
                 time_elapsed = 0 # on a per sec basis 
                 # print('successfully dropped off object', given_id)
@@ -631,7 +648,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             # communication threshold  
             if not holding_something and not reversing: # max value for light 
                 if light_sensor.getValue() > 700 and light_sensor.getValue() < 900:
-                    if time_elapsed_since_robot > 500: 
+                    if time_elapsed_since_robot > t_elapsed_constant: 
                         communicate_with_robot()
                         time_elapsed_since_robot = 0 # reset time step      
                 elif light_sensor.getValue() > 800: 
