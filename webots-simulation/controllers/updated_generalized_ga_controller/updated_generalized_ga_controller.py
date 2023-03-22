@@ -50,6 +50,10 @@ inertia.enable(timestep)
 camera = robot.getDevice('camera')
 camera.enable(timestep)
 camera.recognitionEnable(timestep)
+
+camera_b = robot.getDevice('camera(1)')
+camera_b.enable(timestep)
+camera_b.recognitionEnable(timestep)
 # gps info 
 gps = robot.getDevice('gps')
 gps.enable(timestep)
@@ -560,6 +564,22 @@ cleaning = False
 while robot.step(timestep) != -1 and sim_complete != True:
 
     if not cleaning: 
+        image = camera.getImageArray()
+        if image:
+            # display the components of each pixel
+            red   = image[0][0][0]
+            green = image[0][0][1]
+            blue  = image[0][0][2]
+            print('r='+str(red)+' g='+str(green)+' b='+str(blue))
+            
+            # for x in range(0,camera.getWidth()):
+                # for y in range(0,camera.getHeight()):
+                    # red   = image[x][y][0]
+                    # green = image[x][y][1]
+                    # blue  = image[x][y][2]
+                    # gray  = (red + green + blue) / 3
+                    # print('r='+str(red)+' g='+str(green)+' b='+str(blue))
+                    
         interpret(str(robot.step(timestep)))
         
         # too long return back and reset prob distrib

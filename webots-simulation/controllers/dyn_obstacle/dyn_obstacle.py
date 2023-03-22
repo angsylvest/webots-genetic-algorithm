@@ -95,7 +95,7 @@ while robot.step(timestep) != -1:
     
     
     run_seconds(forward_duration)
-    print('yaw', yaw, 'heading', round(headings[index],2), 'index', index)
+    # print('yaw', yaw, 'heading', round(headings[index],2), 'index', index)
     
     if not moving_forward:   
         # now rotate 90 degrees and then return to moving forward 
