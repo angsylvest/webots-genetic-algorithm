@@ -117,7 +117,7 @@ def regenerate_environment(block_dist):
     # generates block on opposite sides of arena (randomly generated) 
     if len(b_pos_to_generate) == 0: 
         # for i in range(10): 
-        seed_file = open('../../graph-generation/seed-11-rn.csv', 'r') 
+        seed_file = open('../../graph-generation/seed-15.csv', 'r') 
         list = seed_file.readlines()
         for pos in list: 
             res = [float(i) for i in pos.strip('][\n').split(', ')]
