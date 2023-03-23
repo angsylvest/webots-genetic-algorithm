@@ -26,8 +26,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.37792933601424045 -0.12945137037890025 0.9167397447950318 3.750118200748251
-  position 2.8743902855260264 1.2800349099608253 3.505696715158228
+  orientation 0.44367427955377164 -0.25019486095152943 -0.8605554399432302 4.045192184512145
+  position 1.6135627620108153 -2.4414179064834243 5.176937408730106
 }
 TexturedBackground {
   luminosity 0.5
@@ -58,8 +58,18 @@ DEF supervisor TinkerbotsBase {
   ]
 }
 E-puck {
-  translation 0.7 -0.94 0
+  translation 0.78 -0.94 0
   rotation 0 0 1 1.5708
+  controller ""
+  turretSlot [
+    InertialUnit {
+    }
+  ]
+}
+E-puck {
+  translation -0.84 0.749999 0.02
+  rotation 0 0 -1 1.57079
+  name "e-puck(1)"
   controller "dyn_obstacle"
   turretSlot [
     InertialUnit {
@@ -75,6 +85,14 @@ StraightRoadSegment {
   rightBorder FALSE
   leftBorder FALSE
   length 1.8
+  appearance Asphalt {
+    colorOverride 0 0 0
+    IBLStrength 0
+  }
+  pavementAppearance Pavement {
+    type "tiles"
+    colorOverride 0.00392157 0.00396735 0.00396735
+  }
   locked FALSE
 }
 StraightRoadSegment {
@@ -87,6 +105,9 @@ StraightRoadSegment {
   rightBorder FALSE
   leftBorder FALSE
   length 1.8
+  appearance Asphalt {
+    IBLStrength 0
+  }
   locked FALSE
 }
 StraightRoadSegment {
@@ -99,6 +120,9 @@ StraightRoadSegment {
   rightBorder FALSE
   leftBorder FALSE
   length 1.8
+  appearance Asphalt {
+    IBLStrength 0
+  }
   locked FALSE
 }
 StraightRoadSegment {
@@ -111,7 +135,12 @@ StraightRoadSegment {
   rightBorder FALSE
   leftBorder FALSE
   length 1.8
+  appearance Asphalt {
+    colorOverride 0.0105898 0.0107118 0.0107118
+    IBLStrength 0
+  }
+  pavementAppearance Pavement {
+    type "slate"
+  }
   locked FALSE
 }
-
-

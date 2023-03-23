@@ -62,3 +62,13 @@ E-puck {
     }
   ]
 }
+E-puck {
+  translation -0.84 0.749999 0.02
+  rotation 0 0 -1 1.57079
+  name "e-puck(1)"
+  controller "dyn_obstacle"
+  turretSlot [
+    InertialUnit {
+    }
+  ]
+}

@@ -26,12 +26,18 @@ n = 0
 index = 0 
 start = robot.getTime() 
 headings = [0, pi, -pi/2, 0, pi/2]
-forward_duration = 15 
+forward_duration = 18 
 
 moving_forward = True 
 rotating = False 
 
 forward_speed = 5
+roll, pitch, yaw = inertia.getRollPitchYaw()
+yaw = round(yaw, 2)
+
+if robot.getName() == "e-puck(1)":
+    index = 2 
+  
 
 def begin_rotating():
     leftMotor.setPosition(float('inf'))

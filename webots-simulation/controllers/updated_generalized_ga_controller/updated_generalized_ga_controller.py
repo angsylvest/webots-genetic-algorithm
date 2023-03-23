@@ -86,6 +86,9 @@ num_better = 0
 
 gens_elapsed = 0 
 
+terrains = ['normal', 'road']
+current_terrain = terrains[0] # either normal or road 
+
 # generalize id acquisition
 if robot.getName() == "k0":
     given_id = 0
@@ -143,6 +146,19 @@ prev_msg = ""
 trial_num = -1 
 
 found_something = False 
+
+def identify_terrain(r,g,b):
+    global terrains
+    global current_terrain
+    
+    if (int(r) < 70 and int(g) < 60 and int(b) <85):
+        # ugly hardcode to determine if on road 
+        index = 0 
+        current_terrain = terrains[1]
+        
+    else: 
+        current_terrain = terrains[0]
+
 
 # calculates angle normal to current orientation 
 def calc_normal(curr_angle): 
@@ -479,6 +495,7 @@ def interpret(timestep):
             weights[current_strat_index] = weights[current_strat_index] + inc
             weights = [float(i)/sum(weights) for i in weights] 
             n_observations_block += 1 
+            gens_elapsed = 0
             
             # observations_per_strategy[current_strat_index] += 1
             energy_collected_gen += 1
@@ -566,20 +583,23 @@ while robot.step(timestep) != -1 and sim_complete != True:
     if not cleaning: 
         image = camera.getImageArray()
         if image:
-            # display the components of each pixel
+            # display the components of top left pixel 
             red   = image[0][0][0]
             green = image[0][0][1]
             blue  = image[0][0][2]
-            print('r='+str(red)+' g='+str(green)+' b='+str(blue))
             
-            # for x in range(0,camera.getWidth()):
-                # for y in range(0,camera.getHeight()):
-                    # red   = image[x][y][0]
-                    # green = image[x][y][1]
-                    # blue  = image[x][y][2]
-                    # gray  = (red + green + blue) / 3
-                    # print('r='+str(red)+' g='+str(green)+' b='+str(blue))
-                    
+            identify_terrain(red, green, blue)
+            
+        
+        if current_terrain != terrains[0]:
+            # figure out level of fear 
+            reactions = ['avoid', 'proceed']
+            choice_react = random.choices(reactions, [50, 50])
+            if choice_react == reactions[0]:
+                chosen_direction = calc_normal(yaw)
+                orientation_found = False 
+                moving_forward = True 
+                     
         interpret(str(robot.step(timestep)))
         
         # too long return back and reset prob distrib
