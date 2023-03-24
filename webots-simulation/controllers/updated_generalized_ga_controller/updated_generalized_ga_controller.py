@@ -88,6 +88,7 @@ gens_elapsed = 0
 
 terrains = ['normal', 'road']
 current_terrain = terrains[0] # either normal or road 
+prev_terrain = terrains[0]
 
 # generalize id acquisition
 if robot.getName() == "k0":
@@ -150,6 +151,9 @@ found_something = False
 def identify_terrain(r,g,b):
     global terrains
     global current_terrain
+    global prev_terrain 
+    
+    prev_terrain = current_terrain 
     
     if (int(r) < 70 and int(g) < 60 and int(b) <85):
         # ugly hardcode to determine if on road 
@@ -588,10 +592,11 @@ while robot.step(timestep) != -1 and sim_complete != True:
             green = image[0][0][1]
             blue  = image[0][0][2]
             
+            
             identify_terrain(red, green, blue)
             
         
-        if current_terrain != terrains[0]:
+        if current_terrain != terrains[0] and prev_terrain != current_terrain:
             # figure out level of fear 
             reactions = ['avoid', 'proceed']
             choice_react = random.choices(reactions, [50, 50])

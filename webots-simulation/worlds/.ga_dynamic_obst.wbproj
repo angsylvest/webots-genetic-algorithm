@@ -6,9 +6,9 @@ minimizedPerspectives: 000000ff00000000fd000000030000000000000087000002ecfc01000
 maximizedDockId: -1
 centralWidgetVisible: 1
 orthographicViewHeight: 1
-textFiles: 0 "controllers/dyn_obstacle/dyn_obstacle.py" "controllers/generic_crw_foraging/generic_crw_foraging.py" "controllers/updated_generalized_ga_controller/updated_generalized_ga_controller.py" "controllers/ga_updated_supervisor/ga_updated_supervisor.py"
+textFiles: 3 "controllers/dyn_obstacle/dyn_obstacle.py" "controllers/generic_crw_foraging/generic_crw_foraging.py" "controllers/updated_generalized_ga_controller/updated_generalized_ga_controller.py" "controllers/ga_updated_supervisor/ga_updated_supervisor.py"
 consoles: Console:All:All
 renderingDevicePerspectives: e-puck(1):camera;1;1;0;0
 renderingDevicePerspectives: e-puck:camera;1;0.820513;0;0
-renderingDevicePerspectives: k0:camera;0;1;0;0;688;390;64;64;0
+renderingDevicePerspectives: k0:camera;1;1;0;0
 renderingDevicePerspectives: k0:camera(1);1;1;0;0
