@@ -186,6 +186,9 @@ def message_listener(time_step):
                     child_1, child_2 = reproduce(pop_genotypes[int(given_id)], pop_genotypes[int(curr_best)], multi = comparing_genes)
                     child = "child-" + str(child_1) + '-' + str(child_2) 
                     emitter_individual.send(child.encode('utf-8'))
+                    
+            else: 
+                emitter_individual.send('penalize'.encode('utf-8'))
                    
             receiver_individual.nextPacket()
             

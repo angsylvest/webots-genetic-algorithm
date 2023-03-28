@@ -549,6 +549,14 @@ def interpret(timestep):
             next_child = message[5:].split("*")
             num_better += 1
             receiver_individual.nextPacket()
+            
+        if 'penalize' in message: 
+            if t_elapsed_constant < 500: 
+                t_elapsed_constant = t_elapsed_constant * 1.5 
+            
+            receiver_individual.nextPacket()
+            
+            
         else: 
             receiver_individual.nextPacket()
             
@@ -599,7 +607,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
         if current_terrain != terrains[0] and prev_terrain != current_terrain:
             # figure out level of fear 
             reactions = ['avoid', 'proceed']
-            choice_react = random.choices(reactions, [50, 50])
+            choice_react = random.choices(reactions, [70, 30])
             if choice_react == reactions[0]:
                 chosen_direction = calc_normal(yaw)
                 orientation_found = False 
@@ -609,9 +617,25 @@ while robot.step(timestep) != -1 and sim_complete != True:
         
         # too long return back and reset prob distrib
         if gens_elapsed > 5: # consistent trials spent with no productive behavior 
-            holding_something = True # reset to beginning 
             gens_elapsed = 0 
-            weights = [0.25, 0.25, 0.25, 0.25]  
+            curr_index = 0 
+            
+            max_index = weights.index(max(weights))
+            
+            if max_index == 0 or max_index == 3: 
+                # want more conservative movement 
+                weights[1] = weights[current_strat_index] + 0.02
+                weights[2] = weights[current_strat_index] + 0.02  
+            else: 
+                # want more dauntless movement 
+                weights[1] = weights[current_strat_index] - 0.02
+                weights[2] = weights[current_strat_index] - 0.02  
+                
+            time_elapsed = 0 
+            weights = [float(i)/sum(weights) for i in weights] 
+            strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = False)
+            
+            # make circular movements less likely 
             t_elapsed_constant = t_elapsed_constant // 2 
         
         # homing mechanism 
@@ -696,8 +720,8 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     if time_elapsed_since_robot > t_elapsed_constant: 
                         communicate_with_robot()
                         time_elapsed_since_robot = 0 # reset time step      
-                elif light_sensor.getValue() > 800: 
-                    time_elapsed_since_robot += 1 
+                # elif light_sensor.getValue() > 800: 
+                time_elapsed_since_robot += 1 # increment every time (more interactions) 
                 
                 
             start_count = robot.getTime()  
