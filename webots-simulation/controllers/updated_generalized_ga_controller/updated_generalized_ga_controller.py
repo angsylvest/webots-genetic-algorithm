@@ -624,19 +624,19 @@ while robot.step(timestep) != -1 and sim_complete != True:
             
             if max_index == 0 or max_index == 3: 
                 # want more conservative movement 
-                weights[1] = weights[current_strat_index] + 0.02
-                weights[2] = weights[current_strat_index] + 0.02  
+                weights[1] = weights[current_strat_index] + 0.05
+                weights[2] = weights[current_strat_index] + 0.05  
             else: 
                 # want more dauntless movement 
-                weights[1] = weights[current_strat_index] - 0.02
-                weights[2] = weights[current_strat_index] - 0.02  
+                weights[1] = weights[current_strat_index] - 0.05
+                weights[2] = weights[current_strat_index] - 0.05  
                 
             time_elapsed = 0 
             weights = [float(i)/sum(weights) for i in weights] 
             strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = False)
             
             # make circular movements less likely 
-            t_elapsed_constant = t_elapsed_constant // 2 
+            t_elapsed_constant = t_elapsed_constant // 2 # more likely to interact with other robots
         
         # homing mechanism 
         if holding_something == True and not reversing and not moving_forward: # move towards nest (constant vector towards home) 

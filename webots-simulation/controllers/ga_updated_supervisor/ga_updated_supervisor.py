@@ -32,7 +32,7 @@ gene_df.close()
 # genetic algorithm-specific parameters 
 num_generations = 10
 simulation_time = 30
-trials = 50
+trials = 20
 curr_trial = 0 
 robot_population_sizes = [5, 10, 15]
 gene_list = ['control speed 10', 'energy cost 5', 'food energy 30', 'observations thres 5']
