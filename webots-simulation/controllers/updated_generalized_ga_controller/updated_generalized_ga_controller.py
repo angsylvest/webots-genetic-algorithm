@@ -593,6 +593,9 @@ cleaning = False
 while robot.step(timestep) != -1 and sim_complete != True:
 
     if not cleaning: 
+    
+        # collision test: 
+        print('collision value', collision.getValue())
         image = camera.getImageArray()
         if image:
             # display the components of top left pixel 
@@ -707,10 +710,10 @@ while robot.step(timestep) != -1 and sim_complete != True:
         elif reversing: 
             move_backwards()
             
-        if min(dist_vals) <= 330 and not reversing: # wall detection 
-            fitness += 1 
-            reversing = True 
-            move_backwards()
+        # if min(dist_vals) <= 330 and not reversing: # wall detection 
+            # fitness += 1 
+            # reversing = True 
+            # move_backwards()
                         
             # does each behavior after 1 sec    
         if robot.getTime() - start_count >= 1: 
