@@ -366,7 +366,6 @@ def interpret(timestep):
     global gene_df
     global obj_found_so_far
     global time_elapsed_since_block
-    global fitness
     global holding_something
     global chosen_direction
     global strategy 
@@ -593,9 +592,7 @@ cleaning = False
 while robot.step(timestep) != -1 and sim_complete != True:
 
     if not cleaning: 
-    
-        # collision test: 
-        print('collision value', collision.getValue())
+       
         image = camera.getImageArray()
         if image:
             # display the components of top left pixel 
@@ -717,6 +714,9 @@ while robot.step(timestep) != -1 and sim_complete != True:
                         
             # does each behavior after 1 sec    
         if robot.getTime() - start_count >= 1: 
+            if collision.getValue() == 1:
+                fitness += 1
+        
             # communication threshold  
             if not holding_something and not reversing: # max value for light 
                 if light_sensor.getValue() > 700 and light_sensor.getValue() < 900:
