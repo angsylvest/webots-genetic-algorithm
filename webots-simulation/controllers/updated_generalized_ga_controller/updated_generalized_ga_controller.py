@@ -111,7 +111,7 @@ gene_df = open("../../graph-generation/collision-data/ga-gene-info.csv", 'a')
 # environment statistics garnered 
 time_elapsed_since_block = 0 
 time_elapsed_since_robot = 0
-t_elapsed_constant = 500
+t_elapsed_constant = 10
 weights = [0.25, 0.25, 0.25, 0.25] 
 observations_per_strategy = [1, 1, 1, 1] # num successes using each (set to 1 so that there is still likelihood for gathering strategy) 
 total_observations = sum(observations_per_strategy)
@@ -155,7 +155,7 @@ def identify_terrain(r,g,b):
     
     prev_terrain = current_terrain 
     
-    if (int(r) < 70 and int(g) < 60 and int(b) <85):
+    if (int(r) > 170):
         # ugly hardcode to determine if on road 
         index = 0 
         current_terrain = terrains[1]
@@ -596,18 +596,22 @@ while robot.step(timestep) != -1 and sim_complete != True:
         image = camera.getImageArray()
         if image:
             # display the components of top left pixel 
-            red   = image[0][0][0]
-            green = image[0][0][1]
-            blue  = image[0][0][2]
+            red   = image[len(image)//2][len(image[0])//2][0]
+            green = image[len(image)//2][len(image[0])//2][1]
+            blue  = image[len(image)//2][len(image[0])//2][2]
             
+            # print('gen terrain',red, green, blue)
+               
             
             identify_terrain(red, green, blue)
             
         
         if current_terrain != terrains[0] and prev_terrain != current_terrain:
             # figure out level of fear 
+            print('dangerous terrain',red, green, blue)
+            print('id',  given_id)
             reactions = ['avoid', 'proceed']
-            choice_react = random.choices(reactions, [70, 30])
+            choice_react = random.choices(reactions, [0.7, 0.3])
             if choice_react == reactions[0]:
                 chosen_direction = calc_normal(yaw)
                 orientation_found = False 
@@ -707,10 +711,10 @@ while robot.step(timestep) != -1 and sim_complete != True:
         elif reversing: 
             move_backwards()
             
-        # if min(dist_vals) <= 330 and not reversing: # wall detection 
-            # fitness += 1 
-            # reversing = True 
-            # move_backwards()
+        if min(dist_vals) <= 330 and not reversing: # wall detection 
+            fitness += 1 
+            reversing = True 
+            move_backwards()
                         
             # does each behavior after 1 sec    
         if robot.getTime() - start_count >= 1: 
