@@ -61,13 +61,13 @@ def reproduce(r1, r2, multi=False):
         print('potential candidates', new_genotype, other_genotype)
         return new_genotype, other_genotype 
     
-def crossover(m, d):
+def crossover(m, d): # d is the higher fitness 
     global other_genotype 
     
     new_child = ''
     other_child = '' 
     
-    random_start = random.randint(0,len(m)-1)
+    random_start = random.randint((len(m)-1) // 2,len(m)-1) # always more of d
     new_child += m[:random_start] + d[random_start:] 
     
     other_child += m[random_start:] + d[:random_start] 
