@@ -4,6 +4,11 @@ from controller import Supervisor, Node, Keyboard, Emitter, Receiver, Field
 import random
 import math 
 
+# ensure that we can access utils package to streamline tasks 
+import sys 
+sys.path.append('../../')
+import utils.environment as env_mod 
+
 """
 Main supervisor base 
 Optimization algorithm - Collaboration-oriented 
@@ -60,9 +65,15 @@ updated = False
 fit_update = False 
 count = 0
 prev_msg = ""
-random.seed(11)
+seed_val = 11
+random.seed(seed_val)
 assessing = False 
 repopulate = False
+
+env_type = "random"
+# generate envs 
+curr_env = env_mod.Environment(env_type=env_type, seed = seed_val)
+
 
 def generate_robot_central(num_robots):
     global fitness_scores 
@@ -99,299 +110,46 @@ def generate_robot_central(num_robots):
         collected_count.append(0)
         population.append(rec_node)
 
-
-def regenerate_environment(block_dist):
-    # creates a equally distributed set of blocks 
-    # avoiding areas where a robot is already present 
+def regenerate_blocks(seed = None):
     global block_list
     global population 
     global r_pos_to_generate
     global b_pos_to_generate
+    global curr_env
     
     for obj in block_list: 
         obj.remove()
     
     block_list = []
+    assert curr_env
     
-    for i in range(len(r_pos_to_generate)):
-        population[i].getField('translation').setSFVec3f(r_pos_to_generate[i])
-        
-    # generates block on opposite sides of arena (randomly generated) 
-    if len(b_pos_to_generate) == 0: 
-        seed_file = open('../../graph-generation/seed-11-rn.csv', 'r') 
-        list = seed_file.readlines()
-        for pos in list: 
-            res = [float(i) for i in pos.strip('][\n').split(', ')]
-            b_pos_to_generate.append(res)
-            rootNode = robot.getRoot()
-            rootChildrenField = rootNode.getField('children')
-            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
-            rec_node = rootChildrenField.getMFNode(-1)
-        
-            t_field = rec_node.getField('translation')
-            t_field.setSFVec3f(res) 
-            block_list.append(rec_node) 
-        # for i in range(10): 
-            # rootNode = robot.getRoot()
-            # rootChildrenField = rootNode.getField('children')
-            # rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
-            # rec_node = rootChildrenField.getMFNode(-1)
-        
-            # t_field = rec_node.getField('translation')
-            # pose = [round(random.uniform(0.9, -0.9),2), round(random.uniform(0.3, 0.85),2), 0.02]
-            # t_field.setSFVec3f(pose) 
-            # b_pos_to_generate.append(pose)
-            # block_list.append(rec_node)
-        
-        # for i in range(10): 
-            # rootNode = robot.getRoot()
-            # rootChildrenField = rootNode.getField('children')
-            # rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
-            # rec_node = rootChildrenField.getMFNode(-1)
-        
-            # t_field = rec_node.getField('translation')
-            # pose = [round(random.uniform(0.9, -0.9),2), round(random.uniform(-1, 0.23),2), 0.02]
-            # t_field.setSFVec3f(pose) 
-            # b_pos_to_generate.append(pose)
-            # block_list.append(rec_node)
-    else: 
-        # if already generated, use the previously saved positions 
-        for i in b_pos_to_generate: 
-            rootNode = robot.getRoot()
-            rootChildrenField = rootNode.getField('children')
-            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
-            rec_node = rootChildrenField.getMFNode(-1)
-        
-            t_field = rec_node.getField('translation')
-            t_field.setSFVec3f(i) 
-            block_list.append(rec_node)
-        
-# initially reads from file for re-producibility, and then continues to re-read (will be second)        
-def regenerate_environment_alternate(block_dist): # will stay constant based off seed 
-    # creates a equally distributed set of blocks 
-    # avoiding areas where a robot is already present 
-    global block_list
-    global population 
-    global r_pos_to_generate
-    global b_pos_to_generate_alternative
-    
-    for obj in block_list: 
-        obj.remove()
-    
-    block_list = []
-    
-    for i in range(len(r_pos_to_generate)):
-        population[i].getField('translation').setSFVec3f(r_pos_to_generate[i])
-        
-    # generates block on opposite sides of arena (randomly generated) 
-    if len(b_pos_to_generate_alternative) == 0: 
-        seed_file = open('../../graph-generation/seed-15-pl.csv', 'r') 
-        list = seed_file.readlines()
-        for pos in list: 
-            res = [float(i) for i in pos.strip('][\n').split(', ')]
-            b_pos_to_generate_alternative.append(res)
-            rootNode = robot.getRoot()
-            rootChildrenField = rootNode.getField('children')
-            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
-            rec_node = rootChildrenField.getMFNode(-1)
-        
-            t_field = rec_node.getField('translation')
-            t_field.setSFVec3f(res) 
-            block_list.append(rec_node)   
-        
-    else: 
-        # if already generated, use the previously saved positions 
-        for i in b_pos_to_generate_alternative: 
-            rootNode = robot.getRoot()
-            rootChildrenField = rootNode.getField('children')
-            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
-            rec_node = rootChildrenField.getMFNode(-1)
-        
-            t_field = rec_node.getField('translation')
-            t_field.setSFVec3f(i) 
-            block_list.append(rec_node)
-            
-def regenerate_blocks_single_source():
-    global block_list
-    global r_pos_to_generate
-    global b_pos_to_generate
-    
-    for obj in block_list: 
-        obj.remove()
-    
-    block_list = []
-    
-    for i in range(len(r_pos_to_generate)):
-        population[i].getField('translation').setSFVec3f(r_pos_to_generate[i])
-        
-    if len(b_pos_to_generate) == 0: 
-        for i in range(40): 
-            rootNode = robot.getRoot()
-            rootChildrenField = rootNode.getField('children')
-            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
-            rec_node = rootChildrenField.getMFNode(-1)
-        
-            t_field = rec_node.getField('translation')
-            t_field.setSFVec3f([round(random.uniform(-0.5, -0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]) 
-            block_list.append(rec_node)
-            
-    else: 
-        # if already generated, use the previously saved positions 
-        for i in b_pos_to_generate: 
-            rootNode = robot.getRoot()
-            rootChildrenField = rootNode.getField('children')
-            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
-            rec_node = rootChildrenField.getMFNode(-1)
-        
-            t_field = rec_node.getField('translation')
-            t_field.setSFVec3f(i) 
-            block_list.append(rec_node)
-        
-def regenerate_blocks_dual_source():
-    global block_list
-    global r_pos_to_generate
-    global b_pos_to_generate
-    
-    for obj in block_list: 
-        obj.remove()
-    
-    block_list = []
-    
-    if len(b_pos_to_generate) == 0: 
-        for i in range(len(r_pos_to_generate)):
-            population[i].getField('translation').setSFVec3f(r_pos_to_generate[i])
-            
-    
-        for i in range(20): 
-            rootNode = robot.getRoot()
-            rootChildrenField = rootNode.getField('children')
-            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
-            rec_node = rootChildrenField.getMFNode(-1)
-        
-            t_field = rec_node.getField('translation')
-            t_field.setSFVec3f([round(random.uniform(-0.5, -0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]) 
-            block_list.append(rec_node)        
-          
-        for i in range(20): 
-            rootNode = robot.getRoot()
-            rootChildrenField = rootNode.getField('children')
-            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
-            rec_node = rootChildrenField.getMFNode(-1)
-            
-            t_field = rec_node.getField('translation')
-            t_field.setSFVec3f([round(random.uniform(0.5, 0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]) 
-            block_list.append(rec_node)    
- 
-    else: 
-        # if already generated, use the previously saved positions 
-        for i in b_pos_to_generate: 
-            rootNode = robot.getRoot()
-            rootChildrenField = rootNode.getField('children')
-            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
-            rec_node = rootChildrenField.getMFNode(-1)
-        
-            t_field = rec_node.getField('translation')
-            t_field.setSFVec3f(i) 
-            block_list.append(rec_node)
-               
-# creates random clustering         
-def regenerate_blocks_power_law():
-    global block_list
-    global r_pos_to_generate
-    global b_pos_to_generate
-    
-    for obj in block_list: 
-        obj.remove()
-    
-    block_list = []
-    
-    
-    for i in range(len(r_pos_to_generate)):
-        population[i].getField('translation').setSFVec3f(r_pos_to_generate[i])
-        
-    # x_min = 1
-    # alpha = 2.5
-    # centers = []
-    
-    if len(b_pos_to_generate) == 0: 
-    
-        seed_file = open('../../graph-generation/seed-11-pl.csv', 'r') 
-        list = seed_file.readlines()
-        for pos in list: 
-            res = [float(i) for i in pos.strip('][\n').split(', ')]
-            b_pos_to_generate_alternative.append(res)
-            rootNode = robot.getRoot()
-            rootChildrenField = rootNode.getField('children')
-            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
-            rec_node = rootChildrenField.getMFNode(-1)
-        
-            t_field = rec_node.getField('translation')
-            t_field.setSFVec3f(res) 
-            block_list.append(rec_node) 
+    if seed == 15 and curr_env.seed != 15: 
+        curr_env = env_mod.Environment(env_type=env_type, seed = seed)
+        b_pos_to_generate = curr_env.generate_blocks()
 
-        # for i in range(40): # will be number of clusters instead of disparate blocks 
-            # r = random.random()
-            # x_smp = round(x_min * (1 - r) ** (-1 / (alpha - 1)))
-            # print(x_smp)
-            # if x_smp > 5: 
-                # x_smp = 5 
-                
-            # center = random.choices([[round(random.uniform(0.9, -0.9),2), round(random.uniform(0.3, 0.85),2), 0.02], [round(random.uniform(0.9, -0.9),2), round(random.uniform(-1, 0.23),2), 0.02]])[0]
-            # other = center
-            # if len(centers) != 0:
-                # while all(math.dist(center, other) < 0.2 and math.dist(center, (0,0,0.02)) < 0.8 for other in centers): # generate center until appropriate distance away 
-                     # center = random.choices([[round(random.uniform(0.9, -0.9),2), round(random.uniform(0.3, 0.85),2), 0.02], [round(random.uniform(0.9, -0.9),2), round(random.uniform(-1, 0.23),2), 0.02]])[0]
-            # else: 
-                # while math.dist(center, (0,0,0.02)) < 0.8: # generate center until appropriate distance away 
-                     # center = random.choices([[round(random.uniform(0.9, -0.9),2), round(random.uniform(0.3, 0.85),2), 0.02], [round(random.uniform(0.9, -0.9),2), round(random.uniform(-1, 0.23),2), 0.02]])[0]
-            # centers.append(center)
+    if len(b_pos_to_generate) == 0:
+        b_pos_to_generate = curr_env.generate_blocks()
+
+    for i in b_pos_to_generate: 
+        rootNode = robot.getRoot()
+        rootChildrenField = rootNode.getField('children')
+        rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+        rec_node = rootChildrenField.getMFNode(-1)
     
-            # x, y, z = center[0],center[1], center[2]
-            # x_smp -= 1
-            # pot = []
-            # new_c = [x+0.05, y, z]
-            # new_c1 = [x, y + 0.05, z]
-            # new_c2 = [x-0.05, y, z]
-            # new_c3 = [x, y - 0.05, z]
-            # pot.append(new_c)
-            # pot.append(new_c1)
-            # pot.append(new_c2)
-            # pot.append(new_c3)
-            
-            # for i in range(x_smp): # will be clumped in same location
-                # rootNode = robot.getRoot()
-                # rootChildrenField = rootNode.getField('children')
-                # rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
-                # rec_node = rootChildrenField.getMFNode(-1)
-            
-                # t_field = rec_node.getField('translation')
-                
-                # want to have additional parts centralized (at most 4 others) 
-                # b_pos_to_generate.append(pot[i])
-                # seed_15.write(str(pot[i]) + '\n')
-                
-                # t_field.setSFVec3f(pot[i]) 
-                # block_list.append(rec_node)
-            
-    else: 
-        # if already generated, use the previously saved positions 
-        for i in b_pos_to_generate: 
-            rootNode = robot.getRoot()
-            rootChildrenField = rootNode.getField('children')
-            rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
-            rec_node = rootChildrenField.getMFNode(-1)
+        t_field = rec_node.getField('translation')
+        t_field.setSFVec3f(i) 
         
-            t_field = rec_node.getField('translation')
-            t_field.setSFVec3f(i) 
-            block_list.append(rec_node)
+        r_field = rec_node.getField('rotation')
+        if r_field.getSFRotation() != [0, 0, -1]:
+            r_field.setSFRotation([0, 0, -1])
+            
+        block_list.append(rec_node)
             
     for rec_node in block_list: # set to be upright
         r_field = rec_node.getField('rotation')
         if r_field.getSFRotation() != [0, 0, -1]:
             r_field.setSFRotation([0, 0, -1])
-            
-        
-    
+
 def save_progress():
     # way to save total number of blocks found 
     # global k_gen_f
@@ -570,16 +328,11 @@ def run_optimization():
         curr_trial = 0 
         
         if assessing and curr_trial % 2 == 0:
-            regenerate_blocks_power_law()
-            # regenerate_environment_alternate(0.2) 
+            regenerate_blocks(seed = 11)
         elif assessing and curr_trial % 2 != 0: 
-            regenerate_environment_alternate(0.2)    
+            regenerate_blocks(seed = 15) 
         else: 
-            regenerate_environment(0.2)
-            # regenerate_blocks_power_law()
-        # regenerate_blocks_power_law()
-        # regenerate_blocks_single_source()
-        # regenerate_blocks_dual_source()
+            regenerate_blocks(seed = 11)
         
         for rec_node in population: 
             r_field = rec_node.getField('rotation')
@@ -611,20 +364,14 @@ def run_optimization():
             
             curr_trial = i + 1
             if assessing and curr_trial % 2 == 0:
-                # regenerate_environment(0.2)
-                regenerate_blocks_power_law()
-                # regenerate_environment_alternate(0.2)
+                regenerate_blocks(seed = 11)
                 emitter.send('trial_complete-'.encode('utf-8'))
             elif assessing and curr_trial % 2 != 0: 
-                regenerate_environment_alternate(0.2)  
+                regenerate_blocks(seed = 15)
                 emitter.send('trial_complete'.encode('utf-8'))  
             else: 
-                regenerate_environment(0.2)
-                # regenerate_blocks_power_law()
+                regenerate_blocks(seed = 11)
                 emitter.send('trial_complete-'.encode('utf-8'))
-            # regenerate_blocks_power_law()
-            # regenerate_blocks_single_source()
-            # regenerate_blocks_dual_source()
             total_found = 0 
             found_list = [] 
             index = 0 
@@ -646,4 +393,296 @@ def main():
 main()
                     
             
+# --- old code --- 
+# def regenerate_environment(block_dist):
+#     # creates a equally distributed set of blocks 
+#     # avoiding areas where a robot is already present 
+#     global block_list
+#     global population 
+#     global r_pos_to_generate
+#     global b_pos_to_generate
+    
+#     for obj in block_list: 
+#         obj.remove()
+    
+#     block_list = []
+    
+#     for i in range(len(r_pos_to_generate)):
+#         population[i].getField('translation').setSFVec3f(r_pos_to_generate[i])
+        
+#     # generates block on opposite sides of arena (randomly generated) 
+#     if len(b_pos_to_generate) == 0: 
+#         seed_file = open('../../graph-generation/seed-11-rn.csv', 'r') 
+#         list = seed_file.readlines()
+#         for pos in list: 
+#             res = [float(i) for i in pos.strip('][\n').split(', ')]
+#             b_pos_to_generate.append(res)
+#             rootNode = robot.getRoot()
+#             rootChildrenField = rootNode.getField('children')
+#             rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+#             rec_node = rootChildrenField.getMFNode(-1)
+        
+#             t_field = rec_node.getField('translation')
+#             t_field.setSFVec3f(res) 
+#             block_list.append(rec_node) 
+#         # for i in range(10): 
+#             # rootNode = robot.getRoot()
+#             # rootChildrenField = rootNode.getField('children')
+#             # rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+#             # rec_node = rootChildrenField.getMFNode(-1)
+        
+#             # t_field = rec_node.getField('translation')
+#             # pose = [round(random.uniform(0.9, -0.9),2), round(random.uniform(0.3, 0.85),2), 0.02]
+#             # t_field.setSFVec3f(pose) 
+#             # b_pos_to_generate.append(pose)
+#             # block_list.append(rec_node)
+        
+#         # for i in range(10): 
+#             # rootNode = robot.getRoot()
+#             # rootChildrenField = rootNode.getField('children')
+#             # rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+#             # rec_node = rootChildrenField.getMFNode(-1)
+        
+#             # t_field = rec_node.getField('translation')
+#             # pose = [round(random.uniform(0.9, -0.9),2), round(random.uniform(-1, 0.23),2), 0.02]
+#             # t_field.setSFVec3f(pose) 
+#             # b_pos_to_generate.append(pose)
+#             # block_list.append(rec_node)
+#     else: 
+#         # if already generated, use the previously saved positions 
+#         for i in b_pos_to_generate: 
+#             rootNode = robot.getRoot()
+#             rootChildrenField = rootNode.getField('children')
+#             rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+#             rec_node = rootChildrenField.getMFNode(-1)
+        
+#             t_field = rec_node.getField('translation')
+#             t_field.setSFVec3f(i) 
+#             block_list.append(rec_node)
+        
+# # initially reads from file for re-producibility, and then continues to re-read (will be second)        
+# def regenerate_environment_alternate(block_dist): # will stay constant based off seed 
+#     # creates a equally distributed set of blocks 
+#     # avoiding areas where a robot is already present 
+#     global block_list
+#     global population 
+#     global r_pos_to_generate
+#     global b_pos_to_generate_alternative
+    
+#     for obj in block_list: 
+#         obj.remove()
+    
+#     block_list = []
+    
+#     for i in range(len(r_pos_to_generate)):
+#         population[i].getField('translation').setSFVec3f(r_pos_to_generate[i])
+        
+#     # generates block on opposite sides of arena (randomly generated) 
+#     if len(b_pos_to_generate_alternative) == 0: 
+#         seed_file = open('../../graph-generation/seed-15-pl.csv', 'r') 
+#         list = seed_file.readlines()
+#         for pos in list: 
+#             res = [float(i) for i in pos.strip('][\n').split(', ')]
+#             b_pos_to_generate_alternative.append(res)
+#             rootNode = robot.getRoot()
+#             rootChildrenField = rootNode.getField('children')
+#             rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+#             rec_node = rootChildrenField.getMFNode(-1)
+        
+#             t_field = rec_node.getField('translation')
+#             t_field.setSFVec3f(res) 
+#             block_list.append(rec_node)   
+        
+#     else: 
+#         # if already generated, use the previously saved positions 
+#         for i in b_pos_to_generate_alternative: 
+#             rootNode = robot.getRoot()
+#             rootChildrenField = rootNode.getField('children')
+#             rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+#             rec_node = rootChildrenField.getMFNode(-1)
+        
+#             t_field = rec_node.getField('translation')
+#             t_field.setSFVec3f(i) 
+#             block_list.append(rec_node)
             
+# def regenerate_blocks_single_source():
+#     global block_list
+#     global r_pos_to_generate
+#     global b_pos_to_generate
+    
+#     for obj in block_list: 
+#         obj.remove()
+    
+#     block_list = []
+    
+#     for i in range(len(r_pos_to_generate)):
+#         population[i].getField('translation').setSFVec3f(r_pos_to_generate[i])
+        
+#     if len(b_pos_to_generate) == 0: 
+#         for i in range(40): 
+#             rootNode = robot.getRoot()
+#             rootChildrenField = rootNode.getField('children')
+#             rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+#             rec_node = rootChildrenField.getMFNode(-1)
+        
+#             t_field = rec_node.getField('translation')
+#             t_field.setSFVec3f([round(random.uniform(-0.5, -0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]) 
+#             block_list.append(rec_node)
+            
+#     else: 
+#         # if already generated, use the previously saved positions 
+#         for i in b_pos_to_generate: 
+#             rootNode = robot.getRoot()
+#             rootChildrenField = rootNode.getField('children')
+#             rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+#             rec_node = rootChildrenField.getMFNode(-1)
+        
+#             t_field = rec_node.getField('translation')
+#             t_field.setSFVec3f(i) 
+#             block_list.append(rec_node)
+        
+# def regenerate_blocks_dual_source():
+#     global block_list
+#     global r_pos_to_generate
+#     global b_pos_to_generate
+    
+#     for obj in block_list: 
+#         obj.remove()
+    
+#     block_list = []
+    
+#     if len(b_pos_to_generate) == 0: 
+#         for i in range(len(r_pos_to_generate)):
+#             population[i].getField('translation').setSFVec3f(r_pos_to_generate[i])
+            
+    
+#         for i in range(20): 
+#             rootNode = robot.getRoot()
+#             rootChildrenField = rootNode.getField('children')
+#             rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+#             rec_node = rootChildrenField.getMFNode(-1)
+        
+#             t_field = rec_node.getField('translation')
+#             t_field.setSFVec3f([round(random.uniform(-0.5, -0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]) 
+#             block_list.append(rec_node)        
+          
+#         for i in range(20): 
+#             rootNode = robot.getRoot()
+#             rootChildrenField = rootNode.getField('children')
+#             rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+#             rec_node = rootChildrenField.getMFNode(-1)
+            
+#             t_field = rec_node.getField('translation')
+#             t_field.setSFVec3f([round(random.uniform(0.5, 0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]) 
+#             block_list.append(rec_node)    
+ 
+#     else: 
+#         # if already generated, use the previously saved positions 
+#         for i in b_pos_to_generate: 
+#             rootNode = robot.getRoot()
+#             rootChildrenField = rootNode.getField('children')
+#             rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+#             rec_node = rootChildrenField.getMFNode(-1)
+        
+#             t_field = rec_node.getField('translation')
+#             t_field.setSFVec3f(i) 
+#             block_list.append(rec_node)
+               
+# # creates random clustering         
+# def regenerate_blocks_power_law():
+#     global block_list
+#     global r_pos_to_generate
+#     global b_pos_to_generate
+    
+#     for obj in block_list: 
+#         obj.remove()
+    
+#     block_list = []
+    
+    
+#     for i in range(len(r_pos_to_generate)):
+#         population[i].getField('translation').setSFVec3f(r_pos_to_generate[i])
+        
+#     # x_min = 1
+#     # alpha = 2.5
+#     # centers = []
+    
+#     if len(b_pos_to_generate) == 0: 
+    
+#         seed_file = open('../../graph-generation/seed-11-pl.csv', 'r') 
+#         list = seed_file.readlines()
+#         for pos in list: 
+#             res = [float(i) for i in pos.strip('][\n').split(', ')]
+#             b_pos_to_generate_alternative.append(res)
+#             rootNode = robot.getRoot()
+#             rootChildrenField = rootNode.getField('children')
+#             rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+#             rec_node = rootChildrenField.getMFNode(-1)
+        
+#             t_field = rec_node.getField('translation')
+#             t_field.setSFVec3f(res) 
+#             block_list.append(rec_node) 
+
+#         # for i in range(40): # will be number of clusters instead of disparate blocks 
+#             # r = random.random()
+#             # x_smp = round(x_min * (1 - r) ** (-1 / (alpha - 1)))
+#             # print(x_smp)
+#             # if x_smp > 5: 
+#                 # x_smp = 5 
+                
+#             # center = random.choices([[round(random.uniform(0.9, -0.9),2), round(random.uniform(0.3, 0.85),2), 0.02], [round(random.uniform(0.9, -0.9),2), round(random.uniform(-1, 0.23),2), 0.02]])[0]
+#             # other = center
+#             # if len(centers) != 0:
+#                 # while all(math.dist(center, other) < 0.2 and math.dist(center, (0,0,0.02)) < 0.8 for other in centers): # generate center until appropriate distance away 
+#                      # center = random.choices([[round(random.uniform(0.9, -0.9),2), round(random.uniform(0.3, 0.85),2), 0.02], [round(random.uniform(0.9, -0.9),2), round(random.uniform(-1, 0.23),2), 0.02]])[0]
+#             # else: 
+#                 # while math.dist(center, (0,0,0.02)) < 0.8: # generate center until appropriate distance away 
+#                      # center = random.choices([[round(random.uniform(0.9, -0.9),2), round(random.uniform(0.3, 0.85),2), 0.02], [round(random.uniform(0.9, -0.9),2), round(random.uniform(-1, 0.23),2), 0.02]])[0]
+#             # centers.append(center)
+    
+#             # x, y, z = center[0],center[1], center[2]
+#             # x_smp -= 1
+#             # pot = []
+#             # new_c = [x+0.05, y, z]
+#             # new_c1 = [x, y + 0.05, z]
+#             # new_c2 = [x-0.05, y, z]
+#             # new_c3 = [x, y - 0.05, z]
+#             # pot.append(new_c)
+#             # pot.append(new_c1)
+#             # pot.append(new_c2)
+#             # pot.append(new_c3)
+            
+#             # for i in range(x_smp): # will be clumped in same location
+#                 # rootNode = robot.getRoot()
+#                 # rootChildrenField = rootNode.getField('children')
+#                 # rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+#                 # rec_node = rootChildrenField.getMFNode(-1)
+            
+#                 # t_field = rec_node.getField('translation')
+                
+#                 # want to have additional parts centralized (at most 4 others) 
+#                 # b_pos_to_generate.append(pot[i])
+#                 # seed_15.write(str(pot[i]) + '\n')
+                
+#                 # t_field.setSFVec3f(pot[i]) 
+#                 # block_list.append(rec_node)
+            
+#     else: 
+#         # if already generated, use the previously saved positions 
+#         for i in b_pos_to_generate: 
+#             rootNode = robot.getRoot()
+#             rootChildrenField = rootNode.getField('children')
+#             rootChildrenField.importMFNode(-1, '../las_supervisor/cylinder-obj.wbo') 
+#             rec_node = rootChildrenField.getMFNode(-1)
+        
+#             t_field = rec_node.getField('translation')
+#             t_field.setSFVec3f(i) 
+#             block_list.append(rec_node)
+            
+#     for rec_node in block_list: # set to be upright
+#         r_field = rec_node.getField('rotation')
+#         if r_field.getSFRotation() != [0, 0, -1]:
+#             r_field.setSFRotation([0, 0, -1])
+            
+        
+              

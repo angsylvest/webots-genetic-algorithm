@@ -13,11 +13,6 @@ from math import sin, cos, pi
 import math 
 import random 
 
-# ensure that we can access utils package to streamline tasks 
-import sys 
-sys.path.append('../../')
-import utils
-
 # create the Robot instance.
 robot = Robot()
 
@@ -110,13 +105,13 @@ receiver_individual.enable(timestep)
 receiver_individual.setChannel((int(given_id) * 10) - 1)
 
 # collects statistics about strategy and collisions 
-strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'a')
-gene_df = open("../../graph-generation/collision-data/ga-gene-info.csv", 'a')
+strategy_f = open("../../graph-generation/collision-data/ga-info-gen.csv", 'a')
+gene_df = open("../../graph-generation/collision-data/ga-gene-info-gen.csv", 'a')
 
 # environment statistics garnered 
 time_elapsed_since_block = 0 
 time_elapsed_since_robot = 0
-t_elapsed_constant = 10
+t_elapsed_constant = 10 # was 500 
 weights = [0.25, 0.25, 0.25, 0.25] 
 observations_per_strategy = [1, 1, 1, 1] # num successes using each (set to 1 so that there is still likelihood for gathering strategy) 
 total_observations = sum(observations_per_strategy)
@@ -422,11 +417,11 @@ def interpret(timestep):
             # print('calculating fitness', calc_robot_fitness())
             strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(weights[0]) + ',' + str(weights[1]) + ',' + str(weights[2]) + ',' + str(weights[3]) + ','+ str(time_elapsed_since_block) + ',' + str(n_observations_robot)  + ',' + str(curr_sim_size) + ',' + str(calc_robot_fitness())+ ',' + str(curr_sim_size) + ',ga' + ',' + str(trial_num) + ',' + str(n_observations_block) + ',' + str(curr_robot_genotype) + ',' + str(num_better) + ',' + str(gps.getValues()[0]) + ',' + str(gps.getValues()[1]) + '\n')
             strategy_f.close()
-            strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'a')
+            strategy_f = open("../../graph-generation/collision-data/ga-info-gen.csv", 'a')
             
             gene_df.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(trial_num) + ',' + str(curr_sim_size) + ',' + str(curr_robot_genotype) + '\n')
             gene_df.close()
-            gene_df = open("../../graph-generation/collision-data/ga-gene-info.csv", 'a')
+            gene_df = open("../../graph-generation/collision-data/ga-gene-info-gen.csv", 'a')
 
             fitness = 0
             overall_fitness = 0
@@ -554,11 +549,11 @@ def interpret(timestep):
             num_better += 1
             receiver_individual.nextPacket()
             
-        if 'penalize' in message: 
-            if t_elapsed_constant < 500: 
-                t_elapsed_constant = t_elapsed_constant * 1.5 
+        # if 'penalize' in message: 
+            # if t_elapsed_constant < 500: 
+                # t_elapsed_constant = t_elapsed_constant * 1.5 
             
-            receiver_individual.nextPacket()
+            # receiver_individual.nextPacket()
             
             
         else: 
@@ -622,30 +617,30 @@ while robot.step(timestep) != -1 and sim_complete != True:
                 # orientation_found = False 
                 # moving_forward = True 
                      
-        # interpret(str(robot.step(timestep)))
+        interpret(str(robot.step(timestep)))
         
-        # # too long return back and reset prob distrib
+        # too long return back and reset prob distrib
         # if gens_elapsed > 5: # consistent trials spent with no productive behavior 
-        #     gens_elapsed = 0 
-        #     curr_index = 0 
+            # gens_elapsed = 0 
+            # curr_index = 0 
             
-        #     max_index = weights.index(max(weights))
+            # max_index = weights.index(max(weights))
             
-        #     if max_index == 0 or max_index == 3: 
-        #         # want more conservative movement 
-        #         weights[1] = weights[current_strat_index] + 0.05
-        #         weights[2] = weights[current_strat_index] + 0.05  
-        #     else: 
-        #         # want more dauntless movement 
-        #         weights[1] = weights[current_strat_index] - 0.05
-        #         weights[2] = weights[current_strat_index] - 0.05  
+            # if max_index == 0 or max_index == 3: 
+                # want more conservative movement 
+                # weights[1] = weights[current_strat_index] + 0.05
+                # weights[2] = weights[current_strat_index] + 0.05  
+            # else: 
+                # want more dauntless movement 
+                # weights[1] = weights[current_strat_index] - 0.05
+                # weights[2] = weights[current_strat_index] - 0.05  
                 
-        #     time_elapsed = 0 
-        #     weights = [float(i)/sum(weights) for i in weights] 
-        #     strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = False)
+            # time_elapsed = 0 
+            # weights = [float(i)/sum(weights) for i in weights] 
+            # strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = False)
             
-        #     # make circular movements less likely 
-        #     t_elapsed_constant = t_elapsed_constant // 2 # more likely to interact with other robots
+            # make circular movements less likely 
+            # t_elapsed_constant = t_elapsed_constant // 2 # more likely to interact with other robots
         
         # homing mechanism 
         if holding_something == True and not reversing and not moving_forward: # move towards nest (constant vector towards home) 
@@ -717,7 +712,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             move_backwards()
             
         if min(dist_vals) <= 330 and not reversing: # wall detection 
-            fitness += 1 
+            # fitness += 1 
             reversing = True 
             move_backwards()
                         
@@ -764,4 +759,5 @@ while robot.step(timestep) != -1 and sim_complete != True:
         pass
     
 # Enter here exit cleanup code.
+
 

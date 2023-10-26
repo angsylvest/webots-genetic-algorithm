@@ -13,11 +13,6 @@ from math import sin, cos, pi
 import math 
 import random 
 
-# ensure that we can access utils package to streamline tasks 
-import sys 
-sys.path.append('../../')
-import utils
-
 # create the Robot instance.
 robot = Robot()
 
@@ -56,9 +51,9 @@ camera = robot.getDevice('camera')
 camera.enable(timestep)
 camera.recognitionEnable(timestep)
 
-camera_b = robot.getDevice('camera(1)')
-camera_b.enable(timestep)
-camera_b.recognitionEnable(timestep)
+# camera_b = robot.getDevice('camera(1)')
+# camera_b.enable(timestep)
+# camera_b.recognitionEnable(timestep)
 # gps info 
 gps = robot.getDevice('gps')
 gps.enable(timestep)
@@ -91,10 +86,6 @@ num_better = 0
 
 gens_elapsed = 0 
 
-terrains = ['normal', 'road']
-current_terrain = terrains[0] # either normal or road 
-prev_terrain = terrains[0]
-
 # generalize id acquisition
 if robot.getName() == "k0":
     given_id = 0
@@ -116,7 +107,7 @@ gene_df = open("../../graph-generation/collision-data/ga-gene-info.csv", 'a')
 # environment statistics garnered 
 time_elapsed_since_block = 0 
 time_elapsed_since_robot = 0
-t_elapsed_constant = 10
+t_elapsed_constant = 500
 weights = [0.25, 0.25, 0.25, 0.25] 
 observations_per_strategy = [1, 1, 1, 1] # num successes using each (set to 1 so that there is still likelihood for gathering strategy) 
 total_observations = sum(observations_per_strategy)
@@ -152,22 +143,6 @@ prev_msg = ""
 trial_num = -1 
 
 found_something = False 
-
-def identify_terrain(r,g,b):
-    global terrains
-    global current_terrain
-    global prev_terrain 
-    
-    prev_terrain = current_terrain 
-    
-    if (int(r) > 170):
-        # ugly hardcode to determine if on road 
-        index = 0 
-        current_terrain = terrains[1]
-        
-    else: 
-        current_terrain = terrains[0]
-
 
 # calculates angle normal to current orientation 
 def calc_normal(curr_angle): 
@@ -371,6 +346,7 @@ def interpret(timestep):
     global gene_df
     global obj_found_so_far
     global time_elapsed_since_block
+    global fitness
     global holding_something
     global chosen_direction
     global strategy 
@@ -398,6 +374,7 @@ def interpret(timestep):
     
     global found_something
     global gens_elapsed
+    global t_elapsed_constant
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -455,6 +432,7 @@ def interpret(timestep):
         elif 'trial' in message: 
             # resets relevant statistics 
             trial_num = int(message[5:])
+            t_elapsed_constant = 500
             gens_elapsed = 0
             fitness = 0 # number of obstacles 
             best_prev_genotype = '!'
@@ -496,7 +474,8 @@ def interpret(timestep):
             found_something = True 
             # print('currently holding obj--', given_id)
             observations_per_strategy[current_strat_index] += 1
-            
+            t_elapsed_constant = 500 
+
             obj_id = message.split('-')[1] 
             
             inc = 0.02
@@ -513,7 +492,8 @@ def interpret(timestep):
             curr_sim_size = message[5:]
             obj_found_so_far = []
             trial_num = -1
-            
+            t_elapsed_constant = 500 
+          
             # resets relevant statistics 
             fitness = 0 # number of obstacles 
             best_prev_genotype = '!'
@@ -553,14 +533,6 @@ def interpret(timestep):
             next_child = message[5:].split("*")
             num_better += 1
             receiver_individual.nextPacket()
-            
-        if 'penalize' in message: 
-            if t_elapsed_constant < 500: 
-                t_elapsed_constant = t_elapsed_constant * 1.5 
-            
-            receiver_individual.nextPacket()
-            
-            
         else: 
             receiver_individual.nextPacket()
             
@@ -597,55 +569,30 @@ cleaning = False
 while robot.step(timestep) != -1 and sim_complete != True:
 
     if not cleaning: 
-       
         # image = camera.getImageArray()
         # if image:
-            # display the components of top left pixel 
-            # red   = image[len(image)//2][len(image[0])//2][0]
-            # green = image[len(image)//2][len(image[0])//2][1]
-            # blue  = image[len(image)//2][len(image[0])//2][2]
+            # display the components of each pixel
+            # red   = image[0][0][0]
+            # green = image[0][0][1]
+            # blue  = image[0][0][2]
+            # print('r='+str(red)+' g='+str(green)+' b='+str(blue))
             
-            # print('gen terrain',red, green, blue)
-               
-            
-            # identify_terrain(red, green, blue)
-            
+            # for x in range(0,camera.getWidth()):
+                # for y in range(0,camera.getHeight()):
+                    # red   = image[x][y][0]
+                    # green = image[x][y][1]
+                    # blue  = image[x][y][2]
+                    # gray  = (red + green + blue) / 3
+                    # print('r='+str(red)+' g='+str(green)+' b='+str(blue))
+                    
+        interpret(str(robot.step(timestep)))
         
-        # if current_terrain != terrains[0] and prev_terrain != current_terrain:
-            # figure out level of fear 
-            # print('dangerous terrain',red, green, blue)
-            # print('id',  given_id)
-            # reactions = ['avoid', 'proceed']
-            # choice_react = random.choices(reactions, [0.7, 0.3])
-            # if choice_react == reactions[0]:
-                # chosen_direction = calc_normal(yaw)
-                # orientation_found = False 
-                # moving_forward = True 
-                     
-        # interpret(str(robot.step(timestep)))
-        
-        # # too long return back and reset prob distrib
-        # if gens_elapsed > 5: # consistent trials spent with no productive behavior 
-        #     gens_elapsed = 0 
-        #     curr_index = 0 
-            
-        #     max_index = weights.index(max(weights))
-            
-        #     if max_index == 0 or max_index == 3: 
-        #         # want more conservative movement 
-        #         weights[1] = weights[current_strat_index] + 0.05
-        #         weights[2] = weights[current_strat_index] + 0.05  
-        #     else: 
-        #         # want more dauntless movement 
-        #         weights[1] = weights[current_strat_index] - 0.05
-        #         weights[2] = weights[current_strat_index] - 0.05  
-                
-        #     time_elapsed = 0 
-        #     weights = [float(i)/sum(weights) for i in weights] 
-        #     strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = False)
-            
-        #     # make circular movements less likely 
-        #     t_elapsed_constant = t_elapsed_constant // 2 # more likely to interact with other robots
+        # too long return back and reset prob distrib
+        if gens_elapsed > 5: # consistent trials spent with no productive behavior 
+            holding_something = True # reset to beginning 
+            gens_elapsed = 0 
+            weights = [0.25, 0.25, 0.25, 0.25]  
+            t_elapsed_constant = t_elapsed_constant // 2 
         
         # homing mechanism 
         if holding_something == True and not reversing and not moving_forward: # move towards nest (constant vector towards home) 
@@ -723,17 +670,14 @@ while robot.step(timestep) != -1 and sim_complete != True:
                         
             # does each behavior after 1 sec    
         if robot.getTime() - start_count >= 1: 
-            if collision.getValue() == 1:
-                fitness += 1
-        
             # communication threshold  
             if not holding_something and not reversing: # max value for light 
                 if light_sensor.getValue() > 700 and light_sensor.getValue() < 900:
                     if time_elapsed_since_robot > t_elapsed_constant: 
                         communicate_with_robot()
                         time_elapsed_since_robot = 0 # reset time step      
-                # elif light_sensor.getValue() > 800: 
-                time_elapsed_since_robot += 1 # increment every time (more interactions) 
+                elif light_sensor.getValue() > 800: 
+                    time_elapsed_since_robot += 1 
                 
                 
             start_count = robot.getTime()  
@@ -764,4 +708,5 @@ while robot.step(timestep) != -1 and sim_complete != True:
         pass
     
 # Enter here exit cleanup code.
+
 
