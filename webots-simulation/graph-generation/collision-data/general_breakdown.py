@@ -38,3 +38,51 @@ for trial, df in grouped_data:
 
     summary_df = df[summary_variables].describe()
     summary_df.to_csv(f'trial_{trial}_summary_statistics.csv')  # Save summary statistics as CSV
+
+
+# Example coordinates data for a specific trial
+coordinates_data = {
+    'x': [1, 2, 3, 4, 5],
+    'y': [2, 4, 5, 4, 6]
+}
+
+# Convert the dictionary to a DataFrame
+df = pd.DataFrame(coordinates_data)
+
+# Calculate relevant statistics
+distance_traveled = df.apply(lambda row: ((row['x'].diff()**2 + row['y'].diff()**2)**0.5).sum(), axis=1)
+total_distance = distance_traveled.sum()
+average_distance_per_step = distance_traveled.mean()
+
+# Visualize the coordinates data
+plt.figure(figsize=(8, 6))
+plt.plot(df['x'], df['y'], marker='o')
+plt.xlabel('X-coordinate')
+plt.ylabel('Y-coordinate')
+plt.title('Foraging Performance - Trial X')
+plt.show()
+
+# Print relevant statistics
+print(f"Total Distance Traveled: {total_distance}")
+print(f"Average Distance Traveled per Step: {average_distance_per_step}")
+
+
+# Calculate coverage based on the dimensions of the shared space
+shared_space_width = 10  # Replace with the actual width of the shared space
+shared_space_height = 10  # Replace with the actual height of the shared space
+
+x_coverage = df['x'].max() - df['x'].min()
+y_coverage = df['y'].max() - df['y'].min()
+
+total_coverage = (x_coverage * y_coverage) / (shared_space_width * shared_space_height) * 100
+
+# Visualize the coordinates data
+plt.figure(figsize=(8, 6))
+plt.plot(df['x'], df['y'], marker='o')
+plt.xlabel('X-coordinate')
+plt.ylabel('Y-coordinate')
+plt.title('Foraging Performance - Trial X')
+plt.show()
+
+# Print coverage statistics
+print(f"Total Coverage: {total_coverage}%")

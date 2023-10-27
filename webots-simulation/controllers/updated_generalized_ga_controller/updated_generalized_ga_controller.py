@@ -120,6 +120,9 @@ t_elapsed_constant = 10
 weights = [0.25, 0.25, 0.25, 0.25] 
 observations_per_strategy = [1, 1, 1, 1] # num successes using each (set to 1 so that there is still likelihood for gathering strategy) 
 total_observations = sum(observations_per_strategy)
+weights_high_density = [0.25, 0.25, 0.25, 0.25] 
+observations_per_strategy_high_dens = [1, 1, 1, 1] # num successes using each (set to 1 so that there is still likelihood for gathering strategy) 
+total_observations_high_dense = sum(observations_per_strategy_high_dens)
 current_strat_index = 0 # set arbitrarily 
 curr_best_weights = [] # set initially as empty 
 
@@ -152,6 +155,10 @@ prev_msg = ""
 trial_num = -1 
 
 found_something = False 
+
+agent_observation = {'num_interactions': 0, 'num_objects_observed': 0, 'num_collisions':0}
+time_into_generation = 0 
+using_high_dens = True 
 
 def identify_terrain(r,g,b):
     global terrains
@@ -188,6 +195,7 @@ def calc_normal(curr_angle):
         
      
 # parameters reset when strategy changes (after a generation) 
+# fix (make fitness reliant on prior observations) 
 def calc_robot_fitness():
     global t_elapsed_block_total
     global n_observations_block
@@ -195,10 +203,11 @@ def calc_robot_fitness():
     global obj_weight 
     global obstacle_weight
     
+    
     if fitness != 0: 
-        return obj_weight*(n_observations_block) + obstacle_weight*(1 / fitness)
+        return obj_weight*(n_observations_block) + obstacle_weight*(1 / fitness) + 0.5*agent_observation['num_objects_observed']
     else: 
-        return obj_weight*(n_observations_block) 
+        return obj_weight*(n_observations_block) + 0.5*agent_observation['num_objects_observed']
     
     # else: 
         # return 0 
@@ -264,6 +273,7 @@ def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False
     global curr_sim_size
     global current_strat_index 
     global weights 
+    
     
     # want to update weights based off effectiveness of current strategy 
     if update: 
@@ -398,6 +408,12 @@ def interpret(timestep):
     
     global found_something
     global gens_elapsed
+    global time_into_generation
+    global agent_observation 
+
+    global weights_high_density
+    global observations_per_strategy_high_dens
+
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -433,6 +449,8 @@ def interpret(timestep):
             best_prev_genotype = '!'
             best_prev_score = -1000
             num_better = 0 
+            time_into_generation = 0
+            agent_observation = {'num_interactions': 0, 'num_objects_observed': 0, 'num_collisions':0}
             
             if not found_something: 
                 gens_elapsed += 1 
@@ -460,6 +478,11 @@ def interpret(timestep):
             best_prev_genotype = '!'
             best_prev_score = -1000
             observations_per_strategy = [1, 1, 1, 1]
+            weights = [0.25, 0.25, 0.25, 0.25] 
+
+            weights_high_density = [0.25, 0.25, 0.25, 0.25] 
+            observations_per_strategy_high_dens = [1, 1, 1, 1] # num successes using each (set to 1 so that there is still likelihood for gathering strategy) 
+            
             current_strat_index = 0
             
             t_elapsed_block_total = 0
@@ -494,14 +517,24 @@ def interpret(timestep):
             # strategy_f.write('agent id:' + str(given_id) + ',time step: '+ timestep + ',straight:' + str(weights[0]) + ',alternating-left:' + str(weights[1]) + ',alternating-right:' + str(weights[2]) + ',true random:' + str(weights[3]) + ',time since last block:'+ str(time_elapsed_since_block) + ',size' + str(curr_sim_size))
             holding_something = True 
             found_something = True 
+            
             # print('currently holding obj--', given_id)
-            observations_per_strategy[current_strat_index] += 1
+            if using_high_dens and agent_observation['num_collisions'] > 0.3:
+                observations_per_strategy_high_dens[current_strat_index] += 1
+
+                incr = 0.02
+                weights_high_density[current_strat_index] = weights_high_density[current_strat_index] + incr
+                weights_high_density = [float(i)/sum(weights_high_density) for i in weights_high_density] 
+
             
-            obj_id = message.split('-')[1] 
-            
-            inc = 0.02
-            weights[current_strat_index] = weights[current_strat_index] + inc
-            weights = [float(i)/sum(weights) for i in weights] 
+            else: 
+                observations_per_strategy[current_strat_index] += 1 
+                obj_id = message.split('-')[1] 
+                
+                inc = 0.02
+                weights[current_strat_index] = weights[current_strat_index] + inc
+                weights = [float(i)/sum(weights) for i in weights] 
+
             n_observations_block += 1 
             gens_elapsed = 0
             
@@ -575,6 +608,15 @@ def communicate_with_robot():
         emitter_individual.send(response.encode('utf-8'))
         prev_msg = response 
     # print('found neighbor')
+    
+    
+def checkForCollectable(list_of_ids):
+    collectables = 0
+    for obj in list_of_ids: 
+        id = str(obj.get_id())
+        if id not in obj_found_so_far:
+            collectables += 1
+    return collectables 
 
 # controller tracker variables 
 i = 0 
@@ -593,10 +635,151 @@ start_count = robot.getTime()
 reversing = False 
 moving_forward = False  
 cleaning = False
+prev_gen_check = robot.getTime()
 
 while robot.step(timestep) != -1 and sim_complete != True:
 
     if not cleaning: 
+        if robot.getTime() - prev_gen_check == 1: 
+            prev_gen_check = robot.getTime()
+            time_into_generation += 1
+            if time_into_generation % 10 == 0: 
+                time_into_generation = 0
+                agent_observation = {'num_interactions': 0, 'num_objects_observed': 0, 'num_collisions':0}
+            print('given id', given_id, 'updated time into generation + here dictionary', agent_observation['num_interactions'] , 'num collisions', agent_observation['num_collisions']) 
+        
+        # homing mechanism 
+        if holding_something == True and not reversing and not moving_forward: # move towards nest (constant vector towards home) 
+            cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
+            if math.dist([cd_x, cd_y], [0,0]) > 0.05:  
+                chosen_direction = round(math.atan2(-cd_y,-cd_x),2)
+                
+            else: 
+                holding_something = False
+                t_elapsed_block_total += time_elapsed_since_block 
+                # n_observations_block += 1
+                time_elapsed_since_block = 0
+                time_elapsed = 0 # on a per sec basis 
+                # print('successfully dropped off object', given_id)
+            
+        if curr_index >= len(strategy) and not holding_something and not reversing and not moving_forward: # maintain strategy for initial
+            curr_index = 0 
+            # used to determine when to update strategy 
+            print('completed strategy --', strategy, 'energy expenditure --', energy_expenditure())
+            w = weights 
+            if using_high_dens and agent_observation['num_collisions'] > 0.3:
+                w = weights_high_density
+
+            if energy_expenditure() < 0: # update the weights based off success so far 
+                strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, w, update = True) # chooses a new strategy   
+                # time_elapsed = 0    
+            else: 
+                strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, w, update = False)
+                # time_elapsed = 0 
+    
+        time_elapsed_since_robot +=1
+        # biased random walk movement (each time step, cert prob of turning that direction) 
+        roll, pitch, yaw = inertia.getRollPitchYaw()
+        yaw = round(yaw, 2)
+       
+    
+        if yaw != chosen_direction and orientation_found != True and object_encountered != True and not reversing: 
+            begin_rotating()
+            
+            # handles avoidance  
+        elif (i - back_i >= 50 and object_encountered != True and orientation_found == True and not reversing and moving_forward):
+            moving_forward = False
+            # proceeds with previous strategy 
+            orientation_found = False 
+            if not holding_something: 
+                chosen_direction = strategy[curr_index]
+            
+        elif (i - prev_i == time_switch and object_encountered != True and orientation_found == True and not reversing):
+            orientation_found = False 
+            if not holding_something: 
+                chosen_direction = strategy[curr_index]
+                curr_index += 1
+        
+        elif orientation_found != True and yaw == chosen_direction and object_encountered != True and not reversing: 
+            orientation_found = True 
+            prev_i = i
+            # for avoidance strategy 
+            back_i = i 
+            move_forward()    
+            # moving_forward = True 
+            
+        # collision avoidance mechanism     
+        dist_val = ds.getValue()
+        dist_vals = [ds.getValue(), ds_left.getValue(), ds_right.getValue()]
+                
+        if min(dist_vals) > 500 and reversing: # no longer within range of obstacle
+            # print('proceeding with navigation')
+            reversing = False
+            chosen_direction = calc_normal(yaw)
+            orientation_found = False 
+            moving_forward = True 
+            
+        elif reversing: 
+            move_backwards()
+            
+        if min(dist_vals) <= 330 and not reversing: # wall detection 
+            fitness += 1 
+            reversing = True 
+            move_backwards()
+            if time_into_generation != 0: 
+                agent_observation['num_collisions'] = (agent_observation['num_collisions'] + 1) / time_into_generation
+                        
+            # does each behavior after 1 sec    
+        if robot.getTime() - start_count >= 1: 
+            if collision.getValue() == 1:
+                fitness += 1
+        
+            # communication threshold  
+            if not holding_something and not reversing: # max value for light 
+                if light_sensor.getValue() > 700 and light_sensor.getValue() < 900:
+                    if time_into_generation != 0: 
+                        agent_observation['num_interactions'] = (agent_observation['num_interactions'] + 1) / time_into_generation
+                    if time_elapsed_since_robot > t_elapsed_constant: 
+                        communicate_with_robot()
+                        time_elapsed_since_robot = 0 # reset time step      
+                # elif light_sensor.getValue() > 800: 
+                time_elapsed_since_robot += 1 # increment every time (more interactions) 
+                
+                
+            start_count = robot.getTime()  
+            if not holding_something:  # don't take into account homing state 
+                time_elapsed += 1
+            
+            # check for collisions with other robot 
+            list = camera.getRecognitionObjects()
+            if holding_something == False and not reversing: 
+                # stop()
+                if (object_encountered == False):
+                    # frequency of observing foragable objects 
+                    num_not_found = checkForCollectable(camera.getRecognitionObjects())
+                    if time_into_generation != 0: 
+                        agent_observation['num_objects_observed'] = ((agent_observation['num_objects_observed']*(time_into_generation-1)) + num_not_found) / time_into_generation
+                    
+                    # attempt to get object detected 
+                    if min(dist_vals) < 500 and len(list) != 0:
+                        firstObject = camera.getRecognitionObjects()[0]
+                        count = len(camera.getRecognitionObjects())
+                        id = str(firstObject.get_id())
+                        if id not in obj_found_so_far:
+                            id = "$" + str(given_id) + "-" + str(id) # indication that it is a object to be deleted 
+                            if prev_msg != id: 
+                                emitter.send(str(id).encode('utf-8'))
+                                prev_msg = id 
+                        else: 
+                            time_elapsed_since_block += 1 # on a per sec basis    
+                    else: 
+                        time_elapsed_since_block += 1 # on a per sec basis 
+        i+=1
+            
+        pass
+    
+# Enter here exit cleanup code.
+
        
         # image = camera.getImageArray()
         # if image:
@@ -646,122 +829,3 @@ while robot.step(timestep) != -1 and sim_complete != True:
             
         #     # make circular movements less likely 
         #     t_elapsed_constant = t_elapsed_constant // 2 # more likely to interact with other robots
-        
-        # homing mechanism 
-        if holding_something == True and not reversing and not moving_forward: # move towards nest (constant vector towards home) 
-            cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
-            if math.dist([cd_x, cd_y], [0,0]) > 0.05:  
-                chosen_direction = round(math.atan2(-cd_y,-cd_x),2)
-                
-            else: 
-                holding_something = False
-                t_elapsed_block_total += time_elapsed_since_block 
-                # n_observations_block += 1
-                time_elapsed_since_block = 0
-                time_elapsed = 0 # on a per sec basis 
-                # print('successfully dropped off object', given_id)
-            
-        
-        if curr_index >= len(strategy) and not holding_something and not reversing and not moving_forward: # maintain strategy for initial
-            curr_index = 0 
-            # used to determine when to update strategy 
-            if energy_expenditure() < 0: # update the weights based off success so far 
-                strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = True) # chooses a new strategy   
-                # time_elapsed = 0    
-            else: 
-                strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = False)
-                # time_elapsed = 0 
-    
-        time_elapsed_since_robot +=1
-        # biased random walk movement (each time step, cert prob of turning that direction) 
-        roll, pitch, yaw = inertia.getRollPitchYaw()
-        yaw = round(yaw, 2) 
-    
-        if yaw != chosen_direction and orientation_found != True and object_encountered != True and not reversing: 
-            begin_rotating()
-            
-            # handles avoidance  
-        elif (i - back_i >= 50 and object_encountered != True and orientation_found == True and not reversing and moving_forward):
-            moving_forward = False
-            # proceeds with previous strategy 
-            orientation_found = False 
-            if not holding_something: 
-                chosen_direction = strategy[curr_index]
-            
-        elif (i - prev_i == time_switch and object_encountered != True and orientation_found == True and not reversing):
-            orientation_found = False 
-            if not holding_something: 
-                chosen_direction = strategy[curr_index]
-                curr_index += 1
-        
-        elif orientation_found != True and yaw == chosen_direction and object_encountered != True and not reversing: 
-            orientation_found = True 
-            prev_i = i
-            # for avoidance strategy 
-            back_i = i 
-            move_forward()    
-            # moving_forward = True 
-            
-        # collision avoidance mechanism     
-        dist_val = ds.getValue()
-        dist_vals = [ds.getValue(), ds_left.getValue(), ds_right.getValue()]
-                
-        if min(dist_vals) > 500 and reversing: # no longer within range of obstacle
-            # print('proceeding with navigation')
-            reversing = False
-            chosen_direction = calc_normal(yaw)
-            orientation_found = False 
-            moving_forward = True 
-            
-        elif reversing: 
-            move_backwards()
-            
-        if min(dist_vals) <= 330 and not reversing: # wall detection 
-            fitness += 1 
-            reversing = True 
-            move_backwards()
-                        
-            # does each behavior after 1 sec    
-        if robot.getTime() - start_count >= 1: 
-            if collision.getValue() == 1:
-                fitness += 1
-        
-            # communication threshold  
-            if not holding_something and not reversing: # max value for light 
-                if light_sensor.getValue() > 700 and light_sensor.getValue() < 900:
-                    if time_elapsed_since_robot > t_elapsed_constant: 
-                        communicate_with_robot()
-                        time_elapsed_since_robot = 0 # reset time step      
-                # elif light_sensor.getValue() > 800: 
-                time_elapsed_since_robot += 1 # increment every time (more interactions) 
-                
-                
-            start_count = robot.getTime()  
-            if not holding_something:  # don't take into account homing state 
-                time_elapsed += 1
-            
-            # check for collisions with other robot 
-            list = camera.getRecognitionObjects()
-            if holding_something == False and not reversing: 
-                # stop()
-                if (object_encountered == False):
-                    # attempt to get object detected 
-                    if min(dist_vals) < 500 and len(list) != 0:
-                        firstObject = camera.getRecognitionObjects()[0]
-                        count = len(camera.getRecognitionObjects())
-                        id = str(firstObject.get_id())
-                        if id not in obj_found_so_far:
-                            id = "$" + str(given_id) + "-" + str(id) # indication that it is a object to be deleted 
-                            if prev_msg != id: 
-                                emitter.send(str(id).encode('utf-8'))
-                                prev_msg = id 
-                        else: 
-                            time_elapsed_since_block += 1 # on a per sec basis    
-                    else: 
-                        time_elapsed_since_block += 1 # on a per sec basis 
-        i+=1
-            
-        pass
-    
-# Enter here exit cleanup code.
-
