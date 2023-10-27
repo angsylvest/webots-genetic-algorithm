@@ -192,7 +192,7 @@ def initialize_genotypes(size):
     pop_genotypes = []
     for r in range(size):
         new_geno = create_individal_genotype(gene_list)
-        print(new_geno)
+        # print(new_geno)
         initial_genotypes.append(new_geno)
         pop_genotypes.append(new_geno)
                 
