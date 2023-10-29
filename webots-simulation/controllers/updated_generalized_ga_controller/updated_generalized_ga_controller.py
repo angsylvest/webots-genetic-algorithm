@@ -213,16 +213,18 @@ def calc_robot_fitness():
         # return 0 
 
 # determines whether new strategy should be attempted based off given costs/benefits
+# another idea: reward forward movement (ie., coverage? )/ time spent to complete strategy, just not as much 
 def energy_expenditure():
     global energy_per_item 
     global energy_cost 
     global energy_collected_gen 
     global time_elapsed 
     
+    print('avg num observed --', agent_observation['num_objects_observed'])
     if time_elapsed != 0: 
-        return (energy_collected_gen*energy_per_item - (energy_cost*time_elapsed))
+        return (energy_collected_gen*energy_per_item + (agent_observation['num_objects_observed']*energy_per_item) - (energy_cost*time_elapsed))
     else: 
-        return energy_collected_gen*energy_per_item
+        return energy_collected_gen*energy_per_item + (agent_observation['num_objects_observed']*energy_per_item)
     
 
 # direction selection 
@@ -319,7 +321,7 @@ def create_new_weights(t_block, t_robot, original_weights):
     # want to set weights so more biased towards straight-line motion (no energy)  
     else: 
         adjust = 0.02
-        original_weights[-1] = original_weights[-1] + 0.02 
+        original_weights[-1] = original_weights[-1] + adjust
         return [float(i)/sum(original_weights) for i in original_weights] 
          
 def begin_rotating():
