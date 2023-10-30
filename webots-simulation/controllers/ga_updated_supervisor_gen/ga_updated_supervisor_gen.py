@@ -123,7 +123,7 @@ def generate_robot_central(num_robots):
     for i in range(num_robots):
         rootNode = robot.getRoot()
         rootChildrenField = rootNode.getField('children')
-        rootChildrenField.importMFNode(-1, '../las_supervisor/robots/robot-ga-update.wbo') 
+        rootChildrenField.importMFNode(-1, '../las_supervisor/robots/robot-ga-update-gen.wbo') 
         rec_node = rootChildrenField.getMFNode(-1)
         
     
