@@ -87,7 +87,7 @@ PipeSection {
 }
 DEF supervisor TinkerbotsBase {
   translation -0.41 0 0
-  controller "ga_updated_supervisor"
+  controller "ga_updated_supervisor_gen"
   supervisor TRUE
   extensionSlot [
     Receiver {
