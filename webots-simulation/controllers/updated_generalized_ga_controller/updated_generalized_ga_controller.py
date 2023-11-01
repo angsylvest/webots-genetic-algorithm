@@ -446,6 +446,8 @@ def interpret(timestep):
             gene_df.close()
             gene_df = open("../../graph-generation/collision-data/ga-gene-info.csv", 'a')
 
+            print('written into csvs') 
+            
             fitness = 0
             overall_fitness = 0
             best_prev_genotype = '!'
@@ -640,8 +642,10 @@ cleaning = False
 prev_gen_check = robot.getTime()
 
 while robot.step(timestep) != -1 and sim_complete != True:
-
+    
     if not cleaning: 
+        interpret(str(robot.step(timestep)))
+        
         if robot.getTime() - prev_gen_check == 1: 
             prev_gen_check = robot.getTime()
             time_into_generation += 1
@@ -807,7 +811,6 @@ while robot.step(timestep) != -1 and sim_complete != True:
                 # orientation_found = False 
                 # moving_forward = True 
                      
-        # interpret(str(robot.step(timestep)))
         
         # # too long return back and reset prob distrib
         # if gens_elapsed > 5: # consistent trials spent with no productive behavior 

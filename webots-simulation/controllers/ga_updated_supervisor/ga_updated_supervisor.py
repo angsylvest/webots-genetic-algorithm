@@ -37,10 +37,10 @@ gene_df.close()
 
 # genetic algorithm-specific parameters 
 num_generations = 10
-simulation_time = 30
+simulation_time = 10
 trials = 28
 curr_trial = 0 
-robot_population_sizes = [10, 15]
+robot_population_sizes = [5, 10, 15]
 gene_list = ['control speed 10', 'energy cost 5', 'food energy 30', 'observations thres 5']
 curr_size = robot_population_sizes[0]
 env_type = "random" # "power law"
@@ -328,6 +328,7 @@ def run_seconds(t,waiting=False):
             msg = 'return_fitness'
             # if prev_msg != msg: 
             message_listener(robot.getTime()) # will clear out msg until next gen 
+            print('requesting fitness')
             emitter.send('return_fitness'.encode('utf-8'))
             prev_msg = msg 
             # print('requesting fitness')

@@ -6,15 +6,20 @@ minimizedPerspectives: 000000ff00000000fd000000030000000000000087000002ecfc01000
 maximizedDockId: -1
 centralWidgetVisible: 1
 orthographicViewHeight: 1
-textFiles: 3 "controllers/crw_supervisor/crw_supervisor.py" "controllers/generic_crw_foraging/generic_crw_foraging.py" "controllers/levy_supervisor/levy_supervisor.py" "controllers/updated_generalized_ga_learning/updated_generalized_ga_learning.py" "controllers/ga_update_learner/ga_update_learner.py" "controllers/ga_updated_supervisor/ga_updated_supervisor.py"
+textFiles: 2 "controllers/ga_updated_supervisor_gen/ga_updated_supervisor_gen.py" "controllers/updated_generalized_ga_controller_gen/updated_generalized_ga_controller_gen.py" "controllers/ga_updated_supervisor/ga_updated_supervisor.py" "controllers/updated_generalized_ga_controller/updated_generalized_ga_controller.py"
 consoles: Console:All:All
 renderingDevicePerspectives: k0(1):camera;1;1;0;0
+renderingDevicePerspectives: k0(1):camera(1);1;1;0;0
 renderingDevicePerspectives: k0(2):camera;1;1;0;0
+renderingDevicePerspectives: k0(2):camera(1);1;1;0;0
 renderingDevicePerspectives: k0(3):camera;1;1;0;0
+renderingDevicePerspectives: k0(3):camera(1);1;1;0;0
 renderingDevicePerspectives: k0(4):camera;1;1;0;0
+renderingDevicePerspectives: k0(4):camera(1);1;1;0;0
 renderingDevicePerspectives: k0(5):camera;1;1;0;0
 renderingDevicePerspectives: k0(6):camera;1;1;0;0
 renderingDevicePerspectives: k0(7):camera;1;1;0;0
 renderingDevicePerspectives: k0(8):camera;1;1;0;0
 renderingDevicePerspectives: k0(9):camera;1;1;0;0
 renderingDevicePerspectives: k0:camera;1;1;0;0
+renderingDevicePerspectives: k0:camera(1);1;1;0;0

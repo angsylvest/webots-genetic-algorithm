@@ -644,6 +644,8 @@ prev_gen_check = robot.getTime()
 while robot.step(timestep) != -1 and sim_complete != True:
 
     if not cleaning: 
+        interpret(str(robot.step(timestep)))
+        
         if robot.getTime() - prev_gen_check == 1: 
             prev_gen_check = robot.getTime()
             time_into_generation += 1
