@@ -448,7 +448,7 @@ def interpret(timestep):
             gene_df.close()
             gene_df = open("../../graph-generation/collision-data/ga-gene-info.csv", 'a')
 
-            print('written into csvs') 
+            # print('written into csvs') 
             
             fitness = 0
             overall_fitness = 0

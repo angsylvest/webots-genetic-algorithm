@@ -21,8 +21,8 @@ collected_count = []
 
 # genetic algorithm-specific parameters 
 num_generations = 10
-simulation_time = 10
-trials = 28
+simulation_time = 30
+trials = 30
 curr_trial = 0 
 robot_population_sizes = [5, 10, 15]
 gene_list = ['control speed 10', 'energy cost 5', 'food energy 30', 'observations thres 5']
@@ -31,7 +31,7 @@ env_type = "random" # "power law"
 sim_type = "random"
 
 # collected counts csv generation 
-overall_f = open(f'../../graph-generation/collection-data/overall-df{sim_type}-{curr_size}.csv', 'w')
+overall_f = open(f'../../graph-generation/collection-data/overall-df-{sim_type}-{curr_size}.csv', 'w')
 overall_columns = 'trial' + ',time' + ',objects retrieved' + ',size' + ',type' + ',potential time' + ',total elapsed'
 overall_f.write(str(overall_columns) + '\n')
 overall_f.close()
