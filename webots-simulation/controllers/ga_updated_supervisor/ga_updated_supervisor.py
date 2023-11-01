@@ -19,22 +19,6 @@ columns = 'agent id' + ',time step' + ',fitness' + ',xpos'+ ',ypos' + ',num col'
 # global collected_count 
 collected_count = []
 
-# collected counts csv generation 
-overall_f = open('../../graph-generation/collection-data/overall-df.csv', 'w')
-overall_columns = 'trial' + ',time' + ',objects retrieved' + ',size' + ',type' + ',potential time' + ',total elapsed'
-overall_f.write(str(overall_columns) + '\n')
-overall_f.close()
-overall_f = open('../../graph-generation/collection-data/overall-df.csv', 'a')
-
-# for individual robot, statistics about strategy taken over time & individual collision info 
-strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'w')
-strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',num encounters' + ',size' + ',fitness'+ ',size'+ ',type' + ',trial' + ',collected' + ',genotype' + ',num better' + ',pos x' + ',pos y' + '\n')
-strategy_f.close()
-
-gene_df = open("../../graph-generation/collision-data/ga-gene-info.csv", 'w')
-gene_df.write('agent id'+ ',time step' + ',trial' + ',size' + ',genotype' + '\n')
-gene_df.close()
-
 # genetic algorithm-specific parameters 
 num_generations = 10
 simulation_time = 10
@@ -44,6 +28,23 @@ robot_population_sizes = [5, 10, 15]
 gene_list = ['control speed 10', 'energy cost 5', 'food energy 30', 'observations thres 5']
 curr_size = robot_population_sizes[0]
 env_type = "random" # "power law"
+sim_type = "random"
+
+# collected counts csv generation 
+overall_f = open(f'../../graph-generation/collection-data/overall-df{sim_type}-{curr_size}.csv', 'w')
+overall_columns = 'trial' + ',time' + ',objects retrieved' + ',size' + ',type' + ',potential time' + ',total elapsed'
+overall_f.write(str(overall_columns) + '\n')
+overall_f.close()
+overall_f = open(f'../../graph-generation/collection-data/overall-df-{sim_type}-{curr_size}.csv', 'a')
+
+# for individual robot, statistics about strategy taken over time & individual collision info 
+strategy_f = open(f"../../graph-generation/collision-data/ga-info-{sim_type}-{curr_size}.csv", 'w')
+strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',num encounters' + ',size' + ',fitness'+ ',size'+ ',type' + ',trial' + ',collected' + ',genotype' + ',num better' + ',pos x' + ',pos y' + '\n')
+strategy_f.close()
+
+gene_df = open(f"../../graph-generation/collision-data/ga-gene-info-{sim_type}-{curr_size}.csv", 'w')
+gene_df.write('agent id'+ ',time step' + ',trial' + ',size' + ',genotype' + '\n')
+gene_df.close()
 
 
 # statistics collected 
@@ -497,7 +498,7 @@ def run_optimization():
 
             overall_f.write(str(i) + ',' + str(robot.getTime()) + ',' + str(total_found) + ',' + str(size)+ ',' + 'ga' + ',' + str(20) + ',' + str(total_elapsed) + '\n')    
             overall_f.close()
-            overall_f = open('../../graph-generation/collection-data/overall-df.csv', 'a')
+            overall_f = open(f'../../graph-generation/collection-data/overall-df-{sim_type}-{curr_size}.csv', 'a')
             print('items collected', total_found)
             curr_trial = i + 1
             if assessing and curr_trial % 2 == 0:

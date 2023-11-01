@@ -88,6 +88,7 @@ repopulate = False
 
 next_child = ""
 num_better = 0 
+sim_type = "random" 
 
 gens_elapsed = 0 
 
@@ -415,6 +416,7 @@ def interpret(timestep):
 
     global weights_high_density
     global observations_per_strategy_high_dens
+    global sim_type
 
     
     if receiver.getQueueLength()>0:
@@ -550,6 +552,9 @@ def interpret(timestep):
             curr_sim_size = message[5:]
             obj_found_so_far = []
             trial_num = -1
+
+            strategy_f = open(f"../../graph-generation/collision-data/ga-info-{sim_type}-{curr_sim_size}.csv", 'a')
+            gene_df = open(f"../../graph-generation/collision-data/ga-gene-info-{sim_type}-{curr_sim_size}.csv", 'a')
             
             # resets relevant statistics 
             fitness = 0 # number of obstacles 
