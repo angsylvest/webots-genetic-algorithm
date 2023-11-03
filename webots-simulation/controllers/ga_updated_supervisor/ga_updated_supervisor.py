@@ -460,7 +460,7 @@ def run_optimization():
             individual.getField('translation').setSFVec3f([0, 2, 0])
             
         emitter_individual.send(id_msg.encode('utf-8'))
-        total_elapsed = 600
+        total_elapsed = 30
             
         num_generations = total_elapsed // simulation_time
         

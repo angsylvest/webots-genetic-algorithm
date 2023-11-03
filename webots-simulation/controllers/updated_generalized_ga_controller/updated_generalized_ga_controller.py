@@ -457,6 +457,7 @@ def interpret(timestep):
             num_better = 0 
             time_into_generation = 0
             agent_observation = {'num_interactions': 0, 'num_objects_observed': 0, 'num_collisions':0}
+            time_elapsed = 0 # on a per sec basis 
             
             if not found_something: 
                 gens_elapsed += 1 
@@ -479,6 +480,7 @@ def interpret(timestep):
         elif 'trial' in message: 
             # resets relevant statistics 
             trial_num = int(message[5:])
+            print('end of trial, moving on to next trial', trial_num)
             gens_elapsed = 0
             fitness = 0 # number of obstacles 
             best_prev_genotype = '!'
@@ -596,11 +598,11 @@ def interpret(timestep):
             num_better += 1
             receiver_individual.nextPacket()
             
-        if 'penalize' in message: 
-            if t_elapsed_constant < 500: 
-                t_elapsed_constant = t_elapsed_constant * 1.5 
+        # if 'penalize' in message: 
+            # if t_elapsed_constant < 500: 
+                # t_elapsed_constant = t_elapsed_constant * 1.5 
             
-            receiver_individual.nextPacket()
+            # receiver_individual.nextPacket()
             
             
         else: 

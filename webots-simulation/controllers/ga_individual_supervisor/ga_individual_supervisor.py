@@ -188,7 +188,9 @@ def message_listener(time_step):
                     emitter_individual.send(child.encode('utf-8'))
                     
             else: 
-                emitter_individual.send('penalize'.encode('utf-8'))
+                child = 'child' + str(reproduce(pop_genotypes[robo_index], pop_genotypes[robo_index]))
+                emitter_individual.send(child.encode('utf-8'))
+                # emitter_individual.send('penalize'.encode('utf-8'))
                    
             receiver_individual.nextPacket()
             
