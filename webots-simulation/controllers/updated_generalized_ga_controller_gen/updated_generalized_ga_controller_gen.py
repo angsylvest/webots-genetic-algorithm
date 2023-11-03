@@ -672,7 +672,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                 time_elapsed_since_block = 0
                 time_elapsed = 0 # on a per sec basis 
                 # print('successfully dropped off object', given_id)
-            
+          
         if curr_index >= len(strategy) and not holding_something and not reversing and not moving_forward: # maintain strategy for initial
             curr_index = 0 
             # used to determine when to update strategy 
@@ -705,11 +705,14 @@ while robot.step(timestep) != -1 and sim_complete != True:
             if not holding_something: 
                 chosen_direction = strategy[curr_index]
             
-        elif (i - prev_i == time_switch and object_encountered != True and orientation_found == True and not reversing):
+        elif (i - prev_i >= time_switch and object_encountered != True and orientation_found == True and not reversing):
             orientation_found = False 
             if not holding_something: 
                 chosen_direction = strategy[curr_index]
                 curr_index += 1
+                # print('why arent you changing ???', curr_index, 'given id:', given_id) 
+            else: 
+                # print('holding something ..', given_id)
         
         elif orientation_found != True and yaw == chosen_direction and object_encountered != True and not reversing: 
             orientation_found = True 
