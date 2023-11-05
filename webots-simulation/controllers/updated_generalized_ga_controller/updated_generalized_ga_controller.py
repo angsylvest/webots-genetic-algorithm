@@ -417,6 +417,8 @@ def interpret(timestep):
     global weights_high_density
     global observations_per_strategy_high_dens
     global sim_type
+    
+    global curr_index 
 
     
     if receiver.getQueueLength()>0:
@@ -442,11 +444,11 @@ def interpret(timestep):
             # print('calculating fitness', calc_robot_fitness())
             strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(weights[0]) + ',' + str(weights[1]) + ',' + str(weights[2]) + ',' + str(weights[3]) + ','+ str(time_elapsed_since_block) + ',' + str(n_observations_robot)  + ',' + str(curr_sim_size) + ',' + str(calc_robot_fitness())+ ',' + str(curr_sim_size) + ',ga' + ',' + str(trial_num) + ',' + str(n_observations_block) + ',' + str(curr_robot_genotype) + ',' + str(num_better) + ',' + str(gps.getValues()[0]) + ',' + str(gps.getValues()[1]) + '\n')
             strategy_f.close()
-            strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'a')
+            strategy_f = open("../../graph-generation/collision-data/ga-info-{sim_type}-{curr_sim_size}.csv", 'a')
             
             gene_df.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(trial_num) + ',' + str(curr_sim_size) + ',' + str(curr_robot_genotype) + '\n')
             gene_df.close()
-            gene_df = open("../../graph-generation/collision-data/ga-gene-info.csv", 'a')
+            gene_df = open("../../graph-generation/collision-data/ga-gene-info-{sim_type}-{curr_sim_size}.csv", 'a')
 
             # print('written into csvs') 
             
@@ -468,7 +470,7 @@ def interpret(timestep):
                 # print('current child', next_child)
             
             emitter.send(response.encode('utf-8'))
-            found_something = False 
+            # found_something = False 
             # obj_found_so_far = []
             receiver.nextPacket()
 
@@ -505,7 +507,10 @@ def interpret(timestep):
             
             time_elapsed = 0 # on a per sec basis 
             overall_fitness = 0
+            # holding_something = False 
             obj_found_so_far = []
+            curr_index = 0 
+            
             receiver.nextPacket()
             
         elif 'partner' in message: 
@@ -678,7 +683,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
         if curr_index >= len(strategy) and not holding_something and not reversing and not moving_forward: # maintain strategy for initial
             curr_index = 0 
             # used to determine when to update strategy 
-            print('completed strategy --', strategy, 'energy expenditure --', energy_expenditure())
+            print('completed strategy --', strategy, 'energy expenditure --', energy_expenditure(), 'for agent: ', given_id)
             w = weights 
             if using_high_dens and agent_observation['num_collisions'] > 0.3:
                 w = weights_high_density
@@ -706,6 +711,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             orientation_found = False 
             if not holding_something: 
                 chosen_direction = strategy[curr_index]
+                # curr_index += 1
             
         elif (i - prev_i >= time_switch and object_encountered != True and orientation_found == True and not reversing):
             orientation_found = False 

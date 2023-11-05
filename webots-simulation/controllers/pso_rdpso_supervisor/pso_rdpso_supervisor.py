@@ -196,12 +196,17 @@ def regenerate_blocks(seed = None):
     global r_pos_to_generate
     global b_pos_to_generate
     global curr_env
+
+    global population 
     
     for obj in block_list: 
         obj.remove()
     
     block_list = []
     assert curr_env
+
+    for i in range(len(r_pos_to_generate)):
+        population[i].getField('translation').setSFVec3f(r_pos_to_generate[i])
     
     if seed == 15 and curr_env.seed != 15: 
         curr_env = env_mod.Environment(env_type=env_type, seed = seed)
@@ -228,7 +233,7 @@ def regenerate_blocks(seed = None):
     for rec_node in block_list: # set to be upright
         r_field = rec_node.getField('rotation')
         if r_field.getSFRotation() != [0, 0, -1]:
-            r_field.setSFRotation([0, 0, -1])            
+            r_field.setSFRotation([0, 0, -1])           
 
 def save_progress():
     global overall_f

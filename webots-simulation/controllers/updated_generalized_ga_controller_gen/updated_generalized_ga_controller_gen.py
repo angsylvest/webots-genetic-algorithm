@@ -220,6 +220,7 @@ def energy_expenditure():
     global energy_cost 
     global energy_collected_gen 
     global time_elapsed 
+    global time_into_generation
     
     print('avg num observed --', agent_observation['num_objects_observed'])
     if time_elapsed != 0: 
@@ -417,6 +418,9 @@ def interpret(timestep):
     global weights_high_density
     global observations_per_strategy_high_dens
     global sim_type
+    global curr_size
+    
+    global curr_index 
 
     
     if receiver.getQueueLength()>0:
@@ -442,11 +446,11 @@ def interpret(timestep):
             # print('calculating fitness', calc_robot_fitness())
             strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(weights[0]) + ',' + str(weights[1]) + ',' + str(weights[2]) + ',' + str(weights[3]) + ','+ str(time_elapsed_since_block) + ',' + str(n_observations_robot)  + ',' + str(curr_sim_size) + ',' + str(calc_robot_fitness())+ ',' + str(curr_sim_size) + ',ga' + ',' + str(trial_num) + ',' + str(n_observations_block) + ',' + str(curr_robot_genotype) + ',' + str(num_better) + ',' + str(gps.getValues()[0]) + ',' + str(gps.getValues()[1]) + '\n')
             strategy_f.close()
-            strategy_f = open(f"../../graph-generation/collision-data/ga-info-{sim_type}.csv", 'a')
+            strategy_f = open(f"../../graph-generation/collision-data/ga-info-{sim_type}-{curr_sim_size}.csv", 'a')
             
             gene_df.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(trial_num) + ',' + str(curr_sim_size) + ',' + str(curr_robot_genotype) + '\n')
             gene_df.close()
-            gene_df = open(f"../../graph-generation/collision-data/ga-gene-info-{sim_type}.csv", 'a')
+            gene_df = open(f"../../graph-generation/collision-data/ga-gene-info-{sim_type}-{curr_sim_size}.csv", 'a')
 
             fitness = 0
             overall_fitness = 0
@@ -466,7 +470,7 @@ def interpret(timestep):
                 # print('current child', next_child)
             
             emitter.send(response.encode('utf-8'))
-            found_something = False 
+            # found_something = False 
             # obj_found_so_far = []
             receiver.nextPacket()
 
@@ -500,6 +504,7 @@ def interpret(timestep):
             
             found_something = False 
             gens_elapsed = 0 
+            curr_index = 0 
             
             time_elapsed = 0 # on a per sec basis 
             overall_fitness = 0
@@ -676,7 +681,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
         if curr_index >= len(strategy) and not holding_something and not reversing and not moving_forward: # maintain strategy for initial
             curr_index = 0 
             # used to determine when to update strategy 
-            print('completed strategy --', strategy, 'energy expenditure --', energy_expenditure())
+            print('completed strategy --', strategy, 'energy expenditure --', energy_expenditure(), 'for agent: ', given_id)
             w = weights 
             if using_high_dens and agent_observation['num_collisions'] > 0.3:
                 w = weights_high_density
@@ -704,14 +709,16 @@ while robot.step(timestep) != -1 and sim_complete != True:
             orientation_found = False 
             if not holding_something: 
                 chosen_direction = strategy[curr_index]
+                # curr_index += 1
+                print('hey im over here too --', curr_index)
             
         elif (i - prev_i >= time_switch and object_encountered != True and orientation_found == True and not reversing):
             orientation_found = False 
             if not holding_something: 
                 chosen_direction = strategy[curr_index]
                 curr_index += 1
-                # print('why arent you changing ???', curr_index, 'given id:', given_id) 
-            else: 
+                print('why arent you changing ???', curr_index, 'given id:', given_id) 
+            # else: 
                 # print('holding something ..', given_id)
         
         elif orientation_found != True and yaw == chosen_direction and object_encountered != True and not reversing: 
