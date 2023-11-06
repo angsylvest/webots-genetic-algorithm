@@ -444,11 +444,11 @@ def interpret(timestep):
             # print('calculating fitness', calc_robot_fitness())
             strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(weights[0]) + ',' + str(weights[1]) + ',' + str(weights[2]) + ',' + str(weights[3]) + ','+ str(time_elapsed_since_block) + ',' + str(n_observations_robot)  + ',' + str(curr_sim_size) + ',' + str(calc_robot_fitness())+ ',' + str(curr_sim_size) + ',ga' + ',' + str(trial_num) + ',' + str(n_observations_block) + ',' + str(curr_robot_genotype) + ',' + str(num_better) + ',' + str(gps.getValues()[0]) + ',' + str(gps.getValues()[1]) + '\n')
             strategy_f.close()
-            strategy_f = open("../../graph-generation/collision-data/ga-info-{sim_type}-{curr_sim_size}.csv", 'a')
+            strategy_f = open(f"../../graph-generation/collision-data/ga-info-{sim_type}-{curr_sim_size}.csv", 'a')
             
             gene_df.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(trial_num) + ',' + str(curr_sim_size) + ',' + str(curr_robot_genotype) + '\n')
             gene_df.close()
-            gene_df = open("../../graph-generation/collision-data/ga-gene-info-{sim_type}-{curr_sim_size}.csv", 'a')
+            gene_df = open(f"../../graph-generation/collision-data/ga-gene-info-{sim_type}-{curr_sim_size}.csv", 'a')
 
             # print('written into csvs') 
             
