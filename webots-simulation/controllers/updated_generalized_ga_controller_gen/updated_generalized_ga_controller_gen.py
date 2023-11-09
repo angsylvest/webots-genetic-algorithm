@@ -160,6 +160,8 @@ found_something = False
 agent_observation = {'num_interactions': 0, 'num_objects_observed': 0, 'num_collisions':0}
 time_into_generation = 0 
 using_high_dens = True 
+using_artificial_field = True
+remove_orientations = []
 
 def identify_terrain(r,g,b):
     global terrains
@@ -206,9 +208,9 @@ def calc_robot_fitness():
     
     
     if fitness != 0: 
-        return obj_weight*(n_observations_block) + obstacle_weight*(1 / fitness) + 0.5*agent_observation['num_objects_observed']
+        return obj_weight*(n_observations_block) + obstacle_weight*(1 / fitness) # + 0.5*agent_observation['num_objects_observed']
     else: 
-        return obj_weight*(n_observations_block) + 0.5*agent_observation['num_objects_observed']
+        return obj_weight*(n_observations_block) # + 0.5*agent_observation['num_objects_observed']
     
     # else: 
         # return 0 
@@ -252,6 +254,18 @@ def correlated_random(curr_dir):
         
     else: 
         return round(random.choice([pi,pi, pi/2, -pi/2]),2)
+        
+def filtered_random(list_collisions): 
+    # simply removes directions with obstacles while trying to re-orient 
+    
+    list_of_dir = [0.00, round(pi, 2), round(pi/2, 2), round(-pi/2, 2)]
+    print('list of collisions --', list_collisions, list_of_dir) 
+    for i in list_collisions: 
+        if i in list_of_dir: # remove requesting same dir 
+            list_of_dir.remove(round(i,2))
+        
+    return round(random.choice(list_of_dir), 2)
+
         
 def dynamic_correlated_random(curr_dir, bias): 
     # follows a markov chain (persistence), will exclude direction directly behind  
@@ -710,14 +724,13 @@ while robot.step(timestep) != -1 and sim_complete != True:
             if not holding_something: 
                 chosen_direction = strategy[curr_index]
                 # curr_index += 1
-                print('hey im over here too --', curr_index)
             
         elif (i - prev_i >= time_switch and object_encountered != True and orientation_found == True and not reversing):
-            orientation_found = False 
+            orientation_found = False
+            remove_orientations = [] 
             if not holding_something: 
                 chosen_direction = strategy[curr_index]
                 curr_index += 1
-                print('why arent you changing ???', curr_index, 'given id:', given_id) 
             # else: 
                 # print('holding something ..', given_id)
         
@@ -736,7 +749,10 @@ while robot.step(timestep) != -1 and sim_complete != True:
         if min(dist_vals) > 500 and reversing: # no longer within range of obstacle
             # print('proceeding with navigation')
             reversing = False
-            chosen_direction = calc_normal(yaw)
+            if using_artificial_field: 
+                chosen_direction = filtered_random(remove_orientations)
+            else:   
+                chosen_direction = calc_normal(yaw)
             orientation_found = False 
             moving_forward = True 
             
@@ -744,6 +760,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             move_backwards()
             
         if min(dist_vals) <= 330 and not reversing: # wall detection 
+            remove_orientations.append(chosen_direction)
             fitness += 1 
             reversing = True 
             move_backwards()
