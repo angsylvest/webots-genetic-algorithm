@@ -104,6 +104,9 @@ def calc_normal(curr_angle):
         diff = abs(round(pi/2, 2) - curr_angle) 
         return round(diff,2) 
         
+    elif (curr_angle == round(pi,2)): # handle edge case that seems to only happen w/exactly 3.14 (never broke before because never quite at 3.14????)
+        return round(-1*round(pi/2, 2),2)
+        
 def rotate_random():
     # will choose direction following biased random walk 
     directions = [pi/2, pi, -pi/2, 0] # more preference to move straight 

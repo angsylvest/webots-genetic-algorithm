@@ -111,6 +111,7 @@ def message_listener(time_step):
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
+        # print('individual msgs --', message)
             
         if 'fitness-scores' in message:
             fs = message.split(" ")[1:]
@@ -169,7 +170,8 @@ def message_listener(time_step):
         if 'encounter' in message_individual: 
             robo_index = int(message_individual.split('-')[0])
             # reproduce_list.append(robo_index) 
-            # print('robot found -- checking genotype', robo_index) 
+            print('robot found -- checking genotype', robo_index) 
+            curr_orient = message_individual.split('-')[-1]
             
             # only store best genotype 
             other_index = find_nearest_robot_genotype(robo_index)
@@ -192,6 +194,9 @@ def message_listener(time_step):
                 emitter_individual.send(child.encode('utf-8'))
                 # emitter_individual.send('penalize'.encode('utf-8'))
                    
+            comm_information = "comm-" + str(robo_index) + "-" + str(other_index) + "-" + str(curr_orient)
+            emitter_individual.send(comm_information.encode('utf-8'))
+            
             receiver_individual.nextPacket()
             
         else: 

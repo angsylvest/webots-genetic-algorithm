@@ -105,6 +105,9 @@ def calc_normal(curr_angle):
     elif (curr_angle + round(pi/2, 2) >= 0 and curr_angle <= 0): 
         diff = abs(round(pi/2, 2) - curr_angle) 
         return round(diff,2) 
+        
+    elif (curr_angle == round(pi,2)): # handle edge case that seems to only happen w/exactly 3.14 (never broke before because never quite at 3.14????)
+        return round(-1*round(pi/2, 2),2)
 
 
 def rotate_random():

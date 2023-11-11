@@ -160,7 +160,7 @@ found_something = False
 agent_observation = {'num_interactions': 0, 'num_objects_observed': 0, 'num_collisions':0}
 time_into_generation = 0 
 using_high_dens = True 
-using_artificial_field = True
+using_artificial_field = False
 remove_orientations = []
 
 def identify_terrain(r,g,b):
@@ -180,6 +180,7 @@ def identify_terrain(r,g,b):
 
 
 # calculates angle normal to current orientation 
+# calculates angle normal to current orientation 
 def calc_normal(curr_angle): 
 
     if (curr_angle + round(pi/2, 2) <= round(pi, 2) and curr_angle <= round(pi, 2) and curr_angle >= 0): 
@@ -195,6 +196,10 @@ def calc_normal(curr_angle):
     elif (curr_angle + round(pi/2, 2) >= 0 and curr_angle <= 0): 
         diff = abs(round(pi/2, 2) - curr_angle) 
         return round(diff,2) 
+        
+    elif (curr_angle == round(pi,2)): # handle edge case that seems to only happen w/exactly 3.14 (never broke before because never quite at 3.14????)
+        return round(-1*round(pi/2, 2),2)
+        
         
      
 # parameters reset when strategy changes (after a generation) 
@@ -224,11 +229,10 @@ def energy_expenditure():
     global time_elapsed 
     global time_into_generation
     
-    print('avg num observed --', agent_observation['num_objects_observed'])
     if time_elapsed != 0: 
-        return (energy_collected_gen*energy_per_item + (agent_observation['num_objects_observed']*energy_per_item) - (energy_cost*time_elapsed))
+        return (energy_collected_gen*energy_per_item - (energy_cost*time_elapsed))
     else: 
-        return energy_collected_gen*energy_per_item + (agent_observation['num_objects_observed']*energy_per_item)
+        return energy_collected_gen*energy_per_item # + (agent_observation['num_objects_observed']*energy_per_item)
     
 
 # direction selection 
@@ -259,11 +263,12 @@ def filtered_random(list_collisions):
     # simply removes directions with obstacles while trying to re-orient 
     
     list_of_dir = [0.00, round(pi, 2), round(pi/2, 2), round(-pi/2, 2)]
-    print('list of collisions --', list_collisions, list_of_dir) 
     for i in list_collisions: 
         if i in list_of_dir: # remove requesting same dir 
             list_of_dir.remove(round(i,2))
-        
+    if len(list_of_dir) == 0: 
+         # print(list_collisions)
+         return round(random.choice(list_collisions), 2)   
     return round(random.choice(list_of_dir), 2)
 
         
@@ -435,11 +440,14 @@ def interpret(timestep):
     global curr_size
     
     global curr_index 
+    global remove_orientations
+    
+    global chosen_direction 
+    global orientation_found
 
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
-        # print('incoming messages: ', given_id, message) 
     
         # intertrial changes 
         if message[0:2] == "#" + str(given_id):
@@ -523,6 +531,7 @@ def interpret(timestep):
             time_elapsed = 0 # on a per sec basis 
             overall_fitness = 0
             obj_found_so_far = []
+            remove_orientations = []
             receiver.nextPacket()
             
         elif 'partner' in message: 
@@ -604,6 +613,16 @@ def interpret(timestep):
         elif message == 'clean finish': 
             cleaning = False 
             receiver.nextPacket() 
+            
+            
+        elif 'comm_response' in message and str(message.split('-')[1]) == str(given_id): 
+            print('updating orientation for', given_id, 'to', message.split('[')[1], 'for given id', given_id)
+            roll, pitch, yaw = inertia.getRollPitchYaw()
+            yaw = round(yaw, 2)
+            chosen_direction = float(message.split('[')[1])
+            orientation_found = False
+            receiver.nextPacket() 
+            
         
         else: 
             receiver.nextPacket()
@@ -613,6 +632,10 @@ def interpret(timestep):
         if 'child' in message: 
             next_child = message[5:].split("*")
             num_better += 1
+            receiver_individual.nextPacket()
+            
+        elif 'comm' in message and str(message.split('-')[1]) == str(given_id):
+            emitter.send(str(message).encode('utf-8'))
             receiver_individual.nextPacket()
             
         # if 'penalize' in message: 
@@ -630,12 +653,14 @@ def interpret(timestep):
 def communicate_with_robot():
     global given_id 
     global prev_msg
+    global chosen_direction 
     # find closest robot to exchange info with 
-    response = str(given_id) + "-encounter"
+    response = str(given_id) + "-encounter-" + str(chosen_direction)
     if prev_msg != response: 
         emitter_individual.send(response.encode('utf-8'))
         prev_msg = response 
     # print('found neighbor')
+    
     
     
 def checkForCollectable(list_of_ids):
@@ -670,11 +695,13 @@ while robot.step(timestep) != -1 and sim_complete != True:
     if not cleaning: 
         interpret(str(robot.step(timestep)))
         
+        
         if robot.getTime() - prev_gen_check == 1: 
             prev_gen_check = robot.getTime()
             time_into_generation += 1
             if time_into_generation % 10 == 0: 
                 time_into_generation = 0
+                # print('avg num observed --', agent_observation['num_objects_observed'], given_id)
                 agent_observation = {'num_interactions': 0, 'num_objects_observed': 0, 'num_collisions':0}
             # print('given id', given_id, 'updated time into generation + here dictionary', agent_observation['num_interactions'] , 'num collisions', agent_observation['num_collisions']) 
         
@@ -749,7 +776,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
         if min(dist_vals) > 500 and reversing: # no longer within range of obstacle
             # print('proceeding with navigation')
             reversing = False
-            if using_artificial_field: 
+            if using_artificial_field and not holding_something: 
                 chosen_direction = filtered_random(remove_orientations)
             else:   
                 chosen_direction = calc_normal(yaw)
@@ -778,6 +805,10 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     if time_into_generation != 0: 
                         agent_observation['num_interactions'] = (agent_observation['num_interactions'] + 1) / time_into_generation
                     if time_elapsed_since_robot > t_elapsed_constant: 
+                        # remove_orientations.append(chosen_direction)
+                        # if using_artificial_field: 
+                            # chosen_direction = filtered_random(remove_orientations, from_others = True)
+                            # orientation_found = False 
                         communicate_with_robot()
                         time_elapsed_since_robot = 0 # reset time step      
                 # elif light_sensor.getValue() > 800: 

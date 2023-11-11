@@ -8,6 +8,8 @@ import sys
 sys.path.append('../../')
 import utils.environment as env_mod 
 
+from math import pi
+
 """
 Main supervisor base 
 Optimization algorithm - Collaboration-oriented 
@@ -187,6 +189,26 @@ def regenerate_blocks(seed = None):
         r_field = rec_node.getField('rotation')
         if r_field.getSFRotation() != [0, 0, -1]:
             r_field.setSFRotation([0, 0, -1])
+            
+# calculates angle normal to current orientation 
+def calc_normal(curr_angle): 
+
+    if (curr_angle + round(pi/2, 2) <= round(pi, 2) and curr_angle <= round(pi, 2) and curr_angle >= 0): 
+        return round(curr_angle + round(pi/2, 2), 2)
+    
+    elif (curr_angle + round(pi/2, 2) > round(pi, 2) and curr_angle < round(pi, 2) and curr_angle > 0): 
+        diff = round(pi/2, 2) - (round(pi,2) - curr_angle) 
+        return round((-1*round(pi/2, 2) + diff),2)
+    
+    elif (curr_angle + round(pi/2, 2) < 0 and curr_angle < 0): 
+        return round((-1*round(pi, 2) + curr_angle + round(pi/2, 2)),2)
+        
+    elif (curr_angle + round(pi/2, 2) >= 0 and curr_angle <= 0): 
+        diff = abs(round(pi/2, 2) - curr_angle) 
+        return round(diff,2) 
+        
+    elif (curr_angle == round(pi,2)): # handle edge case that seems to only happen w/exactly 3.14 (never broke before because never quite at 3.14????)
+        return round(-1*round(pi/2, 2),2)
 
 def initialize_genotypes(size):
     global initial_genotypes
@@ -292,6 +314,19 @@ def message_listener(time_step):
                 new_geno = reproduce(pop_genotypes[index], pop_genotypes[partner])
                 pop_genotypes[index] = new_geno
             eval_fitness(time_step)
+            receiver.nextPacket()
+            
+        elif 'comm' in message:
+            print('processing communication request', message) 
+            id_1 = message.split('-')[1]
+            id_2 = message.split('-')[2]
+            init_orient = float(message.split('-')[3])
+            new_2 = calc_normal(round(float(init_orient),2))
+            
+            comm_msg_update = 'comm_response-' + str(id_2) + "-[" + str(new_2) 
+
+            emitter.send(str(comm_msg_update).encode('utf-8'))
+
             receiver.nextPacket()
             
         else: 

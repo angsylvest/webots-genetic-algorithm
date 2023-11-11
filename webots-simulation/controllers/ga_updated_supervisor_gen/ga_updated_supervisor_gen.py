@@ -30,6 +30,8 @@ env_type = "random" # "power law"
 collected_count = []
 sim_type = "urban" 
 
+from math import pi
+
 # collected counts csv generation 
 overall_f = open(f'../../graph-generation/collection-data/overall-df-{sim_type}-{curr_size}.csv', 'w')
 overall_columns = 'trial' + ',time' + ',objects retrieved' + ',size' + ',type' + ',potential time' + ',total elapsed'
@@ -186,6 +188,27 @@ def regenerate_blocks(seed = None):
         r_field = rec_node.getField('rotation')
         if r_field.getSFRotation() != [0, 0, -1]:
             r_field.setSFRotation([0, 0, -1])
+            
+# calculates angle normal to current orientation 
+def calc_normal(curr_angle): 
+
+    if (curr_angle + round(pi/2, 2) <= round(pi, 2) and curr_angle <= round(pi, 2) and curr_angle >= 0): 
+        return round(curr_angle + round(pi/2, 2), 2)
+    
+    elif (curr_angle + round(pi/2, 2) > round(pi, 2) and curr_angle < round(pi, 2) and curr_angle > 0): 
+        diff = round(pi/2, 2) - (round(pi,2) - curr_angle) 
+        return round((-1*round(pi/2, 2) + diff),2)
+    
+    elif (curr_angle + round(pi/2, 2) < 0 and curr_angle < 0): 
+        return round((-1*round(pi, 2) + curr_angle + round(pi/2, 2)),2)
+        
+    elif (curr_angle + round(pi/2, 2) >= 0 and curr_angle <= 0): 
+        diff = abs(round(pi/2, 2) - curr_angle) 
+        return round(diff,2) 
+        
+    elif (curr_angle == round(pi,2)): # handle edge case that seems to only happen w/exactly 3.14 (never broke before because never quite at 3.14????)
+        return round(-1*round(pi/2, 2),2)
+        
 
 def initialize_genotypes(size):
     global initial_genotypes
@@ -244,7 +267,6 @@ def message_listener(time_step):
 
     if receiver.getQueueLength()>0 and (robot.getTime() - start < simulation_time):
         message = receiver.getData().decode('utf-8')
-        # print('supervisor msgs --', message) 
         
         if message[0] == "$": # handles deletion of objects when grabbed
             obj_node = robot.getFromId(int(message.split("-")[1]))
@@ -292,6 +314,20 @@ def message_listener(time_step):
                 pop_genotypes[index] = new_geno
             eval_fitness(time_step)
             receiver.nextPacket()
+            
+        elif 'comm' in message:
+            print('processing communication request', message) 
+            id_1 = message.split('-')[1]
+            id_2 = message.split('-')[2]
+            init_orient = float(message.split('-')[3])
+            new_2 = calc_normal(round(float(init_orient),2))
+            
+            comm_msg_update = 'comm_response-' + str(id_2) + "-[" + str(new_2) 
+
+            emitter.send(str(comm_msg_update).encode('utf-8'))
+
+            receiver.nextPacket()
+            
             
         else: 
             receiver.nextPacket() 
