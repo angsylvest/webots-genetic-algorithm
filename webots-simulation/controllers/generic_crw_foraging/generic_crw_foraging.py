@@ -80,8 +80,10 @@ if robot.getName() == "k0":
 else: 
     given_id = robot.getName()[3:-1] 
 
+env_type = "random"
+
 # Agent Level File Appended Set-up 
-strategy_f = open("../../graph-generation/collision-data/crw-info.csv", 'a')
+strategy_f = open(f"../../graph-generation/collision-data/crw-{env_type}-info.csv", 'a')
 
 # calculates angle normal to current orientation 
 def calc_normal(curr_angle): 
@@ -182,6 +184,8 @@ def interpret():
     global sim_complete
     global holding_something
     global cleaning
+
+    global env_type
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -194,7 +198,7 @@ def interpret():
             receiver.nextPacket()
             strategy_f.write(str(given_id) + ',' + str(robot.getTime()) + ',' + str(t_block) + ',' + str(curr_sim_size) + ',' + str(fitness) + ',crw' + ',' + str(len(obj_found_so_far)) + ',' + str(gps.getValues()[0]) + ',' + str(gps.getValues()[1]) + '\n')
             strategy_f.close()
-            strategy_f = open("../../graph-generation/collision-data/crw-info.csv", 'a')
+            strategy_f = open(f"../../graph-generation/collision-data/crw-{env_type}-info.csv", 'a')
             fitness = 0
             receiver.nextPacket()
             

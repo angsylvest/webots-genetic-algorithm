@@ -12,14 +12,17 @@ Main supervisor base
 Optimization algorithm - Collaboration-oriented 
 Angel Sylvester 2022
 """
+
+env_type = "random"
+
 # # collected counts csv generation 
-overall_f = open('../../graph-generation/collection-data/overall-crw-info.csv', 'w') 
+overall_f = open(f'../../graph-generation/collection-data/overall-crw-{env_type}-info.csv', 'w') 
 overall_f.write('trial' + ',time' + ',objects retrieved' + ',size'+ ',type' + '\n')
 overall_f.close()
-overall_f = open('../../graph-generation/collection-data/overall-crw-info.csv', 'a') 
+overall_f = open(f'../../graph-generation/collection-data/overall-crw-{env_type}-info.csv', 'a') 
 
 # individual robot collision counts 
-strategy_f = open("../../graph-generation/collision-data/crw-info.csv", 'w')
+strategy_f = open(f"../../graph-generation/collision-data/crw-{env_type}-info.csv", 'w')
 strategy_f.write('agent id,'+ 'time step,' +' time since last block' + ',size' + ',collisions'+ ',type' + ',collected' + ',pos x' + ',pos y' + '\n')
 strategy_f.close()
 
@@ -350,7 +353,7 @@ def run_optimization():
 
             overall_f.write(str(i) + ',' + str(robot.getTime()) + ','  + str(total_found) + ','  + str(size)+ ',crw' + '\n')    
             overall_f.close()
-            overall_f = open('../../graph-generation/collection-data/overall-crw-info.csv', 'a') 
+            overall_f = open(f'../../graph-generation/collection-data/overall-crw-{env_type}-info.csv', 'a') 
             print('items collected', total_found)
             curr_trial = i + 1  
             if assessing and curr_trial % 2 == 0:

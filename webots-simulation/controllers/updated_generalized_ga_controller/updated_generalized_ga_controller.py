@@ -632,7 +632,7 @@ def interpret(timestep):
             num_better += 1
             receiver_individual.nextPacket()
             
-        elif 'comm' in message and str(message.split('-')[1]) == str(given_id):
+        elif 'comm' in message and str(message.split('-')[1]) == str(given_id) and not 'comm_response' in message:
             emitter.send(str(message).encode('utf-8'))
             receiver_individual.nextPacket()
             
@@ -652,10 +652,11 @@ def communicate_with_robot():
     global prev_msg
     global chosen_direction 
     # find closest robot to exchange info with 
-    response = str(given_id) + "-encounter-" + str(chosen_direction)
+    response = str(given_id) + "-encounter-[" + str(chosen_direction)
     if prev_msg != response: 
         emitter_individual.send(response.encode('utf-8'))
         prev_msg = response 
+    # print('found neighbor')
     
     
 def checkForCollectable(list_of_ids):

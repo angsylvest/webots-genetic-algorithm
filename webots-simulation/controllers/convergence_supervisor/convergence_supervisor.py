@@ -33,18 +33,18 @@ sim_type = "urban"
 from math import pi
 
 # collected counts csv generation 
-overall_f = open(f'../../graph-generation/collection-data/overall-df-{sim_type}-{curr_size}.csv', 'w')
+overall_f = open(f'../../graph-generation/collection-data/overall-df-{sim_type}-{curr_size}-convergence.csv', 'w')
 overall_columns = 'trial' + ',time' + ',objects retrieved' + ',size' + ',type' + ',potential time' + ',total elapsed'
 overall_f.write(str(overall_columns) + '\n')
 overall_f.close()
-overall_f = open(f'../../graph-generation/collection-data/overall-df-{sim_type}-{curr_size}.csv', 'a')
+overall_f = open(f'../../graph-generation/collection-data/overall-df-{sim_type}-{curr_size}-convergence.csv', 'a')
 
 # for individual robot, statistics about strategy taken over time & individual collision info 
-strategy_f = open(f"../../graph-generation/collision-data/ga-info-{sim_type}-{curr_size}.csv", 'w')
+strategy_f = open(f"../../graph-generation/collision-data/ga-info-{sim_type}-{curr_size}-convergence.csv", 'w')
 strategy_f.write('agent id'+ ',time step' + ',straight' + ',alternating-left' + ',alternating-right' + ',true random' + ',time since last block' + ',num encounters' + ',size' + ',fitness'+ ',size'+ ',type' + ',trial' + ',collected' + ',genotype' + ',num better' + ',pos x' + ',pos y' + '\n')
 strategy_f.close()
 
-gene_df = open(f"../../graph-generation/collision-data/ga-gene-info-{sim_type}-{curr_size}.csv", 'w')
+gene_df = open(f"../../graph-generation/collision-data/ga-gene-info-{sim_type}-{curr_size}-convergence.csv", 'w')
 gene_df.write('agent id'+ ',time step' + ',trial' + ',size' + ',genotype' + '\n')
 gene_df.close()
 
@@ -518,7 +518,7 @@ def run_optimization():
                     r_field.setSFRotation([0, 0, -1])
                 
                 
-            for gen in range(num_generations): 
+            while (total_found != 20): # until finish task 
                 updated = False 
                 # index = 0 
                 
@@ -538,7 +538,7 @@ def run_optimization():
 
             overall_f.write(str(i) + ',' + str(robot.getTime()) + ',' + str(total_found) + ',' + str(size)+ ',' + 'ga' + ',' + str(20) + ',' + str(total_elapsed) + '\n')    
             overall_f.close()
-            overall_f = open(f'../../graph-generation/collection-data/overall-df-{sim_type}-{curr_size}.csv', 'a')
+            overall_f = open(f'../../graph-generation/collection-data/overall-df-{sim_type}-{curr_size}-convergence.csv', 'a')
             print('items collected', total_found)
             curr_trial = i + 1
             if assessing and curr_trial % 2 == 0:

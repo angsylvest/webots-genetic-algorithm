@@ -12,6 +12,7 @@ Main supervisor base
 Optimization algorithm - Collaboration-oriented 
 Angel Sylvester 2022
 """
+
 # # collected counts csv generation 
 overall_f = open('../../graph-generation/collection-data/overall-crw-info-urban-tmp.csv', 'w') 
 overall_f.write('trial' + ',time' + ',objects retrieved' + ',size'+ ',type' + '\n')

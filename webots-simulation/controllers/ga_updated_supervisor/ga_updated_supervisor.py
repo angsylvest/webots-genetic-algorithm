@@ -316,11 +316,11 @@ def message_listener(time_step):
             eval_fitness(time_step)
             receiver.nextPacket()
             
-        elif 'comm' in message:
+        elif 'comm' in message :
             print('processing communication request', message) 
             id_1 = message.split('-')[1]
             id_2 = message.split('-')[2]
-            init_orient = float(message.split('-')[3])
+            init_orient = float(message.split('[')[-1])
             new_2 = calc_normal(round(float(init_orient),2))
             
             comm_msg_update = 'comm_response-' + str(id_2) + "-[" + str(new_2) 
