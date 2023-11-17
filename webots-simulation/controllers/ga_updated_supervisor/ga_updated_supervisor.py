@@ -87,6 +87,7 @@ emitter_individual.setChannel(5)
 assessing = False 
 repopulate = False # keep False for now 
 phase_one_times = [620]
+central = True
 
 # generate envs 
 curr_env = env_mod.Environment(env_type=env_type, seed = seed_val)
@@ -144,6 +145,70 @@ def generate_robot_central(num_robots):
         collected_count.append(0)
         population.append(rec_node)
         id_msg += " " + str(rec_node.getId()) 
+
+# set up environments 
+def generate_robot_edge(num_robots, right = False):
+    global fitness_scores 
+    global collected_count 
+    global population
+    global columns 
+    global r_pos_to_generate
+    global pairs 
+    global overall_fitness_scores
+    global prev_msg 
+    global id_msg
+    
+    initialize_genotypes(num_robots)
+    curr_msg = str("size-" + str(num_robots))
+    if curr_msg != prev_msg: 
+        emitter.send(str("size-" + str(num_robots)).encode('utf-8'))
+        emitter_individual.send(str("size-" + str(num_robots)).encode('utf-8'))
+        prev_msg = curr_msg
+    
+    if len(population) != 0: 
+    
+        for r in population: 
+            r.remove()
+             
+    population = []
+    fitness_scores = []
+    overall_fitness_scores = []
+    collected_count = []
+    pairs = []
+    id_msg = "ids"
+        
+    for i in range(num_robots):
+        rootNode = robot.getRoot()
+        rootChildrenField = rootNode.getField('children')
+        rootChildrenField.importMFNode(-1, '../las_supervisor/robots/robot-ga-update.wbo') 
+        rec_node = rootChildrenField.getMFNode(-1)
+        
+        if right: 
+            t_field = rec_node.getField('translation')
+            pose = [round(random.uniform(-0.5, -0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]
+            while pose in r_pos_to_generate: # remove any duplicates
+                pose = [round(random.uniform(-0.5, -0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]
+            r_pos_to_generate.append(pose)
+            t_field.setSFVec3f(pose)
+                # print(r_field)
+
+        else: 
+            t_field = rec_node.getField('translation')
+            pose = [round(random.uniform(0.5, 0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]
+            while pose in r_pos_to_generate: # remove any duplicates
+                pose = [round(random.uniform(0.5, 0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]
+            r_pos_to_generate.append(pose)
+            t_field.setSFVec3f(pose)
+                # print(r_field)            
+        
+        # sets up metrics 
+        fitness_scores.append("!")
+        overall_fitness_scores.append('!')
+        pairs.append("!")
+        collected_count.append(0)
+        population.append(rec_node)
+        id_msg += " " + str(rec_node.getId()) 
+
 
 def regenerate_blocks(seed = None):
     global block_list
@@ -478,7 +543,11 @@ def run_optimization():
         curr_size = size  
         initialize_genotypes(size)
         r_pos_to_generate = []
-        generate_robot_central(size)
+
+        if central: 
+            generate_robot_central(size)
+        else: 
+            generate_robot_edge(size)
         
         curr_trial = 0
         if assessing and curr_trial % 2 == 0:
