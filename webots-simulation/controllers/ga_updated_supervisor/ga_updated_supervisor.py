@@ -87,7 +87,7 @@ emitter_individual.setChannel(5)
 assessing = False 
 repopulate = False # keep False for now 
 phase_one_times = [620]
-central = True
+central = False
 
 # generate envs 
 curr_env = env_mod.Environment(env_type=env_type, seed = seed_val)
@@ -184,6 +184,7 @@ def generate_robot_edge(num_robots, right = False):
         rec_node = rootChildrenField.getMFNode(-1)
         
         if right: 
+            print('right')
             t_field = rec_node.getField('translation')
             pose = [round(random.uniform(-0.5, -0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]
             while pose in r_pos_to_generate: # remove any duplicates
@@ -193,6 +194,7 @@ def generate_robot_edge(num_robots, right = False):
                 # print(r_field)
 
         else: 
+            print('left')
             t_field = rec_node.getField('translation')
             pose = [round(random.uniform(0.5, 0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]
             while pose in r_pos_to_generate: # remove any duplicates
@@ -547,7 +549,7 @@ def run_optimization():
         if central: 
             generate_robot_central(size)
         else: 
-            generate_robot_edge(size)
+            generate_robot_edge(size) # set True to switch
         
         curr_trial = 0
         if assessing and curr_trial % 2 == 0:
