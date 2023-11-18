@@ -39,11 +39,11 @@ TexturedBackgroundLight {
 DEF arena RectangleArena {
   translation -0.04 -0.07 0
   rotation 0 1 0 4.692820414042842e-06
-  floorSize 1.7 1.7
+  floorSize 2 2
 }
 DEF supervisor TinkerbotsBase {
-  translation -0.41 0 0
-  controller "ga_updated_supervisor_gen"
+  translation -0.69 0 0
+  controller "convergence_supervisor"
   supervisor TRUE
   extensionSlot [
     Emitter {

@@ -6,11 +6,7 @@ minimizedPerspectives: 000000ff00000000fd000000030000000000000087000002ecfc01000
 maximizedDockId: -1
 centralWidgetVisible: 1
 orthographicViewHeight: 1
-textFiles: 1 "controllers/generic_crw_foraging/generic_crw_foraging.py" "controllers/crw_supervisor/crw_supervisor.py" "controllers/updated_generalized_ga_controller/updated_generalized_ga_controller.py" "controllers/ga_updated_supervisor/ga_updated_supervisor.py"
-globalOptionalRendering: DistanceSensorRays
+textFiles: 2 "controllers/generic_crw_foraging/generic_crw_foraging.py" "controllers/crw_supervisor/crw_supervisor.py" "controllers/updated_generalized_ga_controller/updated_generalized_ga_controller.py" "controllers/ga_updated_supervisor/ga_updated_supervisor.py" "controllers/pso_pugh_supervisor/pso_pugh_supervisor.py"
 consoles: Console:All:All
-renderingDevicePerspectives: k0(1):camera;1;1;0;0
-renderingDevicePerspectives: k0(2):camera;1;1;0;0
-renderingDevicePerspectives: k0(3):camera;1;1;0;0
-renderingDevicePerspectives: k0(4):camera;1;1;0;0
-renderingDevicePerspectives: k0:camera;1;1;0;0
+renderingDevicePerspectives: e-puck(1):camera;1;1;0;0
+renderingDevicePerspectives: e-puck:camera;1;1;0;0
