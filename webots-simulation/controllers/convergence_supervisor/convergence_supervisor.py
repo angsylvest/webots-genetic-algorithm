@@ -21,14 +21,14 @@ num_generations = 10
 simulation_time = 30
 trials = 30
 curr_trial = 0 
-robot_population_sizes = [5, 10, 15]
+robot_population_sizes = [5]
 gene_list = ['control speed 10', 'energy cost 5', 'food energy 30', 'observations thres 5']
 curr_size = robot_population_sizes[0]
 env_type = "random" # "power law"
 
 # global collected_count 
 collected_count = []
-sim_type = "urban" 
+sim_type = "random" 
 
 from math import pi
 
@@ -85,7 +85,7 @@ emitter_individual = robot.getDevice("emitter_processor")
 emitter_individual.setChannel(5)
 assessing = False 
 repopulate = False # keep False for now 
-phase_one_times = [620]
+phase_one_times = [650, 700, 750, 800, 850, 900, 950, 1000]
 
 # generate envs 
 curr_env = env_mod.Environment(env_type=env_type, seed = seed_val)
@@ -474,7 +474,9 @@ def run_optimization():
     global curr_trial 
     global phase_one_times
     
-    for size in robot_population_sizes:
+    size = robot_population_sizes[0]
+    
+    for pot_time in phase_one_times# for size in robot_population_sizes:
         curr_size = size  
         initialize_genotypes(size)
         r_pos_to_generate = []
@@ -500,7 +502,7 @@ def run_optimization():
             individual.getField('translation').setSFVec3f([0, 2, 0])
             
         emitter_individual.send(id_msg.encode('utf-8'))
-        total_elapsed = 600
+        total_elapsed = pot_time
             
         num_generations = total_elapsed // simulation_time
         
@@ -518,7 +520,7 @@ def run_optimization():
                     r_field.setSFRotation([0, 0, -1])
                 
                 
-            while (total_found != 20): # until finish task 
+            for gen in range(num_generations):
                 updated = False 
                 # index = 0 
                 

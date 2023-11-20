@@ -88,7 +88,7 @@ repopulate = False
 
 next_child = ""
 num_better = 0 
-sim_type = "random" 
+sim_type = "power law" 
 
 gens_elapsed = 0 
 

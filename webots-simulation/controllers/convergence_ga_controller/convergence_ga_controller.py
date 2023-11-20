@@ -90,7 +90,7 @@ next_child = ""
 num_better = 0 
 
 gens_elapsed = 0 
-sim_type = "urban" 
+sim_type = "random" 
 
 terrains = ['normal', 'road']
 current_terrain = terrains[0] # either normal or road 

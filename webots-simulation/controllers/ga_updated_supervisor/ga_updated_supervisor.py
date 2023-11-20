@@ -29,8 +29,8 @@ curr_trial = 0
 robot_population_sizes = [5, 10, 15]
 gene_list = ['control speed 10', 'energy cost 5', 'food energy 30', 'observations thres 5']
 curr_size = robot_population_sizes[0]
-env_type = "random" # "power law"
-sim_type = "random"
+env_type = "power law" # "power law"
+sim_type = "power law"
 
 # collected counts csv generation 
 overall_f = open(f'../../graph-generation/collection-data/overall-df-{sim_type}-{curr_size}.csv', 'w')
@@ -87,7 +87,7 @@ emitter_individual.setChannel(5)
 assessing = False 
 repopulate = False # keep False for now 
 phase_one_times = [620]
-central = False
+central = True
 
 # generate envs 
 curr_env = env_mod.Environment(env_type=env_type, seed = seed_val)
