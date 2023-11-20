@@ -476,7 +476,7 @@ def run_optimization():
     
     size = robot_population_sizes[0]
     
-    for pot_time in phase_one_times# for size in robot_population_sizes:
+    for pot_time in phase_one_times: # for size in robot_population_sizes:
         curr_size = size  
         initialize_genotypes(size)
         r_pos_to_generate = []
