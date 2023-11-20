@@ -85,7 +85,7 @@ emitter_individual = robot.getDevice("emitter_processor")
 emitter_individual.setChannel(5)
 assessing = False 
 repopulate = False # keep False for now 
-phase_one_times = [650, 700, 750, 800, 850, 900, 950, 1000]
+phase_one_times = [650, 700, 750, 800, 850, 900, 950, 1000, 1050, 1100]
 
 # generate envs 
 curr_env = env_mod.Environment(env_type=env_type, seed = seed_val)
