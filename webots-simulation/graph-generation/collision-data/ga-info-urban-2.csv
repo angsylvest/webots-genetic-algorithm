@@ -1,3 +1,0 @@
-agent id,time step,straight,alternating-left,alternating-right,true random,time since last block,num encounters,size,fitness,size,type,trial,collected,genotype,num better,pos x,pos y
-0,30.1,0.2647058823529412,0.24509803921568626,0.24509803921568626,0.24509803921568626,15,0,2,2.0,2,ga,-1,1,[],2,-0.29376202433976467,-0.22727722210991202
-1,30.1,0.25,0.25,0.25,0.25,29,0,2,0.0,2,ga,-1,0,[],2,-0.14225310634955454,0.07052050656893427
