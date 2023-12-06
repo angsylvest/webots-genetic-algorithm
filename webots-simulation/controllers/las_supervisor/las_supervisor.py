@@ -15,17 +15,8 @@ Optimization algorithm - Collaboration-oriented
 Angel Sylvester 2022
 """
 
-# collected counts csv generation 
-overall_f = open('../../graph-generation/collection-data/overall-las-info.csv', 'w') 
-overall_f.write('trial' + ',time' + ',objects retrieved'+ ',size'+ ',type'+ '\n')
-overall_f.close()
+env_type = "random"
 
-overall_f = open('../../graph-generation/collection-data/overall-las-info.csv', 'a') 
-
-# individual robot collision counts 
-strategy_f = open("../../graph-generation/collision-data/las-info.csv", 'w')
-strategy_f.write('agent id,'+ 'time step,' + 'time since last block' + ',size' + ',collisions'+ ',type' + ',collected' + ',pos x' + ',pos y' +'\n')
-strategy_f.close()
 
 # set-up robot
 TIME_STEP = 32
@@ -45,6 +36,18 @@ curr_size = 5
 curr_trial = 0 
 robot_population_sizes = [5,10,15] # [5, 10, 15]
 start = 0
+
+# collected counts csv generation 
+overall_f = open(f'../../graph-generation/collection-data/overall-las-info-{env_type}-{robot_population_sizes[0]}.csv', 'w') 
+overall_f.write('trial' + ',time' + ',objects retrieved'+ ',size'+ ',type'+ '\n')
+overall_f.close()
+
+overall_f = open(f'../../graph-generation/collection-data/overall-las-info-{env_type}-{robot_population_sizes[0]}.csv', 'a') 
+
+# individual robot collision counts 
+strategy_f = open(f"../../graph-generation/collision-data/las-info.csv", 'w')
+strategy_f.write('agent id,'+ 'time step,' + 'time since last block' + ',size' + ',collisions'+ ',type' + ',collected' + ',pos x' + ',pos y' +'\n')
+strategy_f.close()
 
 # sim statistics 
 population = []
@@ -69,8 +72,6 @@ seed_val = 11
 random.seed(seed_val)
 assessing = False 
 repopulate = False
-
-env_type = "random"
 
 # generate envs 
 curr_env = env_mod.Environment(env_type=env_type, seed = seed_val)
@@ -364,7 +365,7 @@ def run_optimization():
             
             overall_f.write(str(i) + ',' + str(robot.getTime()) + ',' + str(total_found) + ',' + str(size)+ ',las' + '\n')    
             overall_f.close()
-            overall_f = open('../../graph-generation/collection-data/overall-las-info.csv', 'a') 
+            overall_f = open(f'../../graph-generation/collection-data/overall-las-info-{env_type}-{robot_population_sizes[0]}.csv', 'a') 
             print('items collected', total_found)
             
             curr_trial = i + 1

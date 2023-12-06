@@ -14,12 +14,13 @@ Angel Sylvester 2022
 """
 
 env_type = "random"
+robot_population_sizes = [5, 10, 20] # [5, 10, 15]
 
 # # collected counts csv generation 
-overall_f = open(f'../../graph-generation/collection-data/overall-crw-{env_type}-info.csv', 'w') 
+overall_f = open(f'../../graph-generation/collection-data/overall-crw-{env_type}-{robot_population_sizes[0]}-info.csv', 'w') 
 overall_f.write('trial' + ',time' + ',objects retrieved' + ',size'+ ',type' + '\n')
 overall_f.close()
-overall_f = open(f'../../graph-generation/collection-data/overall-crw-{env_type}-info.csv', 'a') 
+overall_f = open(f'../../graph-generation/collection-data/overall-crw-{env_type}-{robot_population_sizes[0]}-info.csv', 'a') 
 
 # individual robot collision counts 
 strategy_f = open(f"../../graph-generation/collision-data/crw-{env_type}-info.csv", 'w')
@@ -42,7 +43,6 @@ start = 0
 num_generations = 20
 trials = 50
 simulation_time = 30
-robot_population_sizes = [5, 10, 20] # [5, 10, 15]
 curr_size = robot_population_sizes[0]
 curr_trial = 0 
 population = []
@@ -353,7 +353,7 @@ def run_optimization():
 
             overall_f.write(str(i) + ',' + str(robot.getTime()) + ','  + str(total_found) + ','  + str(size)+ ',crw' + '\n')    
             overall_f.close()
-            overall_f = open(f'../../graph-generation/collection-data/overall-crw-{env_type}-info.csv', 'a') 
+            overall_f = open(f'../../graph-generation/collection-data/overall-crw-{env_type}-{robot_population_sizes[0]}-info.csv', 'a') 
             print('items collected', total_found)
             curr_trial = i + 1  
             if assessing and curr_trial % 2 == 0:

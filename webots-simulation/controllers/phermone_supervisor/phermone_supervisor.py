@@ -15,16 +15,8 @@ Optimization algorithm - Collaboration-oriented
 Angel Sylvester 2022
 """
 
-# collected counts csv generation 
-overall_f = open('../../graph-generation/collection-data/overall-ant-info.csv', 'w') 
-overall_f.write('trial' + ',time' + ',objects retrieved' + ',size' + ',type' + '\n')
-overall_f.close()
-overall_f = open('../../graph-generation/collection-data/overall-ant-info.csv', 'a') 
+env_type = "random"
 
-# individual robot collision counts  
-strategy_f = open("../../graph-generation/collision-data/ant-info.csv", 'w')
-strategy_f.write('agent id,'+ 'time step,' +' time since last block' + ',size' + ',collisions'+ ',type' + ',collected' + ',pos x' + ',pos y' + '\n')
-strategy_f.close()
 
 # set-up robot
 TIME_STEP = 32
@@ -45,6 +37,17 @@ trials = 50
 curr_size = 5
 robot_population_sizes = [5, 10, 15] # [5, 10, 15]
 curr_trial = 0 
+
+# collected counts csv generation 
+overall_f = open(f'../../graph-generation/collection-data/overall-ant-info-{env_type}-{robot_population_sizes[0]}.csv', 'w') 
+overall_f.write('trial' + ',time' + ',objects retrieved' + ',size' + ',type' + '\n')
+overall_f.close()
+overall_f = open(f'../../graph-generation/collection-data/overall-ant-info-{env_type}-{robot_population_sizes[0]}.csv', 'a') 
+
+# individual robot collision counts  
+strategy_f = open("../../graph-generation/collision-data/ant-info.csv", 'w')
+strategy_f.write('agent id,'+ 'time step,' +' time since last block' + ',size' + ',collisions'+ ',type' + ',collected' + ',pos x' + ',pos y' + '\n')
+strategy_f.close()
 
 # sim statistics 
 total_collected = 0 
@@ -68,7 +71,6 @@ random.seed(seed_val) # was 11 (changed to 15 to get new configuration)
 assessing = False # change once finished gathering data  
 repopulate = False 
 
-env_type = "random"
 # generate envs 
 curr_env = env_mod.Environment(env_type=env_type, seed = seed_val)
 
@@ -383,7 +385,7 @@ def run_optimization():
             # print('here')
             overall_f.write(str(i) + ',' + str(robot.getTime()) + ',' + str(total_found) + ',' + str(size)+ ',invert-ant' + '\n')   
             overall_f.close()
-            overall_f = open('../../graph-generation/collection-data/overall-ant-info.csv', 'a')  
+            overall_f = open(f'../../graph-generation/collection-data/overall-ant-info-{env_type}-{robot_population_sizes[0]}.csv', 'a')  
             # new_row = {'trial': i,'time': simulation_time*num_generations, 'objects retrieved': total_found}
             print('items collected', total_found)
             # overall_df = pd.concat([overall_df, pd.DataFrame([new_row])], ignore_index = True)

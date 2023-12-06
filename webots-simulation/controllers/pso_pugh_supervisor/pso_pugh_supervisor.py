@@ -12,16 +12,8 @@ Main supervisor base
 Optimization algorithm - Collaboration-oriented 
 Angel Sylvester 2022
 """
-# # collected counts csv generation 
-overall_f = open('../../graph-generation/collection-data/overall-pso-pugh-info.csv', 'w') 
-overall_f.write('trial' + ',time' + ',objects retrieved' + ',size'+ ',type' + '\n')
-overall_f.close()
-overall_f = open('../../graph-generation/collection-data/overall-pso-pugh-info.csv', 'a') 
 
-# individual robot collision counts 
-strategy_f = open("../../graph-generation/collision-data/pso-pugh-info.csv", 'w')
-strategy_f.write('agent id,'+ 'time step,' +' time since last block' + ',size' + ',collisions'+ ',type' + ',collected' + ',pos x' + ',pos y' + '\n')
-strategy_f.close()
+env_type = "random"
 
 # set-up robot2
 TIME_STEP = 32
@@ -48,6 +40,18 @@ fitness_scores = []
 pop_genotypes = []
 population_info = {} # each index correspond to robot id -> performance 
 
+# # collected counts csv generation 
+overall_f = open(f'../../graph-generation/collection-data/overall-pso-pugh-info-{env_type}-{robot_population_sizes[0]}.csv', 'w') 
+overall_f.write('trial' + ',time' + ',objects retrieved' + ',size'+ ',type' + '\n')
+overall_f.close()
+overall_f = open(f'../../graph-generation/collection-data/overall-pso-pugh-info-{env_type}-{robot_population_sizes[0]}.csv', 'a') 
+
+# individual robot collision counts 
+strategy_f = open("../../graph-generation/collision-data/pso-pugh-info.csv", 'w')
+strategy_f.write('agent id,'+ 'time step,' +' time since last block' + ',size' + ',collisions'+ ',type' + ',collected' + ',pos x' + ',pos y' + '\n')
+strategy_f.close()
+
+
 # sim statistics 
 total_collected = 0 
 taken = False # getting second child assigned 
@@ -67,7 +71,6 @@ random.seed(seed_val)
 assessing = False 
 repopulate = False
 
-env_type = "random"
 # generate envs 
 curr_env = env_mod.Environment(env_type=env_type, seed = seed_val)
 
@@ -417,7 +420,7 @@ def run_optimization():
             
             overall_f.write(str(i) + ',' + str(robot.getTime()) + ','  + str(total_found) + ','  + str(size)+ ',pso-pugh' + '\n')    
             overall_f.close()
-            overall_f = open('../../graph-generation/collection-data/overall-pso-pugh-info.csv', 'a') 
+            overall_f = open(f'../../graph-generation/collection-data/overall-pso-pugh-info-{env_type}-{robot_population_sizes[0]}.csv', 'a') 
             print('items collected', total_found)
             curr_trial = i + 1  
             if assessing and curr_trial % 2 == 0:
