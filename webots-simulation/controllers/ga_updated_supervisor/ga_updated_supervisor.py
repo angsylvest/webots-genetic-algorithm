@@ -26,12 +26,12 @@ num_generations = 10
 simulation_time = 30
 trials = 25
 curr_trial = 0 
-robot_population_sizes = [10, 15]
+robot_population_sizes = [5, 10, 15]
 gene_list = ['control speed 10', 'energy cost 5', 'food energy 30', 'observations thres 5']
 curr_size = robot_population_sizes[0]
-env_type = "random" # "power law"
+env_type = "single source" # "power law"
 sim_type = "random"
-communication = False
+communication = True
 high_dense = True
 
 # collected counts csv generation 
@@ -611,7 +611,7 @@ def run_optimization():
 
             overall_f.write(str(i) + ',' + str(robot.getTime()) + ',' + str(total_found) + ',' + str(size)+ ',' + 'ga' + ',' + str(20) + ',' + str(total_elapsed) + '\n')    
             overall_f.close()
-            overall_f = open(f'../../graph-generation/collection-data/overall-df-{sim_type}-{curr_size}-comm_{communication}.csv', 'a')
+            overall_f = open(f'../../graph-generation/collection-data/overall-df-{sim_type}-{curr_size}-comm_{communication}-dense_{high_dense}.csv', 'a')
             print('items collected', total_found)
             curr_trial = i + 1
             if assessing and curr_trial % 2 == 0:

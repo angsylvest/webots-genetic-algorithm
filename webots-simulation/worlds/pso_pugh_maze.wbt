@@ -1,0 +1,206 @@
+#VRML_SIM R2022a utf8
+WorldInfo {
+  info [
+    "A Khepera robot equipped with a gripper"
+  ]
+  title "Khepera Gripper"
+  CFM 0.001
+  ERP 0.4
+  basicTimeStep 10
+  FPS 30
+  optimalThreadCount 2
+  contactProperties [
+    ContactProperties {
+      material1 "gripper"
+      material2 "stick"
+      coulombFriction [
+        10
+      ]
+      bounceVelocity 0.5
+    }
+    ContactProperties {
+      material1 "khepera"
+      coulombFriction [
+        0.1
+      ]
+    }
+  ]
+}
+Viewpoint {
+  orientation -0.627158358542001 -0.00039476821205492113 0.7788916724865926 3.142577717292738
+  position 1.3586068821566262 -0.30190006675092457 6.515684613507337
+}
+TexturedBackground {
+  luminosity 0.5
+}
+TexturedBackgroundLight {
+  luminosity 0.4
+}
+DEF arena RectangleArena {
+  translation -0.04 -0.07 0
+  rotation 0 1 0 4.692820414042842e-06
+  floorSize 2 2
+}
+DEF supervisor TinkerbotsBase {
+  translation -0.69 0 0
+  controller "pso_pugh_supervisor"
+  supervisor TRUE
+  extensionSlot [
+    Emitter {
+      name "emitter_processor"
+      channel 5
+    }
+    Receiver {
+      channel 2
+    }
+    Emitter {
+      channel 1
+    }
+  ]
+}
+LegoWall {
+  translation -0.39 0.37 0.025
+}
+LegoWall {
+  translation -0.72 -0.16 0.025
+  name "LEGO wall(20)"
+}
+LegoWall {
+  translation -0.62 -0.16 0.025
+  name "LEGO wall(21)"
+}
+LegoWall {
+  translation -0.99 0.58 0.025
+  name "LEGO wall(25)"
+}
+LegoWall {
+  translation 0.89 -0.82 0.025
+  name "LEGO wall(28)"
+}
+LegoWall {
+  translation 0.78 -0.82 0.025
+  name "LEGO wall(29)"
+}
+LegoWall {
+  translation -0.89 0.58 0.025
+  name "LEGO wall(26)"
+}
+LegoWall {
+  translation -0.79 0.58 0.025
+  name "LEGO wall(27)"
+}
+LegoWall {
+  translation -0.56 -0.13 0.025
+  rotation 0 0 1 1.5708
+  name "LEGO wall(22)"
+}
+LegoWall {
+  translation -0.56 -0.03 0.025
+  rotation 0 0 1 1.5708
+  name "LEGO wall(23)"
+}
+LegoWall {
+  translation -0.56 0.07 0.025
+  rotation 0 0 1 1.5708
+  name "LEGO wall(24)"
+}
+LegoWall {
+  translation -0.27 -0.38 0.025
+  name "LEGO wall(7)"
+}
+LegoWall {
+  translation -0.17 -0.38 0.025
+  name "LEGO wall(8)"
+}
+LegoWall {
+  translation 0.29 -0.38 0.025
+  name "LEGO wall(13)"
+}
+LegoWall {
+  translation 0.39 -0.38 0.025
+  name "LEGO wall(14)"
+}
+LegoWall {
+  translation 0.49 -0.38 0.025
+  name "LEGO wall(15)"
+}
+LegoWall {
+  translation 0.55 -0.42 0.025
+  rotation 0 0 1 -1.5707953071795862
+  name "LEGO wall(19)"
+}
+LegoWall {
+  translation 0.5 0.21 0.025
+  name "LEGO wall(16)"
+}
+LegoWall {
+  translation 0.46 0.27 0.025
+  rotation 0 0 1 -1.5707953071795862
+  name "LEGO wall(18)"
+}
+LegoWall {
+  translation 0.69 0.87 0.025
+  rotation 0 0 1 -1.5707953071795862
+  name "LEGO wall(32)"
+}
+LegoWall {
+  translation 0.69 0.77 0.025
+  rotation 0 0 1 -1.5707953071795862
+  name "LEGO wall(33)"
+}
+LegoWall {
+  translation 0.6 0.21 0.025
+  name "LEGO wall(17)"
+}
+LegoWall {
+  translation -0.37 -0.38 0.025
+  name "LEGO wall(9)"
+}
+LegoWall {
+  translation -0.43 -0.43 0.025
+  rotation 0 0 1 1.5708
+  name "LEGO wall(10)"
+}
+LegoWall {
+  translation -0.43 -0.53 0.025
+  rotation 0 0 1 1.5708
+  name "LEGO wall(11)"
+}
+LegoWall {
+  translation -0.43 -0.63 0.025
+  rotation 0 0 1 1.5708
+  name "LEGO wall(12)"
+}
+LegoWall {
+  translation -0.69 -1.01 0.025
+  rotation 0 0 1 1.5708
+  name "LEGO wall(30)"
+}
+LegoWall {
+  translation -0.69 -0.91 0.025
+  rotation 0 0 1 1.5708
+  name "LEGO wall(31)"
+}
+LegoWall {
+  translation -0.29 0.37 0.025
+  name "LEGO wall(1)"
+}
+LegoWall {
+  translation -0.19 0.37 0.025
+  name "LEGO wall(2)"
+}
+LegoWall {
+  translation -0.13 0.33 0.025
+  rotation 0 0 1 -1.5707953071795862
+  name "LEGO wall(4)"
+}
+LegoWall {
+  translation -0.13 0.13 0.025
+  rotation 0 0 1 -1.5707953071795862
+  name "LEGO wall(6)"
+}
+LegoWall {
+  translation -0.13 0.23 0.025
+  rotation 0 0 1 -1.5707953071795862
+  name "LEGO wall(5)"
+}

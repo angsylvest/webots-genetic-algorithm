@@ -91,6 +91,7 @@ num_better = 0
 
 gens_elapsed = 0 
 sim_type = "urban" 
+communication = False 
 
 terrains = ['normal', 'road']
 current_terrain = terrains[0] # either normal or road 
@@ -469,11 +470,11 @@ def interpret(timestep):
             # print('calculating fitness', calc_robot_fitness())
             strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(weights[0]) + ',' + str(weights[1]) + ',' + str(weights[2]) + ',' + str(weights[3]) + ','+ str(time_elapsed_since_block) + ',' + str(n_observations_robot)  + ',' + str(curr_sim_size) + ',' + str(calc_robot_fitness())+ ',' + str(curr_sim_size) + ',ga' + ',' + str(trial_num) + ',' + str(n_observations_block) + ',' + str(curr_robot_genotype) + ',' + str(num_better) + ',' + str(gps.getValues()[0]) + ',' + str(gps.getValues()[1]) + '\n')
             strategy_f.close()
-            strategy_f = open(f"../../graph-generation/collision-data/ga-info-{sim_type}-{curr_sim_size}.csv", 'a')
+            strategy_f = open(f"../../graph-generation/collision-data/ga-info-{sim_type}-{curr_sim_size}-comm_{communication}-dense_{using_high_dens}.csv", 'a')
             
             gene_df.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(trial_num) + ',' + str(curr_sim_size) + ',' + str(curr_robot_genotype) + '\n')
             gene_df.close()
-            gene_df = open(f"../../graph-generation/collision-data/ga-gene-info-{sim_type}-{curr_sim_size}.csv", 'a')
+            gene_df = open(f"../../graph-generation/collision-data/ga-gene-info-{sim_type}-{curr_sim_size}-comm_{communication}-dense_{using_high_dens}.csv", 'a')
 
             fitness = 0
             overall_fitness = 0
@@ -616,7 +617,7 @@ def interpret(timestep):
             receiver.nextPacket() 
             
             
-        elif 'comm_response' in message and str(message.split('-')[1]) == str(given_id): 
+        elif 'comm_response' in message and str(message.split('-')[1]) == str(given_id) and communication: 
             print('updating orientation for', given_id, 'to', message.split('[')[1], 'for given id', given_id)
             roll, pitch, yaw = inertia.getRollPitchYaw()
             yaw = round(yaw, 2)
@@ -630,7 +631,7 @@ def interpret(timestep):
             
     if receiver_individual.getQueueLength()>0:
         message = receiver_individual.getData().decode('utf-8')
-        if 'child' in message: 
+        if 'child' in message and communication: 
             next_child = message[5:].split("*")
             num_better += 1
             receiver_individual.nextPacket()

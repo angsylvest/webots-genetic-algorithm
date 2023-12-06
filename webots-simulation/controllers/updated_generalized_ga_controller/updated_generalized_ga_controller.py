@@ -90,6 +90,7 @@ next_child = ""
 num_better = 0 
 sim_type = "random" 
 communication = False 
+using_high_dens = True 
 
 gens_elapsed = 0 
 
@@ -160,7 +161,6 @@ found_something = False
 
 agent_observation = {'num_interactions': 0, 'num_objects_observed': 0, 'num_collisions':0}
 time_into_generation = 0 
-using_high_dens = True 
 using_artificial_field = False
 remove_orientations = []
 

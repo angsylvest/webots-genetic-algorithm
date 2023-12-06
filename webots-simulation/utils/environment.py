@@ -16,6 +16,9 @@ class Environment():
 
         elif self.env_type == "power law": 
             return self.power_law()
+        
+        elif self.env_type == 'single source':
+            return self.single_source()
 
         else: 
             print("Invalid/unimplemmented environment")
@@ -103,4 +106,17 @@ class Environment():
                 b_pos_to_generate.append(pose)
 
         
+        return b_pos_to_generate
+    
+
+    def single_source(self):
+        random.seed(self.seed)
+        b_pos_to_generate = []
+        for i in range(self.num_blocks): 
+            pose = [round(random.uniform(0.9, -0.9),2), round(random.uniform(0.3, 0.85),2), 0.02]
+            b_pos_to_generate.append(pose)
+        
+        # for i in range(self.num_blocks // 2): 
+        #     pose = [round(random.uniform(0.9, -0.9),2), round(random.uniform(-1, 0.23),2), 0.02]
+        #     b_pos_to_generate.append(pose)
         return b_pos_to_generate
