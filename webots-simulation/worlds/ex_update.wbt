@@ -1,0 +1,3697 @@
+#VRML_SIM R2022a utf8
+WorldInfo {
+  info [
+    "A Khepera robot equipped with a gripper"
+  ]
+  title "Khepera Gripper"
+  CFM 0.001
+  ERP 0.4
+  basicTimeStep 10
+  FPS 30
+  optimalThreadCount 3
+  contactProperties [
+    ContactProperties {
+      material1 "gripper"
+      material2 "stick"
+      coulombFriction [
+        10
+      ]
+      bounceVelocity 0.5
+    }
+    ContactProperties {
+      material1 "khepera"
+      coulombFriction [
+        0.1
+      ]
+    }
+  ]
+}
+Viewpoint {
+  orientation -0.43596765408385607 -0.2218014534526285 0.8722019948606634 3.976868632741304
+  position 1.4375327452017082 1.8542948815663671 3.220904927248047
+}
+TexturedBackground {
+  luminosity 0.5
+}
+TexturedBackgroundLight {
+  luminosity 0.4
+}
+DEF arena RectangleArena {
+  translation -0.04 -0.07 0
+  rotation 0 1 0 4.692820414042842e-06
+  floorSize 2 2
+}
+DEF supervisor TinkerbotsBase {
+  hidden linearVelocity_0 2.6960376699998175e-09 -2.4671426847831382e-17 0.000207303949805442
+  hidden angularVelocity_0 1.1311860857854549e-15 4.7546680719379655e-08 1.2073468111785775e-16
+  translation -0.40999980740226316 -8.075245614481864e-19 0.02048547777288437
+  rotation -2.537373407843872e-12 0.9999999999999999 -1.6187380724429524e-12 4.692744563237175e-06
+  controller "ga_updated_supervisor"
+  supervisor TRUE
+  extensionSlot [
+    Emitter {
+      name "emitter_processor"
+      channel 5
+    }
+    Receiver {
+      channel 2
+    }
+    Emitter {
+      channel 1
+    }
+  ]
+}
+DEF khepera Robot {
+  translation 0.2951855628092821 0.08999950661571336 -2.5014789748097066e-07
+  rotation -6.4800368164305955e-06 -0.9999999841088162 -0.00017815829096498145 0.07183918943189256
+  children [
+    Camera {
+      translation 0.11 1.19334e-15 0.03
+      rotation 9.58979e-09 -1 9.58976e-09 -1.5707953071795862
+      name "camera(1)"
+    }
+    Emitter {
+      name "emitter_processor"
+    }
+    Receiver {
+      name "receiver_processor"
+      channel -1
+    }
+    GPS {
+      name "gps(1)"
+    }
+    Group {
+      children [
+        DistanceSensor {
+          translation 0 0 0.02
+          rotation 0 0 1 -0.523
+          name "distance sensor right"
+        }
+        DistanceSensor {
+          translation 0 0 0.02
+          rotation 0 0 1 0.523
+          name "distance sensor left"
+        }
+        LightSensor {
+          translation -0.02 5.30722e-08 0
+          rotation 0 0 1 3.14159
+          lookupTable [
+            0 0 0
+            4 1024 0
+          ]
+        }
+        LED {
+          translation 0.04 0 0
+          recognitionColors [
+            0 0 0
+          ]
+        }
+        TouchSensor {
+          translation 0 0 0.04
+          boundingObject Box {
+            size 0.06 0.07 0.06
+          }
+        }
+        GPS {
+        }
+        DistanceSensor {
+          translation 0 0 0.02
+          rotation 0 1 0 0
+        }
+        InertialUnit {
+        }
+        Receiver {
+          channel 1
+        }
+        Emitter {
+          channel 2
+        }
+        DEF LIFT_HINGE_JOINT HingeJoint {
+          jointParameters HingeJointParameters {
+            position -1.3999962881769412
+            axis 0 1 0
+            anchor -0.01 0 0.022
+          }
+          device [
+            RotationalMotor {
+              name "motor"
+            }
+          ]
+          endPoint Solid {
+            translation -0.010000272344874047 2.437851864822672e-09 0.021999275509467214
+            rotation 0.7058147862417943 -0.7058147862417063 -0.060423298859172844 3.0208926920283106
+            children [
+              DEF RIGHT_GRIP SliderJoint {
+                jointParameters JointParameters {
+                  position 0.00015515029788207752
+                  axis 1 0 0
+                }
+                device [
+                  LinearMotor {
+                    name "right grip"
+                    maxVelocity 0.1
+                    minPosition -6.244776062687065e-14
+                    maxPosition 0.029
+                    maxForce 100
+                  }
+                ]
+                endPoint Solid {
+                  translation 0.00015515029825859133 0 -0.048
+                  rotation 0 1 0 1.5708
+                  children [
+                    Shape {
+                      appearance PBRAppearance {
+                        baseColor 0.8 0.8 0.8
+                        roughness 1
+                        metalness 0
+                      }
+                      geometry IndexedFaceSet {
+                        coord Coordinate {
+                          point [
+                            0 -0.004 0.004
+                            0.03 -0.004 0.002
+                            0.03 -0.004 0.0001
+                            0 -0.004 0.0001
+                            0 -0.004 0.004
+                            0 0.004 0.004
+                            0.03 0.004 0.002
+                            0.03 0.004 0.0001
+                            0 0.004 0.0001
+                            0 0.004 0.004
+                          ]
+                        }
+                        coordIndex [
+                          4, 3, 2, 1, 0, -1, 5, 6, 7, 8, 9, -1, 0, 1, 6, 5, -1, 1, 2, 7, 6, -1, 2, 3, 8, 7, -1, 3, 4, 9, 8, -1
+                        ]
+                      }
+                    }
+                    DistanceSensor {
+                      translation 0.015 0 0
+                      rotation 0 1 0 1.5708
+                      name "ds"
+                      lookupTable [
+                        0 0 0
+                        0.05 1000 0
+                      ]
+                      type "infra-red"
+                    }
+                  ]
+                  name "right grip"
+                  contactMaterial "gripper"
+                  boundingObject Transform {
+                    translation 0.015 0 0.003
+                    children [
+                      Box {
+                        size 0.028 0.007 0.005
+                      }
+                    ]
+                  }
+                  physics Physics {
+                    density 100
+                    centerOfMass [
+                      0.01 0 0
+                    ]
+                  }
+                  linearVelocity 0.040595885357724994 -4.3603692333095905e-07 0.00010981322204036708
+                  angularVelocity 8.180570341663037e-07 0.039031207116357436 -4.3197519798007995e-06
+                }
+              }
+              DEF LEFT_GRIP SliderJoint {
+                jointParameters JointParameters {
+                  position -0.00015515517068044675
+                  axis -1 0 0
+                }
+                device [
+                  LinearMotor {
+                    name "left grip"
+                    maxVelocity 0.1
+                    minPosition -0.00016864583241887318
+                    maxPosition 0.029
+                    maxForce 100
+                  }
+                ]
+                endPoint Solid {
+                  translation 0.00015515517105696078 0 -0.048
+                  rotation 0 1 0 -1.5708
+                  children [
+                    Shape {
+                      appearance PBRAppearance {
+                        baseColor 0.8 0.8 0.8
+                        roughness 1
+                        metalness 0
+                      }
+                      geometry IndexedFaceSet {
+                        coord Coordinate {
+                          point [
+                            0 -0.004 0.0001
+                            -0.03 -0.004 0.0001
+                            -0.03 -0.004 0.002
+                            0 -0.004 0.004
+                            0 -0.004 0.0001
+                            0 0.004 0.0001
+                            -0.03 0.004 0.0001
+                            -0.03 0.004 0.002
+                            0 0.004 0.004
+                            0 0.004 0.0001
+                          ]
+                        }
+                        coordIndex [
+                          4, 3, 2, 1, 0, -1, 5, 6, 7, 8, 9, -1, 0, 1, 6, 5, -1, 1, 2, 7, 6, -1, 2, 3, 8, 7, -1, 3, 4, 9, 8, -1
+                        ]
+                      }
+                    }
+                  ]
+                  name "left grip"
+                  contactMaterial "gripper"
+                  boundingObject Transform {
+                    translation -0.015 0 0.003
+                    children [
+                      Box {
+                        size 0.028 0.007 0.005
+                      }
+                    ]
+                  }
+                  physics Physics {
+                    density 100
+                    centerOfMass [
+                      -0.01 0 0
+                    ]
+                  }
+                  linearVelocity 0.04059588535738617 -4.3603692366481397e-07 0.00010981322201588499
+                  angularVelocity 8.180570485117247e-07 0.03903120711635448 -4.319751952389915e-06
+                }
+              }
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.8 0.8 0.8
+                  roughness 1
+                  metalness 0
+                }
+                geometry IndexedFaceSet {
+                  coord Coordinate {
+                    point [
+                      0.035 -0.004 0.006
+                      0.035 -0.004 -0.048
+                      -0.035 -0.004 -0.048
+                      -0.035 -0.004 0.006
+                      -0.025 -0.004 0.006
+                      -0.025 -0.004 -0.03
+                      -0.016 -0.004 -0.04
+                      0.016 -0.004 -0.04
+                      0.025 -0.004 -0.03
+                      0.025 -0.004 0.006
+                      0.035 -0.004 0.006
+                      0.035 0.004 0.006
+                      0.035 0.004 -0.048
+                      -0.035 0.004 -0.048
+                      -0.035 0.004 0.006
+                      -0.025 0.004 0.006
+                      -0.025 0.004 -0.03
+                      -0.016 0.004 -0.04
+                      0.016 0.004 -0.04
+                      0.025 0.004 -0.03
+                      0.025 0.004 0.006
+                      0.035 0.004 0.006
+                    ]
+                  }
+                  coordIndex [
+                    10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, -1, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, -1, 0, 1, 12, 11, -1, 1, 2, 13, 12, -1, 2, 3, 14, 13, -1, 3, 4, 15, 14, -1, 4, 5, 16, 15, -1, 5, 6, 17, 16, -1, 6, 7, 18, 17, -1, 7, 8, 19, 18, -1, 8, 9, 20, 19, -1, 9, 10, 21, 20, -1
+                  ]
+                }
+              }
+            ]
+            boundingObject Transform {
+              translation 0 0 -0.021
+              children [
+                Box {
+                  size 0.068 0.008 0.052
+                }
+              ]
+            }
+            physics Physics {
+              density 100
+              centerOfMass [
+                0 0 -0.02
+              ]
+            }
+            linearVelocity 0.03912756390520267 -3.692662277896415e-07 0.00033299630278025975
+            angularVelocity 8.180571012812297e-07 0.03903120587530931 -4.319756838029104e-06
+          }
+        }
+        DEF GRIPPER_BASE Transform {
+          translation -0.01 0 0.023
+          rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.8 0.8 0.8
+                roughness 1
+                metalness 0
+              }
+              geometry Box {
+                size 0.05 0.01 0.01
+              }
+            }
+          ]
+        }
+        Camera {
+          translation -0.01 0 0.035
+          rotation -0.999759341318827 -0.016153505514822745 -0.014843305067519018 -5.307179586466759e-06
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.70632 0.70632 0.70632
+                roughness 1
+                metalness 0
+              }
+              geometry DEF CAMERA Box {
+                size 0.03 0.03 0.02
+              }
+            }
+          ]
+          boundingObject DEF CAMERA Box {
+            size 0.03 0.03 0.02
+          }
+          physics Physics {
+            density -1
+            mass 0.02
+          }
+          fieldOfView 0.3
+          recognition Recognition {
+            maxRange 50
+          }
+        }
+      ]
+    }
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.0539951 0.505576 0.0897663
+        roughness 0.4
+        metalness 0
+      }
+      geometry IndexedFaceSet {
+        coord Coordinate {
+          point [
+            0.009 -0.0276 0.0025, 0.0194 -0.0215 0.0025, 0.0265 -0.0118 0.0025, 0.029 0 0.0025, 0.0265 0.0118 0.0025, 0.0194 0.0215 0.0025, 0.009 0.0276 0.0025, 0.009 0.0236 0.02, -0.009 0.0236 0.02, -0.009 -0.0236 0.02, 0.009 -0.0236 0.02, -0.009 0.0276 0.0025, -0.0194 0.0215 0.0025, -0.0265 0.0118 0.0025, -0.029 0 0.0025, -0.0265 -0.0118 0.0025, -0.0194 -0.0215 0.0025, -0.009 -0.0276 0.0025, 0.009 -0.0276 0.001, 0.0194 -0.0215 0.001, 0.0265 -0.0118 0.001, 0.029 0 0.001, 0.0265 0.0118 0.001, 0.0194 0.0215 0.001, 0.009 0.0276 0.001, 0.009 0.0236 0.001, -0.009 0.0236 0.001, -0.009 -0.0236 0.001, 0.009 -0.0236 0.001, -0.009 0.0276 0.001, -0.0194 0.0215 0.001, -0.0265 0.0118 0.001, -0.029 0 0.001, -0.0265 -0.0118 0.001, -0.0194 -0.0215 0.001, -0.009 -0.0276 0.001
+          ]
+        }
+        coordIndex [
+          0, 1, 2, 3, 4, 5, 6, -1, 11, 12, 13, 14, 15, 16, 17, -1, 24, 23, 22, 21, 20, 19, 18, -1, 35, 34, 33, 32, 31, 30, 29, -1, 1, 0, 18, 19, -1, 2, 1, 19, 20, -1, 3, 2, 20, 21, -1, 4, 3, 21, 22, -1, 5, 4, 22, 23, -1, 6, 5, 23, 24, -1, 0, 6, 24, 18, -1, 17, 16, 34, 35, -1, 16, 15, 33, 34, -1, 15, 14, 32, 33, -1, 14, 13, 31, 32, -1, 13, 12, 30, 31, -1, 12, 11, 29, 30, -1, 11, 17, 35, 29, -1, 7, 10, 28, 25, -1, 9, 8, 26, 27, -1, 8, 7, 25, 26, -1, 10, 9, 27, 28, -1, 28, 27, 26, 25, -1
+        ]
+        creaseAngle 0.5
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        position -28.231214460426507
+        axis 0 1 0
+        anchor 0 0 0.0075
+      }
+      device [
+        RotationalMotor {
+          name "left wheel motor"
+        }
+        PositionSensor {
+          name "left wheel sensor"
+          resolution 0.0314
+        }
+      ]
+      endPoint Solid {
+        translation 0 0.02599999999999997 0.0075
+        rotation 0.4461793827424467 -0.4461795058574023 -0.7757885065972642 1.8219876413134202
+        children [
+          DEF WHEEL Transform {
+            rotation 0.5773869352700204 -0.5773319352761864 0.5773319352761864 -2.094339
+            children [
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.778497 0.793743 0.8
+                  roughness 0.3
+                  metalness 0
+                }
+                geometry Cylinder {
+                  height 0.003
+                  radius 0.0075
+                }
+              }
+            ]
+          }
+        ]
+        name "left wheel"
+        boundingObject USE WHEEL
+        physics Physics {
+        }
+        linearVelocity 0.03779089423194041 -4.217728585292359e-07 5.4986967794332946e-05
+        angularVelocity 6.50575582266004e-05 5.039031167774313 -3.268134771465723e-06
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        position 251.40414661966565
+        axis 0 1 0
+        anchor 0 0 0.0075
+      }
+      device [
+        RotationalMotor {
+          name "right wheel motor"
+        }
+        PositionSensor {
+          name "right wheel sensor"
+          resolution 0.0314
+        }
+      ]
+      endPoint Solid {
+        translation 0 -0.025999999999999645 0.0075
+        rotation -0.6523272742525258 0.6523272683603282 -0.3859252028824013 2.40496420069215
+        children [
+          USE WHEEL
+        ]
+        name "right wheel"
+        boundingObject USE WHEEL
+        physics Physics {
+        }
+        linearVelocity 0.037790758779319165 -4.2247279333214826e-07 5.4969332323809234e-05
+        angularVelocity 6.439813341187393e-05 5.039031165751265 -5.44330953871298e-06
+      }
+    }
+    Transform {
+      translation 0 0 0.02
+      rotation 0 0 1 -1.570796
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.015 0.48 0.1796
+            roughness 0.4
+            metalness 0
+          }
+          geometry Cylinder {
+            height 0.0015
+            radius 0.028
+          }
+        }
+      ]
+    }
+    DEF LS0 LightSensor {
+      translation 0.00215188 0.0227638 0.0144
+      rotation 0.5102819257784789 0.6081179115480401 0.6081159115483309 2.19792
+      name "ls0"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS1 LightSensor {
+      translation 0.0139291 0.0114289 0.0144
+      rotation 0.6776599336428648 0.5199889490821645 0.5199889490821645 1.95044
+      name "ls1"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS2 LightSensor {
+      translation 0.0123588 -0.0225 0.0144
+      rotation -0.5773509358554485 0.5773489358556708 0.5773509358554485 -2.094395307179586
+      name "ls2"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS3 LightSensor {
+      translation -0.00166025 -0.00785883 0.0144
+      rotation -0.1861570160863869 0.6947460600350939 0.6947470600351803 -2.7734953071795863
+      name "ls3"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS4 LightSensor {
+      translation -0.0072844 0.00978409 0.0144
+      rotation 0.2810839910810645 0.6785979784677472 0.6785989784677153 2.59357
+      name "ls4"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS5 LightSensor {
+      translation -0.0103523 -0.0251114 0.0144
+      rotation -0.8053168807607647 0.4192049379304254 0.4192039379305735 -1.7856453071795864
+      name "ls5"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS6 LightSensor {
+      translation -0.0163407 -0.00641179 0.0144
+      rotation -0.09269154676500942 0.7040625956398727 0.7040625956398727 -2.9567353071795863
+      name "ls6"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS7 LightSensor {
+      translation -0.016 0.00899998 0.0144
+      rotation 0 -0.7071067811865476 -0.7071067811865476 -3.14159
+      name "ls7"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LED0 LED {
+      translation 0.042 -0.003 0.021
+      rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
+      children [
+        PointLight {
+          attenuation 0 0 12.56
+          color 1 0 0
+          intensity 0.25
+          radius 10
+        }
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.501961 0.501961 0.501961
+            metalness 0
+            emissiveIntensity 7
+          }
+          geometry Box {
+            size 0.002 0.002 0.002
+          }
+        }
+      ]
+      name "led0"
+    }
+    DEF LED1 LED {
+      translation 0.024 -0.01 0.021
+      rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.501961 0.501961 0.501961
+            metalness 0
+            emissiveColor 1 0 0
+          }
+          geometry Box {
+            size 0.002 0.002 0.002
+          }
+        }
+      ]
+      name "led1"
+    }
+    DEF RS232_OUT Emitter {
+      name "rs232_out"
+      type "serial"
+      range 1000
+      baudRate 57600
+    }
+    DEF RS232_IN Receiver {
+      name "rs232_in"
+      type "serial"
+      baudRate 57600
+    }
+  ]
+  name "k0"
+  model "Khepera"
+  description "A mini mobile robot by K-Team SA"
+  contactMaterial "khepera"
+  boundingObject Transform {
+    translation 0 0 0.012
+    rotation 0 0 1 -1.570796
+    children [
+      Cylinder {
+        height 0.02
+        radius 0.0285
+      }
+    ]
+  }
+  physics Physics {
+    centerOfMass [
+      0 0 0.005
+    ]
+  }
+  controller "updated_generalized_ga_controller"
+  supervisor TRUE
+  linearVelocity 0.03802573928260149 -3.7123853554366414e-07 0.00016294918226442205
+  angularVelocity 8.18057515896295e-07 0.03903119576607045 -4.319776219653724e-06
+}
+DEF khepera Robot {
+  translation -0.0643561763342374 -0.10952354455264297 -7.131970268074717e-07
+  rotation -0.0204582585004678 -0.8143565844818788 -0.5800041490973462 0.08685715908583681
+  children [
+    Camera {
+      translation 0.11 1.19334e-15 0.03
+      rotation 9.58979e-09 -1 9.58976e-09 -1.5707953071795862
+      name "camera(1)"
+    }
+    Emitter {
+      name "emitter_processor"
+    }
+    Receiver {
+      name "receiver_processor"
+      channel 9
+    }
+    GPS {
+      name "gps(1)"
+    }
+    Group {
+      children [
+        DistanceSensor {
+          translation 0 0 0.02
+          rotation 0 0 1 -0.523
+          name "distance sensor right"
+        }
+        DistanceSensor {
+          translation 0 0 0.02
+          rotation 0 0 1 0.523
+          name "distance sensor left"
+        }
+        LightSensor {
+          translation -0.02 5.30722e-08 0
+          rotation 0 0 1 3.14159
+          lookupTable [
+            0 0 0
+            4 1024 0
+          ]
+        }
+        LED {
+          translation 0.04 0 0
+          recognitionColors [
+            0 0 0
+          ]
+        }
+        TouchSensor {
+          translation 0 0 0.04
+          boundingObject Box {
+            size 0.06 0.07 0.06
+          }
+        }
+        GPS {
+        }
+        DistanceSensor {
+          translation 0 0 0.02
+          rotation 0 1 0 0
+        }
+        InertialUnit {
+        }
+        Receiver {
+          channel 1
+        }
+        Emitter {
+          channel 2
+        }
+        DEF LIFT_HINGE_JOINT HingeJoint {
+          jointParameters HingeJointParameters {
+            position -1.399996291218873
+            axis 0 1 0
+            anchor -0.01 0 0.022
+          }
+          device [
+            RotationalMotor {
+              name "motor"
+            }
+          ]
+          endPoint Solid {
+            translation -0.010000272344871842 2.437851864822672e-09 0.021999275509466384
+            rotation 0.7058147862879129 -0.7058147862878249 -0.06042329778173321 3.020892694175351
+            children [
+              DEF RIGHT_GRIP SliderJoint {
+                jointParameters JointParameters {
+                  position 0.00013058272243226087
+                  axis 1 0 0
+                }
+                device [
+                  LinearMotor {
+                    name "right grip"
+                    maxVelocity 0.1
+                    minPosition -6.244776062687065e-14
+                    maxPosition 0.029
+                    maxForce 100
+                  }
+                ]
+                endPoint Solid {
+                  translation 0.00013058272280877468 0 -0.048
+                  rotation 0 1 0 1.5708
+                  children [
+                    Shape {
+                      appearance PBRAppearance {
+                        baseColor 0.8 0.8 0.8
+                        roughness 1
+                        metalness 0
+                      }
+                      geometry IndexedFaceSet {
+                        coord Coordinate {
+                          point [
+                            0 -0.004 0.004
+                            0.03 -0.004 0.002
+                            0.03 -0.004 0.0001
+                            0 -0.004 0.0001
+                            0 -0.004 0.004
+                            0 0.004 0.004
+                            0.03 0.004 0.002
+                            0.03 0.004 0.0001
+                            0 0.004 0.0001
+                            0 0.004 0.004
+                          ]
+                        }
+                        coordIndex [
+                          4, 3, 2, 1, 0, -1, 5, 6, 7, 8, 9, -1, 0, 1, 6, 5, -1, 1, 2, 7, 6, -1, 2, 3, 8, 7, -1, 3, 4, 9, 8, -1
+                        ]
+                      }
+                    }
+                    DistanceSensor {
+                      translation 0.015 0 0
+                      rotation 0 1 0 1.5708
+                      name "ds"
+                      lookupTable [
+                        0 0 0
+                        0.05 1000 0
+                      ]
+                      type "infra-red"
+                    }
+                  ]
+                  name "right grip"
+                  contactMaterial "gripper"
+                  boundingObject Transform {
+                    translation 0.015 0 0.003
+                    children [
+                      Box {
+                        size 0.028 0.007 0.005
+                      }
+                    ]
+                  }
+                  physics Physics {
+                    density 100
+                    centerOfMass [
+                      0.01 0 0
+                    ]
+                  }
+                  linearVelocity 0.0007962844898717644 -0.003176074874054247 0.00014332729787781552
+                  angularVelocity 0.0004440058188023622 0.011246836952313316 0.550777553409516
+                }
+              }
+              DEF LEFT_GRIP SliderJoint {
+                jointParameters JointParameters {
+                  position -0.00013105651715033544
+                  axis -1 0 0
+                }
+                device [
+                  LinearMotor {
+                    name "left grip"
+                    maxVelocity 0.1
+                    minPosition -0.00016864583241887318
+                    maxPosition 0.029
+                    maxForce 100
+                  }
+                ]
+                endPoint Solid {
+                  translation 0.00013105651752684947 0 -0.048
+                  rotation 0 1 0 -1.5708
+                  children [
+                    Shape {
+                      appearance PBRAppearance {
+                        baseColor 0.8 0.8 0.8
+                        roughness 1
+                        metalness 0
+                      }
+                      geometry IndexedFaceSet {
+                        coord Coordinate {
+                          point [
+                            0 -0.004 0.0001
+                            -0.03 -0.004 0.0001
+                            -0.03 -0.004 0.002
+                            0 -0.004 0.004
+                            0 -0.004 0.0001
+                            0 0.004 0.0001
+                            -0.03 0.004 0.0001
+                            -0.03 0.004 0.002
+                            0 0.004 0.004
+                            0 0.004 0.0001
+                          ]
+                        }
+                        coordIndex [
+                          4, 3, 2, 1, 0, -1, 5, 6, 7, 8, 9, -1, 0, 1, 6, 5, -1, 1, 2, 7, 6, -1, 2, 3, 8, 7, -1, 3, 4, 9, 8, -1
+                        ]
+                      }
+                    }
+                  ]
+                  name "left grip"
+                  contactMaterial "gripper"
+                  boundingObject Transform {
+                    translation -0.015 0 0.003
+                    children [
+                      Box {
+                        size 0.028 0.007 0.005
+                      }
+                    ]
+                  }
+                  physics Physics {
+                    density 100
+                    centerOfMass [
+                      -0.01 0 0
+                    ]
+                  }
+                  linearVelocity 0.0007968670350495335 -0.00317088863174224 0.00014332724069239232
+                  angularVelocity 0.0004440058099972018 0.011246836952994192 0.5507775533965295
+                }
+              }
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.8 0.8 0.8
+                  roughness 1
+                  metalness 0
+                }
+                geometry IndexedFaceSet {
+                  coord Coordinate {
+                    point [
+                      0.035 -0.004 0.006
+                      0.035 -0.004 -0.048
+                      -0.035 -0.004 -0.048
+                      -0.035 -0.004 0.006
+                      -0.025 -0.004 0.006
+                      -0.025 -0.004 -0.03
+                      -0.016 -0.004 -0.04
+                      0.016 -0.004 -0.04
+                      0.025 -0.004 -0.03
+                      0.025 -0.004 0.006
+                      0.035 -0.004 0.006
+                      0.035 0.004 0.006
+                      0.035 0.004 -0.048
+                      -0.035 0.004 -0.048
+                      -0.035 0.004 0.006
+                      -0.025 0.004 0.006
+                      -0.025 0.004 -0.03
+                      -0.016 0.004 -0.04
+                      0.016 0.004 -0.04
+                      0.025 0.004 -0.03
+                      0.025 0.004 0.006
+                      0.035 0.004 0.006
+                    ]
+                  }
+                  coordIndex [
+                    10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, -1, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, -1, 0, 1, 12, 11, -1, 1, 2, 13, 12, -1, 2, 3, 14, 13, -1, 3, 4, 15, 14, -1, 4, 5, 16, 15, -1, 5, 6, 17, 16, -1, 6, 7, 18, 17, -1, 7, 8, 19, 18, -1, 8, 9, 20, 19, -1, 9, 10, 21, 20, -1
+                  ]
+                }
+              }
+            ]
+            boundingObject Transform {
+              translation 0 0 -0.021
+              children [
+                Box {
+                  size 0.068 0.008 0.052
+                }
+              ]
+            }
+            physics Physics {
+              density 100
+              centerOfMass [
+                0 0 -0.02
+              ]
+            }
+            linearVelocity 0.0002030593795802282 -0.004967840013454844 0.00018777279777648453
+            angularVelocity 0.00044400579357809823 0.011246836944764253 0.5507775534038621
+          }
+        }
+        DEF GRIPPER_BASE Transform {
+          translation -0.01 0 0.023
+          rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.8 0.8 0.8
+                roughness 1
+                metalness 0
+              }
+              geometry Box {
+                size 0.05 0.01 0.01
+              }
+            }
+          ]
+        }
+        Camera {
+          translation -0.01 0 0.035
+          rotation -0.999759341318827 -0.016153505514822745 -0.014843305067519018 -5.307179586466759e-06
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.70632 0.70632 0.70632
+                roughness 1
+                metalness 0
+              }
+              geometry DEF CAMERA Box {
+                size 0.03 0.03 0.02
+              }
+            }
+          ]
+          boundingObject DEF CAMERA Box {
+            size 0.03 0.03 0.02
+          }
+          physics Physics {
+            density -1
+            mass 0.02
+          }
+          fieldOfView 0.3
+          recognition Recognition {
+            maxRange 50
+          }
+        }
+      ]
+    }
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.0539951 0.505576 0.0897663
+        roughness 0.4
+        metalness 0
+      }
+      geometry IndexedFaceSet {
+        coord Coordinate {
+          point [
+            0.009 -0.0276 0.0025, 0.0194 -0.0215 0.0025, 0.0265 -0.0118 0.0025, 0.029 0 0.0025, 0.0265 0.0118 0.0025, 0.0194 0.0215 0.0025, 0.009 0.0276 0.0025, 0.009 0.0236 0.02, -0.009 0.0236 0.02, -0.009 -0.0236 0.02, 0.009 -0.0236 0.02, -0.009 0.0276 0.0025, -0.0194 0.0215 0.0025, -0.0265 0.0118 0.0025, -0.029 0 0.0025, -0.0265 -0.0118 0.0025, -0.0194 -0.0215 0.0025, -0.009 -0.0276 0.0025, 0.009 -0.0276 0.001, 0.0194 -0.0215 0.001, 0.0265 -0.0118 0.001, 0.029 0 0.001, 0.0265 0.0118 0.001, 0.0194 0.0215 0.001, 0.009 0.0276 0.001, 0.009 0.0236 0.001, -0.009 0.0236 0.001, -0.009 -0.0236 0.001, 0.009 -0.0236 0.001, -0.009 0.0276 0.001, -0.0194 0.0215 0.001, -0.0265 0.0118 0.001, -0.029 0 0.001, -0.0265 -0.0118 0.001, -0.0194 -0.0215 0.001, -0.009 -0.0276 0.001
+          ]
+        }
+        coordIndex [
+          0, 1, 2, 3, 4, 5, 6, -1, 11, 12, 13, 14, 15, 16, 17, -1, 24, 23, 22, 21, 20, 19, 18, -1, 35, 34, 33, 32, 31, 30, 29, -1, 1, 0, 18, 19, -1, 2, 1, 19, 20, -1, 3, 2, 20, 21, -1, 4, 3, 21, 22, -1, 5, 4, 22, 23, -1, 6, 5, 23, 24, -1, 0, 6, 24, 18, -1, 17, 16, 34, 35, -1, 16, 15, 33, 34, -1, 15, 14, 32, 33, -1, 14, 13, 31, 32, -1, 13, 12, 30, 31, -1, 12, 11, 29, 30, -1, 11, 17, 35, 29, -1, 7, 10, 28, 25, -1, 9, 8, 26, 27, -1, 8, 7, 25, 26, -1, 10, 9, 27, 28, -1, 28, 27, 26, 25, -1
+        ]
+        creaseAngle 0.5
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        position -30.720801911310577
+        axis 0 1 0
+        anchor 0 0 0.0075
+      }
+      device [
+        RotationalMotor {
+          name "left wheel motor"
+        }
+        PositionSensor {
+          name "left wheel sensor"
+          resolution 0.0314
+        }
+      ]
+      endPoint Solid {
+        translation 0 0.025999999999999964 0.0075
+        rotation 0.7002442765265957 -0.7002443099852957 0.13898150785252542 3.417786612117124
+        children [
+          DEF WHEEL Transform {
+            rotation 0.5773869352700204 -0.5773319352761864 0.5773319352761864 -2.094339
+            children [
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.778497 0.793743 0.8
+                  roughness 0.3
+                  metalness 0
+                }
+                geometry Cylinder {
+                  height 0.003
+                  radius 0.0075
+                }
+              }
+            ]
+          }
+        ]
+        name "left wheel"
+        boundingObject USE WHEEL
+        physics Physics {
+        }
+        linearVelocity -0.014214949373083617 0.00074619920184735 8.470575551902668e-05
+        angularVelocity -0.10582348079416162 -1.9859353672469495 0.5510362793303426
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        position 249.99415259084296
+        axis 0 1 0
+        anchor 0 0 0.0075
+      }
+      device [
+        RotationalMotor {
+          name "right wheel motor"
+        }
+        PositionSensor {
+          name "right wheel sensor"
+          resolution 0.0314
+        }
+      ]
+      endPoint Solid {
+        translation 0 -0.025999999999999655 0.0075
+        rotation -0.30953977413331263 0.3095398932979282 -0.8990940900076061 1.6769640740659075
+        children [
+          USE WHEEL
+        ]
+        name "right wheel"
+        boundingObject USE WHEEL
+        physics Physics {
+        }
+        linearVelocity 0.014390158947986391 -0.000748397563175036 9.139154632941519e-05
+        angularVelocity 0.10671189540494667 2.0084289968342435 0.5510669454093569
+      }
+    }
+    Transform {
+      translation 0 0 0.02
+      rotation 0 0 1 -1.570796
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.015 0.48 0.1796
+            roughness 0.4
+            metalness 0
+          }
+          geometry Cylinder {
+            height 0.0015
+            radius 0.028
+          }
+        }
+      ]
+    }
+    DEF LS0 LightSensor {
+      translation 0.00215188 0.0227638 0.0144
+      rotation 0.5102819257784789 0.6081179115480401 0.6081159115483309 2.19792
+      name "ls0"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS1 LightSensor {
+      translation 0.0139291 0.0114289 0.0144
+      rotation 0.6776599336428648 0.5199889490821645 0.5199889490821645 1.95044
+      name "ls1"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS2 LightSensor {
+      translation 0.0123588 -0.0225 0.0144
+      rotation -0.5773509358554485 0.5773489358556708 0.5773509358554485 -2.094395307179586
+      name "ls2"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS3 LightSensor {
+      translation -0.00166025 -0.00785883 0.0144
+      rotation -0.1861570160863869 0.6947460600350939 0.6947470600351803 -2.7734953071795863
+      name "ls3"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS4 LightSensor {
+      translation -0.0072844 0.00978409 0.0144
+      rotation 0.2810839910810645 0.6785979784677472 0.6785989784677153 2.59357
+      name "ls4"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS5 LightSensor {
+      translation -0.0103523 -0.0251114 0.0144
+      rotation -0.8053168807607647 0.4192049379304254 0.4192039379305735 -1.7856453071795864
+      name "ls5"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS6 LightSensor {
+      translation -0.0163407 -0.00641179 0.0144
+      rotation -0.09269154676500942 0.7040625956398727 0.7040625956398727 -2.9567353071795863
+      name "ls6"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS7 LightSensor {
+      translation -0.016 0.00899998 0.0144
+      rotation 0 -0.7071067811865476 -0.7071067811865476 -3.14159
+      name "ls7"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LED0 LED {
+      translation 0.042 -0.003 0.021
+      rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
+      children [
+        PointLight {
+          attenuation 0 0 12.56
+          color 1 0 0
+          intensity 0.25
+          radius 10
+        }
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.501961 0.501961 0.501961
+            metalness 0
+            emissiveIntensity 7
+          }
+          geometry Box {
+            size 0.002 0.002 0.002
+          }
+        }
+      ]
+      name "led0"
+    }
+    DEF LED1 LED {
+      translation 0.024 -0.01 0.021
+      rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.501961 0.501961 0.501961
+            metalness 0
+            emissiveColor 1 0 0
+          }
+          geometry Box {
+            size 0.002 0.002 0.002
+          }
+        }
+      ]
+      name "led1"
+    }
+    DEF RS232_OUT Emitter {
+      name "rs232_out"
+      type "serial"
+      range 1000
+      baudRate 57600
+    }
+    DEF RS232_IN Receiver {
+      name "rs232_in"
+      type "serial"
+      baudRate 57600
+    }
+  ]
+  name "k0(1)"
+  model "Khepera"
+  description "A mini mobile robot by K-Team SA"
+  contactMaterial "khepera"
+  boundingObject Transform {
+    translation 0 0 0.012
+    rotation 0 0 1 -1.570796
+    children [
+      Cylinder {
+        height 0.02
+        radius 0.0285
+      }
+    ]
+  }
+  physics Physics {
+    centerOfMass [
+      0 0 0.005
+    ]
+  }
+  controller "updated_generalized_ga_controller"
+  supervisor TRUE
+  linearVelocity 5.767465226688596e-05 -0.0017795820121290589 0.000124100697302985
+  angularVelocity 0.00044400359684666795 0.01124679571407275 0.5507775523453399
+}
+DEF khepera Robot {
+  translation 0.15612528952619037 -0.2698870485562265 -0.00017478311782621186
+  rotation -0.010035372428584103 -0.343123310761129 0.9392367565808641 0.1789706824942165
+  children [
+    Camera {
+      translation 0.11 1.19334e-15 0.03
+      rotation 9.58979e-09 -1 9.58976e-09 -1.5707953071795862
+      name "camera(1)"
+    }
+    Emitter {
+      name "emitter_processor"
+    }
+    Receiver {
+      name "receiver_processor"
+      channel 19
+    }
+    GPS {
+      name "gps(1)"
+    }
+    Group {
+      children [
+        DistanceSensor {
+          translation 0 0 0.02
+          rotation 0 0 1 -0.523
+          name "distance sensor right"
+        }
+        DistanceSensor {
+          translation 0 0 0.02
+          rotation 0 0 1 0.523
+          name "distance sensor left"
+        }
+        LightSensor {
+          translation -0.02 5.30722e-08 0
+          rotation 0 0 1 3.14159
+          lookupTable [
+            0 0 0
+            4 1024 0
+          ]
+        }
+        LED {
+          translation 0.04 0 0
+          recognitionColors [
+            0 0 0
+          ]
+        }
+        TouchSensor {
+          translation 0 0 0.04
+          boundingObject Box {
+            size 0.06 0.07 0.06
+          }
+        }
+        GPS {
+        }
+        DistanceSensor {
+          translation 0 0 0.02
+          rotation 0 1 0 0
+        }
+        InertialUnit {
+        }
+        Receiver {
+          channel 1
+        }
+        Emitter {
+          channel 2
+        }
+        DEF LIFT_HINGE_JOINT HingeJoint {
+          jointParameters HingeJointParameters {
+            position -1.3999962876926022
+            axis 0 1 0
+            anchor -0.01 0 0.022
+          }
+          device [
+            RotationalMotor {
+              name "motor"
+            }
+          ]
+          endPoint Solid {
+            translation -0.010000272344874397 2.437851864822672e-09 0.021999275509467345
+            rotation 0.7058147862344512 -0.7058147862343631 -0.06042329903072364 3.020892691686457
+            children [
+              DEF RIGHT_GRIP SliderJoint {
+                jointParameters JointParameters {
+                  position 0.0001524391174017368
+                  axis 1 0 0
+                }
+                device [
+                  LinearMotor {
+                    name "right grip"
+                    maxVelocity 0.1
+                    minPosition -6.244776062687065e-14
+                    maxPosition 0.029
+                    maxForce 100
+                  }
+                ]
+                endPoint Solid {
+                  translation 0.00015243911777825062 0 -0.048
+                  rotation 0 1 0 1.5708
+                  children [
+                    Shape {
+                      appearance PBRAppearance {
+                        baseColor 0.8 0.8 0.8
+                        roughness 1
+                        metalness 0
+                      }
+                      geometry IndexedFaceSet {
+                        coord Coordinate {
+                          point [
+                            0 -0.004 0.004
+                            0.03 -0.004 0.002
+                            0.03 -0.004 0.0001
+                            0 -0.004 0.0001
+                            0 -0.004 0.004
+                            0 0.004 0.004
+                            0.03 0.004 0.002
+                            0.03 0.004 0.0001
+                            0 0.004 0.0001
+                            0 0.004 0.004
+                          ]
+                        }
+                        coordIndex [
+                          4, 3, 2, 1, 0, -1, 5, 6, 7, 8, 9, -1, 0, 1, 6, 5, -1, 1, 2, 7, 6, -1, 2, 3, 8, 7, -1, 3, 4, 9, 8, -1
+                        ]
+                      }
+                    }
+                    DistanceSensor {
+                      translation 0.015 0 0
+                      rotation 0 1 0 1.5708
+                      name "ds"
+                      lookupTable [
+                        0 0 0
+                        0.05 1000 0
+                      ]
+                      type "infra-red"
+                    }
+                  ]
+                  name "right grip"
+                  contactMaterial "gripper"
+                  boundingObject Transform {
+                    translation 0.015 0 0.003
+                    children [
+                      Box {
+                        size 0.028 0.007 0.005
+                      }
+                    ]
+                  }
+                  physics Physics {
+                    density 100
+                    centerOfMass [
+                      0.01 0 0
+                    ]
+                  }
+                  linearVelocity -0.006407604857493136 -0.01841157571693805 0.002349145163371251
+                  angularVelocity 0.19922249330015462 -0.08619740055846048 0.5984122268882359
+                }
+              }
+              DEF LEFT_GRIP SliderJoint {
+                jointParameters JointParameters {
+                  position -0.00015244402362267996
+                  axis -1 0 0
+                }
+                device [
+                  LinearMotor {
+                    name "left grip"
+                    maxVelocity 0.1
+                    minPosition -0.00016864583241887318
+                    maxPosition 0.029
+                    maxForce 100
+                  }
+                ]
+                endPoint Solid {
+                  translation 0.000152444023999194 0 -0.048
+                  rotation 0 1 0 -1.5708
+                  children [
+                    Shape {
+                      appearance PBRAppearance {
+                        baseColor 0.8 0.8 0.8
+                        roughness 1
+                        metalness 0
+                      }
+                      geometry IndexedFaceSet {
+                        coord Coordinate {
+                          point [
+                            0 -0.004 0.0001
+                            -0.03 -0.004 0.0001
+                            -0.03 -0.004 0.002
+                            0 -0.004 0.004
+                            0 -0.004 0.0001
+                            0 0.004 0.0001
+                            -0.03 0.004 0.0001
+                            -0.03 0.004 0.002
+                            0 0.004 0.004
+                            0 0.004 0.0001
+                          ]
+                        }
+                        coordIndex [
+                          4, 3, 2, 1, 0, -1, 5, 6, 7, 8, 9, -1, 0, 1, 6, 5, -1, 1, 2, 7, 6, -1, 2, 3, 8, 7, -1, 3, 4, 9, 8, -1
+                        ]
+                      }
+                    }
+                  ]
+                  name "left grip"
+                  contactMaterial "gripper"
+                  boundingObject Transform {
+                    translation -0.015 0 0.003
+                    children [
+                      Box {
+                        size 0.028 0.007 0.005
+                      }
+                    ]
+                  }
+                  physics Physics {
+                    density 100
+                    centerOfMass [
+                      -0.01 0 0
+                    ]
+                  }
+                  linearVelocity -0.006407558442300086 -0.01841156790764397 0.0023491306466058987
+                  angularVelocity 0.19922249330014075 -0.08619740055847225 0.598412226888263
+                }
+              }
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.8 0.8 0.8
+                  roughness 1
+                  metalness 0
+                }
+                geometry IndexedFaceSet {
+                  coord Coordinate {
+                    point [
+                      0.035 -0.004 0.006
+                      0.035 -0.004 -0.048
+                      -0.035 -0.004 -0.048
+                      -0.035 -0.004 0.006
+                      -0.025 -0.004 0.006
+                      -0.025 -0.004 -0.03
+                      -0.016 -0.004 -0.04
+                      0.016 -0.004 -0.04
+                      0.025 -0.004 -0.03
+                      0.025 -0.004 0.006
+                      0.035 -0.004 0.006
+                      0.035 0.004 0.006
+                      0.035 0.004 -0.048
+                      -0.035 0.004 -0.048
+                      -0.035 0.004 0.006
+                      -0.025 0.004 0.006
+                      -0.025 0.004 -0.03
+                      -0.016 0.004 -0.04
+                      0.016 0.004 -0.04
+                      0.025 0.004 -0.03
+                      0.025 0.004 0.006
+                      0.035 0.004 0.006
+                    ]
+                  }
+                  coordIndex [
+                    10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, -1, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, -1, 0, 1, 12, 11, -1, 1, 2, 13, 12, -1, 2, 3, 14, 13, -1, 3, 4, 15, 14, -1, 4, 5, 16, 15, -1, 5, 6, 17, 16, -1, 6, 7, 18, 17, -1, 7, 8, 19, 18, -1, 8, 9, 20, 19, -1, 9, 10, 21, 20, -1
+                  ]
+                }
+              }
+            ]
+            boundingObject Transform {
+              translation 0 0 -0.021
+              children [
+                Box {
+                  size 0.068 0.008 0.052
+                }
+              ]
+            }
+            physics Physics {
+              density 100
+              centerOfMass [
+                0 0 -0.02
+              ]
+            }
+            linearVelocity -0.0024489342204819416 -0.013287649204611781 0.0026414068779362955
+            angularVelocity 0.19922247505993207 -0.08619741233425848 0.5984122291699724
+          }
+        }
+        DEF GRIPPER_BASE Transform {
+          translation -0.01 0 0.023
+          rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.8 0.8 0.8
+                roughness 1
+                metalness 0
+              }
+              geometry Box {
+                size 0.05 0.01 0.01
+              }
+            }
+          ]
+        }
+        Camera {
+          translation -0.01 0 0.035
+          rotation -0.999759341318827 -0.016153505514822745 -0.014843305067519018 -5.307179586466759e-06
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.70632 0.70632 0.70632
+                roughness 1
+                metalness 0
+              }
+              geometry DEF CAMERA Box {
+                size 0.03 0.03 0.02
+              }
+            }
+          ]
+          boundingObject DEF CAMERA Box {
+            size 0.03 0.03 0.02
+          }
+          physics Physics {
+            density -1
+            mass 0.02
+          }
+          fieldOfView 0.3
+          recognition Recognition {
+            maxRange 50
+          }
+        }
+      ]
+    }
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.0539951 0.505576 0.0897663
+        roughness 0.4
+        metalness 0
+      }
+      geometry IndexedFaceSet {
+        coord Coordinate {
+          point [
+            0.009 -0.0276 0.0025, 0.0194 -0.0215 0.0025, 0.0265 -0.0118 0.0025, 0.029 0 0.0025, 0.0265 0.0118 0.0025, 0.0194 0.0215 0.0025, 0.009 0.0276 0.0025, 0.009 0.0236 0.02, -0.009 0.0236 0.02, -0.009 -0.0236 0.02, 0.009 -0.0236 0.02, -0.009 0.0276 0.0025, -0.0194 0.0215 0.0025, -0.0265 0.0118 0.0025, -0.029 0 0.0025, -0.0265 -0.0118 0.0025, -0.0194 -0.0215 0.0025, -0.009 -0.0276 0.0025, 0.009 -0.0276 0.001, 0.0194 -0.0215 0.001, 0.0265 -0.0118 0.001, 0.029 0 0.001, 0.0265 0.0118 0.001, 0.0194 0.0215 0.001, 0.009 0.0276 0.001, 0.009 0.0236 0.001, -0.009 0.0236 0.001, -0.009 -0.0236 0.001, 0.009 -0.0236 0.001, -0.009 0.0276 0.001, -0.0194 0.0215 0.001, -0.0265 0.0118 0.001, -0.029 0 0.001, -0.0265 -0.0118 0.001, -0.0194 -0.0215 0.001, -0.009 -0.0276 0.001
+          ]
+        }
+        coordIndex [
+          0, 1, 2, 3, 4, 5, 6, -1, 11, 12, 13, 14, 15, 16, 17, -1, 24, 23, 22, 21, 20, 19, 18, -1, 35, 34, 33, 32, 31, 30, 29, -1, 1, 0, 18, 19, -1, 2, 1, 19, 20, -1, 3, 2, 20, 21, -1, 4, 3, 21, 22, -1, 5, 4, 22, 23, -1, 6, 5, 23, 24, -1, 0, 6, 24, 18, -1, 17, 16, 34, 35, -1, 16, 15, 33, 34, -1, 15, 14, 32, 33, -1, 14, 13, 31, 32, -1, 13, 12, 30, 31, -1, 12, 11, 29, 30, -1, 11, 17, 35, 29, -1, 7, 10, 28, 25, -1, 9, 8, 26, 27, -1, 8, 7, 25, 26, -1, 10, 9, 27, 28, -1, 28, 27, 26, 25, -1
+        ]
+        creaseAngle 0.5
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        position -30.541206287044574
+        axis 0 1 0
+        anchor 0 0 0.0075
+      }
+      device [
+        RotationalMotor {
+          name "left wheel motor"
+        }
+        PositionSensor {
+          name "left wheel sensor"
+          resolution 0.0314
+        }
+      ]
+      endPoint Solid {
+        translation 0 0.025999999999999964 0.0075
+        rotation 0.7051090088848982 -0.7051090502112675 0.07511666193009982 3.2915445415291638
+        children [
+          DEF WHEEL Transform {
+            rotation 0.5773869352700204 -0.5773319352761864 0.5773319352761864 -2.094339
+            children [
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.778497 0.793743 0.8
+                  roughness 0.3
+                  metalness 0
+                }
+                geometry Cylinder {
+                  height 0.003
+                  radius 0.0075
+                }
+              }
+            ]
+          }
+        ]
+        name "left wheel"
+        boundingObject USE WHEEL
+        physics Physics {
+        }
+        linearVelocity -0.01571788763987538 -0.004099034708955236 0.00893409142296419
+        angularVelocity 0.5296458454746823 -2.058643550108615 0.6169070315795027
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        position 250.41413847727333
+        axis 0 1 0
+        anchor 0 0 0.0075
+      }
+      device [
+        RotationalMotor {
+          name "right wheel motor"
+        }
+        PositionSensor {
+          name "right wheel sensor"
+          resolution 0.0314
+        }
+      ]
+      endPoint Solid {
+        translation 0 -0.025999999999999645 0.0075
+        rotation -0.45818422024512606 0.4581842996769273 -0.761665522291727 1.839742189634591
+        children [
+          USE WHEEL
+        ]
+        name "right wheel"
+        boundingObject USE WHEEL
+        physics Physics {
+        }
+        linearVelocity 0.015015474011266502 0.0011437693455607165 -0.0004530196781092897
+        angularVelocity -0.1314448901143319 1.886215248865939 0.580628676784362
+      }
+    }
+    Transform {
+      translation 0 0 0.02
+      rotation 0 0 1 -1.570796
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.015 0.48 0.1796
+            roughness 0.4
+            metalness 0
+          }
+          geometry Cylinder {
+            height 0.0015
+            radius 0.028
+          }
+        }
+      ]
+    }
+    DEF LS0 LightSensor {
+      translation 0.00215188 0.0227638 0.0144
+      rotation 0.5102819257784789 0.6081179115480401 0.6081159115483309 2.19792
+      name "ls0"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS1 LightSensor {
+      translation 0.0139291 0.0114289 0.0144
+      rotation 0.6776599336428648 0.5199889490821645 0.5199889490821645 1.95044
+      name "ls1"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS2 LightSensor {
+      translation 0.0123588 -0.0225 0.0144
+      rotation -0.5773509358554485 0.5773489358556708 0.5773509358554485 -2.094395307179586
+      name "ls2"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS3 LightSensor {
+      translation -0.00166025 -0.00785883 0.0144
+      rotation -0.1861570160863869 0.6947460600350939 0.6947470600351803 -2.7734953071795863
+      name "ls3"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS4 LightSensor {
+      translation -0.0072844 0.00978409 0.0144
+      rotation 0.2810839910810645 0.6785979784677472 0.6785989784677153 2.59357
+      name "ls4"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS5 LightSensor {
+      translation -0.0103523 -0.0251114 0.0144
+      rotation -0.8053168807607647 0.4192049379304254 0.4192039379305735 -1.7856453071795864
+      name "ls5"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS6 LightSensor {
+      translation -0.0163407 -0.00641179 0.0144
+      rotation -0.09269154676500942 0.7040625956398727 0.7040625956398727 -2.9567353071795863
+      name "ls6"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS7 LightSensor {
+      translation -0.016 0.00899998 0.0144
+      rotation 0 -0.7071067811865476 -0.7071067811865476 -3.14159
+      name "ls7"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LED0 LED {
+      translation 0.042 -0.003 0.021
+      rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
+      children [
+        PointLight {
+          attenuation 0 0 12.56
+          color 1 0 0
+          intensity 0.25
+          radius 10
+        }
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.501961 0.501961 0.501961
+            metalness 0
+            emissiveIntensity 7
+          }
+          geometry Box {
+            size 0.002 0.002 0.002
+          }
+        }
+      ]
+      name "led0"
+    }
+    DEF LED1 LED {
+      translation 0.024 -0.01 0.021
+      rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.501961 0.501961 0.501961
+            metalness 0
+            emissiveColor 1 0 0
+          }
+          geometry Box {
+            size 0.002 0.002 0.002
+          }
+        }
+      ]
+      name "led1"
+    }
+    DEF RS232_OUT Emitter {
+      name "rs232_out"
+      type "serial"
+      range 1000
+      baudRate 57600
+    }
+    DEF RS232_IN Receiver {
+      name "rs232_in"
+      type "serial"
+      baudRate 57600
+    }
+  ]
+  name "k0(2)"
+  model "Khepera"
+  description "A mini mobile robot by K-Team SA"
+  contactMaterial "khepera"
+  boundingObject Transform {
+    translation 0 0 0.012
+    rotation 0 0 1 -1.570796
+    children [
+      Cylinder {
+        height 0.02
+        radius 0.0285
+      }
+    ]
+  }
+  physics Physics {
+    centerOfMass [
+      0 0 0.005
+    ]
+  }
+  controller "updated_generalized_ga_controller"
+  supervisor TRUE
+  linearVelocity -0.0004612669434372208 -0.004535106755605117 0.0038119413844549324
+  angularVelocity 0.19922185912375023 -0.08619763902105326 0.5984123001768725
+}
+DEF khepera Robot {
+  translation -0.09481451272914221 0.0999995066158973 1.5202086312750968e-06
+  rotation -6.4802573433822986e-06 -0.999999984087768 -0.00017827638629396104 0.0717917082112561
+  children [
+    Camera {
+      translation 0.11 1.19334e-15 0.03
+      rotation 9.58979e-09 -1 9.58976e-09 -1.5707953071795862
+      name "camera(1)"
+    }
+    Emitter {
+      name "emitter_processor"
+    }
+    Receiver {
+      name "receiver_processor"
+      channel 29
+    }
+    GPS {
+      name "gps(1)"
+    }
+    Group {
+      children [
+        DistanceSensor {
+          translation 0 0 0.02
+          rotation 0 0 1 -0.523
+          name "distance sensor right"
+        }
+        DistanceSensor {
+          translation 0 0 0.02
+          rotation 0 0 1 0.523
+          name "distance sensor left"
+        }
+        LightSensor {
+          translation -0.02 5.30722e-08 0
+          rotation 0 0 1 3.14159
+          lookupTable [
+            0 0 0
+            4 1024 0
+          ]
+        }
+        LED {
+          translation 0.04 0 0
+          recognitionColors [
+            0 0 0
+          ]
+        }
+        TouchSensor {
+          translation 0 0 0.04
+          boundingObject Box {
+            size 0.06 0.07 0.06
+          }
+        }
+        GPS {
+        }
+        DistanceSensor {
+          translation 0 0 0.02
+          rotation 0 1 0 0
+        }
+        InertialUnit {
+        }
+        Receiver {
+          channel 1
+        }
+        Emitter {
+          channel 2
+        }
+        DEF LIFT_HINGE_JOINT HingeJoint {
+          jointParameters HingeJointParameters {
+            position -1.3999962881684906
+            axis 0 1 0
+            anchor -0.01 0 0.022
+          }
+          device [
+            RotationalMotor {
+              name "motor"
+            }
+          ]
+          endPoint Solid {
+            translation -0.010000272344874052 2.4378518648226717e-09 0.021999275509467217
+            rotation 0.7058147862416662 -0.7058147862415781 -0.06042329886216595 3.020892692022346
+            children [
+              DEF RIGHT_GRIP SliderJoint {
+                jointParameters JointParameters {
+                  position 0.00015515029793098094
+                  axis 1 0 0
+                }
+                device [
+                  LinearMotor {
+                    name "right grip"
+                    maxVelocity 0.1
+                    minPosition -6.244776062687065e-14
+                    maxPosition 0.029
+                    maxForce 100
+                  }
+                ]
+                endPoint Solid {
+                  translation 0.00015515029830749476 0 -0.048
+                  rotation 0 1 0 1.5708
+                  children [
+                    Shape {
+                      appearance PBRAppearance {
+                        baseColor 0.8 0.8 0.8
+                        roughness 1
+                        metalness 0
+                      }
+                      geometry IndexedFaceSet {
+                        coord Coordinate {
+                          point [
+                            0 -0.004 0.004
+                            0.03 -0.004 0.002
+                            0.03 -0.004 0.0001
+                            0 -0.004 0.0001
+                            0 -0.004 0.004
+                            0 0.004 0.004
+                            0.03 0.004 0.002
+                            0.03 0.004 0.0001
+                            0 0.004 0.0001
+                            0 0.004 0.004
+                          ]
+                        }
+                        coordIndex [
+                          4, 3, 2, 1, 0, -1, 5, 6, 7, 8, 9, -1, 0, 1, 6, 5, -1, 1, 2, 7, 6, -1, 2, 3, 8, 7, -1, 3, 4, 9, 8, -1
+                        ]
+                      }
+                    }
+                    DistanceSensor {
+                      translation 0.015 0 0
+                      rotation 0 1 0 1.5708
+                      name "ds"
+                      lookupTable [
+                        0 0 0
+                        0.05 1000 0
+                      ]
+                      type "infra-red"
+                    }
+                  ]
+                  name "right grip"
+                  contactMaterial "gripper"
+                  boundingObject Transform {
+                    translation 0.015 0 0.003
+                    children [
+                      Box {
+                        size 0.028 0.007 0.005
+                      }
+                    ]
+                  }
+                  physics Physics {
+                    density 100
+                    centerOfMass [
+                      0.01 0 0
+                    ]
+                  }
+                  linearVelocity 0.0405017074701691 -4.348455951919031e-07 0.00010436928597223392
+                  angularVelocity 8.027329145528492e-07 0.037839482314926426 -4.319868903220269e-06
+                }
+              }
+              DEF LEFT_GRIP SliderJoint {
+                jointParameters JointParameters {
+                  position -0.0001551551707293918
+                  axis -1 0 0
+                }
+                device [
+                  LinearMotor {
+                    name "left grip"
+                    maxVelocity 0.1
+                    minPosition -0.00016864583241887318
+                    maxPosition 0.029
+                    maxForce 100
+                  }
+                ]
+                endPoint Solid {
+                  translation 0.00015515517110590584 0 -0.048
+                  rotation 0 1 0 -1.5708
+                  children [
+                    Shape {
+                      appearance PBRAppearance {
+                        baseColor 0.8 0.8 0.8
+                        roughness 1
+                        metalness 0
+                      }
+                      geometry IndexedFaceSet {
+                        coord Coordinate {
+                          point [
+                            0 -0.004 0.0001
+                            -0.03 -0.004 0.0001
+                            -0.03 -0.004 0.002
+                            0 -0.004 0.004
+                            0 -0.004 0.0001
+                            0 0.004 0.0001
+                            -0.03 0.004 0.0001
+                            -0.03 0.004 0.002
+                            0 0.004 0.004
+                            0 0.004 0.0001
+                          ]
+                        }
+                        coordIndex [
+                          4, 3, 2, 1, 0, -1, 5, 6, 7, 8, 9, -1, 0, 1, 6, 5, -1, 1, 2, 7, 6, -1, 2, 3, 8, 7, -1, 3, 4, 9, 8, -1
+                        ]
+                      }
+                    }
+                  ]
+                  name "left grip"
+                  contactMaterial "gripper"
+                  boundingObject Transform {
+                    translation -0.015 0 0.003
+                    children [
+                      Box {
+                        size 0.028 0.007 0.005
+                      }
+                    ]
+                  }
+                  physics Physics {
+                    density 100
+                    centerOfMass [
+                      -0.01 0 0
+                    ]
+                  }
+                  linearVelocity 0.04050170746983106 -4.3484559516306286e-07 0.00010436928594740347
+                  angularVelocity 8.027329064864232e-07 0.03783948231494247 -4.319868918066347e-06
+                }
+              }
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.8 0.8 0.8
+                  roughness 1
+                  metalness 0
+                }
+                geometry IndexedFaceSet {
+                  coord Coordinate {
+                    point [
+                      0.035 -0.004 0.006
+                      0.035 -0.004 -0.048
+                      -0.035 -0.004 -0.048
+                      -0.035 -0.004 0.006
+                      -0.025 -0.004 0.006
+                      -0.025 -0.004 -0.03
+                      -0.016 -0.004 -0.04
+                      0.016 -0.004 -0.04
+                      0.025 -0.004 -0.03
+                      0.025 -0.004 0.006
+                      0.035 -0.004 0.006
+                      0.035 0.004 0.006
+                      0.035 0.004 -0.048
+                      -0.035 0.004 -0.048
+                      -0.035 0.004 0.006
+                      -0.025 0.004 0.006
+                      -0.025 0.004 -0.03
+                      -0.016 0.004 -0.04
+                      0.016 0.004 -0.04
+                      0.025 0.004 -0.03
+                      0.025 0.004 0.006
+                      0.035 0.004 0.006
+                    ]
+                  }
+                  coordIndex [
+                    10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, -1, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, -1, 0, 1, 12, 11, -1, 1, 2, 13, 12, -1, 2, 3, 14, 13, -1, 3, 4, 15, 14, -1, 4, 5, 16, 15, -1, 5, 6, 17, 16, -1, 6, 7, 18, 17, -1, 7, 8, 19, 18, -1, 8, 9, 20, 19, -1, 9, 10, 21, 20, -1
+                  ]
+                }
+              }
+            ]
+            boundingObject Transform {
+              translation 0 0 -0.021
+              children [
+                Box {
+                  size 0.068 0.008 0.052
+                }
+              ]
+            }
+            physics Physics {
+              density 100
+              centerOfMass [
+                0 0 -0.02
+              ]
+            }
+            linearVelocity 0.03907845948210242 -3.6864486286027335e-07 0.00032310583214850567
+            angularVelocity 8.027329657211144e-07 0.03783948108716991 -4.3198737338430335e-06
+          }
+        }
+        DEF GRIPPER_BASE Transform {
+          translation -0.01 0 0.023
+          rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.8 0.8 0.8
+                roughness 1
+                metalness 0
+              }
+              geometry Box {
+                size 0.05 0.01 0.01
+              }
+            }
+          ]
+        }
+        Camera {
+          translation -0.01 0 0.035
+          rotation -0.999759341318827 -0.016153505514822745 -0.014843305067519018 -5.307179586466759e-06
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.70632 0.70632 0.70632
+                roughness 1
+                metalness 0
+              }
+              geometry DEF CAMERA Box {
+                size 0.03 0.03 0.02
+              }
+            }
+          ]
+          boundingObject DEF CAMERA Box {
+            size 0.03 0.03 0.02
+          }
+          physics Physics {
+            density -1
+            mass 0.02
+          }
+          fieldOfView 0.3
+          recognition Recognition {
+            maxRange 50
+          }
+        }
+      ]
+    }
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.0539951 0.505576 0.0897663
+        roughness 0.4
+        metalness 0
+      }
+      geometry IndexedFaceSet {
+        coord Coordinate {
+          point [
+            0.009 -0.0276 0.0025, 0.0194 -0.0215 0.0025, 0.0265 -0.0118 0.0025, 0.029 0 0.0025, 0.0265 0.0118 0.0025, 0.0194 0.0215 0.0025, 0.009 0.0276 0.0025, 0.009 0.0236 0.02, -0.009 0.0236 0.02, -0.009 -0.0236 0.02, 0.009 -0.0236 0.02, -0.009 0.0276 0.0025, -0.0194 0.0215 0.0025, -0.0265 0.0118 0.0025, -0.029 0 0.0025, -0.0265 -0.0118 0.0025, -0.0194 -0.0215 0.0025, -0.009 -0.0276 0.0025, 0.009 -0.0276 0.001, 0.0194 -0.0215 0.001, 0.0265 -0.0118 0.001, 0.029 0 0.001, 0.0265 0.0118 0.001, 0.0194 0.0215 0.001, 0.009 0.0276 0.001, 0.009 0.0236 0.001, -0.009 0.0236 0.001, -0.009 -0.0236 0.001, 0.009 -0.0236 0.001, -0.009 0.0276 0.001, -0.0194 0.0215 0.001, -0.0265 0.0118 0.001, -0.029 0 0.001, -0.0265 -0.0118 0.001, -0.0194 -0.0215 0.001, -0.009 -0.0276 0.001
+          ]
+        }
+        coordIndex [
+          0, 1, 2, 3, 4, 5, 6, -1, 11, 12, 13, 14, 15, 16, 17, -1, 24, 23, 22, 21, 20, 19, 18, -1, 35, 34, 33, 32, 31, 30, 29, -1, 1, 0, 18, 19, -1, 2, 1, 19, 20, -1, 3, 2, 20, 21, -1, 4, 3, 21, 22, -1, 5, 4, 22, 23, -1, 6, 5, 23, 24, -1, 0, 6, 24, 18, -1, 17, 16, 34, 35, -1, 16, 15, 33, 34, -1, 15, 14, 32, 33, -1, 14, 13, 31, 32, -1, 13, 12, 30, 31, -1, 12, 11, 29, 30, -1, 11, 17, 35, 29, -1, 7, 10, 28, 25, -1, 9, 8, 26, 27, -1, 8, 7, 25, 26, -1, 10, 9, 27, 28, -1, 28, 27, 26, 25, -1
+        ]
+        creaseAngle 0.5
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        position -28.231214460420148
+        axis 0 1 0
+        anchor 0 0 0.0075
+      }
+      device [
+        RotationalMotor {
+          name "left wheel motor"
+        }
+        PositionSensor {
+          name "left wheel sensor"
+          resolution 0.0314
+        }
+      ]
+      endPoint Solid {
+        translation 0 0.02599999999999996 0.0075
+        rotation 0.44617938274047103 -0.4461795058554267 -0.7757885065995369 1.8219876413105829
+        children [
+          DEF WHEEL Transform {
+            rotation 0.5773869352700204 -0.5773319352761864 0.5773319352761864 -2.094339
+            children [
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.778497 0.793743 0.8
+                  roughness 0.3
+                  metalness 0
+                }
+                geometry Cylinder {
+                  height 0.003
+                  radius 0.0075
+                }
+              }
+            ]
+          }
+        ]
+        name "left wheel"
+        boundingObject USE WHEEL
+        physics Physics {
+        }
+        linearVelocity 0.03778194855405293 -4.216482608295964e-07 5.5833840824678836e-05
+        angularVelocity 6.5040567583861e-05 5.037839443036581 -3.2697280303245526e-06
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        position 251.40414661967196
+        axis 0 1 0
+        anchor 0 0 0.0075
+      }
+      device [
+        RotationalMotor {
+          name "right wheel motor"
+        }
+        PositionSensor {
+          name "right wheel sensor"
+          resolution 0.0314
+        }
+      ]
+      endPoint Solid {
+        translation 0 -0.025999999999999638 0.0075
+        rotation -0.6523272742532251 0.6523272683610275 -0.38592520288003673 2.4049642006962664
+        children [
+          USE WHEEL
+        ]
+        name "right wheel"
+        boundingObject USE WHEEL
+        physics Physics {
+        }
+        linearVelocity 0.03778181309871467 -4.223688403330488e-07 5.581620879869908e-05
+        angularVelocity 6.438458478836035e-05 5.037839441013433 -5.442067305138248e-06
+      }
+    }
+    Transform {
+      translation 0 0 0.02
+      rotation 0 0 1 -1.570796
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.015 0.48 0.1796
+            roughness 0.4
+            metalness 0
+          }
+          geometry Cylinder {
+            height 0.0015
+            radius 0.028
+          }
+        }
+      ]
+    }
+    DEF LS0 LightSensor {
+      translation 0.00215188 0.0227638 0.0144
+      rotation 0.5102819257784789 0.6081179115480401 0.6081159115483309 2.19792
+      name "ls0"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS1 LightSensor {
+      translation 0.0139291 0.0114289 0.0144
+      rotation 0.6776599336428648 0.5199889490821645 0.5199889490821645 1.95044
+      name "ls1"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS2 LightSensor {
+      translation 0.0123588 -0.0225 0.0144
+      rotation -0.5773509358554485 0.5773489358556708 0.5773509358554485 -2.094395307179586
+      name "ls2"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS3 LightSensor {
+      translation -0.00166025 -0.00785883 0.0144
+      rotation -0.1861570160863869 0.6947460600350939 0.6947470600351803 -2.7734953071795863
+      name "ls3"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS4 LightSensor {
+      translation -0.0072844 0.00978409 0.0144
+      rotation 0.2810839910810645 0.6785979784677472 0.6785989784677153 2.59357
+      name "ls4"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS5 LightSensor {
+      translation -0.0103523 -0.0251114 0.0144
+      rotation -0.8053168807607647 0.4192049379304254 0.4192039379305735 -1.7856453071795864
+      name "ls5"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS6 LightSensor {
+      translation -0.0163407 -0.00641179 0.0144
+      rotation -0.09269154676500942 0.7040625956398727 0.7040625956398727 -2.9567353071795863
+      name "ls6"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS7 LightSensor {
+      translation -0.016 0.00899998 0.0144
+      rotation 0 -0.7071067811865476 -0.7071067811865476 -3.14159
+      name "ls7"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LED0 LED {
+      translation 0.042 -0.003 0.021
+      rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
+      children [
+        PointLight {
+          attenuation 0 0 12.56
+          color 1 0 0
+          intensity 0.25
+          radius 10
+        }
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.501961 0.501961 0.501961
+            metalness 0
+            emissiveIntensity 7
+          }
+          geometry Box {
+            size 0.002 0.002 0.002
+          }
+        }
+      ]
+      name "led0"
+    }
+    DEF LED1 LED {
+      translation 0.024 -0.01 0.021
+      rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.501961 0.501961 0.501961
+            metalness 0
+            emissiveColor 1 0 0
+          }
+          geometry Box {
+            size 0.002 0.002 0.002
+          }
+        }
+      ]
+      name "led1"
+    }
+    DEF RS232_OUT Emitter {
+      name "rs232_out"
+      type "serial"
+      range 1000
+      baudRate 57600
+    }
+    DEF RS232_IN Receiver {
+      name "rs232_in"
+      type "serial"
+      baudRate 57600
+    }
+  ]
+  name "k0(3)"
+  model "Khepera"
+  description "A mini mobile robot by K-Team SA"
+  contactMaterial "khepera"
+  boundingObject Transform {
+    translation 0 0 0.012
+    rotation 0 0 1 -1.570796
+    children [
+      Cylinder {
+        height 0.02
+        radius 0.0285
+      }
+    ]
+  }
+  physics Physics {
+    centerOfMass [
+      0 0 0.005
+    ]
+  }
+  controller "updated_generalized_ga_controller"
+  supervisor TRUE
+  linearVelocity 0.03800991480468174 -3.710389987570216e-07 0.00015999968339536753
+  angularVelocity 8.027333673274746e-07 0.03783947114491774 -4.319892924141342e-06
+}
+DEF khepera Robot {
+  translation -0.13200576853690252 -0.04635565294183957 -1.1986870397506094e-06
+  rotation 0.028805518721280884 -0.5296495876020568 0.8477272889580524 0.13235980406392042
+  children [
+    Camera {
+      translation 0.11 1.19334e-15 0.03
+      rotation 9.58979e-09 -1 9.58976e-09 -1.5707953071795862
+      name "camera(1)"
+    }
+    Emitter {
+      name "emitter_processor"
+    }
+    Receiver {
+      name "receiver_processor"
+      channel 39
+    }
+    GPS {
+      name "gps(1)"
+    }
+    Group {
+      children [
+        DistanceSensor {
+          translation 0 0 0.02
+          rotation 0 0 1 -0.523
+          name "distance sensor right"
+        }
+        DistanceSensor {
+          translation 0 0 0.02
+          rotation 0 0 1 0.523
+          name "distance sensor left"
+        }
+        LightSensor {
+          translation -0.02 5.30722e-08 0
+          rotation 0 0 1 3.14159
+          lookupTable [
+            0 0 0
+            4 1024 0
+          ]
+        }
+        LED {
+          translation 0.04 0 0
+          recognitionColors [
+            0 0 0
+          ]
+        }
+        TouchSensor {
+          translation 0 0 0.04
+          boundingObject Box {
+            size 0.06 0.07 0.06
+          }
+        }
+        GPS {
+        }
+        DistanceSensor {
+          translation 0 0 0.02
+          rotation 0 1 0 0
+        }
+        InertialUnit {
+        }
+        Receiver {
+          channel 1
+        }
+        Emitter {
+          channel 2
+        }
+        DEF LIFT_HINGE_JOINT HingeJoint {
+          jointParameters HingeJointParameters {
+            position -1.399997981486654
+            axis 0 1 0
+            anchor -0.01 0 0.022
+          }
+          device [
+            RotationalMotor {
+              name "motor"
+            }
+          ]
+          endPoint Solid {
+            translation -0.01000027234364726 2.4378518648226725e-09 0.02199927550900605
+            rotation 0.7058148119138696 -0.7058148119138291 -0.06042269909590983 3.0208938871913653
+            children [
+              DEF RIGHT_GRIP SliderJoint {
+                jointParameters JointParameters {
+                  position 0.00010191643213642096
+                  axis 1 0 0
+                }
+                device [
+                  LinearMotor {
+                    name "right grip"
+                    maxVelocity 0.1
+                    minPosition -6.244776062687065e-14
+                    maxPosition 0.029
+                    maxForce 100
+                  }
+                ]
+                endPoint Solid {
+                  translation 0.00010191643251293477 0 -0.048
+                  rotation 0 1 0 1.5708
+                  children [
+                    Shape {
+                      appearance PBRAppearance {
+                        baseColor 0.8 0.8 0.8
+                        roughness 1
+                        metalness 0
+                      }
+                      geometry IndexedFaceSet {
+                        coord Coordinate {
+                          point [
+                            0 -0.004 0.004
+                            0.03 -0.004 0.002
+                            0.03 -0.004 0.0001
+                            0 -0.004 0.0001
+                            0 -0.004 0.004
+                            0 0.004 0.004
+                            0.03 0.004 0.002
+                            0.03 0.004 0.0001
+                            0 0.004 0.0001
+                            0 0.004 0.004
+                          ]
+                        }
+                        coordIndex [
+                          4, 3, 2, 1, 0, -1, 5, 6, 7, 8, 9, -1, 0, 1, 6, 5, -1, 1, 2, 7, 6, -1, 2, 3, 8, 7, -1, 3, 4, 9, 8, -1
+                        ]
+                      }
+                    }
+                    DistanceSensor {
+                      translation 0.015 0 0
+                      rotation 0 1 0 1.5708
+                      name "ds"
+                      lookupTable [
+                        0 0 0
+                        0.05 1000 0
+                      ]
+                      type "infra-red"
+                    }
+                  ]
+                  name "right grip"
+                  contactMaterial "gripper"
+                  boundingObject Transform {
+                    translation 0.015 0 0.003
+                    children [
+                      Box {
+                        size 0.028 0.007 0.005
+                      }
+                    ]
+                  }
+                  physics Physics {
+                    density 100
+                    centerOfMass [
+                      0.01 0 0
+                    ]
+                  }
+                  linearVelocity 0.00019560503891289185 -0.0036844554114597978 8.21200209546695e-05
+                  angularVelocity 0.003483896448581259 -0.002828751349731094 0.5510279434659036
+                }
+              }
+              DEF LEFT_GRIP SliderJoint {
+                jointParameters JointParameters {
+                  position -0.00011097184646414294
+                  axis -1 0 0
+                }
+                device [
+                  LinearMotor {
+                    name "left grip"
+                    maxVelocity 0.1
+                    minPosition -0.00016864583241887318
+                    maxPosition 0.029
+                    maxForce 100
+                  }
+                ]
+                endPoint Solid {
+                  translation 0.00011097184684065697 0 -0.048
+                  rotation 0 1 0 -1.5708
+                  children [
+                    Shape {
+                      appearance PBRAppearance {
+                        baseColor 0.8 0.8 0.8
+                        roughness 1
+                        metalness 0
+                      }
+                      geometry IndexedFaceSet {
+                        coord Coordinate {
+                          point [
+                            0 -0.004 0.0001
+                            -0.03 -0.004 0.0001
+                            -0.03 -0.004 0.002
+                            0 -0.004 0.004
+                            0 -0.004 0.0001
+                            0 0.004 0.0001
+                            -0.03 0.004 0.0001
+                            -0.03 0.004 0.002
+                            0 0.004 0.004
+                            0 0.004 0.0001
+                          ]
+                        }
+                        coordIndex [
+                          4, 3, 2, 1, 0, -1, 5, 6, 7, 8, 9, -1, 0, 1, 6, 5, -1, 1, 2, 7, 6, -1, 2, 3, 8, 7, -1, 3, 4, 9, 8, -1
+                        ]
+                      }
+                    }
+                  ]
+                  name "left grip"
+                  contactMaterial "gripper"
+                  boundingObject Transform {
+                    translation -0.015 0 0.003
+                    children [
+                      Box {
+                        size 0.028 0.007 0.005
+                      }
+                    ]
+                  }
+                  physics Physics {
+                    density 100
+                    centerOfMass [
+                      -0.01 0 0
+                    ]
+                  }
+                  linearVelocity 0.00018971342737955077 -0.003583940666752793 8.208506605916397e-05
+                  angularVelocity 0.0034838962100567335 -0.002828751355096667 0.5510279435442662
+                }
+              }
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.8 0.8 0.8
+                  roughness 1
+                  metalness 0
+                }
+                geometry IndexedFaceSet {
+                  coord Coordinate {
+                    point [
+                      0.035 -0.004 0.006
+                      0.035 -0.004 -0.048
+                      -0.035 -0.004 -0.048
+                      -0.035 -0.004 0.006
+                      -0.025 -0.004 0.006
+                      -0.025 -0.004 -0.03
+                      -0.016 -0.004 -0.04
+                      0.016 -0.004 -0.04
+                      0.025 -0.004 -0.03
+                      0.025 -0.004 0.006
+                      0.035 -0.004 0.006
+                      0.035 0.004 0.006
+                      0.035 0.004 -0.048
+                      -0.035 0.004 -0.048
+                      -0.035 0.004 0.006
+                      -0.025 0.004 0.006
+                      -0.025 0.004 -0.03
+                      -0.016 0.004 -0.04
+                      0.016 0.004 -0.04
+                      0.025 0.004 -0.03
+                      0.025 0.004 0.006
+                      0.035 0.004 0.006
+                    ]
+                  }
+                  coordIndex [
+                    10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, -1, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, -1, 0, 1, 12, 11, -1, 1, 2, 13, 12, -1, 2, 3, 14, 13, -1, 3, 4, 15, 14, -1, 4, 5, 16, 15, -1, 5, 6, 17, 16, -1, 6, 7, 18, 17, -1, 7, 8, 19, 18, -1, 8, 9, 20, 19, -1, 9, 10, 21, 20, -1
+                  ]
+                }
+              }
+            ]
+            boundingObject Transform {
+              translation 0 0 -0.021
+              children [
+                Box {
+                  size 0.068 0.008 0.052
+                }
+              ]
+            }
+            physics Physics {
+              density 100
+              centerOfMass [
+                0 0 -0.02
+              ]
+            }
+            linearVelocity 0.00041552085331984437 -0.005061960646035136 7.103625231071268e-05
+            angularVelocity 0.003483896228181307 -0.0028287513180242463 0.5510279435517231
+          }
+        }
+        DEF GRIPPER_BASE Transform {
+          translation -0.01 0 0.023
+          rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.8 0.8 0.8
+                roughness 1
+                metalness 0
+              }
+              geometry Box {
+                size 0.05 0.01 0.01
+              }
+            }
+          ]
+        }
+        Camera {
+          translation -0.01 0 0.035
+          rotation -0.999759341318827 -0.016153505514822745 -0.014843305067519018 -5.307179586466759e-06
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.70632 0.70632 0.70632
+                roughness 1
+                metalness 0
+              }
+              geometry DEF CAMERA Box {
+                size 0.03 0.03 0.02
+              }
+            }
+          ]
+          boundingObject DEF CAMERA Box {
+            size 0.03 0.03 0.02
+          }
+          physics Physics {
+            density -1
+            mass 0.02
+          }
+          fieldOfView 0.3
+          recognition Recognition {
+            maxRange 50
+          }
+        }
+      ]
+    }
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.0539951 0.505576 0.0897663
+        roughness 0.4
+        metalness 0
+      }
+      geometry IndexedFaceSet {
+        coord Coordinate {
+          point [
+            0.009 -0.0276 0.0025, 0.0194 -0.0215 0.0025, 0.0265 -0.0118 0.0025, 0.029 0 0.0025, 0.0265 0.0118 0.0025, 0.0194 0.0215 0.0025, 0.009 0.0276 0.0025, 0.009 0.0236 0.02, -0.009 0.0236 0.02, -0.009 -0.0236 0.02, 0.009 -0.0236 0.02, -0.009 0.0276 0.0025, -0.0194 0.0215 0.0025, -0.0265 0.0118 0.0025, -0.029 0 0.0025, -0.0265 -0.0118 0.0025, -0.0194 -0.0215 0.0025, -0.009 -0.0276 0.0025, 0.009 -0.0276 0.001, 0.0194 -0.0215 0.001, 0.0265 -0.0118 0.001, 0.029 0 0.001, 0.0265 0.0118 0.001, 0.0194 0.0215 0.001, 0.009 0.0276 0.001, 0.009 0.0236 0.001, -0.009 0.0236 0.001, -0.009 -0.0236 0.001, 0.009 -0.0236 0.001, -0.009 0.0276 0.001, -0.0194 0.0215 0.001, -0.0265 0.0118 0.001, -0.029 0 0.001, -0.0265 -0.0118 0.001, -0.0194 -0.0215 0.001, -0.009 -0.0276 0.001
+          ]
+        }
+        coordIndex [
+          0, 1, 2, 3, 4, 5, 6, -1, 11, 12, 13, 14, 15, 16, 17, -1, 24, 23, 22, 21, 20, 19, 18, -1, 35, 34, 33, 32, 31, 30, 29, -1, 1, 0, 18, 19, -1, 2, 1, 19, 20, -1, 3, 2, 20, 21, -1, 4, 3, 21, 22, -1, 5, 4, 22, 23, -1, 6, 5, 23, 24, -1, 0, 6, 24, 18, -1, 17, 16, 34, 35, -1, 16, 15, 33, 34, -1, 15, 14, 32, 33, -1, 14, 13, 31, 32, -1, 13, 12, 30, 31, -1, 12, 11, 29, 30, -1, 11, 17, 35, 29, -1, 7, 10, 28, 25, -1, 9, 8, 26, 27, -1, 8, 7, 25, 26, -1, 10, 9, 27, 28, -1, 28, 27, 26, 25, -1
+        ]
+        creaseAngle 0.5
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        position -30.960443666314458
+        axis 0 1 0
+        anchor 0 0 0.0075
+      }
+      device [
+        RotationalMotor {
+          name "left wheel motor"
+        }
+        PositionSensor {
+          name "left wheel sensor"
+          resolution 0.0314
+        }
+      ]
+      endPoint Solid {
+        translation 0 0.02599999999999997 0.0075
+        rotation 0.6889641471660447 -0.6889641696831768 0.22507060406133805 3.584356125120604
+        children [
+          DEF WHEEL Transform {
+            rotation 0.5773869352700204 -0.5773319352761864 0.5773319352761864 -2.094339
+            children [
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.778497 0.793743 0.8
+                  roughness 0.3
+                  metalness 0
+                }
+                geometry Cylinder {
+                  height 0.003
+                  radius 0.0075
+                }
+              }
+            ]
+          }
+        ]
+        name "left wheel"
+        boundingObject USE WHEEL
+        physics Physics {
+        }
+        linearVelocity -0.0142653036826794 -0.0016315518169459228 0.000182843166733255
+        angularVelocity 0.22202079489434717 -1.9908796291506565 0.551559498996235
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        position 249.43489011674532
+        axis 0 1 0
+        anchor 0 0 0.0075
+      }
+      device [
+        RotationalMotor {
+          name "right wheel motor"
+        }
+        PositionSensor {
+          name "right wheel sensor"
+          resolution 0.0314
+        }
+      ]
+      endPoint Solid {
+        translation 0 -0.02599999999999964 0.0075
+        rotation -0.05184524862912773 0.051845412821469705 -0.9973084394328343 1.573491631526233
+        children [
+          USE WHEEL
+        ]
+        name "right wheel"
+        boundingObject USE WHEEL
+        physics Physics {
+        }
+        linearVelocity 0.01421007991230001 0.0015834742123345886 1.8698230590885805e-05
+        angularVelocity -0.2150300308262103 1.985186757246361 0.5510534323260857
+      }
+    }
+    Transform {
+      translation 0 0 0.02
+      rotation 0 0 1 -1.570796
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.015 0.48 0.1796
+            roughness 0.4
+            metalness 0
+          }
+          geometry Cylinder {
+            height 0.0015
+            radius 0.028
+          }
+        }
+      ]
+    }
+    DEF LS0 LightSensor {
+      translation 0.00215188 0.0227638 0.0144
+      rotation 0.5102819257784789 0.6081179115480401 0.6081159115483309 2.19792
+      name "ls0"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS1 LightSensor {
+      translation 0.0139291 0.0114289 0.0144
+      rotation 0.6776599336428648 0.5199889490821645 0.5199889490821645 1.95044
+      name "ls1"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS2 LightSensor {
+      translation 0.0123588 -0.0225 0.0144
+      rotation -0.5773509358554485 0.5773489358556708 0.5773509358554485 -2.094395307179586
+      name "ls2"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS3 LightSensor {
+      translation -0.00166025 -0.00785883 0.0144
+      rotation -0.1861570160863869 0.6947460600350939 0.6947470600351803 -2.7734953071795863
+      name "ls3"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS4 LightSensor {
+      translation -0.0072844 0.00978409 0.0144
+      rotation 0.2810839910810645 0.6785979784677472 0.6785989784677153 2.59357
+      name "ls4"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS5 LightSensor {
+      translation -0.0103523 -0.0251114 0.0144
+      rotation -0.8053168807607647 0.4192049379304254 0.4192039379305735 -1.7856453071795864
+      name "ls5"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS6 LightSensor {
+      translation -0.0163407 -0.00641179 0.0144
+      rotation -0.09269154676500942 0.7040625956398727 0.7040625956398727 -2.9567353071795863
+      name "ls6"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LS7 LightSensor {
+      translation -0.016 0.00899998 0.0144
+      rotation 0 -0.7071067811865476 -0.7071067811865476 -3.14159
+      name "ls7"
+      lookupTable [
+        0 0 0
+        4 1024 0
+      ]
+    }
+    DEF LED0 LED {
+      translation 0.042 -0.003 0.021
+      rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
+      children [
+        PointLight {
+          attenuation 0 0 12.56
+          color 1 0 0
+          intensity 0.25
+          radius 10
+        }
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.501961 0.501961 0.501961
+            metalness 0
+            emissiveIntensity 7
+          }
+          geometry Box {
+            size 0.002 0.002 0.002
+          }
+        }
+      ]
+      name "led0"
+    }
+    DEF LED1 LED {
+      translation 0.024 -0.01 0.021
+      rotation 0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.094395
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.501961 0.501961 0.501961
+            metalness 0
+            emissiveColor 1 0 0
+          }
+          geometry Box {
+            size 0.002 0.002 0.002
+          }
+        }
+      ]
+      name "led1"
+    }
+    DEF RS232_OUT Emitter {
+      name "rs232_out"
+      type "serial"
+      range 1000
+      baudRate 57600
+    }
+    DEF RS232_IN Receiver {
+      name "rs232_in"
+      type "serial"
+      baudRate 57600
+    }
+  ]
+  name "k0(4)"
+  model "Khepera"
+  description "A mini mobile robot by K-Team SA"
+  contactMaterial "khepera"
+  boundingObject Transform {
+    translation 0 0 0.012
+    rotation 0 0 1 -1.570796
+    children [
+      Cylinder {
+        height 0.02
+        radius 0.0285
+      }
+    ]
+  }
+  physics Physics {
+    centerOfMass [
+      0 0 0.005
+    ]
+  }
+  controller "updated_generalized_ga_controller"
+  supervisor TRUE
+  linearVelocity 0.0001500309051348665 -0.0018107835948565688 9.023434903823903e-05
+  angularVelocity 0.0034859693657111586 -0.002847457928425619 0.5510279454210403
+}
+DEF r11 Solid {
+  translation 0.09000060330295688 0.61 0.05998964819129934
+  rotation 5.656176834283576e-14 1 4.338412196502857e-12 4.702768852247302e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(9)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+  linearVelocity -1.133402923792454e-08 1.4938629212073953e-17 0.00021868900725536563
+  angularVelocity -2.3936385013383726e-16 -2.0755045604194077e-07 1.8077503654680177e-16
+}
+DEF r11 Solid {
+  translation -0.7599993966782909 0.56 0.05999364431684839
+  rotation -1.2441889838114183e-12 1 -1.78505559029944e-14 4.702768845190833e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(1)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+  linearVelocity -1.1334866776835456e-08 4.549640101870085e-17 0.0002185082908724925
+  angularVelocity -7.446895871454162e-16 -2.0755028056106664e-07 8.297283645406621e-17
+}
+DEF r11 Solid {
+  translation -0.009999396694836935 0.62 0.059990118323716875
+  rotation -6.220887666663225e-13 1 3.6985224393713205e-12 4.702768851390645e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(2)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+  linearVelocity -1.1334127823949736e-08 1.7694887397917638e-17 0.00021866774650444357
+  angularVelocity -3.1915284377362486e-16 -2.075504362677604e-07 -2.6310948191985617e-18
+}
+DEF r11 Solid {
+  translation 0.570000603292368 0.58 0.05998739155569518
+  rotation 9.61440322119889e-13 1 1.327157945844676e-11 4.702768856221553e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(3)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+  linearVelocity -1.1333556298184921e-08 1.0132840214259447e-16 0.00021879105885943233
+  angularVelocity -1.7819362127879384e-15 -2.075505554048515e-07 1.0165127922938981e-16
+}
+DEF r11 Solid {
+  translation -0.22999939668998323 0.74 0.05999115261503545
+  rotation -2.6015083559299206e-12 1 -1.3634893644692484e-11 4.702768849597797e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(4)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+  linearVelocity -1.1334344527010387e-08 2.2983267853766928e-17 0.00021862097285231516
+  angularVelocity -3.9894067359471846e-16 -2.0755038976454362e-07 8.569771762619552e-17
+}
+DEF r11 Solid {
+  translation 0.7300006032888365 0.47 0.05998663934382712
+  rotation 2.884267754161756e-12 1 6.583734545809811e-12 4.7027688575290205e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(5)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+  linearVelocity -1.133339864126476e-08 2.269315232684013e-18 0.00021882507606091063
+  angularVelocity 1.498179391591083e-22 -2.0755058843716902e-07 3.4980332141814525e-17
+}
+DEF r11 Solid {
+  translation 0.7400006032886159 0.75 0.05998659233058538
+  rotation -2.262160008822534e-12 1 1.4997956198983042e-12 4.70276885760774e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(6)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+  linearVelocity -1.1333388843233352e-08 -1.2508411972746e-17 0.00021882720213611438
+  angularVelocity 1.7287432361871362e-16 -2.075505914292307e-07 -2.97277201969107e-17
+}
+DEF r11 Solid {
+  translation -0.3499993966873359 0.32 0.05999171677393649
+  rotation 1.6968234853619607e-13 1 1.2229555272488132e-11 4.702768848590878e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(7)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+  linearVelocity -1.1334462825959627e-08 -2.5700851918927995e-17 0.0002185954599513777
+  angularVelocity 4.122389466945504e-16 -2.075503656817792e-07 -3.003190888224341e-17
+}
+DEF r11 Solid {
+  translation -0.8699993966758633 0.83 0.05999416146250767
+  rotation -7.917509013859821e-13 1 3.3451628575856435e-12 4.702768844273536e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(8)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+  linearVelocity -1.1334975137166342e-08 -5.0538401098809306e-17 0.0002184849040465159
+  angularVelocity 1.0505444315627925e-15 -2.0755025744908338e-07 -7.209235411567383e-17
+}
+DEF r11 Solid {
+  translation -0.2799993966888802 0.64 0.05999138768124422
+  rotation -3.3366356819530853e-12 1 3.396401385221567e-11 4.702768849171468e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(10)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+  linearVelocity -1.133439381645094e-08 2.6565642340323895e-17 0.000218610342476995
+  angularVelocity -4.920268477106785e-16 -2.0755037959153835e-07 1.0173770248879287e-16
+}
+DEF r11 Solid {
+  translation 0.6200006032912642 0.31 0.0599871564894864
+  rotation -1.640085336347713e-12 1 -1.076070882488363e-11 4.702768856614909e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(11)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+  linearVelocity -1.1333507048244666e-08 1.3363661061558506e-17 0.00021880168923518894
+  angularVelocity -2.3936461432605435e-16 -2.075505661496758e-07 2.347135301023333e-18
+}
+DEF r11 Solid {
+  translation -0.04999939669395446 0.33 0.05999030637668389
+  rotation 1.2441845296089099e-12 1 -3.374565861392703e-12 4.70276885105899e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(12)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+  linearVelocity -1.1334167183540937e-08 5.928222833814336e-17 0.00021865924220381121
+  angularVelocity -1.0904385811437157e-15 -2.075504269990313e-07 6.146459536425278e-17
+}
+DEF r11 Solid {
+  translation 0.5600006032925874 0.43 0.05998743856893693
+  rotation -3.0539112314518676e-12 1 4.892807143977952e-12 4.7027688561148956e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(13)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+  linearVelocity -1.1333566187931565e-08 -3.272482697798804e-17 0.00021878893278434153
+  angularVelocity 7.047946498914712e-16 -2.075505540218772e-07 -2.7751092249594745e-16
+}
+DEF r11 Solid {
+  translation 0.8500006032861898 0.56 0.05998607518492608
+  rotation -4.524083688846506e-13 1 1.4732900118737212e-11 4.702768858517326e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(14)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+  linearVelocity -1.1333280509016963e-08 8.636323171264553e-19 0.00021885058896211257
+  angularVelocity -9.308645700409556e-17 -2.0755061492686014e-07 -5.0010329329402614e-17
+}
+DEF r11 Solid {
+  translation 0.1100006033025156 0.76 0.059989554164815835
+  rotation -2.262163998097256e-12 1 -1.096177239787083e-12 4.702768852404753e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(15)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+  linearVelocity -1.1334009543991631e-08 2.802956720392399e-17 0.00021869325940540468
+  angularVelocity -4.122395219048664e-16 -2.075504602840085e-07 -1.0427143368917156e-16
+}
+DEF r11 Solid {
+  translation -0.0299993966943957 0.65 0.059990212350200384
+  rotation -5.654705206272729e-14 1 4.616525507212861e-12 4.702768851242773e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(16)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+  linearVelocity -1.1334147519762278e-08 -1.0261866365414408e-17 0.0002186634943542797
+  angularVelocity 2.526623182453334e-16 -2.075504319990744e-07 -7.957680964611936e-17
+}
+DEF r11 Solid {
+  translation 6.033049424370019e-07 0.66 0.05999007131047512
+  rotation -1.1310682438096424e-13 1 8.909705811996466e-13 4.702768851482931e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(17)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+  linearVelocity -1.1334117922718304e-08 2.0254222400920442e-17 0.00021866987257955416
+  angularVelocity -2.6596068549961397e-16 -2.0755043739809717e-07 1.92729093001525e-18
+}
+DEF r11 Solid {
+  translation 0.0800006033031775 0.45 0.0599896952045411
+  rotation 1.5835211520656497e-12 1 4.826467691054041e-12 4.7027688521489e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(18)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+  linearVelocity -1.1334039078545723e-08 -1.0252211777179441e-16 0.0002186868811799614
+  angularVelocity 1.7553401432986363e-15 -2.075504537413703e-07 -1.0167787728712258e-16
+}
+DEF r11 Solid {
+  translation -0.8999993966752011 0.85 0.059994302502232935
+  rotation 2.2055846866834332e-12 1 -1.4920693585073537e-11 4.702768844032313e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(19)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+  linearVelocity -1.1335004647821182e-08 3.692881901173151e-18 0.00021847852582124465
+  angularVelocity -1.8617228478749898e-16 -2.0755025030802584e-07 4.6893329636891763e-17
+}
+DEF r11 Solid {
+  translation -0.6099993966816003 0.69 0.05999293911822208
+  rotation 7.917540901719836e-13 1 -1.30671200029385e-12 4.702768846432869e-06
+  scale 2 2 2
+  children [
+    DEF STICK_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.155604 0.246125
+        roughness 0.783569247
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.06
+        radius 0.008
+      }
+    }
+  ]
+  name "red stick(20)"
+  model "red-rod-1"
+  contactMaterial "stick"
+  boundingObject Box {
+    size 0.013 0.013 0.06
+  }
+  physics Physics {
+    density 100
+  }
+  recognitionColors [
+    0.8 0 0
+  ]
+  linearVelocity -1.1334718959659014e-08 2.752985380328015e-17 0.00021854018199885908
+  angularVelocity -5.851135575739726e-16 -2.075503112928292e-07 -7.311619567471115e-18
+}
+DEF supervisor TinkerbotsBase {
+  hidden linearVelocity_0 1.8094809059671235e-05 -3.646160451357334e-07 0.00026731116668459706
+  hidden angularVelocity_0 1.7778920323332298e-05 0.0008822172525426272 -8.346549154011683e-11
+  translation -0.21049595157013049 1.996639941589098 0.02048214248453874
+  rotation -1.527835508750672e-05 8.842142714309945e-07 0.999999999882895 -3.072458400849508
+  name "Tinkerbots(1)"
+  controller "ga_individual_supervisor"
+  supervisor TRUE
+  extensionSlot [
+    Receiver {
+      name "receiver_processor"
+    }
+    Receiver {
+      channel 5
+    }
+    Emitter {
+      channel -1
+    }
+  ]
+}
+DEF supervisor TinkerbotsBase {
+  hidden linearVelocity_0 3.310064992958087e-06 1.196032422135623e-07 0.00027012959160838443
+  hidden angularVelocity_0 -5.831933455786212e-06 0.00016130267550206663 2.7378922340824014e-11
+  translation -0.06824361878265438 1.998808198625488 0.020481362223636057
+  rotation -8.818256762445239e-07 -8.452830221071538e-08 0.9999999999996076 -3.0685406052041744
+  name "Tinkerbots(2)"
+  controller "ga_individual_supervisor"
+  supervisor TRUE
+  extensionSlot [
+    Receiver {
+      name "receiver_processor"
+      channel 10
+    }
+    Receiver {
+      channel 5
+    }
+    Emitter {
+      channel 9
+    }
+  ]
+}
+DEF supervisor TinkerbotsBase {
+  hidden linearVelocity_0 2.0679269328739787e-07 -1.1598864727718525e-08 0.00027155228917754963
+  hidden angularVelocity_0 5.65568340600838e-07 9.984733409744936e-06 -2.655317157204738e-12
+  translation -0.001548893861316001 1.999999539657107 0.020480992358196334
+  rotation 2.1481328041430103e-06 -7.083114550668369e-08 0.9999999999976903 -3.06514026310504
+  name "Tinkerbots(3)"
+  controller "ga_individual_supervisor"
+  supervisor TRUE
+  extensionSlot [
+    Receiver {
+      name "receiver_processor"
+      channel 20
+    }
+    Receiver {
+      channel 5
+    }
+    Emitter {
+      channel 19
+    }
+  ]
+}
+DEF supervisor TinkerbotsBase {
+  hidden linearVelocity_0 -2.9354720025753374e-06 -1.5609218833882857e-07 0.0002700080058267527
+  hidden angularVelocity_0 7.611158680705092e-06 -0.00014323382487341294 -3.573172687550333e-11
+  translation 0.06162058482586057 2.001206520512705 0.02048075765624182
+  rotation 5.216970811437909e-06 -5.352410232607273e-08 0.9999999999863902 -3.0626876635417957
+  name "Tinkerbots(4)"
+  controller "ga_individual_supervisor"
+  supervisor TRUE
+  extensionSlot [
+    Receiver {
+      name "receiver_processor"
+      channel 30
+    }
+    Receiver {
+      channel 5
+    }
+    Emitter {
+      channel 29
+    }
+  ]
+}
+DEF supervisor TinkerbotsBase {
+  hidden linearVelocity_0 -1.7230257804923845e-05 1.754455449947978e-07 0.0002668926291913094
+  hidden angularVelocity_0 -8.5548412001352e-06 -0.0008402563539084004 4.016199500169369e-11
+  translation 0.2015240059074997 2.003398379815188 0.020480225686632304
+  rotation 1.9139520395675886e-05 -9.386897004148818e-07 0.9999999998163989 -3.0614475988175744
+  name "Tinkerbots(5)"
+  controller "ga_individual_supervisor"
+  supervisor TRUE
+  extensionSlot [
+    Receiver {
+      name "receiver_processor"
+      channel 40
+    }
+    Receiver {
+      channel 5
+    }
+    Emitter {
+      channel 39
+    }
+  ]
+}

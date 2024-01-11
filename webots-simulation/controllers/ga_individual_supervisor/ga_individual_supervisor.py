@@ -80,7 +80,7 @@ def find_nearest_robot_genotype(r_index):
     
     for i in range(len(population)):
         if (i != r_index): 
-            other_pos = [population[i].getPosition()[0], population[i].getPosition()[0]]
+            other_pos = [population[i].getPosition()[0], population[i].getPosition()[1]]
             dis = math.dist(curr_pos, other_pos)
             if closest_neigh == " ":
                 closest_neigh = str(population[i].getId())
