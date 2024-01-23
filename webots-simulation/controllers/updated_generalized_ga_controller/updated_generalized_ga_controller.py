@@ -17,6 +17,8 @@ import random
 import sys 
 sys.path.append('../../')
 import utils
+import utils.bayes as bayes 
+import utils.globals as globals
 
 # create the Robot instance.
 robot = Robot()
@@ -88,9 +90,9 @@ repopulate = False
 
 next_child = ""
 num_better = 0 
-sim_type = "random" 
-communication = False 
-using_high_dens = True 
+sim_type = globals.sim_type #"random" 
+communication = globals.communication # False 
+using_high_dens = globals.using_high_dens # True 
 
 gens_elapsed = 0 
 
@@ -162,7 +164,11 @@ found_something = False
 agent_observation = {'num_interactions': 0, 'num_objects_observed': 0, 'num_collisions':0}
 time_into_generation = 0 
 using_artificial_field = False
+using_bayes = globals.using_bayes
 remove_orientations = []
+
+if using_bayes:
+    multi_arm = bayes.NArmedBanditDrift(len(observations_per_strategy))
 
 def identify_terrain(r,g,b):
     global terrains
@@ -295,22 +301,32 @@ def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False
     global curr_sim_size
     global current_strat_index 
     global weights 
-    
+    global observations_per_strategy 
     
     # want to update weights based off effectiveness of current strategy 
     if update: 
-        new_weights = create_new_weights(t_block, t_robot, original_weights)
-        weights = new_weights 
-        strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], new_weights)[0]
-        # print('current strat', strat)
-        current_strat_index = ['straight','alternating-left','alternating-right', 'true random'].index(strat) 
-        # strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(original_weights[0]) + ',' + str(original_weights[1]) + ',' + str(original_weights[2]) + ',' + str(original_weights[3]) + ','+ str(t_block) + ',' + str(curr_sim_size) + ',' + str(calc_robot_fitness())+ ',' + str(curr_sim_size) + ',ga' +'\n')
-        # strategy_f.close()
-        # strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'a')
+        if not using_bayes: 
+            new_weights = create_new_weights(t_block, t_robot, original_weights)
+            weights = new_weights 
+            strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], new_weights)[0]
+            # print('current strat', strat)
+            current_strat_index = ['straight','alternating-left','alternating-right', 'true random'].index(strat) 
+            # strategy_f.write(str(given_id) + ','+ str(robot.getTime()) + ',' + str(original_weights[0]) + ',' + str(original_weights[1]) + ',' + str(original_weights[2]) + ',' + str(original_weights[3]) + ','+ str(t_block) + ',' + str(curr_sim_size) + ',' + str(calc_robot_fitness())+ ',' + str(curr_sim_size) + ',ga' +'\n')
+            # strategy_f.close()
+            # strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'a')
+        else: # bayes weight updating 
+            multi_arm.advance(current_strat_index, observations_per_strategy[current_strat_index]) # action, reward_accum
+            current_strat_index = multi_arm.sample_action()
+            strat = ['straight','alternating-left','alternating-right', 'true random'][current_strat_index]
+
 
     if not update: 
-        strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], original_weights)[0]
-        current_strat_index = ['straight','alternating-left','alternating-right', 'true random'].index(strat)
+        if not using_bayes: 
+            strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], original_weights)[0]
+            current_strat_index = ['straight','alternating-left','alternating-right', 'true random'].index(strat)
+        else: 
+            current_strat_index = multi_arm.sample_action()
+            strat = ['straight','alternating-left','alternating-right', 'true random'][current_strat_index]
     
     if strat == 'straight':
         return [curr_dir, curr_dir, curr_dir, curr_dir]
@@ -320,7 +336,7 @@ def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False
         return [round(pi/2,2), round(pi,2), round(-pi/2,2), 0]
     else: #  correlated random
         return [correlated_random(curr_dir), correlated_random(curr_dir), correlated_random(curr_dir), correlated_random(curr_dir)]
-    
+  
     
 def create_new_weights(t_block, t_robot, original_weights): 
     # print('original weights --', original_weights)

@@ -7,6 +7,7 @@ import random
 import sys 
 sys.path.append('../../')
 import utils.environment as env_mod 
+import utils.globals as globals
 
 from math import pi
 
@@ -29,10 +30,10 @@ curr_trial = 0
 robot_population_sizes = [5, 10, 15]
 gene_list = ['control speed 10', 'energy cost 5', 'food energy 30', 'observations thres 5']
 curr_size = robot_population_sizes[0]
-env_type = "single source" # "power law"
-sim_type = "random"
-communication = True
-high_dense = True
+env_type = globals.env_type # "single source" # "power law"
+sim_type = globals.sim_type #"random"
+communication = globals.communication # True
+high_dense = globals.using_high_dens #True
 
 # collected counts csv generation 
 overall_f = open(f'../../graph-generation/collection-data/overall-df-{sim_type}-{curr_size}-comm_{communication}-dense_{high_dense}.csv', 'w')
