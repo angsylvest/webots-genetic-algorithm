@@ -34,6 +34,7 @@ env_type = globals.env_type # "single source" # "power law"
 sim_type = globals.sim_type #"random"
 communication = globals.communication # True
 high_dense = globals.using_high_dens #True
+using_bayes = globals.using_bayes
 
 # collected counts csv generation 
 overall_f = open(f'../../graph-generation/collection-data/overall-df-{sim_type}-{curr_size}-comm_{communication}-dense_{high_dense}.csv', 'w')

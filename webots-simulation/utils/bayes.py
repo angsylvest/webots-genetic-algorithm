@@ -58,6 +58,11 @@ class NArmedBanditDrift(NArmedBandit):
 
         self.prior_success[action] += reward
         self.prior_failure[action] += 1 - reward
+        
+        # Ensure that prior_success and prior_failure are always greater than 0.0
+        self.prior_success = [max(s, 0.001) for s in self.prior_success]
+        self.prior_failure = [max(f, 0.001) for f in self.prior_failure]
+
 
         # resample posterior probabilities 
         self.probs = [random.betavariate(self.prior_success[a], self.prior_failure[a]) for a in range(self.n_arm)]

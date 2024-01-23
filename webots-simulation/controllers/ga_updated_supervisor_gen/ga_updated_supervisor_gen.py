@@ -7,6 +7,9 @@ import random
 import sys 
 sys.path.append('../../')
 import utils.environment as env_mod 
+import utils.globals as globals
+
+from math import pi
 
 """
 Main supervisor base 
@@ -16,23 +19,22 @@ Angel Sylvester 2022
 
 columns = 'agent id' + ',time step' + ',fitness' + ',xpos'+ ',ypos' + ',num col' + ',genotype' + ',potential time'
 
+# global collected_count 
+collected_count = []
+
 # genetic algorithm-specific parameters 
 num_generations = 10
 simulation_time = 30
-trials = 50
+trials = 25
 curr_trial = 0 
 robot_population_sizes = [5, 10, 15]
 gene_list = ['control speed 10', 'energy cost 5', 'food energy 30', 'observations thres 5']
 curr_size = robot_population_sizes[0]
-env_type = "random" # "power law"
-
-# global collected_count 
-collected_count = []
-sim_type = "urban" 
-communication = False
-high_dense = True
-
-from math import pi
+env_type = globals.env_type # "single source" # "power law"
+sim_type = globals.sim_type #"random"
+communication = globals.communication # True
+high_dense = globals.using_high_dens #True
+using_bayes = globals.using_bayes
 
 # collected counts csv generation 
 overall_f = open(f'../../graph-generation/collection-data/overall-df-{sim_type}-{curr_size}-comm_{communication}-dense_{high_dense}.csv', 'w')
@@ -49,6 +51,7 @@ strategy_f.close()
 gene_df = open(f"../../graph-generation/collision-data/ga-gene-info-{sim_type}-{curr_size}-comm_{communication}-dense_{high_dense}.csv", 'w')
 gene_df.write('agent id'+ ',time step' + ',trial' + ',size' + ',genotype' + '\n')
 gene_df.close()
+
 
 # statistics collected 
 population = []
@@ -88,6 +91,7 @@ emitter_individual.setChannel(5)
 assessing = False 
 repopulate = False # keep False for now 
 phase_one_times = [620]
+central = True
 
 # generate envs 
 curr_env = env_mod.Environment(env_type=env_type, seed = seed_val)
@@ -126,7 +130,7 @@ def generate_robot_central(num_robots):
     for i in range(num_robots):
         rootNode = robot.getRoot()
         rootChildrenField = rootNode.getField('children')
-        rootChildrenField.importMFNode(-1, '../las_supervisor/robots/robot-ga-update-gen.wbo') 
+        rootChildrenField.importMFNode(-1, '../las_supervisor/robots/robot-ga-update.wbo') 
         rec_node = rootChildrenField.getMFNode(-1)
         
     
@@ -145,6 +149,72 @@ def generate_robot_central(num_robots):
         collected_count.append(0)
         population.append(rec_node)
         id_msg += " " + str(rec_node.getId()) 
+
+# set up environments 
+def generate_robot_edge(num_robots, right = False):
+    global fitness_scores 
+    global collected_count 
+    global population
+    global columns 
+    global r_pos_to_generate
+    global pairs 
+    global overall_fitness_scores
+    global prev_msg 
+    global id_msg
+    
+    initialize_genotypes(num_robots)
+    curr_msg = str("size-" + str(num_robots))
+    if curr_msg != prev_msg: 
+        emitter.send(str("size-" + str(num_robots)).encode('utf-8'))
+        emitter_individual.send(str("size-" + str(num_robots)).encode('utf-8'))
+        prev_msg = curr_msg
+    
+    if len(population) != 0: 
+    
+        for r in population: 
+            r.remove()
+             
+    population = []
+    fitness_scores = []
+    overall_fitness_scores = []
+    collected_count = []
+    pairs = []
+    id_msg = "ids"
+        
+    for i in range(num_robots):
+        rootNode = robot.getRoot()
+        rootChildrenField = rootNode.getField('children')
+        rootChildrenField.importMFNode(-1, '../las_supervisor/robots/robot-ga-update.wbo') 
+        rec_node = rootChildrenField.getMFNode(-1)
+        
+        if right: 
+            print('right')
+            t_field = rec_node.getField('translation')
+            pose = [round(random.uniform(-0.5, -0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]
+            while pose in r_pos_to_generate: # remove any duplicates
+                pose = [round(random.uniform(-0.5, -0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]
+            r_pos_to_generate.append(pose)
+            t_field.setSFVec3f(pose)
+                # print(r_field)
+
+        else: 
+            print('left')
+            t_field = rec_node.getField('translation')
+            pose = [round(random.uniform(0.5, 0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]
+            while pose in r_pos_to_generate: # remove any duplicates
+                pose = [round(random.uniform(0.5, 0.9),2), round(random.uniform(-0.9, 0.9),2), 0.02]
+            r_pos_to_generate.append(pose)
+            t_field.setSFVec3f(pose)
+                # print(r_field)            
+        
+        # sets up metrics 
+        fitness_scores.append("!")
+        overall_fitness_scores.append('!')
+        pairs.append("!")
+        collected_count.append(0)
+        population.append(rec_node)
+        id_msg += " " + str(rec_node.getId()) 
+
 
 def regenerate_blocks(seed = None):
     global block_list
@@ -210,7 +280,6 @@ def calc_normal(curr_angle):
         
     elif (curr_angle == round(pi,2)): # handle edge case that seems to only happen w/exactly 3.14 (never broke before because never quite at 3.14????)
         return round(-1*round(pi/2, 2),2)
-        
 
 def initialize_genotypes(size):
     global initial_genotypes
@@ -269,7 +338,7 @@ def message_listener(time_step):
 
     if receiver.getQueueLength()>0 and (robot.getTime() - start < simulation_time):
         message = receiver.getData().decode('utf-8')
-        # print('supervisor msgs --', message)
+        # print('supervisor msgs --', message) 
         
         if message[0] == "$": # handles deletion of objects when grabbed
             obj_node = robot.getFromId(int(message.split("-")[1]))
@@ -331,7 +400,6 @@ def message_listener(time_step):
 
             receiver.nextPacket()
             
-            
         else: 
             receiver.nextPacket() 
             
@@ -372,6 +440,7 @@ def run_seconds(t,waiting=False):
             msg = 'return_fitness'
             # if prev_msg != msg: 
             message_listener(robot.getTime()) # will clear out msg until next gen 
+            print('requesting fitness')
             emitter.send('return_fitness'.encode('utf-8'))
             prev_msg = msg 
             # print('requesting fitness')
@@ -480,7 +549,11 @@ def run_optimization():
         curr_size = size  
         initialize_genotypes(size)
         r_pos_to_generate = []
-        generate_robot_central(size)
+
+        if central: 
+            generate_robot_central(size)
+        else: 
+            generate_robot_edge(size) # set True to switch
         
         curr_trial = 0
         if assessing and curr_trial % 2 == 0:
