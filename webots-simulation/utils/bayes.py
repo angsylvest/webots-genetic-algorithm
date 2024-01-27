@@ -11,6 +11,9 @@ https://github.com/iosband/ts_tutorial/blob/master/ts_tutorial_intro.ipynb
 import random
 import math
 
+# ensure that we can access utils package to streamline tasks 
+import globals as globals
+
 class NArmedBandit:
 
     def __init__(self, probs):
@@ -45,6 +48,9 @@ class NArmedBanditDrift(NArmedBandit):
         self.gamma = gamma 
         self.probs = [random.betavariate(a0, b0) for _ in range(n_arm)]
 
+    def decay_gamma(self, decay_rate = 0.95):
+        self.gamma = max(self.gamma * decay_rate, 0.001)  # Ensure gamma doesn't become too small
+
     def set_prior(self, prior_success, prior_failure):
         self.prior_success = prior_success
         self.prior_failure = prior_failure
@@ -53,6 +59,10 @@ class NArmedBanditDrift(NArmedBandit):
         return max(self.probs)
     
     def advance(self, action, reward):
+
+        if globals.decay: 
+            self.decay_gamma()
+
         self.prior_success = [s * (1 - self.gamma) + self.a0 * self.gamma for s in self.prior_success]
         self.prior_failure = [f * (1 - self.gamma) + self.b0 * self.gamma for f in self.prior_failure]
 
