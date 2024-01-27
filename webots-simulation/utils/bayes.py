@@ -12,7 +12,7 @@ import random
 import math
 
 # ensure that we can access utils package to streamline tasks 
-import globals as globals
+import utils.globals as globals
 
 class NArmedBandit:
 
