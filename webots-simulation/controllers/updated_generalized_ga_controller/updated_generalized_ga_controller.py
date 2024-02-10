@@ -162,6 +162,7 @@ trial_num = -1
 found_something = False 
 
 agent_observation = {'num_interactions': 0, 'num_objects_observed': 0, 'num_collisions':0}
+strat_obs = {0: {"collisions": 0, "collected": 0}, 1: {"collisions": 0, "collected": 0}, 2: {"collisions": 0, "collected": 0}, 3:{"collisions": 0, "collected": 0}}
 time_into_generation = 0 
 using_artificial_field = False
 using_bayes = globals.using_bayes
@@ -184,6 +185,28 @@ def identify_terrain(r,g,b):
         
     else: 
         current_terrain = terrains[0]
+
+
+def reward(curr_strat):
+    # based around reward shaping 
+    global t_elapsed_block_total
+    global n_observations_block
+    global fitness 
+    global obj_weight 
+    global obstacle_weight
+    global strat_obs
+
+    # priorities in foraging task 
+    # 1. num collected using strat 
+    # 2. num collisions  
+
+    if 1/strat_obs[curr_strat]["collisions"] != 0: 
+        obs_penalty = (1/strat_obs[curr_strat]["collisions"]) * 1.5
+    else: 
+        obs_penalty = 1.5 # reward highly lack of collisions
+    goal_reward = strat_obs[curr_strat]["collected"] * 1.5
+
+    return obs_penalty + goal_reward
 
 
 # calculates angle normal to current orientation 
@@ -315,7 +338,8 @@ def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False
             # strategy_f.close()
             # strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'a')
         else: # bayes weight updating 
-            multi_arm.advance(current_strat_index, observations_per_strategy[current_strat_index]) # action, reward_accum
+            re = reward(current_strat_index)
+            multi_arm.advance(current_strat_index, re) # action, reward_accum
             current_strat_index = multi_arm.sample_action()
             strat = ['straight','alternating-left','alternating-right', 'true random'][current_strat_index]
 
@@ -455,6 +479,7 @@ def interpret(timestep):
     
     global curr_index 
     global remove_orientations
+    global strat_obs
 
     
     if receiver.getQueueLength()>0:
@@ -519,6 +544,7 @@ def interpret(timestep):
             # resets relevant statistics 
             trial_num = int(message[5:])
             print('end of trial, moving on to next trial', trial_num)
+            strat_obs = {0: {"collisions": 0, "collected": 0}, 1: {"collisions": 0, "collected": 0}, 2: {"collisions": 0, "collected": 0}, 3:{"collisions": 0, "collected": 0}}
             gens_elapsed = 0
             fitness = 0 # number of obstacles 
             best_prev_genotype = '!'
@@ -587,6 +613,7 @@ def interpret(timestep):
 
             n_observations_block += 1 
             gens_elapsed = 0
+            strat_obs[current_strat_index]["collected"] += 1
             
             # observations_per_strategy[current_strat_index] += 1
             energy_collected_gen += 1
@@ -798,6 +825,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             
         if min(dist_vals) <= 330 and not reversing: # wall detection 
             fitness += 1 
+            strat_obs[current_strat_index]["collisions"] += 1
             remove_orientations.append(chosen_direction)
             reversing = True 
             move_backwards()
@@ -808,6 +836,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
         if robot.getTime() - start_count >= 1: 
             if collision.getValue() == 1:
                 fitness += 1
+                strat_obs[current_strat_index]["collisions"] += 1
         
             # communication threshold  
             if not holding_something and not reversing: # max value for light 
