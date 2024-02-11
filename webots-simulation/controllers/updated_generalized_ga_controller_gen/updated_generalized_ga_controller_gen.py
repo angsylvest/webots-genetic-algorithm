@@ -200,7 +200,7 @@ def reward(curr_strat):
     # 1. num collected using strat 
     # 2. num collisions  
 
-    if 1/strat_obs[curr_strat]["collisions"] != 0: 
+    if strat_obs[curr_strat]["collisions"] != 0: 
         obs_penalty = (1/strat_obs[curr_strat]["collisions"]) * 1.5
     else: 
         obs_penalty = 1.5 # reward highly lack of collisions
