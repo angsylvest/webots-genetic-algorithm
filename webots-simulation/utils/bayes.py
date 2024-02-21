@@ -14,6 +14,8 @@ import math
 # ensure that we can access utils package to streamline tasks 
 import utils.globals as globals
 
+use_thompson = globals.thompson_sampling
+
 class NArmedBandit:
 
     def __init__(self, probs):
@@ -78,4 +80,11 @@ class NArmedBanditDrift(NArmedBandit):
         self.probs = [random.betavariate(self.prior_success[a], self.prior_failure[a]) for a in range(self.n_arm)]
 
     def sample_action(self):
-        return random.choices(range(self.n_arm), weights=self.probs)[0]
+        if use_thompson:
+            # Use Thompson Sampling
+            sampled_theta = [random.betavariate(self.prior_success[a], self.prior_failure[a]) for a in range(self.n_arm)]
+            return max(range(self.n_arm), key=lambda a: sampled_theta[a])
+        
+        else: 
+            # use categorical sampling 
+            return random.choices(range(self.n_arm), weights=self.probs)[0]
