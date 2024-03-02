@@ -1,5 +1,7 @@
 
 # would do bayesian updating approach to identify proper rule sets on the fly 
+from bayes import NArmedBanditDrift
+
 
 class CompleteMap():
     def __init__(self, obstacle_locations, dims, obstacle_size, agent_size, x_bounds, y_bounds):
@@ -10,6 +12,7 @@ class CompleteMap():
         self.agent_size = agent_size
         self.x_bounds = x_bounds
         self.y_bounds = y_bounds
+
 
     def update_agent_positions(self, agent_positions):
         self.agent_positions = agent_positions
@@ -37,6 +40,9 @@ class LocalMap():
         self.y_bounds = y_bounds
         self.central_loc = central_loc
 
+        num_envs = 4
+        self.bayes = [NArmedBanditDrift for n in range(num_envs)]
+
 
     def calc_total_area(self):
         min_x = max(self.x_bounds[0], self.central_loc[0] - self.local_dims/2)
@@ -47,16 +53,6 @@ class LocalMap():
 
         return total_area
     
-    # def calculate_area_within_bounds(self, center, dims):
-    #     # Calculate the bounds of the rectangle within the local map
-    #     min_x = max(self.x_bounds[0], center[0] - dims[0]/2)
-    #     max_x = min(self.x_bounds[1], center[0] + dims[0]/2)
-    #     min_y = max(self.y_bounds[0], center[1] - dims[1]/2)
-    #     max_y = min(self.y_bounds[1], center[1] + dims[1]/2)
-
-    #     # Calculate the area within the bounds
-    #     area = (max_x - min_x) * (max_y - min_y)
-    #     return area
 
     def calculate_area_within_bounds(self, center, dims):
         # Calculate the bounds of the rectangle within the local map
@@ -71,20 +67,6 @@ class LocalMap():
         print(f'areas: {area}')
         return area
 
-
-    # def identify_obstacle_distr_type(self):
-    #     # dense vs sparse based on # of obstacles (more than 50% vs less than 50% of open spaces)
-    #     # also, type: (organized, organized (unpredictable), corridor, open)
-    #     total_area = self.calc_total_area()
-    #     # Calculate total area covered by obstacles
-    #     obstacle_area = sum(self.calculate_area_within_bounds(center, (self.obstacle_size, self.obstacle_size)) for center in self.obstacle_pos)
-    #     open_space_area = total_area - obstacle_area
-    #     obstacle_density = obstacle_area / total_area
-
-    #     print(f'total area: {total_area}')
-    #     print(f'obstacle area: {obstacle_area}')
-    #     print(f'open_space area: {open_space_area}')
-    #     print(f'obstacle density: {obstacle_density}')
 
     def identify_obstacle_distr_type(self):
         # dense vs sparse based on # of obstacles (more than 50% vs less than 50% of open spaces)
@@ -120,9 +102,17 @@ class LocalMap():
         print(f'agent density: {agent_density}')
 
 
+    def bayes_sample(self):
+        pass
+
+
     def choose_coordination_type(self):
         # rule set: (righthand rule, queue-based (pause and go), go-away, follow)
-        pass
+        # have way of labeling agent based on relative pos so that they know queue # 
+
+        queue_set = {}
+        
+        return queue_set
 
 
     def find_local_neighbors(self):
