@@ -42,7 +42,7 @@ def __main__():
     complete_map = CompleteMap(obstacle_locations=obstacle_locations, dims=10, obstacle_size=1, agent_size=0.5, x_bounds=x_bounds, y_bounds=y_bounds)
     complete_map.update_agent_positions([(3,3), (6,6)])
     central_loc = (5, 5)
-    dim_size = 10
+    dim_size = 10 # dims of local env
     map_subset_obs, map_subset_ag = complete_map.subset(dim_size=dim_size, central_loc=central_loc)
     
     local_map = LocalMap(obstacle_pos=map_subset_obs, obstacle_size=complete_map.obstacle_size, agent_pos=map_subset_ag, agent_size= 0.5, local_dim=dim_size, x_bounds=complete_map.x_bounds, y_bounds=complete_map.y_bounds, central_loc=central_loc)
