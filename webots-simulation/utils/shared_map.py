@@ -1,11 +1,15 @@
 
+# would do bayesian updating approach to identify proper rule sets on the fly 
+
 class CompleteMap():
-    def __init__(self, obstacle_locations, dims, obstacle_size, agent_size):
+    def __init__(self, obstacle_locations, dims, obstacle_size, agent_size, x_bounds, y_bounds):
         self.obstacle_locations = obstacle_locations
         self.agent_positions = []
         self.dims = dims
         self.obstacle_size = obstacle_size
         self.agent_size = agent_size
+        self.x_bounds = x_bounds
+        self.y_bounds = y_bounds
 
     def update_agent_positions(self, agent_positions):
         self.agent_positions = agent_positions
@@ -23,45 +27,97 @@ class CompleteMap():
     
     
 class LocalMap():
-    def __init__(self, obstacle_pos, obstacle_size, agent_pos, agent_size, local_dim):
+    def __init__(self, obstacle_pos, obstacle_size, agent_pos, agent_size, local_dim, x_bounds, y_bounds, central_loc):
         self.obstacle_pos = obstacle_pos
         self.obstacle_size = obstacle_size
         self.agent_pos = agent_pos 
         self.agent_size = agent_size
         self.local_dims = local_dim
+        self.x_bounds = x_bounds
+        self.y_bounds = y_bounds
+        self.central_loc = central_loc
 
+
+    def calc_total_area(self):
+        min_x = max(self.x_bounds[0], self.central_loc[0] - self.local_dims/2)
+        max_x = min(self.x_bounds[1], self.central_loc[0] + self.local_dims/2)
+        min_y = max(self.y_bounds[0], self.central_loc[1] - self.local_dims/2)
+        max_y = min(self.y_bounds[1], self.central_loc[1] + self.local_dims/2)
+        total_area = (max_x - min_x) * (max_y - min_y)
+
+        return total_area
+    
+    # def calculate_area_within_bounds(self, center, dims):
+    #     # Calculate the bounds of the rectangle within the local map
+    #     min_x = max(self.x_bounds[0], center[0] - dims[0]/2)
+    #     max_x = min(self.x_bounds[1], center[0] + dims[0]/2)
+    #     min_y = max(self.y_bounds[0], center[1] - dims[1]/2)
+    #     max_y = min(self.y_bounds[1], center[1] + dims[1]/2)
+
+    #     # Calculate the area within the bounds
+    #     area = (max_x - min_x) * (max_y - min_y)
+    #     return area
+
+    def calculate_area_within_bounds(self, center, dims):
+        # Calculate the bounds of the rectangle within the local map
+        min_x = self.x_bounds[0] # max(self.x_bounds[0], center[0] - dims[0]/2)
+        max_x = min(self.x_bounds[1], center[0] + dims[0]/2)
+        min_y = self.y_bounds[0] # max(self.y_bounds[0], center[1] - dims[1]/2)
+        max_y = min(self.y_bounds[1], center[1] + dims[1]/2)
+
+        # Calculate the area within the bounds
+        area = (max_x - min_x) * (max_y - min_y)
+        
+        print(f'areas: {area}')
+        return area
+
+
+    # def identify_obstacle_distr_type(self):
+    #     # dense vs sparse based on # of obstacles (more than 50% vs less than 50% of open spaces)
+    #     # also, type: (organized, organized (unpredictable), corridor, open)
+    #     total_area = self.calc_total_area()
+    #     # Calculate total area covered by obstacles
+    #     obstacle_area = sum(self.calculate_area_within_bounds(center, (self.obstacle_size, self.obstacle_size)) for center in self.obstacle_pos)
+    #     open_space_area = total_area - obstacle_area
+    #     obstacle_density = obstacle_area / total_area
+
+    #     print(f'total area: {total_area}')
+    #     print(f'obstacle area: {obstacle_area}')
+    #     print(f'open_space area: {open_space_area}')
+    #     print(f'obstacle density: {obstacle_density}')
 
     def identify_obstacle_distr_type(self):
         # dense vs sparse based on # of obstacles (more than 50% vs less than 50% of open spaces)
-        # also, type: (organized, organized (unpredictable), corridor, open) 
-        total_area = self.local_dims ** 2
-        obstacle_area = len(self.obstacle_pos) * self.obstacle_size ** 2
-        open_space_area = total_area - obstacle_area
-        obstacle_density = obstacle_area / total_area
+        # also, type: (organized, organized (unpredictable), corridor, open)
+        total_area = self.calc_total_area()
+        
+        # Initialize the total covered area to 0
+        total_covered_area = 0
+        
+        # Calculate total area covered by obstacles
+        for center in self.obstacle_pos:
+            area = self.calculate_area_within_bounds(center, (self.obstacle_size, self.obstacle_size))
+            total_covered_area += area
+        
+        # Calculate open space area by subtracting the total covered area from the total area
+        open_space_area = total_area - total_covered_area
+        obstacle_density = total_covered_area / total_area
 
+        print(f'total area: {total_area}')
+        print(f'total covered area: {total_covered_area}')
         print(f'open_space area: {open_space_area}')
         print(f'obstacle density: {obstacle_density}')
 
-        # if obstacle_density > 0.5:
-        #     return "dense"
-        # else:
-        #     return "sparse"
-
     def identify_agent_distr_type(self):
         # dense vs sparse based on # of agents (more than 50% vs less than 50% of open spaces)
-        total_area = self.local_dims ** 2
-        agent_area = len(self.agent_pos) * self.agent_size ** 2
+        total_area = self.calc_total_area()
+        # Calculate total area covered by agents
+        agent_area = sum(self.calculate_area_within_bounds(center, (self.agent_size, self.agent_size)) for center in self.agent_pos)
         open_space_area = total_area - agent_area
         agent_density = agent_area / total_area
 
         print(f'open_space area: {open_space_area}')
         print(f'agent density: {agent_density}')
-
-        # if agent_density > 0.5:
-        #     return "dense"
-        # else:
-        #     return "sparse"
-        
 
 
     def choose_coordination_type(self):
@@ -82,13 +138,13 @@ class LocalMap():
 
 def __main__():
     obstacle_locations = [(1, 1), (2, 2), (5, 5), (7, 7)]
-    complete_map = CompleteMap(obstacle_locations=obstacle_locations, dims=10, obstacle_size=1, agent_size=0.5)
+    complete_map = CompleteMap(obstacle_locations=obstacle_locations, dims=10, obstacle_size=1, agent_size=0.5, bounds = (0, 10))
     complete_map.update_agent_positions([(3,3), (6,6)])
     central_loc = (5, 5)
     dim_size = 10
     map_subset_obs, map_subset_ag = complete_map.subset(dim_size=dim_size, central_loc=central_loc)
 
-    local_map = LocalMap(obstacle_pos=map_subset_obs, obstacle_size=dim_size, agent_pos=map_subset_ag, agent_size= 0.5, local_dim=dim_size)
+    local_map = LocalMap(obstacle_pos=map_subset_obs, obstacle_size=dim_size, agent_pos=map_subset_ag, agent_size= 0.5, local_dim=dim_size, x_bounds=complete_map.x_bounds, y_bounds=complete_map.y_bounds, central_loc = central_loc)
     local_map.identify_agent_distr_type()
     local_map.identify_obstacle_distr_type()
 
