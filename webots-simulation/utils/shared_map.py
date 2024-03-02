@@ -30,12 +30,16 @@ class LocalMap():
         self.agent_size = agent_size
         self.local_dims = local_dim
 
+
     def identify_obstacle_distr_type(self):
+        # dense vs sparse based on # of obstacles (more than 50% vs less than 50% of open spaces)
+        # also, type: (organized, organized (unpredictable), corridor, open) 
         total_area = self.local_dims ** 2
         obstacle_area = len(self.obstacle_pos) * self.obstacle_size ** 2
         open_space_area = total_area - obstacle_area
-        obstacle_density = obstacle_area / open_space_area
+        obstacle_density = obstacle_area / total_area
 
+        print(f'open_space area: {open_space_area}')
         print(f'obstacle density: {obstacle_density}')
 
         # if obstacle_density > 0.5:
@@ -44,11 +48,13 @@ class LocalMap():
         #     return "sparse"
 
     def identify_agent_distr_type(self):
+        # dense vs sparse based on # of agents (more than 50% vs less than 50% of open spaces)
         total_area = self.local_dims ** 2
         agent_area = len(self.agent_pos) * self.agent_size ** 2
         open_space_area = total_area - agent_area
-        agent_density = agent_area / open_space_area
+        agent_density = agent_area / total_area
 
+        print(f'open_space area: {open_space_area}')
         print(f'agent density: {agent_density}')
 
         # if agent_density > 0.5:
@@ -57,16 +63,6 @@ class LocalMap():
         #     return "sparse"
         
 
-    # def identify_obstacle_distr_type(self):
-    #     # dense vs sparse based on # of obstacles (more than 50% vs less than 50% of open spaces)
-    #     # also, type: (organized, organized (unpredictable), corridor, open) 
-
-    #     pass 
-
-    # def identify_agent_distr_type(self):
-    #     # dense vs sparse based on # of agents (more than 50% vs less than 50% of open spaces)
-
-    #     pass 
 
     def choose_coordination_type(self):
         # rule set: (righthand rule, queue-based (pause and go), go-away, follow)
