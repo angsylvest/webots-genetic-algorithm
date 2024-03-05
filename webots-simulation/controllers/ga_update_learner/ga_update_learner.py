@@ -74,7 +74,7 @@ def generate_robot_central(num_robots):
     for i in range(num_robots):
         rootNode = robot.getRoot()
         rootChildrenField = rootNode.getField('children')
-        rootChildrenField.importMFNode(-1, '../las_supervisor/robots/robot-ga-update.wbo') 
+        rootChildrenField.importMFNode(-1, '../las_supervisor/robots/robot-updated-learning.wbo') 
         rec_node = rootChildrenField.getMFNode(-1)
         
     
@@ -99,6 +99,8 @@ def generate_robot_central(num_robots):
         individual = rootChildrenField.getMFNode(-1)
       
         individual.getField('translation').setSFVec3f([0, 2, 0]) 
+        
+    emitter_individual.send(id_msg.encode('utf-8'))
          
 # runs simulation for designated amount of time 
 def run_seconds(t,waiting=False):

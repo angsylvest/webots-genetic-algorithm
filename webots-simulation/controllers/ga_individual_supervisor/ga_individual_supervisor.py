@@ -21,6 +21,7 @@ total_found = 0
 pairs = []
 curr_best = -1 
 population = []
+ids = []
 
 # set-up robot 
 TIME_STEP = 32
@@ -56,14 +57,43 @@ random.seed(10)
 curr_fitness = 0
 child = ""
 coordination_type = ""
+curr_robot_index = "" # should hopefully be overwritten if done correctly 
 
-comparing_genes = False 
-
-def get_local_agent_info():
-    for i in range(len(population)):
-        if (i != r_index): 
-            other_pos = [population[i].getPosition()[0], population[i].getPosition()[1]]
-     
+def generate_heading(assigned_id = None):
+    global curr_robot_index
+    global population
+    
+    curr_pos = [population[curr_robot_index].getPosition()[0], population[curr_robot_index].getPosition()[1]]
+    
+    if assigned_id == None: 
+        closest_neigh = " "
+        
+        for i in range(len(population)):
+            if (i != curr_robot_index): 
+                other_pos = [population[i].getPosition()[0], population[i].getPosition()[1]]
+                dis = math.dist(curr_pos, other_pos)
+                if closest_neigh == " ":
+                    closest_neigh = str(population[i].getId())
+                    curr_dist = dis
+                    other_index = i
+                elif dis < curr_dist: 
+                    closest_neigh = str(population[i].getId())
+                    curr_dist = dis 
+                    other_index = i
+                    
+        neigh_closest = other_index 
+        
+    else: 
+        neigh_closest = assigned_id 
+    
+    print(f'following agent {neigh_closest} that is closest to {curr_robot_index}')
+    curr_x, curr_y = population[curr_robot_index].getPosition()[0], population[curr_robot_index].getPosition()[1]
+    neigh_x, neigh_y = population[neigh_closest].getPosition()[0], population[neigh_closest].getPosition()[1]
+    updated_heading = round(math.atan2(neigh_y-curr_y,neigh_x-curr_x),2)
+    
+    print(f'heading for {curr_robot_index} should be {updated_heading}')
+    
+    
     
 # based off given id of robot assigned 
 def find_nearest_robot_genotype(r_index):
@@ -115,10 +145,11 @@ def message_listener(time_step):
     global curr_best
     global child 
     global comparing_genes
+    global ids 
+    global curr_robot_index
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
-        print('individual msgs --', message)
             
         if 'fitness-scores' in message:
             fs = message.split(" ")[1:]
@@ -151,6 +182,8 @@ def message_listener(time_step):
             for id in id_msg: # will convert to nodes to eventual calculation 
                 node = robot.getFromId(int(id))
                 population.append(node)
+                ids.append(id)
+                
                 
             receiver.nextPacket() 
             
@@ -206,6 +239,14 @@ def message_listener(time_step):
             emitter_individual.send(comm_information.encode('utf-8'))
             
             receiver_individual.nextPacket()
+            
+        if 'assigned' in message_individual:
+            curr_robot_index = int(message_individual.split('-')[-1])
+            generate_heading() # TODO: remove, just for testing purposes
+            
+            
+            receiver_individual.nextPacket() 
+           
             
         else: 
             receiver_individual.nextPacket()

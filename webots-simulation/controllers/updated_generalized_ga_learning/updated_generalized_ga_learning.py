@@ -305,14 +305,24 @@ cleaning = False
 prev_gen_check = robot.getTime() 
 prev_act = ""
 
+time_into_exploration = 0 
+just_begun = True 
+
 
 while robot.step(timestep) != -1:
     
     if not cleaning: 
         interpret(str(robot.step(timestep)))
+        if just_begun: # TODO: make more aligned with status of env
+            # send individual supervisor agent id index 
+            msg = f"assigned-{given_id}"
+            emitter_individual.send(msg.encode('utf-8'))
+            just_begun = False
+
 
         if robot.getTime() - prev_gen_check == 1: 
             prev_gen_check = robot.getTime()
+            time_into_exploration += 1
 
         # homing mechanism 
         if holding_something == True and not reversing and not moving_forward: # move towards nest (constant vector towards home) 
