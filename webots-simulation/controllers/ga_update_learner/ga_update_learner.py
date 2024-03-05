@@ -30,6 +30,15 @@ emitter_individual.setChannel(5)
 formations = ["flocking", "queue", "dispersal"]
 t_allocated = 600 
 t_so_far = 0 
+r_pos_to_generate = [] 
+population = []
+
+
+def message_sender(msg, individual = False):
+    if not individual: 
+        emitter.send(msg.encode('utf-8'))
+    else:  
+        emitter_individual.send(msg.encode('utf-8'))
 
             
 def message_listener(time_step):
@@ -38,13 +47,59 @@ def message_listener(time_step):
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
-
-
-        # else: 
-        #     receiver.nextPacket() 
+        receiver.nextPacket() 
             
         
+
+# set up environments 
+def generate_robot_central(num_robots):
+    global fitness_scores 
+    global collected_count 
+    global population
+    global columns 
+    global r_pos_to_generate
+    global pairs 
+    global overall_fitness_scores
+    global prev_msg 
+    global id_msg
+ 
     
+    if len(population) != 0: 
+    
+        for r in population: 
+            r.remove()
+             
+    id_msg = "ids"
+        
+    for i in range(num_robots):
+        rootNode = robot.getRoot()
+        rootChildrenField = rootNode.getField('children')
+        rootChildrenField.importMFNode(-1, '../las_supervisor/robots/robot-ga-update.wbo') 
+        rec_node = rootChildrenField.getMFNode(-1)
+        
+    
+        t_field = rec_node.getField('translation')
+        pose = [round(random.uniform(0.3, -0.3),2), round(random.uniform(0.3, -0.3) ,2), 0.02]
+        while pose in r_pos_to_generate: # remove any duplicates
+            pose = [round(random.uniform(0.3, -0.3),2), round(random.uniform(0.3, -0.3) ,2), 0.02]
+        r_pos_to_generate.append(pose)
+        t_field.setSFVec3f(pose)
+                # print(r_field)
+        
+        # sets up metrics 
+        population.append(rec_node)
+        id_msg += " " + str(rec_node.getId())
+        
+        
+    for i in range(len(population)):
+        ### generate supervisor for parallelization ####
+        rootNode = robot.getRoot()
+        rootChildrenField = rootNode.getField('children')
+        rootChildrenField.importMFNode(-1, '../las_supervisor/robots/ga-individual.wbo')
+        individual = rootChildrenField.getMFNode(-1)
+      
+        individual.getField('translation').setSFVec3f([0, 2, 0]) 
+         
 # runs simulation for designated amount of time 
 def run_seconds(t,waiting=False):
     global pop_genotypes
@@ -73,9 +128,17 @@ def run_seconds(t,waiting=False):
    
     
 def run_optimization():  
+    global t_so_far
+    global t_allocated
 
     while t_so_far < t_allocated: 
+        if t_so_far == 0: 
+            # set coordination type here 
+            generate_robot_central(5)
+            message_sender("flocking",True)
+            
         run_seconds(1)
+        t_so_far += 1 
 
     return 
   

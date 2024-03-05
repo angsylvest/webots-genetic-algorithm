@@ -51,9 +51,6 @@ camera = robot.getDevice('camera')
 camera.enable(timestep)
 camera.recognitionEnable(timestep)
 
-camera_b = robot.getDevice('camera(1)')
-camera_b.enable(timestep)
-camera_b.recognitionEnable(timestep)
 # gps info 
 gps = robot.getDevice('gps')
 gps.enable(timestep)
@@ -93,6 +90,7 @@ prev_time = robot.getTime()
 time_allocated = 6 # time to move and rotate (worst case) 
 iteration = 0 
 fitness = 0 
+curr_action = []
 
 # calculates angle normal to current orientation 
 def calc_normal(curr_angle): 
@@ -218,7 +216,7 @@ def interpret(timestep):
     global iteration
     
     if receiver.getQueueLength()>0:
-        message = receiver.getString()
+        message = receiver.getData().decode('utf-8')
         # print('incoming messages: ', given_id, message) 
         
         # want to enforce strategy by adding for bias to it here     
@@ -255,8 +253,8 @@ def interpret(timestep):
             receiver.nextPacket()
             
     if receiver_individual.getQueueLength()>0:
-        # message = receiver_individual.getData().decode('utf-8')
-        message = receiver_individual.getString()
+        message = receiver_individual.getData().decode('utf-8')
+        # message = receiver_individual.getString()
 
         if 'episode-agent-complete' in message:
             # reset agent info 
@@ -324,11 +322,6 @@ while robot.step(timestep) != -1:
                 
             else: 
                 holding_something = False
-                # t_elapsed_block_total += time_elapsed_since_block 
-                # n_observations_block += 1
-                # time_elapsed_since_block = 0
-                time_elapsed = 0 # on a per sec basis 
-                # print('successfully dropped off object', given_id)
 
         # do action sequence 
         cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
@@ -401,8 +394,8 @@ while robot.step(timestep) != -1:
                 fitness += 1
  
             start_count = robot.getTime()  
-            if not holding_something:  # don't take into account homing state 
-                time_elapsed += 1
+            # if not holding_something:  # don't take into account homing state 
+            #     time_elapsed += 1
             
             # check for collisions with other robot 
             list = camera.getRecognitionObjects()

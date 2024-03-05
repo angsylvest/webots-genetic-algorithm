@@ -55,9 +55,16 @@ prev_msg = ""
 random.seed(10)
 curr_fitness = 0
 child = ""
+coordination_type = ""
 
 comparing_genes = False 
 
+def get_local_agent_info():
+    for i in range(len(population)):
+        if (i != r_index): 
+            other_pos = [population[i].getPosition()[0], population[i].getPosition()[1]]
+     
+    
 # based off given id of robot assigned 
 def find_nearest_robot_genotype(r_index):
     global population 
@@ -111,7 +118,7 @@ def message_listener(time_step):
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
-        # print('individual msgs --', message)
+        print('individual msgs --', message)
             
         if 'fitness-scores' in message:
             fs = message.split(" ")[1:]
