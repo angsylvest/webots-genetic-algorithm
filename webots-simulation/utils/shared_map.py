@@ -1,7 +1,7 @@
 
 # would do bayesian updating approach to identify proper rule sets on the fly 
 # from utils.bayes import NArmedBanditDrift
-
+import math 
 
 class CompleteMap():
     def __init__(self, obstacle_locations, dims, obstacle_size, agent_size, x_bounds, y_bounds):
@@ -41,6 +41,8 @@ class LocalMap():
         self.central_loc = central_loc
 
         num_envs = 4
+
+        self.bayes = [[1, 1, 1, 1] for i in range(local_dim*local_dim)]
         # self.bayes = [NArmedBanditDrift for n in range(num_envs)]
 
 
@@ -108,6 +110,40 @@ class LocalMap():
     def bayes_sample(self):
         pass
 
+
+    def calculate_center(self, positions):
+        total_x = 0
+        total_y = 0
+        total_z = 0
+        count = len(positions)
+
+        for position in positions:
+            total_x += position[0]
+            total_y += position[1]
+            total_z += position[2]
+
+        center_x = total_x / count
+        center_y = total_y / count
+        center_z = total_z / count
+
+        return center_x, center_y, center_z
+
+    def normalize_vector(self, vec):
+        magnitude = math.sqrt(sum(x**2 for x in vec))
+        return tuple(x / magnitude for x in vec)
+
+
+    def calculate_orientation(self, position, center):
+        # Calculate the vector from center to position
+        vec_to_position = (position[0] - center[0], position[1] - center[1], position[2] - center[2])
+        
+        # Rotate the vector by 180 degrees
+        vec_rotated = (-vec_to_position[0], -vec_to_position[1], -vec_to_position[2])
+        
+        # Normalize the rotated vector
+        vec_normalized = self.normalize_vector(vec_rotated)
+        
+        return vec_normalized
 
     def choose_coordination_type(self):
         # rule set: (righthand rule, queue-based (pause and go), go-away, follow)
