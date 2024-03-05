@@ -41,10 +41,18 @@ class LocalMap():
         self.central_loc = central_loc
 
         num_envs = 4
+        self.duration = 2 
 
         self.bayes = [[1, 1, 1, 1] for i in range(local_dim*local_dim)]
         # self.bayes = [NArmedBanditDrift for n in range(num_envs)]
 
+
+    def queue_times(self): 
+        queue_assignments = {}
+        for i in range(len(self.agent_pos)): 
+            queue_assignments[i] = self.duration*i
+
+        return queue_assignments
 
     def calc_total_area(self):
         min_x = max(self.x_bounds[0], self.central_loc[0] - self.local_dims/2)
