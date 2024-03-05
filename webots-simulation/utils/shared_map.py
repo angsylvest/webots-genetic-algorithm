@@ -1,6 +1,6 @@
 
 # would do bayesian updating approach to identify proper rule sets on the fly 
-from bayes import NArmedBanditDrift
+# from utils.bayes import NArmedBanditDrift
 
 
 class CompleteMap():
@@ -41,7 +41,7 @@ class LocalMap():
         self.central_loc = central_loc
 
         num_envs = 4
-        self.bayes = [NArmedBanditDrift for n in range(num_envs)]
+        # self.bayes = [NArmedBanditDrift for n in range(num_envs)]
 
 
     def calc_total_area(self):
@@ -53,6 +53,8 @@ class LocalMap():
 
         return total_area
     
+    def update_agent_pos(self, agent_list): 
+        self.agent_pos = agent_list
 
     def calculate_area_within_bounds(self, center, dims):
         # Calculate the bounds of the rectangle within the local map
@@ -90,6 +92,8 @@ class LocalMap():
         print(f'open_space area: {open_space_area}')
         print(f'obstacle density: {obstacle_density}')
 
+        return obstacle_density
+
     def identify_agent_distr_type(self):
         # dense vs sparse based on # of agents (more than 50% vs less than 50% of open spaces)
         total_area = self.calc_total_area()
@@ -98,8 +102,7 @@ class LocalMap():
         open_space_area = total_area - agent_area
         agent_density = agent_area / total_area
 
-        print(f'open_space area: {open_space_area}')
-        print(f'agent density: {agent_density}')
+        return agent_density 
 
 
     def bayes_sample(self):
