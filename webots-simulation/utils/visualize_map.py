@@ -27,9 +27,12 @@ def visualize_subset(subset_obstacles, central_loc, dims, obstacle_size, agent_p
     colors = plt.cm.rainbow(np.linspace(0, 1, len(agent_positions)))
 
     # Plot agents as circles with different colors
-    for i, (x, y) in enumerate(agent_positions):
+    i = 0 
+    for pos in agent_positions: 
+        (x,y) = agent_positions[pos]
         circle = plt.Circle((x, y), agent_size/2, color=colors[i], label='Agent')
         ax.add_artist(circle)
+        i += 1 
 
     ax.legend()
     plt.show()
@@ -40,7 +43,8 @@ def __main__():
     x_bounds = (0, 10)
     y_bounds = (0, 10)
     complete_map = CompleteMap(obstacle_locations=obstacle_locations, dims=10, obstacle_size=1, agent_size=0.5, x_bounds=x_bounds, y_bounds=y_bounds)
-    complete_map.update_agent_positions([(3,3), (6,6)])
+    agent_list = {"agent-0": (3.0,3.0), "agent-1": (6.0,6.0)}
+    complete_map.update_agent_positions(agent_list)
     central_loc = (5, 5)
     dim_size = 10 # dims of local env
     map_subset_obs, map_subset_ag = complete_map.subset(dim_size=dim_size, central_loc=central_loc)
@@ -48,6 +52,12 @@ def __main__():
     local_map = LocalMap(obstacle_pos=map_subset_obs, obstacle_size=complete_map.obstacle_size, agent_pos=map_subset_ag, agent_size= 0.5, local_dim=dim_size, x_bounds=complete_map.x_bounds, y_bounds=complete_map.y_bounds, central_loc=central_loc)
     # local_map.identify_agent_distr_type()
     local_map.identify_obstacle_distr_type()
+
+    print(f'testing output of each coordination strategy')
+
+    print(f'strategy for flocking: {local_map.assign_leaders()}')
+    print(f'strategy for queue: {local_map.queue_times()}')
+    print(f'strategy for dispersal: {local_map.generate_dispersion_vectors()}')
 
     # Pass all required arguments to visualize_subset
     visualize_subset(map_subset_obs, central_loc, 5, complete_map.obstacle_size, map_subset_ag, complete_map.agent_size, complete_map.dims)

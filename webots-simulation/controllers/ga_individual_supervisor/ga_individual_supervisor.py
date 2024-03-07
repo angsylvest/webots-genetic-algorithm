@@ -10,6 +10,16 @@ Angel Sylvester 2022
 """
 columns = 'agent id' + ',time step' + ',fitness' + ',xpos'+ ',ypos' + ',num col' + ',genotype' 
 
+# ensure that we can access utils package to streamline tasks 
+import sys 
+sys.path.append('../../')
+import utils
+import utils.bayes as bayes 
+import utils.globals as globals
+import utils.shared_map as shared_map
+
+using_bayes = globals.using_bayes
+
 # global collected_count 
 collected_count = []
 
@@ -22,6 +32,7 @@ pairs = []
 curr_best = -1 
 population = []
 ids = []
+agent_list = {}
 
 # set-up robot 
 TIME_STEP = 32
@@ -58,6 +69,20 @@ curr_fitness = 0
 child = ""
 coordination_type = ""
 curr_robot_index = "" # should hopefully be overwritten if done correctly 
+
+num_coordination_strat = 3 
+num_env_types = 1 # only used for high density areas?  
+dist_covered = [0 for i in range(num_coordination_strat)]
+
+if using_bayes:
+    shared_map = shared_map.CompleteMap(obstacle_locations=[], dims = 4, agent_size=0.2, x_bounds=(-2,2), y_bounds=(-2,2))
+
+    if num_env_types > 1: 
+        multi_arm = [bayes.NArmedBanditDrift(num_coordination_strat) for i in range(num_env_types)]
+    else: 
+        multi_arm = bayes.NArmedBanditDrift(num_coordination_strat)
+
+
 
 def generate_heading(assigned_id = None):
     global curr_robot_index
@@ -148,6 +173,8 @@ def message_listener(time_step):
     global ids 
     global curr_robot_index
 
+    global agent_list
+
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
             
@@ -182,9 +209,10 @@ def message_listener(time_step):
             for id in id_msg: # will convert to nodes to eventual calculation 
                 node = robot.getFromId(int(id))
                 population.append(node)
+                agent_list[id] = (node.getPosition()[0], node.getPosition()[1])
                 ids.append(id)
                 
-                
+            shared_map.update_agent_positions(agent_list)
             receiver.nextPacket() 
             
         elif 'size' in message: 
@@ -213,6 +241,26 @@ def message_listener(time_step):
             # reproduce_list.append(robo_index) 
             # print('robot found -- checking genotype', robo_index) 
             curr_orient = message_individual.split('[')[-1]
+
+            if using_bayes: 
+                # want to be able to determine if should do coordination
+                for rob in population: 
+                    agent_list[rob] = (node.getPosition()[0], node.getPosition()[1])
+                shared_map.update_agent_positions(agent_list)
+
+                map_subset_obs, map_subset_ag = shared_map.subset(dim_size=dim_size, central_loc=central_loc)
+
+                # find subset 
+                local_map = shared_map.LocalMap(obstacle_pos=map_subset_obs, obstacle_size=complete_map.obstacle_size, agent_pos=map_subset_ag, agent_size= 0.5, local_dim=dim_size, x_bounds=complete_map.x_bounds, y_bounds=complete_map.y_bounds, central_loc=central_loc) 
+                if local_map.is_dense_enough():
+                    # sample relevant strategy 
+                    # 0: flock, 1: queue, 2: disperse! 
+                    if len(num_env_types) == 1: 
+                        current_strat_index = multi_arm.sample_action()
+                        msg = local_map.process_output(current_strat_index)
+                        print(f'outputted info to be sent for coordination: {msg}')
+                    pass 
+
             
             # only store best genotype 
             other_index = find_nearest_robot_genotype(robo_index)

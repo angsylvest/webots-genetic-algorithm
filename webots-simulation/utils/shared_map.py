@@ -1,21 +1,24 @@
-
 # would do bayesian updating approach to identify proper rule sets on the fly 
 # from utils.bayes import NArmedBanditDrift
+
 import math 
 
 class CompleteMap():
     def __init__(self, obstacle_locations, dims, obstacle_size, agent_size, x_bounds, y_bounds):
         self.obstacle_locations = obstacle_locations
         self.agent_positions = []
+        self.agents = {}
         self.dims = dims
         self.obstacle_size = obstacle_size
         self.agent_size = agent_size
         self.x_bounds = x_bounds
         self.y_bounds = y_bounds
 
+    def update_agent_positions(self, agents):
+        self.agents = agents
 
-    def update_agent_positions(self, agent_positions):
-        self.agent_positions = agent_positions
+        for key in self.agents: 
+            self.agent_positions.append(self.agents[key])
 
     def subset(self, dim_size, central_loc):
         min_x = central_loc[0] - dim_size/2
@@ -24,9 +27,12 @@ class CompleteMap():
         max_y = central_loc[1] + dim_size/2
 
         subset_obstacles = [(x, y) for (x, y) in self.obstacle_locations if min_x <= x <= max_x and min_y <= y <= max_y]
-        subset_agents = [(x, y) for (x, y) in self.agent_positions if min_x <= x <= max_x and min_y <= y <= max_y]
-        
+        # subset_agents = [(x, y) for (x, y) in self.agent_positions if min_x <= x <= max_x and min_y <= y <= max_y]
+        subset_agents = {key: value for key, value in self.agents.items() if min_x <= value[0] <= max_x and min_y <= value[1] <= max_y}
+
+        print(f'subsetted agents: {subset_agents}')
         return subset_obstacles, subset_agents
+
     
     
 class LocalMap():
@@ -40,19 +46,77 @@ class LocalMap():
         self.y_bounds = y_bounds
         self.central_loc = central_loc
 
-        num_envs = 4
+        self.num_envs = 4
         self.duration = 2 
 
         self.bayes = [[1, 1, 1, 1] for i in range(local_dim*local_dim)]
         # self.bayes = [NArmedBanditDrift for n in range(num_envs)]
 
-
+    def update_agent_pos(self, agent_list): 
+        self.agent_pos = agent_list
+    
+    # for queue coordination strat
     def queue_times(self): 
         queue_assignments = {}
         for i in range(len(self.agent_pos)): 
-            queue_assignments[i] = self.duration*i
+            key_name = f'agent-{i}'
+            queue_assignments[key_name] = self.duration*i
 
         return queue_assignments
+    
+    def is_dense_enough(self):
+        return True
+    
+    def process_output(self, curr_strat_index):
+        if curr_strat_index == 0:
+            return self.assign_leaders()
+        elif curr_strat_index == 1: 
+            return self.queue_times()
+        elif curr_strat_index == 2: 
+            return self.generate_dispersion_vectors()
+        else: 
+            print('whoops does not exist')
+
+
+    
+    # for flocking strategy 
+    def assign_leaders(self):
+        # can be updated each time to be slightly before where agent is
+        assignments = {}
+        leader = self.agent_pos['agent-0'] # just random 
+        assignments['agent-0'] = "leader"
+
+        for i in range(1, len(self.agent_pos)):
+            key_name = f'agent-{i}'
+            curr_agent = self.agent_pos[key_name]
+            assignments[key_name] = self.get_updated_goal(curr_agent, leader, 0.2)
+
+        return assignments
+    
+
+    # for dispersal strategy 
+    def generate_dispersion_vectors(self):
+        agent_vectors = {}
+        center = self.calculate_center(self.agent_pos)
+
+        for i in range(len(self.agent_pos)):
+            key_name = f'agent-{i}'
+            # print(f'self.agent_pos[i]: {self.agent_pos[key_name]} and center: {center}')
+            orient = self.calculate_orientation(self.agent_pos[key_name], center)
+            agent_vectors[key_name] = orient
+             
+        return agent_vectors 
+
+
+    # other relevant functions for each strategy 
+    def get_updated_goal(self, current_pos, goal_pos, distance): 
+        direction = (goal_pos[0] - current_pos[0], goal_pos[1] - current_pos[1])
+        distance_to_goal = math.sqrt(direction[0]**2 + direction[1]**2)
+        if distance_to_goal > 0:
+            direction = (direction[0] / distance_to_goal, direction[1] / distance_to_goal)
+        new_pos = (round(current_pos[0] - direction[0] * distance,2), round(current_pos[1] - direction[1] * distance),2)
+        return new_pos
+
 
     def calc_total_area(self):
         min_x = max(self.x_bounds[0], self.central_loc[0] - self.local_dims/2)
@@ -62,9 +126,7 @@ class LocalMap():
         total_area = (max_x - min_x) * (max_y - min_y)
 
         return total_area
-    
-    def update_agent_pos(self, agent_list): 
-        self.agent_pos = agent_list
+
 
     def calculate_area_within_bounds(self, center, dims):
         # Calculate the bounds of the rectangle within the local map
@@ -76,7 +138,7 @@ class LocalMap():
         # Calculate the area within the bounds
         area = (max_x - min_x) * (max_y - min_y)
         
-        print(f'areas: {area}')
+        # print(f'areas: {area}')
         return area
 
 
@@ -97,10 +159,10 @@ class LocalMap():
         open_space_area = total_area - total_covered_area
         obstacle_density = total_covered_area / total_area
 
-        print(f'total area: {total_area}')
-        print(f'total covered area: {total_covered_area}')
-        print(f'open_space area: {open_space_area}')
-        print(f'obstacle density: {obstacle_density}')
+        # print(f'total area: {total_area}')
+        # print(f'total covered area: {total_covered_area}')
+        # print(f'open_space area: {open_space_area}')
+        # print(f'obstacle density: {obstacle_density}')
 
         return obstacle_density
 
@@ -120,52 +182,44 @@ class LocalMap():
 
 
     def calculate_center(self, positions):
+        # positions is a dict so must convert
         total_x = 0
         total_y = 0
-        total_z = 0
         count = len(positions)
 
+
         for position in positions:
-            total_x += position[0]
-            total_y += position[1]
-            total_z += position[2]
+            total_x += positions[position][0]
+            total_y += positions[position][1]
 
         center_x = total_x / count
         center_y = total_y / count
-        center_z = total_z / count
 
-        return center_x, center_y, center_z
+        return center_x, center_y
 
     def normalize_vector(self, vec):
         magnitude = math.sqrt(sum(x**2 for x in vec))
         return tuple(x / magnitude for x in vec)
 
-
     def calculate_orientation(self, position, center):
         # Calculate the vector from center to position
-        vec_to_position = (position[0] - center[0], position[1] - center[1], position[2] - center[2])
-        
-        # Rotate the vector by 180 degrees
-        vec_rotated = (-vec_to_position[0], -vec_to_position[1], -vec_to_position[2])
-        
-        # Normalize the rotated vector
-        vec_normalized = self.normalize_vector(vec_rotated)
-        
-        return vec_normalized
-
+        vec_to_position = (position[0] - center[0], position[1] - center[1])
+        # Calculate the angle in radians
+        angle_radians = round(math.atan2(vec_to_position[1], vec_to_position[0]),2)
+        return angle_radians
+    
+    # communication-relevant functions 
     def choose_coordination_type(self):
         # rule set: (righthand rule, queue-based (pause and go), go-away, follow)
         # have way of labeling agent based on relative pos so that they know queue # 
-
         queue_set = {}
         
         return queue_set
 
-
     def find_local_neighbors(self):
         pass 
 
-
+    # will include schedule so won't need constant flags .. 
     def share_rule_set(self):
         # sent as emitter 
         msg = ""

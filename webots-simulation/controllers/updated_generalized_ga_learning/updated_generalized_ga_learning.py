@@ -13,6 +13,15 @@ from math import sin, cos, pi
 import math 
 import random 
 
+# ensure that we can access utils package to streamline tasks 
+import sys 
+sys.path.append('../../')
+import utils
+import utils.bayes as bayes 
+import utils.globals as globals
+
+using_bayes = globals.using_bayes
+
 # create the Robot instance.
 robot = Robot()
 
@@ -91,6 +100,10 @@ time_allocated = 6 # time to move and rotate (worst case)
 iteration = 0 
 fitness = 0 
 curr_action = []
+
+
+def determine_env_type(): # maybe eventually 
+    pass
 
 # calculates angle normal to current orientation 
 def calc_normal(curr_angle): 
@@ -262,6 +275,8 @@ def interpret(timestep):
             receiver_individual.nextPacket()
             # TODO: fill out with valid reset to agent actions
 
+        # coordination task 
+        # need schedule and task (if anything)
             
         else: 
             receiver_individual.nextPacket()

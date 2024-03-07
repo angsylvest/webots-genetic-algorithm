@@ -33,6 +33,7 @@ t_so_far = 0
 r_pos_to_generate = [] 
 population = []
 
+input_from_others = {}
 
 def message_sender(msg, individual = False):
     if not individual: 
@@ -48,9 +49,14 @@ def message_listener(time_step):
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
         receiver.nextPacket() 
-            
-        
 
+
+def mediate_differences():
+
+    final_deliberation = ""
+    emitter_individual.send(final_deliberation.encode('utf-8'))
+               
+        
 # set up environments 
 def generate_robot_central(num_robots):
     global fitness_scores 
@@ -62,6 +68,7 @@ def generate_robot_central(num_robots):
     global overall_fitness_scores
     global prev_msg 
     global id_msg
+    global input_from_others
  
     
     if len(population) != 0: 
@@ -72,12 +79,14 @@ def generate_robot_central(num_robots):
     id_msg = "ids"
         
     for i in range(num_robots):
+        curr_key = f'agent-{i}'
         rootNode = robot.getRoot()
         rootChildrenField = rootNode.getField('children')
         rootChildrenField.importMFNode(-1, '../las_supervisor/robots/robot-updated-learning.wbo') 
         rec_node = rootChildrenField.getMFNode(-1)
         
-    
+        input_from_others[curr_key] = 0
+
         t_field = rec_node.getField('translation')
         pose = [round(random.uniform(0.3, -0.3),2), round(random.uniform(0.3, -0.3) ,2), 0.02]
         while pose in r_pos_to_generate: # remove any duplicates
@@ -134,10 +143,11 @@ def run_optimization():
     global t_allocated
 
     while t_so_far < t_allocated: 
+        message_listener(robot.getTimeStep())
         if t_so_far == 0: 
             # set coordination type here 
             generate_robot_central(5)
-            message_sender("flocking",True)
+            # message_sender("flocking",True)
             
         run_seconds(1)
         t_so_far += 1 
