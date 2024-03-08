@@ -3,6 +3,7 @@ from controller import Supervisor, Node, Keyboard, Emitter, Receiver, Field
 import math 
 from robot_pop import * 
 import random
+import ast
 
 """
 Main supervisor base 
@@ -61,17 +62,20 @@ def message_listener(time_step):
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
         if 'agent' in message:
-            print(f'agent message: {message}')
+            # print(f'agent message: {message}')
             agent_dict = {}
-            message_parsed = message.split('-')
-            print(f'parsed msg: {message_parsed}')
+            message_parsed = message.split('~')[0].split('-')
+            # print(f'parsed msg: {message_parsed}')
             agent_info = message_parsed[0].split(':')[1]
-            proposed_strat = message_parsed[1].split(':')[1]
-            strat = message_parsed[2][5:]
-            pos = float(message_parsed[3].split(':')[1][1:-2])
-            posy = float(message_parsed[4][:-2])
+            # Convert the string to a dictionary using ast.literal_eval()
+            proposed_strat = ast.literal_eval(message_parsed[1].split(':')[1])
+            strat_parsed = (message.split('~')[1][5:])
             
-            agent_dict[agent_info] = (proposed_strat, (pos, posy), strat)
+            # strat = message_parsed[2][5:]
+            pos = float(message_parsed[2].split(':')[1][1:-2])
+            posy = float(message_parsed[3][:-2])
+            
+            agent_dict[agent_info] = (proposed_strat, (pos, posy), strat_parsed)
             
             info_garnered.append(agent_dict)
             mediate_differences(info_garnered)
@@ -95,19 +99,19 @@ def get_key_by_value(dictionary, value):
 def mediate_differences(msgs):
     # assuming msgs is a list of suggestions
     # ex format: [{agent_id: (strat, curr_pose)} ..] 
-    print(f'messages: {msgs}')
+    # print(f'messages: {msgs}')
     
     
     cluster_list = []
     for a in msgs: 
-        print(f'agents in msgs: {a}')
+        # print(f'agents in msgs: {a}')
         
         for key in a: 
             curr_pose = a[key][1]
             x,y = curr_pose
             cluster_list.append((x,y))
             
-    print(f'cluster list: {cluster_list}')
+    # print(f'cluster list: {cluster_list}')
 
     cluster_merged = k_means.output_k_means_with_cluster(cluster_list, len(msgs))
         
@@ -118,20 +122,20 @@ def mediate_differences(msgs):
             # Find the original dictionary containing curr_pose
             for agent_dict in msgs:
                 for a, (strat, curr_pose, prop) in agent_dict.items():
-                    print(f'iterating over diff items: {a}, {strat} and {curr_pose}')
+                    # print(f'iterating over diff items: {a}, {strat}, {prop} and {curr_pose}')
                     if curr_pose == pos:
                         strats.append(strat)
                         break  # Stop iterating if we found the strategy for this position
-        print(f'strats at the moment: {strats}')
+        # print(f'strats at the moment: {strats}')
         # Find the most frequently chosen strategy in the cluster
         most_common_strat = max(set(strats), key=strats.count)
         clustered_data[i] = [{'most_common_strat': most_common_strat}]
     
     # Example output: {0: [{'most_common_strat': 'most_common_strat1'}], ...}
     final_deliberation = clustered_data
-    print(f'final deliberation: {final_deliberation}')
+    # print(f'final deliberation: {final_deliberation}')
     msg = f'final-delib:{final_deliberation}'
-    message_sender(msg, individual=True)
+    message_sender(msg, individual=False)
                
         
 # set up environments 
@@ -154,6 +158,7 @@ def generate_robot_central(num_robots):
             r.remove()
              
     id_msg = "ids"
+    id_ind = "id_ind"
         
     for i in range(num_robots):
         curr_key = f'agent-{i}'
@@ -175,6 +180,8 @@ def generate_robot_central(num_robots):
         # sets up metrics 
         population.append(rec_node)
         id_msg += " " + str(rec_node.getId())
+        id_ind += " " + curr_key
+        # id_msg += " " + curr_key
         
         
     for i in range(len(population)):
@@ -187,6 +194,7 @@ def generate_robot_central(num_robots):
         individual.getField('translation').setSFVec3f([0, 2, 0]) 
         
     emitter_individual.send(id_msg.encode('utf-8'))
+    emitter_individual.send(id_ind.encode('utf-8'))
          
 # runs simulation for designated amount of time 
 def run_seconds(t,waiting=False):

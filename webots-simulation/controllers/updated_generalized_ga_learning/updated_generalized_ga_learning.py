@@ -19,6 +19,7 @@ sys.path.append('../../')
 import utils
 import utils.bayes as bayes 
 import utils.globals as globals
+import ast
 
 using_bayes = globals.using_bayes
 
@@ -229,7 +230,7 @@ def interpret(timestep):
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
-        # print('incoming messages: ', given_id, message) 
+        print('incoming messages: ', given_id, message) 
         
         # want to enforce strategy by adding for bias to it here     
         if message[0] == "%" and str(message.split('-')[0][1:]) == str(given_id):
@@ -251,6 +252,18 @@ def interpret(timestep):
             found_something = False 
             
             receiver.nextPacket()
+            
+        elif 'final' in message: 
+            
+            dict_version = ast.literal_eval(message[12:])
+            agent_id = int(f'{given_id}')
+            print(f'dict version: {dict_version} agent id {agent_id}')
+            if agent_id in dict_version: 
+                next_action = dict_version[agent_id]
+                print(f'next agents action: {next_action}')
+                
+            receiver.nextPacket()
+        
             
         elif message == 'clean': 
             # want to pause controller until finished 

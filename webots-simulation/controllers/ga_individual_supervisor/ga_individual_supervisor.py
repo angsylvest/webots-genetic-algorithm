@@ -90,38 +90,7 @@ if using_bayes:
 
 
 def generate_heading(assigned_id = None):
-    global curr_robot_index
-    global population
-    
-    curr_pos = [population[curr_robot_index].getPosition()[0], population[curr_robot_index].getPosition()[1]]
-    
-    if assigned_id == None: 
-        closest_neigh = " "
-        
-        for i in range(len(population)):
-            if (i != curr_robot_index): 
-                other_pos = [population[i].getPosition()[0], population[i].getPosition()[1]]
-                dis = math.dist(curr_pos, other_pos)
-                if closest_neigh == " ":
-                    closest_neigh = str(population[i].getId())
-                    curr_dist = dis
-                    other_index = i
-                elif dis < curr_dist: 
-                    closest_neigh = str(population[i].getId())
-                    curr_dist = dis 
-                    other_index = i
-                    
-        neigh_closest = other_index 
-        
-    else: 
-        neigh_closest = assigned_id 
-    
-    print(f'following agent {neigh_closest} that is closest to {curr_robot_index}')
-    curr_x, curr_y = population[curr_robot_index].getPosition()[0], population[curr_robot_index].getPosition()[1]
-    neigh_x, neigh_y = population[neigh_closest].getPosition()[0], population[neigh_closest].getPosition()[1]
-    updated_heading = round(math.atan2(neigh_y-curr_y,neigh_x-curr_x),2)
-    
-    print(f'heading for {curr_robot_index} should be {updated_heading}')
+    pass
     
     
     
@@ -185,6 +154,7 @@ def message_listener(time_step):
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
+        # print(f'individual msgs: {message}')
             
         if 'fitness-scores' in message:
             fs = message.split(" ")[1:]
@@ -212,6 +182,16 @@ def message_listener(time_step):
                 emitter_individual.send(child.encode('utf-8'))
             
             receiver.nextPacket()
+            
+        elif 'id_ind' in message: 
+            id_msg = message.split(" ")[1:]
+            agent_list = {}
+            
+            for x, id in enumerate(id_msg): # will convert to nodes to eventual calculation 
+                agent_list[id] = (population[x].getPosition()[0], population[x].getPosition()[1])
+                
+            shared_map_complete.update_agent_positions(agent_list)
+            receiver.nextPacket() 
         
         ## access to robot id for node acquisition    
         elif 'ids' in message: 
@@ -221,10 +201,10 @@ def message_listener(time_step):
             for id in id_msg: # will convert to nodes to eventual calculation 
                 node = robot.getFromId(int(id))
                 population.append(node)
-                agent_list[id] = (node.getPosition()[0], node.getPosition()[1])
+                # agent_list[id] = (node.getPosition()[0], node.getPosition()[1])
                 ids.append(id)
                 
-            shared_map_complete.update_agent_positions(agent_list)
+            # shared_map_complete.update_agent_positions(agent_list)
             receiver.nextPacket() 
             
         elif 'size' in message: 
@@ -253,15 +233,16 @@ def message_listener(time_step):
             # reproduce_list.append(robo_index) 
             # print('robot found -- checking genotype', robo_index) 
             curr_orient = message_individual.split('[')[-1]
+            agent_list = {}
 
             if using_bayes: 
                 # want to be able to determine if should do coordination
                 for ind, rob in enumerate(population): 
-                    agent_list[ind] = (rob.getPosition()[0], rob.getPosition()[1])
-                shared_map_complete.update_agent_positions(agent_list)
-                curr_pose = (float(population[curr_robot_index].getPosition()[0])), float(population[curr_robot_index].getPosition()[1])
+                    agent_list[ind] = (round(rob.getPosition()[0],2), round(rob.getPosition()[1],2))
                 
-                # id_central = shared_map.find_central()
+                # print(f'current agent_list {agent_list}')
+                shared_map_complete.update_agent_positions(agent_list)
+                curr_pose = round((float(population[curr_robot_index].getPosition()[0])),2), round(float(population[curr_robot_index].getPosition()[1]),2)
 
                 map_subset_obs, map_subset_ag = shared_map_complete.subset(dim_size=1.0, central_loc=curr_pose)
 
@@ -272,14 +253,14 @@ def message_listener(time_step):
                     # 0: flock, 1: queue, 2: disperse! 
                     if num_env_types == 1: 
                         current_strat_index = multi_arm.sample_action()
-                        # msg = local_map.process_output(current_strat_index)
-                        msg = "" # temporarily empty
+                        msg = local_map.process_output(current_strat_index)
+                        # print(f'proposed strat: {msg}')
+                        # msg = "" # temporarily empty
                         curr_pos = [round(population[curr_robot_index].getPosition()[0],2), round(population[curr_robot_index].getPosition()[1],2)]
-                        msg_for_supervisor = f'agent:{given_id}-strat:{current_strat_index}-prop:{msg}-curr_pos:{curr_pos}'
+                        msg_for_supervisor = f'agent:{given_id}-strat:{current_strat_index}-curr_pos:{curr_pos}~prop:{msg}'
                         # print(f'outputted info to be sent for coordination: {msg}')
                         prev_time = robot.getTime()
-                        emitter.send(msg_for_supervisor.encode('utf-8'))
-                    pass 
+                        emitter.send(msg_for_supervisor.encode('utf-8')) 
 
             if not restrict_crossover: 
                 # only store best genotype 

@@ -231,18 +231,18 @@ class LocalMap():
     
 
 # def __main__():
-    # obstacle_locations = [(1, 1), (2, 2), (5, 5), (7, 7)]
-    # complete_map = CompleteMap(obstacle_locations=obstacle_locations, dims=10, obstacle_size=1, agent_size=0.5, bounds = (0, 10))
-    # complete_map.update_agent_positions([(3,3), (6,6)])
-    # central_loc = (5, 5)
-    # dim_size = 10
-    # map_subset_obs, map_subset_ag = complete_map.subset(dim_size=dim_size, central_loc=central_loc)
+#     obstacle_locations = [(1, 1), (2, 2), (5, 5), (7, 7)]
+#     complete_map = CompleteMap(obstacle_locations=obstacle_locations, dims=10, obstacle_size=1, agent_size=0.5, bounds = (0, 10))
+#     complete_map.update_agent_positions([(3,3), (6,6)])
+#     central_loc = (5, 5)
+#     dim_size = 10
+#     map_subset_obs, map_subset_ag = complete_map.subset(dim_size=dim_size, central_loc=central_loc)
 
-    # local_map = LocalMap(obstacle_pos=map_subset_obs, obstacle_size=dim_size, agent_pos=map_subset_ag, agent_size= 0.5, local_dim=dim_size, x_bounds=complete_map.x_bounds, y_bounds=complete_map.y_bounds, central_loc = central_loc)
-    # local_map.identify_agent_distr_type()
-    # local_map.identify_obstacle_distr_type()
+#     local_map = LocalMap(obstacle_pos=map_subset_obs, obstacle_size=dim_size, agent_pos=map_subset_ag, agent_size= 0.5, local_dim=dim_size, x_bounds=complete_map.x_bounds, y_bounds=complete_map.y_bounds, central_loc = central_loc)
+#     local_map.identify_agent_distr_type()
+#     local_map.identify_obstacle_distr_type()
 
 # if __name__ == "__main__":
-    # __main__()
+#     __main__()
 
 
