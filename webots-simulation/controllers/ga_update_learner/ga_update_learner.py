@@ -67,11 +67,11 @@ def message_listener(time_step):
             print(f'parsed msg: {message_parsed}')
             agent_info = message_parsed[0].split(':')[1]
             proposed_strat = message_parsed[1].split(':')[1]
-            # strat = message_parsed[2].split(':')[1]
+            strat = message_parsed[2][5:]
             pos = float(message_parsed[3].split(':')[1][1:-2])
             posy = float(message_parsed[4][:-2])
             
-            agent_dict[agent_info] = (proposed_strat, (pos, posy))
+            agent_dict[agent_info] = (proposed_strat, (pos, posy), strat)
             
             info_garnered.append(agent_dict)
             mediate_differences(info_garnered)
@@ -110,20 +110,6 @@ def mediate_differences(msgs):
     print(f'cluster list: {cluster_list}')
 
     cluster_merged = k_means.output_k_means_with_cluster(cluster_list, len(msgs))
-
-    # Create a dictionary to store clustered data
-    # clustered_data = {}
-    # for i, cluster in enumerate(cluster_merged):
-        # strats = []
-        # for pos in cluster: 
-            # Find the original dictionary containing curr_pose
-            # for a, (strat, curr_pose) in msgs.items():
-                # if curr_pose == pos:
-                    # strats.append(strat)
-                    # break  # Stop iterating if we found the strategy for this position
-        # Find the most frequently chosen strategy in the cluster
-        # most_common_strat = max(set(strats), key=strats.count)
-        # clustered_data[i] = [{'most_common_strat': most_common_strat}]
         
     clustered_data = {}
     for i, cluster in enumerate(cluster_merged):
@@ -131,7 +117,7 @@ def mediate_differences(msgs):
         for pos in cluster: 
             # Find the original dictionary containing curr_pose
             for agent_dict in msgs:
-                for a, (strat, curr_pose) in agent_dict.items():
+                for a, (strat, curr_pose, prop) in agent_dict.items():
                     print(f'iterating over diff items: {a}, {strat} and {curr_pose}')
                     if curr_pose == pos:
                         strats.append(strat)
