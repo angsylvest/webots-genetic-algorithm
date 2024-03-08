@@ -101,7 +101,6 @@ iteration = 0
 fitness = 0 
 curr_action = []
 
-
 def determine_env_type(): # maybe eventually 
     pass
 
@@ -326,12 +325,17 @@ prev_act = ""
 
 time_into_exploration = 0 
 just_begun = True 
+t_elapsed_constant = 10
+time_elapsed_since_robot = 0
+time_elapsed = 0 
+prev_msg = ""
 
 
 while robot.step(timestep) != -1:
     
     if not cleaning: 
         interpret(str(robot.step(timestep)))
+        
         if just_begun: # TODO: make more aligned with status of env
             # send individual supervisor agent id index 
             msg = f"assigned-{given_id}"
@@ -340,6 +344,7 @@ while robot.step(timestep) != -1:
 
 
         if robot.getTime() - prev_gen_check == 1: 
+            communicate_with_robot() # temporarily added here for debugging 
             prev_gen_check = robot.getTime()
             time_into_exploration += 1
 
@@ -417,14 +422,27 @@ while robot.step(timestep) != -1:
             reversing = True 
             move_backwards()
                         
-            # does each behavior after 1 sec    
+   
         if robot.getTime() - start_count >= 1: 
-            if collision.getValue() == 1:
-                fitness += 1
- 
+            # if collision.getValue() == 1:
+                # fitness += 1
+                # strat_obs[current_strat_index]["collisions"] += 1
+        
+            # communication threshold  
+            if not holding_something and not reversing: # max value for light 
+                if light_sensor.getValue() > 700 and light_sensor.getValue() < 900:
+                    # if time_into_generation != 0: 
+                        # agent_observation['num_interactions'] = (agent_observation['num_interactions'] + 1) / time_into_generation
+                    if time_elapsed_since_robot > t_elapsed_constant: 
+                        communicate_with_robot()
+                        time_elapsed_since_robot = 0 # reset time step      
+                # elif light_sensor.getValue() > 800: 
+                time_elapsed_since_robot += 1 # increment every time (more interactions) 
+                
+                
             start_count = robot.getTime()  
-            # if not holding_something:  # don't take into account homing state 
-            #     time_elapsed += 1
+            if not holding_something:  # don't take into account homing state 
+                time_elapsed += 1
             
             # check for collisions with other robot 
             list = camera.getRecognitionObjects()
@@ -433,21 +451,27 @@ while robot.step(timestep) != -1:
                 if (object_encountered == False):
                     # frequency of observing foragable objects 
                     num_not_found = checkForCollectable(camera.getRecognitionObjects())
+                    # if time_into_generation != 0: 
+                        # agent_observation['num_objects_observed'] = ((agent_observation['num_objects_observed']*(time_into_generation-1)) + num_not_found) / time_into_generation
                     
                     # attempt to get object detected 
                     if min(dist_vals) < 500 and len(list) != 0:
                         firstObject = camera.getRecognitionObjects()[0]
                         count = len(camera.getRecognitionObjects())
-                        id = str(firstObject.getId())
+                        id = str(firstObject.get_id())
                         if id not in obj_found_so_far:
                             id = "$" + str(given_id) + "-" + str(id) # indication that it is a object to be deleted 
                             if prev_msg != id: 
                                 emitter.send(str(id).encode('utf-8'))
                                 prev_msg = id 
-
+                        # else: 
+                            # time_elapsed_since_block += 1 # on a per sec basis    
+                    # else: 
+                        # time_elapsed_since_block += 1 # on a per sec basis 
         i+=1
             
         pass
+
     
 # Enter here exit cleanup code.
 

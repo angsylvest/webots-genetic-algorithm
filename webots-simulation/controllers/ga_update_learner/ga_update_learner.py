@@ -192,11 +192,17 @@ def run_optimization():
     global t_allocated
 
     while t_so_far < t_allocated: 
-        message_listener(robot.getTimeStep())
+        message_listener(robot.getTime())
         if t_so_far == 0: 
             # set coordination type here 
             generate_robot_central(5)
             # message_sender("flocking",True)
+            fitness_scores = ["!" for i in range(len(population))]
+            
+            msg = 'fs' # placeholder for now
+            
+            # if (assessing and trial % 2) == 0 or not assessing: 
+            emitter_individual.send(str(msg).encode('utf-8'))
             
         run_seconds(1)
         t_so_far += 1 
@@ -265,7 +271,7 @@ main()
 # # statistics collected 
 # population = []
 # initial_genotypes = []
-# pop_genotypes = [] 
+pop_genotypes = [] 
 # found_list = []
 # total_found = 0
 # block_list = []

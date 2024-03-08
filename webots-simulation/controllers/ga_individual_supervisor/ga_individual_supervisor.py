@@ -66,6 +66,7 @@ fit_update = False
 start = 0 
 prev_time = robot.getTime()
 time_elapsed = 0 
+comparing_genes = False
 
 prev_msg = ""
 random.seed(10)
@@ -79,7 +80,7 @@ num_env_types = 1 # only used for high density areas?
 dist_covered = [0 for i in range(num_coordination_strat)]
 
 if using_bayes:
-    shared_map = shared_map.CompleteMap(obstacle_locations=[], dims = 4, agent_size=0.2, x_bounds=(-2,2), y_bounds=(-2,2))
+    shared_map_complete = shared_map.CompleteMap(obstacle_locations=[], obstacle_size = 0.2, dims = 4, agent_size=0.2, x_bounds=(-2,2), y_bounds=(-2,2))
 
     if num_env_types > 1: 
         multi_arm = [bayes.NArmedBanditDrift(num_coordination_strat) for i in range(num_env_types)]
@@ -178,6 +179,7 @@ def message_listener(time_step):
 
     global agent_list
     global time_elapsed
+    global prev_time
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -185,6 +187,10 @@ def message_listener(time_step):
         if 'fitness-scores' in message:
             fs = message.split(" ")[1:]
             overall_fitness_scores = [int(i) for i in fs]
+            receiver.nextPacket()
+            
+        elif 'fs' in message: 
+            overall_fitness_scores = [int(0) for i in range(5)]
             receiver.nextPacket()
          
         ## resets to current population genotypes     
@@ -216,7 +222,7 @@ def message_listener(time_step):
                 agent_list[id] = (node.getPosition()[0], node.getPosition()[1])
                 ids.append(id)
                 
-            shared_map.update_agent_positions(agent_list)
+            shared_map_complete.update_agent_positions(agent_list)
             receiver.nextPacket() 
             
         elif 'size' in message: 
@@ -238,7 +244,7 @@ def message_listener(time_step):
             
     if receiver_individual.getQueueLength()>0:  
         message_individual = receiver_individual.getData().decode('utf-8')
-        # print('indiviudal msgs --', message_individual)
+        print('indiviudal msgs --', message_individual)
             
         if 'encounter' in message_individual: 
             robo_index = int(message_individual.split('-')[0])
@@ -248,16 +254,17 @@ def message_listener(time_step):
 
             if using_bayes: 
                 # want to be able to determine if should do coordination
-                for rob in population: 
-                    agent_list[rob] = (node.getPosition()[0], node.getPosition()[1])
-                shared_map.update_agent_positions(agent_list)
+                for ind, rob in enumerate(population): 
+                    agent_list[ind] = (rob.getPosition()[0], rob.getPosition()[1])
+                shared_map_complete.update_agent_positions(agent_list)
+                curr_pose = (float(population[curr_robot_index].getPosition()[0])), float(population[curr_robot_index].getPosition()[1])
+                
+                # id_central = shared_map.find_central()
 
-                id_central = shared_map.find_central((population[curr_robot_index].getPosition()[0], population[curr_robot_index].getPosition()[1]))
-
-                map_subset_obs, map_subset_ag = shared_map.subset(dim_size=dim_size, central_loc=id_central)
+                map_subset_obs, map_subset_ag = shared_map_complete.subset(dim_size=1.0, central_loc=curr_pose)
 
                 # find subset 
-                local_map = shared_map.LocalMap(obstacle_pos=map_subset_obs, obstacle_size=shared_map.obstacle_size, agent_pos=map_subset_ag, agent_size= 0.5, local_dim=dim_size, x_bounds=shared_map.x_bounds, y_bounds=shared_map.y_bounds, central_loc=id_central) 
+                local_map = shared_map.LocalMap(obstacle_pos=map_subset_obs, obstacle_size=shared_map_complete.obstacle_size, agent_pos=map_subset_ag, agent_size= 0.5, local_dim=1.0, x_bounds=shared_map_complete.x_bounds, y_bounds=shared_map_complete.y_bounds, central_loc=curr_pose) 
                 if local_map.is_dense_enough() and (robot.getTime() - prev_time) > 20:
                     # sample relevant strategy 
                     # 0: flock, 1: queue, 2: disperse! 
