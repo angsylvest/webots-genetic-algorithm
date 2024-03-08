@@ -10,6 +10,14 @@ Optimization algorithm - Collaboration-oriented
 Angel Sylvester 2022
 """
 
+# ensure that we can access utils package to streamline tasks 
+import sys 
+sys.path.append('../../')
+import utils
+import utils.bayes as bayes 
+import utils.globals as globals
+import utils.k_means as k_means
+
 
 # set-up robot 
 TIME_STEP = 32
@@ -34,6 +42,8 @@ r_pos_to_generate = []
 population = []
 
 input_from_others = {}
+info_garnered = []
+prev_time = robot.getTime()
 
 def message_sender(msg, individual = False):
     if not individual: 
@@ -48,14 +58,52 @@ def message_listener(time_step):
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
+        if 'agent' in message:
+            if len(info_garnered) > 5 or (robot.getTime() - prev_time) > 10: 
+                mediate_differences(info_garnered)
+                info_garnered = []
+                prev_time = robot.getTime()
+            else: 
+                info_garnered.append(message)
+                
         receiver.nextPacket() 
 
+def create_reverse_lookup_dict(dictionary):
+    return {value: key for key, value in dictionary.items()}
+
+def get_key_by_value(dictionary, value):
+    reverse_lookup_dict = create_reverse_lookup_dict(dictionary)
+    return reverse_lookup_dict.get(value)
 
 def mediate_differences(msgs):
     # assuming msgs is a list of suggestions
-    # ex format: [{agent_id: strat, curr_pose} ..] 
-    final_deliberation = ""
-    emitter_individual.send(final_deliberation.encode('utf-8'))
+    # ex format: [{agent_id: (strat, curr_pose)} ..] 
+
+    cluster_list = []
+    for a in msgs: 
+        curr_pose = msgs[a][1]
+        cluster_list.append(curr_pose)
+
+    cluster_merged = k_means.output_k_means_with_cluster(cluster_list, 5)
+
+    # Create a dictionary to store clustered data
+    clustered_data = {}
+    for i, cluster in enumerate(cluster_merged):
+        strats = []
+        for pos in cluster: 
+            # Find the original dictionary containing curr_pose
+            for a, (strat, curr_pose) in msgs.items():
+                if curr_pose == pos:
+                    strats.append(strat)
+                    break  # Stop iterating if we found the strategy for this position
+        # Find the most frequently chosen strategy in the cluster
+        most_common_strat = max(set(strats), key=strats.count)
+        clustered_data[i] = [{'most_common_strat': most_common_strat}]
+    
+    # Example output: {0: [{'most_common_strat': 'most_common_strat1'}], ...}
+    final_deliberation = clustered_data
+    msg = f'final-delib:{final_deliberation}'
+    message_sender(msg, individual=True)
                
         
 # set up environments 

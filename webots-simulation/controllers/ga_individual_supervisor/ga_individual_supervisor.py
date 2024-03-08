@@ -64,6 +64,8 @@ emitter_individual.setChannel((int(given_id) * 10) - 1)
 updated = False
 fit_update = False 
 start = 0 
+prev_time = robot.getTime()
+time_elapsed = 0 
 
 prev_msg = ""
 random.seed(10)
@@ -175,6 +177,7 @@ def message_listener(time_step):
     global curr_robot_index
 
     global agent_list
+    global time_elapsed
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -255,13 +258,17 @@ def message_listener(time_step):
 
                 # find subset 
                 local_map = shared_map.LocalMap(obstacle_pos=map_subset_obs, obstacle_size=shared_map.obstacle_size, agent_pos=map_subset_ag, agent_size= 0.5, local_dim=dim_size, x_bounds=shared_map.x_bounds, y_bounds=shared_map.y_bounds, central_loc=id_central) 
-                if local_map.is_dense_enough():
+                if local_map.is_dense_enough() and (robot.getTime() - prev_time) > 20:
                     # sample relevant strategy 
                     # 0: flock, 1: queue, 2: disperse! 
                     if len(num_env_types) == 1: 
                         current_strat_index = multi_arm.sample_action()
                         msg = local_map.process_output(current_strat_index)
+                        curr_pos = [population[curr_robot_index].getPosition()[0], population[curr_robot_index].getPosition()[1]]
+                        msg_for_supervisor = f'agent:{given_id}-strat:{current_strat_index}-prop:{msg}-curr_pos:{curr_pos}'
                         print(f'outputted info to be sent for coordination: {msg}')
+                        prev_time = robot.getTime()
+                        emitter.send(msg_for_supervisor.encode('utf-8'))
                     pass 
 
             

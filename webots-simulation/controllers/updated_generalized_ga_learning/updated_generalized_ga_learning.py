@@ -275,6 +275,10 @@ def interpret(timestep):
             receiver_individual.nextPacket()
             # TODO: fill out with valid reset to agent actions
 
+        elif 'final-delib' in message: 
+            # process input to determine next action 
+            print(f'final delib info: {message}')
+            receiver_individual.nextPacket() 
         # coordination task 
         # need schedule and task (if anything)
             

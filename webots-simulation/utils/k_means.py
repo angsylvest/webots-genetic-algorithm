@@ -53,17 +53,11 @@ def output_k_means_with_cluster(data, k):
 
 
 # Example usage
-# data = [[1, 2], [2, 3], [8, 7], [10, 8], [1, 8], [9, 11]]
-# clusters = k_means(data, 4)
-# for cluster in clusters:
-#     print(f'cluster: {cluster}')
+# data = [[1, 2], [2, 3], [8, 7], [10, 8], [1, 8], [9, 11], [3, 3], [9, 9]]
+# k = 4
+# clusters = k_means(data, k)
+# # print(f'clusters: {clusters}')
+# merged_clusters_list = merge_clusters(clusters, distance_threshold=5)
 
-# Example usage
-data = [[1, 2], [2, 3], [8, 7], [10, 8], [1, 8], [9, 11], [3, 3], [9, 9]]
-k = 4
-clusters = k_means(data, k)
-# print(f'clusters: {clusters}')
-merged_clusters_list = merge_clusters(clusters, distance_threshold=5)
-
-for cluster in merged_clusters_list:  
-    print(f'updated clusters: {cluster}')
+# for cluster in merged_clusters_list:  
+#     print(f'updated clusters: {cluster}')
