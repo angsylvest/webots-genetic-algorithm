@@ -19,6 +19,8 @@ import utils.globals as globals
 import utils.shared_map as shared_map
 
 using_bayes = globals.using_bayes
+dist_covered = 0
+finished_task = False
 
 # global collected_count 
 collected_count = []
@@ -81,7 +83,6 @@ if using_bayes:
         multi_arm = [bayes.NArmedBanditDrift(num_coordination_strat) for i in range(num_env_types)]
     else: 
         multi_arm = bayes.NArmedBanditDrift(num_coordination_strat)
-
 
 
 def generate_heading(assigned_id = None):
@@ -248,10 +249,12 @@ def message_listener(time_step):
                     agent_list[rob] = (node.getPosition()[0], node.getPosition()[1])
                 shared_map.update_agent_positions(agent_list)
 
-                map_subset_obs, map_subset_ag = shared_map.subset(dim_size=dim_size, central_loc=central_loc)
+                id_central = shared_map.find_central((population[curr_robot_index].getPosition()[0], population[curr_robot_index].getPosition()[1]))
+
+                map_subset_obs, map_subset_ag = shared_map.subset(dim_size=dim_size, central_loc=id_central)
 
                 # find subset 
-                local_map = shared_map.LocalMap(obstacle_pos=map_subset_obs, obstacle_size=complete_map.obstacle_size, agent_pos=map_subset_ag, agent_size= 0.5, local_dim=dim_size, x_bounds=complete_map.x_bounds, y_bounds=complete_map.y_bounds, central_loc=central_loc) 
+                local_map = shared_map.LocalMap(obstacle_pos=map_subset_obs, obstacle_size=shared_map.obstacle_size, agent_pos=map_subset_ag, agent_size= 0.5, local_dim=dim_size, x_bounds=shared_map.x_bounds, y_bounds=shared_map.y_bounds, central_loc=id_central) 
                 if local_map.is_dense_enough():
                     # sample relevant strategy 
                     # 0: flock, 1: queue, 2: disperse! 

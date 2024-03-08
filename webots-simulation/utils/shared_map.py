@@ -32,6 +32,9 @@ class CompleteMap():
 
         print(f'subsetted agents: {subset_agents}')
         return subset_obstacles, subset_agents
+    
+    def find_central(self, curr_pose):
+        pass
 
     
     
@@ -78,7 +81,7 @@ class LocalMap():
             print('whoops does not exist')
 
 
-    
+
     # for flocking strategy 
     def assign_leaders(self):
         # can be updated each time to be slightly before where agent is

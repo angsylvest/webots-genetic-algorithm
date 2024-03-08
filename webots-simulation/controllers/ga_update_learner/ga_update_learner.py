@@ -51,8 +51,9 @@ def message_listener(time_step):
         receiver.nextPacket() 
 
 
-def mediate_differences():
-
+def mediate_differences(msgs):
+    # assuming msgs is a list of suggestions
+    # ex format: [{agent_id: strat, curr_pose} ..] 
     final_deliberation = ""
     emitter_individual.send(final_deliberation.encode('utf-8'))
                
