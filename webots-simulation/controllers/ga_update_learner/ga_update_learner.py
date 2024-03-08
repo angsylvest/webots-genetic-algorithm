@@ -54,17 +54,34 @@ def message_sender(msg, individual = False):
             
 def message_listener(time_step):
     global start 
-    global prev_msg 
+    global prev_msg
+    
+    global info_garnered 
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
         if 'agent' in message:
-            if len(info_garnered) > 5 or (robot.getTime() - prev_time) > 10: 
-                mediate_differences(info_garnered)
-                info_garnered = []
-                prev_time = robot.getTime()
-            else: 
-                info_garnered.append(message)
+            print(f'agent message: {message}')
+            agent_dict = {}
+            message_parsed = message.split('-')
+            print(f'parsed msg: {message_parsed}')
+            agent_info = message_parsed[0].split(':')[1]
+            proposed_strat = message_parsed[1].split(':')[1]
+            # strat = message_parsed[2].split(':')[1]
+            pos = float(message_parsed[3].split(':')[1][1:-2])
+            posy = float(message_parsed[4][:-2])
+            
+            agent_dict[agent_info] = (proposed_strat, (pos, posy))
+            
+            info_garnered.append(agent_dict)
+            mediate_differences(info_garnered)
+            
+            #if len(info_garnered) > 5 or (robot.getTime() - prev_time) > 10: 
+             #   mediate_differences(info_garnered)
+              #  info_garnered = []
+               # prev_time = robot.getTime()
+            #else: 
+             #   info_garnered.append(message)
                 
         receiver.nextPacket() 
 
@@ -78,30 +95,55 @@ def get_key_by_value(dictionary, value):
 def mediate_differences(msgs):
     # assuming msgs is a list of suggestions
     # ex format: [{agent_id: (strat, curr_pose)} ..] 
-
+    print(f'messages: {msgs}')
+    
+    
     cluster_list = []
     for a in msgs: 
-        curr_pose = msgs[a][1]
-        cluster_list.append(curr_pose)
+        print(f'agents in msgs: {a}')
+        
+        for key in a: 
+            curr_pose = a[key][1]
+            x,y = curr_pose
+            cluster_list.append((x,y))
+            
+    print(f'cluster list: {cluster_list}')
 
-    cluster_merged = k_means.output_k_means_with_cluster(cluster_list, 5)
+    cluster_merged = k_means.output_k_means_with_cluster(cluster_list, len(msgs))
 
     # Create a dictionary to store clustered data
+    # clustered_data = {}
+    # for i, cluster in enumerate(cluster_merged):
+        # strats = []
+        # for pos in cluster: 
+            # Find the original dictionary containing curr_pose
+            # for a, (strat, curr_pose) in msgs.items():
+                # if curr_pose == pos:
+                    # strats.append(strat)
+                    # break  # Stop iterating if we found the strategy for this position
+        # Find the most frequently chosen strategy in the cluster
+        # most_common_strat = max(set(strats), key=strats.count)
+        # clustered_data[i] = [{'most_common_strat': most_common_strat}]
+        
     clustered_data = {}
     for i, cluster in enumerate(cluster_merged):
         strats = []
         for pos in cluster: 
             # Find the original dictionary containing curr_pose
-            for a, (strat, curr_pose) in msgs.items():
-                if curr_pose == pos:
-                    strats.append(strat)
-                    break  # Stop iterating if we found the strategy for this position
+            for agent_dict in msgs:
+                for a, (strat, curr_pose) in agent_dict.items():
+                    print(f'iterating over diff items: {a}, {strat} and {curr_pose}')
+                    if curr_pose == pos:
+                        strats.append(strat)
+                        break  # Stop iterating if we found the strategy for this position
+        print(f'strats at the moment: {strats}')
         # Find the most frequently chosen strategy in the cluster
         most_common_strat = max(set(strats), key=strats.count)
         clustered_data[i] = [{'most_common_strat': most_common_strat}]
     
     # Example output: {0: [{'most_common_strat': 'most_common_strat1'}], ...}
     final_deliberation = clustered_data
+    print(f'final deliberation: {final_deliberation}')
     msg = f'final-delib:{final_deliberation}'
     message_sender(msg, individual=True)
                

@@ -6,3 +6,4 @@ sim_type = "random" # what will be written in csv
 using_bayes = True
 thompson_sampling = False
 decay = True 
+restrict_crossover = True

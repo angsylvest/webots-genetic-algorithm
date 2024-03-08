@@ -19,6 +19,7 @@ import utils.globals as globals
 import utils.shared_map as shared_map
 
 using_bayes = globals.using_bayes
+restrict_crossover = globals.restrict_crossover
 dist_covered = 0
 finished_task = False
 
@@ -180,6 +181,7 @@ def message_listener(time_step):
     global agent_list
     global time_elapsed
     global prev_time
+    global restrict_crossover
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -244,7 +246,7 @@ def message_listener(time_step):
             
     if receiver_individual.getQueueLength()>0:  
         message_individual = receiver_individual.getData().decode('utf-8')
-        print('indiviudal msgs --', message_individual)
+        # print('indiviudal msgs --', message_individual)
             
         if 'encounter' in message_individual: 
             robo_index = int(message_individual.split('-')[0])
@@ -265,44 +267,45 @@ def message_listener(time_step):
 
                 # find subset 
                 local_map = shared_map.LocalMap(obstacle_pos=map_subset_obs, obstacle_size=shared_map_complete.obstacle_size, agent_pos=map_subset_ag, agent_size= 0.5, local_dim=1.0, x_bounds=shared_map_complete.x_bounds, y_bounds=shared_map_complete.y_bounds, central_loc=curr_pose) 
-                if local_map.is_dense_enough() and (robot.getTime() - prev_time) > 20:
+                if local_map.is_dense_enough(): #and (robot.getTime() - prev_time) > 20:
                     # sample relevant strategy 
                     # 0: flock, 1: queue, 2: disperse! 
-                    if len(num_env_types) == 1: 
+                    if num_env_types == 1: 
                         current_strat_index = multi_arm.sample_action()
-                        msg = local_map.process_output(current_strat_index)
-                        curr_pos = [population[curr_robot_index].getPosition()[0], population[curr_robot_index].getPosition()[1]]
+                        # msg = local_map.process_output(current_strat_index)
+                        msg = "" # temporarily empty
+                        curr_pos = [round(population[curr_robot_index].getPosition()[0],2), round(population[curr_robot_index].getPosition()[1],2)]
                         msg_for_supervisor = f'agent:{given_id}-strat:{current_strat_index}-prop:{msg}-curr_pos:{curr_pos}'
-                        print(f'outputted info to be sent for coordination: {msg}')
+                        # print(f'outputted info to be sent for coordination: {msg}')
                         prev_time = robot.getTime()
                         emitter.send(msg_for_supervisor.encode('utf-8'))
                     pass 
 
-            
-            # only store best genotype 
-            other_index = find_nearest_robot_genotype(robo_index)
-            if overall_fitness_scores[other_index] > curr_best: 
-                if not comparing_genes: 
-                    curr_best = other_index
-                    child = 'child' + str(reproduce(pop_genotypes[robo_index], pop_genotypes[curr_best]))
-                    # print('child ---', child) 
-                    # uncomment if want to just use curr_best genotype 
-                    # child = 'child' + str(pop_genotypes[curr_best]))
-                    
-                    emitter_individual.send(child.encode('utf-8'))
+            if not restrict_crossover: 
+                # only store best genotype 
+                other_index = find_nearest_robot_genotype(robo_index)
+                if overall_fitness_scores[other_index] > curr_best: 
+                    if not comparing_genes: 
+                        curr_best = other_index
+                        child = 'child' + str(reproduce(pop_genotypes[robo_index], pop_genotypes[curr_best]))
+                        # print('child ---', child) 
+                        # uncomment if want to just use curr_best genotype 
+                        # child = 'child' + str(pop_genotypes[curr_best]))
+                        
+                        emitter_individual.send(child.encode('utf-8'))
+                    else: 
+                        child_1, child_2 = reproduce(pop_genotypes[int(given_id)], pop_genotypes[int(curr_best)], multi = comparing_genes)
+                        child = "child-" + str(child_1) + '-' + str(child_2) 
+                        emitter_individual.send(child.encode('utf-8'))
+                        
                 else: 
-                    child_1, child_2 = reproduce(pop_genotypes[int(given_id)], pop_genotypes[int(curr_best)], multi = comparing_genes)
-                    child = "child-" + str(child_1) + '-' + str(child_2) 
+                    child = 'child' + str(reproduce(pop_genotypes[robo_index], pop_genotypes[robo_index]))
                     emitter_individual.send(child.encode('utf-8'))
+                    # emitter_individual.send('penalize'.encode('utf-8'))
                     
-            else: 
-                child = 'child' + str(reproduce(pop_genotypes[robo_index], pop_genotypes[robo_index]))
-                emitter_individual.send(child.encode('utf-8'))
-                # emitter_individual.send('penalize'.encode('utf-8'))
-                   
-            comm_information = "comm-" + str(robo_index) + "-" + str(other_index) + "-[" + str(curr_orient)
-            emitter_individual.send(comm_information.encode('utf-8'))
-            
+                comm_information = "comm-" + str(robo_index) + "-" + str(other_index) + "-[" + str(curr_orient)
+                emitter_individual.send(comm_information.encode('utf-8'))
+                
             receiver_individual.nextPacket()
             
         if 'assigned' in message_individual:

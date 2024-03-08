@@ -30,7 +30,7 @@ class CompleteMap():
         # subset_agents = [(x, y) for (x, y) in self.agent_positions if min_x <= x <= max_x and min_y <= y <= max_y]
         subset_agents = {key: value for key, value in self.agents.items() if min_x <= value[0] <= max_x and min_y <= value[1] <= max_y}
 
-        print(f'subsetted agents: {subset_agents}')
+        # print(f'subsetted agents: {subset_agents}')
         return subset_obstacles, subset_agents
     
     def find_central(self, curr_pose):
