@@ -260,8 +260,8 @@ def interpret(timestep):
             print(f'dict version: {dict_version} agent id {agent_id}')
             if agent_id in dict_version: 
                 next_action = dict_version[agent_id]
-                print(f'next agents action: {next_action}')
-                
+                strats = ast.literal_eval(next_action[0]['strat_to_use'])
+                print(f'next agents action: {next_action} and strats {strats}')
             receiver.nextPacket()
         
             

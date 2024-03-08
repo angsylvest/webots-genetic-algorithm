@@ -116,24 +116,28 @@ def mediate_differences(msgs):
     cluster_merged = k_means.output_k_means_with_cluster(cluster_list, len(msgs))
         
     clustered_data = {}
+    proposals = []
     for i, cluster in enumerate(cluster_merged):
         strats = []
+        proposals = []
         for pos in cluster: 
+      
             # Find the original dictionary containing curr_pose
             for agent_dict in msgs:
                 for a, (strat, curr_pose, prop) in agent_dict.items():
                     # print(f'iterating over diff items: {a}, {strat}, {prop} and {curr_pose}')
                     if curr_pose == pos:
+                        proposals.append(prop)
                         strats.append(strat)
                         break  # Stop iterating if we found the strategy for this position
         # print(f'strats at the moment: {strats}')
         # Find the most frequently chosen strategy in the cluster
         most_common_strat = max(set(strats), key=strats.count)
-        clustered_data[i] = [{'most_common_strat': most_common_strat}]
+        clustered_data[i] = [{'most_common_strat': most_common_strat, 'strat_to_use': proposals[0]}]
     
     # Example output: {0: [{'most_common_strat': 'most_common_strat1'}], ...}
     final_deliberation = clustered_data
-    # print(f'final deliberation: {final_deliberation}')
+    print(f'final deliberation: {final_deliberation}')
     msg = f'final-delib:{final_deliberation}'
     message_sender(msg, individual=False)
                
