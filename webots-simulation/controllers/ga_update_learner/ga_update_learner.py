@@ -106,24 +106,35 @@ def mediate_differences(msgs):
     print(f'messages: {msgs}')
     
     cluster_list = []
+    ids = []
+    master_dict = {}
+    agent_pos = {}
+    
     for a in msgs: 
+        print(f'a in messages {a}')
+        
         # for each dict of strategies in list (from each individual agent) 
         # [{'0': (1, (0.04, 0.0), '{0: (0.04, -0.04), 1: (-0.25, 0.02), 2: (-0.05, -0.07), 3: (0.19, -0.01), 4: (-0.08, -0.18)}')}]
         for key in a: 
-            print(f'key in a: {a[key]}')
-            curr_pose = a[key][1]
-            info_from_strat = a[key][2]
-            print(f'info from strat: {info_from_strat}')
-
+            agent_info = a[key]
+            
+            info_from_strat = agent_info[2]
+            curr_pose = agent_info[1]
+                
             for a in info_from_strat: 
                 (x,y) = info_from_strat[a]
+                master_dict[(x,y)] = a 
                 if (x,y) not in cluster_list: 
                     x,y = info_from_strat[a]
                     cluster_list.append((x,y))
+                    
+                    
+    print(f'master agent_pos: {master_dict}')
             
 
     cluster_merged = k_means.output_k_means_with_cluster(cluster_list, len(msgs))
     
+        
     print(f'(merged) cluster list: {cluster_merged}')
     clustered_data = {}
     proposals = []
@@ -131,11 +142,13 @@ def mediate_differences(msgs):
     for i, cluster in enumerate(cluster_merged):
         strats = []
         proposals = []
+        agent_pos = {}
         
         print(f'cluster: {cluster}')
         c = cluster
         
         for pos in c: 
+            agent_pos[master_dict[pos]] = pos
       
             # Find the original dictionary containing curr_pose
             for agent_dict in msgs:
@@ -151,10 +164,11 @@ def mediate_differences(msgs):
         # print(f'strats at the moment: {strats}')
         # Find the most frequently chosen strategy in the cluster
         most_common_strat = max(set(strats), key=strats.count)
-        clustered_data[i] = [{'most_common_strat': most_common_strat, 'strat_to_use': proposals[0]}]
+        print(f'updated agent pos: {agent_pos}')
 
-        localMap = shared_map.LocalMap(obstacle_pos=[], obstacle_size=0.2, agent_pos=cluster, agent_size= 0.5, local_dim=1.0, x_bounds=(-1,1), y_bounds=(-1,1), central_loc=()) # just used to generate strat
+        localMap = shared_map.LocalMap(obstacle_pos=[], obstacle_size=0.2, agent_pos=agent_pos, agent_size= 0.5, local_dim=1.0, x_bounds=(-1,1), y_bounds=(-1,1), central_loc=()) # just used to generate strat
         strat_plan = localMap.process_output(most_common_strat)
+        clustered_data[i] = [{'most_common_strat': most_common_strat, 'strat_to_use': strat_plan}]
 
         print(f'generated strategy for cluster: {strat_plan}')
     # Example output: {0: [{'most_common_strat': 'most_common_strat1'}], ...}

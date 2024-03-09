@@ -210,26 +210,32 @@ def process_action(current_pos):
     global coord_status
     
     x,y = current_pos
-    goalx, goaly = curr_action 
-    
     
     if type_of_action == 0: # flock
         # just continue moving to spot
-        if (math.dist([x, y], [goalx,goaly])): 
-            coord_status = False 
-        else: 
-            coord_status = True
+        
+        if curr_action == 'leader':
+            curr_action = []
+            coord_status = True # just proceed with original movement 
+        else:  
+            goalx, goaly = curr_action 
+            if (math.dist([x, y], [goalx,goaly])): 
+                coord_status = False 
+            else: 
+                coord_status = True
         
     elif type_of_action == 1: # queue
-        if robot.getTime() - time_queued < curr_action: 
+        if robot.getTime() - time_queued >= curr_action: 
             coord_status = True 
             curr_action = [] 
             # wait
         else: 
             # can do action
+            # time_queued = robot.getTime()
             coord_status = False        
     
     elif type_of_action == 2: # disperse
+        goalx, goaly = curr_action 
         if (math.dist([x, y], [goalx,goaly])): 
             coord_status = False 
         else: 
@@ -264,6 +270,7 @@ def interpret(timestep):
     global goal_posx
     global goal_posy
     global type_of_action
+    global time_queued
     
     global forward_per_sec
     global prev_act
@@ -300,8 +307,7 @@ def interpret(timestep):
             agent_id = int(f'{given_id}')
             
             curr_strategy_proposed = {}
-            
-            
+        
             for key in dict_version: 
                print(f'key {key}')
                cluster_dict = (dict_version[key][0])
@@ -309,9 +315,10 @@ def interpret(timestep):
                if agent_id in strat:
                    curr_action = (strat[agent_id])
                    type_of_action = cluster_dict['most_common_strat']
+                   time_queued = robot.getTime()
             
             print(f'dict version {dict_version}: {agent_id} agent id {agent_id} with next_action: {curr_action} for strat {type_of_action}')
-            just_begun = True 
+
             
             receiver.nextPacket()
         
@@ -334,7 +341,9 @@ def interpret(timestep):
 
         if 'episode-agent-complete' in message:
             # reset agent info 
-            curr_action = [0,0] # set to nothing initially
+            curr_action = [] # set to nothing initially
+            type_of_action = 0
+            
             receiver_individual.nextPacket()
             # TODO: fill out with valid reset to agent actions
 
@@ -426,19 +435,20 @@ while robot.step(timestep) != -1:
         # do action sequence 
         cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
         if not holding_something and not reversing and not moving_forward and curr_action == []: 
+            # print('proceeding with original task') 
             # goal_posx, goal_posy = curr_action[0] + cd_x, curr_action[0] + cd_y # TODO: not correct, but logic is there 
             if math.dist([cd_x, cd_y], [0,0]) > 0.05:  
                 if robot.getTime() - prev_time > time_allocated: # if unable to complete, not encouraged
                     pass 
                 else: 
-                    print('proceeding with original path')
+                    # print('proceeding with original path')
                     chosen_direction = round(math.atan2(0-cd_y,0-cd_x),2) 
             else: # request new action 
                 pass
            
                 
         if not holding_something and not reversing and not moving_forward and curr_action != []:
-            done = process_action(current_pos)
+            done = process_action((cd_x, cd_y))
             
             if not done: 
                 if type_of_action != 1:
@@ -451,16 +461,14 @@ while robot.step(timestep) != -1:
                         if robot.getTime() - prev_time > time_allocated: # if unable to complete, not encouraged
                             pass 
                         else: 
-                            print('proceeding with original path')
+                            # print('proceeding with original path')
                             chosen_direction = round(math.atan2(0-cd_y,0-cd_x),2) 
-                    else: # request new action 
-                        curr_action = []
-                        done = True
-                        print(f'finished coord task')
+                else: # request new action 
+                    curr_action = []
+                    done = True
+                    print(f'finished coord task')
             
-       
-                  
-                        
+           
         roll, pitch, yaw = inertia.getRollPitchYaw()
         yaw = round(yaw, 2)
     

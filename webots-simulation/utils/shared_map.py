@@ -63,7 +63,7 @@ class LocalMap():
         queue_assignments = {}
         
         for ind, item in enumerate(self.agent_pos):
-            queue_assignments[ind] = self.duration*ind
+            queue_assignments[item] = self.duration*ind
 
         return queue_assignments
     
@@ -87,15 +87,17 @@ class LocalMap():
     def assign_leaders(self):
         # can be updated each time to be slightly before where agent is
         assignments = {}
+        print(f'agent pos so far: {self.agent_pos}')
         
         for ind, item in enumerate(self.agent_pos): 
             if ind == 0: 
-                leader = ind # self.agent_pos[ind] # just random 
-                assignments[0] = "leader"
+                leader = item # self.agent_pos[ind] # just random 
+                assignments[item] = "leader"
             
             else: 
-                curr_agent_pose = self.agent_pos[ind]
-                assignments[item] = self.get_updated_goal(curr_agent_pose, leader, 0.2)
+                curr_agent_pose = self.agent_pos[item]
+                leader_goal = self.agent_pos[leader]
+                assignments[item] = self.get_updated_goal(curr_agent_pose, leader_goal, 0.2)
                 leader = ind # self.agent_pos[ind] # just random 
 
 
@@ -108,8 +110,10 @@ class LocalMap():
         center = self.calculate_center(self.agent_pos)
 
         for ind, item in enumerate(self.agent_pos): 
-            orient = self.calculate_orientation(item, center)
-            agent_vectors[ind] = orient
+            print(f'ind {ind} with item {item} in generate_dispersion')
+            pos = self.agent_pos[item]
+            orient = self.calculate_orientation(pos, center)
+            agent_vectors[item] = orient
             
              
         return agent_vectors 
@@ -117,11 +121,12 @@ class LocalMap():
 
     # other relevant functions for each strategy 
     def get_updated_goal(self, current_pos, goal_pos, distance): 
+        print(f'updating goal for : {current_pos} and {goal_pos}')
         direction = (goal_pos[0] - current_pos[0], goal_pos[1] - current_pos[1])
         distance_to_goal = math.sqrt(direction[0]**2 + direction[1]**2)
         if distance_to_goal > 0:
             direction = (direction[0] / distance_to_goal, direction[1] / distance_to_goal)
-        new_pos = (round(current_pos[0] - direction[0] * distance,2), round(current_pos[1] - direction[1] * distance),2)
+        new_pos = (round(current_pos[0] - direction[0] * distance,2), round(current_pos[1] - direction[1] * distance,2))
         return new_pos
 
 
