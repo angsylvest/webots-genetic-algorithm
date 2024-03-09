@@ -237,14 +237,22 @@ def message_listener(time_step):
 
             if using_bayes: 
                 # want to be able to determine if should do coordination
-                for ind, rob in enumerate(population): 
-                    agent_list[ind] = (round(rob.getPosition()[0],2), round(rob.getPosition()[1],2))
-                
-                # print(f'current agent_list {agent_list}')
-                shared_map_complete.update_agent_positions(agent_list)
-                curr_pose = round((float(population[curr_robot_index].getPosition()[0])),2), round(float(population[curr_robot_index].getPosition()[1]),2)
+                if globals.use_list_rep: 
+                    for ind, rob in enumerate(population): 
+                        agent_list[ind] = [round(rob.getPosition()[0],2), round(rob.getPosition()[1],2)]
+                        if curr_robot_index == ind: 
+                            curr_pose = agent_list[ind] # round(((population[curr_robot_index].getPosition()[0])),2), round((population[curr_robot_index].getPosition()[1]),2)
+                else: 
 
-                map_subset_obs, map_subset_ag = shared_map_complete.subset(dim_size=1.0, central_loc=curr_pose)
+                    for ind, rob in enumerate(population): 
+                        agent_list[ind] = (round(rob.getPosition()[0],2), round(rob.getPosition()[1],2))
+                        if curr_robot_index == ind: 
+                            curr_pose = agent_list[ind] # round((float(population[curr_robot_index].getPosition()[0])),2), round(float(population[curr_robot_index].getPosition()[1]),2)
+                print(f'current agent_list {agent_list} vs {curr_pose}')
+                shared_map_complete.update_agent_positions(agent_list)
+                # curr_pose = round((float(population[curr_robot_index].getPosition()[0])),2), round(float(population[curr_robot_index].getPosition()[1]),2)
+
+                map_subset_obs, map_subset_ag = shared_map_complete.subset(dim_size=1.0, central_loc=curr_pose, convert = True)
 
                 # find subset 
                 local_map = shared_map.LocalMap(obstacle_pos=map_subset_obs, obstacle_size=shared_map_complete.obstacle_size, agent_pos=map_subset_ag, agent_size= 0.5, local_dim=1.0, x_bounds=shared_map_complete.x_bounds, y_bounds=shared_map_complete.y_bounds, central_loc=curr_pose) 
@@ -256,8 +264,8 @@ def message_listener(time_step):
                         msg = local_map.process_output(current_strat_index)
                         # print(f'proposed strat: {msg}')
                         # msg = "" # temporarily empty
-                        curr_pos = [round(population[curr_robot_index].getPosition()[0],2), round(population[curr_robot_index].getPosition()[1],2)]
-                        msg_for_supervisor = f'agent:{given_id}-strat:{current_strat_index}-curr_pos:{curr_pos}~prop:{msg}'
+                        # curr_pos = [round(population[curr_robot_index].getPosition()[0],2), round(population[curr_robot_index].getPosition()[1],2)]
+                        msg_for_supervisor = f'agent:{given_id}-strat:{current_strat_index}-curr_pos:{curr_pose}~prop:{map_subset_ag}'
                         # print(f'outputted info to be sent for coordination: {msg}')
                         prev_time = robot.getTime()
                         emitter.send(msg_for_supervisor.encode('utf-8')) 

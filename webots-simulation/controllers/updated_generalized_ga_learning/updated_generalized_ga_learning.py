@@ -101,6 +101,8 @@ time_allocated = 6 # time to move and rotate (worst case)
 iteration = 0 
 fitness = 0 
 curr_action = []
+type_of_action = 0
+time_queued = robot.getTime()
 
 def determine_env_type(): # maybe eventually 
     pass
@@ -200,6 +202,44 @@ def release_object():
     leftGrip.setPosition(open_grip)
     rightGrip.setPosition(open_grip)   
     
+def process_action(current_pos):
+    global curr_action 
+    global type_of_action 
+    global time_queued
+    global given_id
+    global coord_status
+    
+    x,y = current_pos
+    goalx, goaly = curr_action 
+    
+    
+    if type_of_action == 0: # flock
+        # just continue moving to spot
+        if (math.dist([x, y], [goalx,goaly])): 
+            coord_status = False 
+        else: 
+            coord_status = True
+        
+    elif type_of_action == 1: # queue
+        if robot.getTime() - time_queued < curr_action: 
+            coord_status = True 
+            curr_action = [] 
+            # wait
+        else: 
+            # can do action
+            coord_status = False        
+    
+    elif type_of_action == 2: # disperse
+        if (math.dist([x, y], [goalx,goaly])): 
+            coord_status = False 
+        else: 
+            coord_status = True 
+    
+    else: 
+        print('action doesnt exist')
+        
+    return coord_status 
+
 def interpret(timestep): 
     global fitness
     global given_id
@@ -223,6 +263,7 @@ def interpret(timestep):
     global curr_action 
     global goal_posx
     global goal_posy
+    global type_of_action
     
     global forward_per_sec
     global prev_act
@@ -230,7 +271,7 @@ def interpret(timestep):
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
-        print('incoming messages: ', given_id, message) 
+        # print('incoming messages: ', given_id, message) 
         
         # want to enforce strategy by adding for bias to it here     
         if message[0] == "%" and str(message.split('-')[0][1:]) == str(given_id):
@@ -257,11 +298,21 @@ def interpret(timestep):
             
             dict_version = ast.literal_eval(message[12:])
             agent_id = int(f'{given_id}')
-            print(f'dict version: {dict_version} agent id {agent_id}')
-            if agent_id in dict_version: 
-                next_action = dict_version[agent_id]
-                strats = ast.literal_eval(next_action[0]['strat_to_use'])
-                print(f'next agents action: {next_action} and strats {strats}')
+            
+            curr_strategy_proposed = {}
+            
+            
+            for key in dict_version: 
+               print(f'key {key}')
+               cluster_dict = (dict_version[key][0])
+               strat = cluster_dict['strat_to_use']
+               if agent_id in strat:
+                   curr_action = (strat[agent_id])
+                   type_of_action = cluster_dict['most_common_strat']
+            
+            print(f'dict version {dict_version}: {agent_id} agent id {agent_id} with next_action: {curr_action} for strat {type_of_action}')
+            just_begun = True 
+            
             receiver.nextPacket()
         
             
@@ -338,10 +389,12 @@ prev_act = ""
 
 time_into_exploration = 0 
 just_begun = True 
+coord_status = False
 t_elapsed_constant = 10
 time_elapsed_since_robot = 0
 time_elapsed = 0 
 prev_msg = ""
+
 
 
 while robot.step(timestep) != -1:
@@ -354,7 +407,7 @@ while robot.step(timestep) != -1:
             msg = f"assigned-{given_id}"
             emitter_individual.send(msg.encode('utf-8'))
             just_begun = False
-
+        
 
         if robot.getTime() - prev_gen_check == 1: 
             communicate_with_robot() # temporarily added here for debugging 
@@ -372,16 +425,42 @@ while robot.step(timestep) != -1:
 
         # do action sequence 
         cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
-        if not holding_something and not reversing and not moving_forward and curr_action != []: 
+        if not holding_something and not reversing and not moving_forward and curr_action == []: 
             # goal_posx, goal_posy = curr_action[0] + cd_x, curr_action[0] + cd_y # TODO: not correct, but logic is there 
             if math.dist([cd_x, cd_y], [0,0]) > 0.05:  
                 if robot.getTime() - prev_time > time_allocated: # if unable to complete, not encouraged
                     pass 
                 else: 
+                    print('proceeding with original path')
                     chosen_direction = round(math.atan2(0-cd_y,0-cd_x),2) 
             else: # request new action 
                 pass
-    
+           
+                
+        if not holding_something and not reversing and not moving_forward and curr_action != []:
+            done = process_action(current_pos)
+            
+            if not done: 
+                if type_of_action != 1:
+                    goal_posx, goal_posy = curr_action[0] + cd_x, curr_action[0] + cd_y # TODO: not correct, but logic is there 
+                    
+                else: 
+                    goal_posx, goal_posy = cd_x, cd_y
+                    
+                if math.dist([cd_x, cd_y], [0,0]) > 0.05:  
+                        if robot.getTime() - prev_time > time_allocated: # if unable to complete, not encouraged
+                            pass 
+                        else: 
+                            print('proceeding with original path')
+                            chosen_direction = round(math.atan2(0-cd_y,0-cd_x),2) 
+                    else: # request new action 
+                        curr_action = []
+                        done = True
+                        print(f'finished coord task')
+            
+       
+                  
+                        
         roll, pitch, yaw = inertia.getRollPitchYaw()
         yaw = round(yaw, 2)
     

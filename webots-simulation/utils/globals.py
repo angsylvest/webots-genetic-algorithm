@@ -7,3 +7,4 @@ using_bayes = True
 thompson_sampling = False
 decay = True 
 restrict_crossover = True
+use_list_rep = True

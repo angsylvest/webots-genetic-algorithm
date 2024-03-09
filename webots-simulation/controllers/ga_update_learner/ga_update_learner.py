@@ -4,6 +4,8 @@ import math
 from robot_pop import * 
 import random
 import ast
+import json 
+
 
 """
 Main supervisor base 
@@ -18,6 +20,7 @@ import utils
 import utils.bayes as bayes 
 import utils.globals as globals
 import utils.k_means as k_means
+import utils.shared_map as shared_map
 
 
 # set-up robot 
@@ -62,20 +65,21 @@ def message_listener(time_step):
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
         if 'agent' in message:
-            # print(f'agent message: {message}')
+            print(f'agent message: {message}')
             agent_dict = {}
             message_parsed = message.split('~')[0].split('-')
             # print(f'parsed msg: {message_parsed}')
             agent_info = message_parsed[0].split(':')[1]
             # Convert the string to a dictionary using ast.literal_eval()
             proposed_strat = ast.literal_eval(message_parsed[1].split(':')[1])
-            strat_parsed = (message.split('~')[1][5:])
+            print(f'parsed strat: {message.split("~")[1][5:]}')
+            strat_parsed = ast.literal_eval(str(message.split('~')[1][5:]))
             
-            # strat = message_parsed[2][5:]
-            pos = float(message_parsed[2].split(':')[1][1:-2])
-            posy = float(message_parsed[3][:-2])
+            poses = ast.literal_eval(message.split('~')[0].split(':')[3])
+            posx = poses[0]
+            posy = poses[1]
             
-            agent_dict[agent_info] = (proposed_strat, (pos, posy), strat_parsed)
+            agent_dict[agent_info] = (proposed_strat, (posx, posy), strat_parsed)
             
             info_garnered.append(agent_dict)
             mediate_differences(info_garnered)
@@ -99,42 +103,60 @@ def get_key_by_value(dictionary, value):
 def mediate_differences(msgs):
     # assuming msgs is a list of suggestions
     # ex format: [{agent_id: (strat, curr_pose)} ..] 
-    # print(f'messages: {msgs}')
-    
+    print(f'messages: {msgs}')
     
     cluster_list = []
     for a in msgs: 
-        # print(f'agents in msgs: {a}')
-        
+        # for each dict of strategies in list (from each individual agent) 
+        # [{'0': (1, (0.04, 0.0), '{0: (0.04, -0.04), 1: (-0.25, 0.02), 2: (-0.05, -0.07), 3: (0.19, -0.01), 4: (-0.08, -0.18)}')}]
         for key in a: 
+            print(f'key in a: {a[key]}')
             curr_pose = a[key][1]
-            x,y = curr_pose
-            cluster_list.append((x,y))
+            info_from_strat = a[key][2]
+            print(f'info from strat: {info_from_strat}')
+
+            for a in info_from_strat: 
+                (x,y) = info_from_strat[a]
+                if (x,y) not in cluster_list: 
+                    x,y = info_from_strat[a]
+                    cluster_list.append((x,y))
             
-    # print(f'cluster list: {cluster_list}')
 
     cluster_merged = k_means.output_k_means_with_cluster(cluster_list, len(msgs))
-        
+    
+    print(f'(merged) cluster list: {cluster_merged}')
     clustered_data = {}
     proposals = []
+
     for i, cluster in enumerate(cluster_merged):
         strats = []
         proposals = []
-        for pos in cluster: 
+        
+        print(f'cluster: {cluster}')
+        c = cluster
+        
+        for pos in c: 
       
             # Find the original dictionary containing curr_pose
             for agent_dict in msgs:
+                # print(f'agent_dict: {agent_dict}')
                 for a, (strat, curr_pose, prop) in agent_dict.items():
-                    # print(f'iterating over diff items: {a}, {strat}, {prop} and {curr_pose}')
+                    p = prop
+                    print(f'iterating over diff items: index {a}, {strat}, {p}, pose {pos} and {curr_pose}')
                     if curr_pose == pos:
-                        proposals.append(prop)
+                        print('here')
+                        proposals.append(p)
                         strats.append(strat)
                         break  # Stop iterating if we found the strategy for this position
         # print(f'strats at the moment: {strats}')
         # Find the most frequently chosen strategy in the cluster
         most_common_strat = max(set(strats), key=strats.count)
         clustered_data[i] = [{'most_common_strat': most_common_strat, 'strat_to_use': proposals[0]}]
-    
+
+        localMap = shared_map.LocalMap(obstacle_pos=[], obstacle_size=0.2, agent_pos=cluster, agent_size= 0.5, local_dim=1.0, x_bounds=(-1,1), y_bounds=(-1,1), central_loc=()) # just used to generate strat
+        strat_plan = localMap.process_output(most_common_strat)
+
+        print(f'generated strategy for cluster: {strat_plan}')
     # Example output: {0: [{'most_common_strat': 'most_common_strat1'}], ...}
     final_deliberation = clustered_data
     print(f'final deliberation: {final_deliberation}')

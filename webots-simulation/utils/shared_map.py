@@ -15,12 +15,12 @@ class CompleteMap():
         self.y_bounds = y_bounds
 
     def update_agent_positions(self, agents):
+        self.agent_positions = []
         self.agents = agents
-
         for key in self.agents: 
             self.agent_positions.append(self.agents[key])
 
-    def subset(self, dim_size, central_loc):
+    def subset(self, dim_size, central_loc, convert = False):
         min_x = central_loc[0] - dim_size/2
         max_x = central_loc[0] + dim_size/2
         min_y = central_loc[1] - dim_size/2
@@ -61,11 +61,12 @@ class LocalMap():
     # for queue coordination strat
     def queue_times(self): 
         queue_assignments = {}
-        for i in range(len(self.agent_pos)): 
-            key_name = f'agent-{i}'
-            queue_assignments[key_name] = self.duration*i
+        
+        for ind, item in enumerate(self.agent_pos):
+            queue_assignments[ind] = self.duration*ind
 
         return queue_assignments
+    
     
     def is_dense_enough(self):
         return True
@@ -86,13 +87,17 @@ class LocalMap():
     def assign_leaders(self):
         # can be updated each time to be slightly before where agent is
         assignments = {}
-        leader = self.agent_pos['agent-0'] # just random 
-        assignments['agent-0'] = "leader"
+        
+        for ind, item in enumerate(self.agent_pos): 
+            if ind == 0: 
+                leader = ind # self.agent_pos[ind] # just random 
+                assignments[0] = "leader"
+            
+            else: 
+                curr_agent_pose = self.agent_pos[ind]
+                assignments[item] = self.get_updated_goal(curr_agent_pose, leader, 0.2)
+                leader = ind # self.agent_pos[ind] # just random 
 
-        for i in range(1, len(self.agent_pos)):
-            key_name = f'agent-{i}'
-            curr_agent = self.agent_pos[key_name]
-            assignments[key_name] = self.get_updated_goal(curr_agent, leader, 0.2)
 
         return assignments
     
@@ -102,11 +107,10 @@ class LocalMap():
         agent_vectors = {}
         center = self.calculate_center(self.agent_pos)
 
-        for i in range(len(self.agent_pos)):
-            key_name = f'agent-{i}'
-            # print(f'self.agent_pos[i]: {self.agent_pos[key_name]} and center: {center}')
-            orient = self.calculate_orientation(self.agent_pos[key_name], center)
-            agent_vectors[key_name] = orient
+        for ind, item in enumerate(self.agent_pos): 
+            orient = self.calculate_orientation(item, center)
+            agent_vectors[ind] = orient
+            
              
         return agent_vectors 
 
