@@ -213,6 +213,7 @@ def process_action(current_pos):
     
     if type_of_action == 0: # flock
         # just continue moving to spot
+        # print(f'flocking')
         
         if curr_action == 'leader':
             curr_action = []
@@ -225,6 +226,7 @@ def process_action(current_pos):
                 coord_status = True
         
     elif type_of_action == 1: # queue
+        # print(f'queuing')
         if robot.getTime() - time_queued >= curr_action: 
             coord_status = True 
             curr_action = [] 
@@ -235,6 +237,7 @@ def process_action(current_pos):
             coord_status = False        
     
     elif type_of_action == 2: # disperse
+        print(f'dispersing')
         goalx, goaly = curr_action 
         if (math.dist([x, y], [goalx,goaly])): 
             coord_status = False 
@@ -309,7 +312,7 @@ def interpret(timestep):
             curr_strategy_proposed = {}
         
             for key in dict_version: 
-               print(f'key {key}')
+            #    print(f'key {key}')
                cluster_dict = (dict_version[key][0])
                strat = cluster_dict['strat_to_use']
                if agent_id in strat:
@@ -317,7 +320,7 @@ def interpret(timestep):
                    type_of_action = cluster_dict['most_common_strat']
                    time_queued = robot.getTime()
             
-            print(f'dict version {dict_version}: {agent_id} agent id {agent_id} with next_action: {curr_action} for strat {type_of_action}')
+            # print(f'dict version {dict_version}: {agent_id} agent id {agent_id} with next_action: {curr_action} for strat {type_of_action}')
 
             
             receiver.nextPacket()
@@ -349,7 +352,7 @@ def interpret(timestep):
 
         elif 'final-delib' in message: 
             # process input to determine next action 
-            print(f'final delib info: {message}')
+            # print(f'final delib info: {message}')
             receiver_individual.nextPacket() 
         # coordination task 
         # need schedule and task (if anything)

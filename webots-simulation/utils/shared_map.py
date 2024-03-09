@@ -87,7 +87,7 @@ class LocalMap():
     def assign_leaders(self):
         # can be updated each time to be slightly before where agent is
         assignments = {}
-        print(f'agent pos so far: {self.agent_pos}')
+        # print(f'agent pos so far: {self.agent_pos}')
         
         for ind, item in enumerate(self.agent_pos): 
             if ind == 0: 
@@ -121,7 +121,7 @@ class LocalMap():
 
     # other relevant functions for each strategy 
     def get_updated_goal(self, current_pos, goal_pos, distance): 
-        print(f'updating goal for : {current_pos} and {goal_pos}')
+        # print(f'updating goal for : {current_pos} and {goal_pos}')
         direction = (goal_pos[0] - current_pos[0], goal_pos[1] - current_pos[1])
         distance_to_goal = math.sqrt(direction[0]**2 + direction[1]**2)
         if distance_to_goal > 0:

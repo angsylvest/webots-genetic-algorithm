@@ -248,7 +248,7 @@ def message_listener(time_step):
                         agent_list[ind] = (round(rob.getPosition()[0],2), round(rob.getPosition()[1],2))
                         if curr_robot_index == ind: 
                             curr_pose = agent_list[ind] # round((float(population[curr_robot_index].getPosition()[0])),2), round(float(population[curr_robot_index].getPosition()[1]),2)
-                print(f'current agent_list {agent_list} vs {curr_pose}')
+                # print(f'current agent_list {agent_list} vs {curr_pose}')
                 shared_map_complete.update_agent_positions(agent_list)
                 # curr_pose = round((float(population[curr_robot_index].getPosition()[0])),2), round(float(population[curr_robot_index].getPosition()[1]),2)
 
@@ -261,6 +261,7 @@ def message_listener(time_step):
                     # 0: flock, 1: queue, 2: disperse! 
                     if num_env_types == 1: 
                         current_strat_index = multi_arm.sample_action()
+                        print(f'current strat index: {current_strat_index}')
                         msg = local_map.process_output(current_strat_index)
                         # print(f'proposed strat: {msg}')
                         # msg = "" # temporarily empty
