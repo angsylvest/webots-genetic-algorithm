@@ -53,6 +53,10 @@ class NArmedBanditDrift(NArmedBandit):
     def decay_gamma(self, decay_rate = 0.95):
         self.gamma = max(self.gamma * decay_rate, 0.001)  # Ensure gamma doesn't become too small
 
+    def reset_prior(self):
+        self.prior_success = [self.a0 for _ in range(self.n_arm)]
+        self.prior_failure = [self.b0 for _ in range(self.n_arm)]
+
     def set_prior(self, prior_success, prior_failure):
         self.prior_success = prior_success
         self.prior_failure = prior_failure

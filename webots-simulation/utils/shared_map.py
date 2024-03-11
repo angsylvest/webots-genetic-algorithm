@@ -69,6 +69,8 @@ class LocalMap():
     
     
     def is_dense_enough(self):
+        # TODO: always returns True, may want to use more selective way 
+        
         return True
     
     def process_output(self, curr_strat_index):

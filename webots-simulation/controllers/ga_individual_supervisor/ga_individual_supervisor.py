@@ -170,6 +170,7 @@ def message_listener(time_step):
             curr_best = -1 
             pop_genotypes = message.split(" ")[1:]
             overall_fitness_scores = [0 for i in range(len(pop_genotypes))]
+            multi_arm.reset_prior()
             
             # initial child
             if not comparing_genes: 
@@ -304,8 +305,16 @@ def message_listener(time_step):
             
             
             receiver_individual.nextPacket() 
+
+        elif 'reward' in message_individual:
+            re_info = message_individual.split(':')
+            strat = re_info[1]
+            reward = re_info[1]
+
+            multi_arm.advance(strat, reward)
+
+            receiver_individual.nextPacket() 
            
-            
         else: 
             receiver_individual.nextPacket()
      

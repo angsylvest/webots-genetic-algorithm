@@ -249,6 +249,10 @@ def process_action(current_pos):
         
     return coord_status 
 
+def path_length_reward(path_length, alpha):
+    neg_reward = math.exp(-alpha * path_length)
+    return 1 - neg_reward
+
 def interpret(timestep): 
     global fitness
     global given_id
@@ -278,6 +282,7 @@ def interpret(timestep):
     global forward_per_sec
     global prev_act
     global iteration
+    global path_length
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -305,24 +310,30 @@ def interpret(timestep):
             receiver.nextPacket()
             
         elif 'final' in message: 
+            if curr_action == []: # if able to take on new task 
+                msg = f'reward:{type_of_action}:{path_length_reward(path_length)}'
+                emitter_individual.send(msg.encode('utf-8'))
+                
+                path_length = 0 # path length reset
             
-            dict_version = ast.literal_eval(message[12:])
-            agent_id = int(f'{given_id}')
+                dict_version = ast.literal_eval(message[12:])
+                agent_id = int(f'{given_id}')
+                
+                curr_strategy_proposed = {}
             
-            curr_strategy_proposed = {}
-        
-            for key in dict_version: 
-            #    print(f'key {key}')
-               cluster_dict = (dict_version[key][0])
-               strat = cluster_dict['strat_to_use']
-               if agent_id in strat:
-                   curr_action = (strat[agent_id])
-                   type_of_action = cluster_dict['most_common_strat']
-                   time_queued = robot.getTime()
-            
-            # print(f'dict version {dict_version}: {agent_id} agent id {agent_id} with next_action: {curr_action} for strat {type_of_action}')
+                for key in dict_version: 
+                #    print(f'key {key}')
+                   cluster_dict = (dict_version[key][0])
+                   strat = cluster_dict['strat_to_use']
+                   if agent_id in strat:
+                       curr_action = (strat[agent_id])
+                       type_of_action = cluster_dict['most_common_strat']
+                       time_queued = robot.getTime()
+                
+                # print(f'dict version {dict_version}: {agent_id} agent id {agent_id} with next_action: {curr_action} for strat {type_of_action}')
 
-            
+            else: 
+                print('ignoring, other action still in progress')
             receiver.nextPacket()
         
             
@@ -406,6 +417,7 @@ t_elapsed_constant = 10
 time_elapsed_since_robot = 0
 time_elapsed = 0 
 prev_msg = ""
+path_length = 0 
 
 
 
@@ -414,20 +426,26 @@ while robot.step(timestep) != -1:
     if not cleaning: 
         interpret(str(robot.step(timestep)))
         
+        cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
         if just_begun: # TODO: make more aligned with status of env
             # send individual supervisor agent id index 
             msg = f"assigned-{given_id}"
             emitter_individual.send(msg.encode('utf-8'))
             just_begun = False
+            prev_x, prev_y = cd_x, cd_y
         
-
+        if curr_action != []:
+            distance = math.sqrt((cd_x - prev_x)**2 + (cd_y - prev_y)**2)
+            path_length += distance
+            prev_x, prev_y = cd_x, cd_y
+            
         if robot.getTime() - prev_gen_check == 1: 
-            communicate_with_robot() # temporarily added here for debugging 
+            # communicate_with_robot() # temporarily added here for debugging 
             prev_gen_check = robot.getTime()
             time_into_exploration += 1
 
         # homing mechanism 
-        if holding_something == True and not reversing and not moving_forward: # move towards nest (constant vector towards home) 
+        if holding_something == True and not reversing and not moving_forward and curr_action == []: # move towards nest (constant vector towards home) 
             cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
             if math.dist([cd_x, cd_y], [0,0]) > 0.05:  
                 chosen_direction = round(math.atan2(-cd_y,-cd_x),2)
@@ -436,7 +454,6 @@ while robot.step(timestep) != -1:
                 holding_something = False
 
         # do action sequence 
-        cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
         if not holding_something and not reversing and not moving_forward and curr_action == []: 
             # print('proceeding with original task') 
             # goal_posx, goal_posy = curr_action[0] + cd_x, curr_action[0] + cd_y # TODO: not correct, but logic is there 
