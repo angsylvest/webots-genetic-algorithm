@@ -79,7 +79,8 @@ curr_robot_index = "" # should hopefully be overwritten if done correctly
 num_coordination_strat = 3 
 num_env_types = 1 # only used for high density areas?  
 dist_covered = [0 for i in range(num_coordination_strat)]
-using_coordination = globals.using_coordination
+using_coordination = globals.use_coordination
+
 
 if using_bayes:
     shared_map_complete = shared_map.CompleteMap(obstacle_locations=[], obstacle_size = 0.2, dims = 4, agent_size=0.2, x_bounds=(-2,2), y_bounds=(-2,2))
@@ -237,6 +238,7 @@ def message_listener(time_step):
             # print('robot found -- checking genotype', robo_index) 
             curr_orient = message_individual.split('[')[-1]
             agent_list = {}
+            curr_pose = ()
 
             if using_coordination: 
                 # want to be able to determine if should do coordination
@@ -264,7 +266,7 @@ def message_listener(time_step):
                     # 0: flock, 1: queue, 2: disperse! 
                     if num_env_types == 1: 
                         current_strat_index = multi_arm.sample_action()
-                        print(f'current strat index: {current_strat_index}')
+                        # print(f'current strat index: {current_strat_index}')
                         msg = local_map.process_output(current_strat_index)
                         # print(f'proposed strat: {msg}')
                         # msg = "" # temporarily empty
@@ -309,6 +311,7 @@ def message_listener(time_step):
             receiver_individual.nextPacket() 
 
         elif 'reward' in message_individual:
+            print(f'reward info: {message_individual}')
             re_info = message_individual.split(':')
             strat = int(re_info[1])
             reward = float(re_info[1])

@@ -264,7 +264,9 @@ def process_action(current_pos):
     return coord_status 
 
 def path_length_reward(path_length, alpha=0.1):
+    # print(f'path length: {path_length}')
     neg_reward = math.exp(-alpha * path_length)
+    # print(f'reward: {1-neg_reward}')
     return 1 - neg_reward
 
 
@@ -597,6 +599,7 @@ def interpret(timestep):
                 # print('current child', next_child)
             
             emitter.send(response.encode('utf-8'))
+            
             # found_something = False 
             # obj_found_so_far = []
             receiver.nextPacket()
@@ -693,6 +696,11 @@ def interpret(timestep):
             energy_collected_gen += 1
             receiver.nextPacket()
             
+        elif 'generation-complete' in message: 
+            msg = f"assigned-{given_id}"
+            emitter_individual.send(msg.encode('utf-8'))
+            receiver.nextPacket()
+            
         elif 'size' in message:
             curr_sim_size = message[5:]
             obj_found_so_far = []
@@ -725,8 +733,6 @@ def interpret(timestep):
         elif 'final' in message: 
             if curr_action == []: # if able to take on new task 
                 prev_time = robot.getTime()
-                msg = f'reward:{type_of_action}:{path_length_reward(path_length)}'
-                emitter_individual.send(msg.encode('utf-8'))
                 
                 path_length = 0 # path length reset
             
@@ -849,6 +855,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             prev_x, prev_y = cd_x, cd_y
         
         if robot.getTime() - prev_gen_check == 1: 
+            communicate_with_robot()
             prev_gen_check = robot.getTime()
             time_into_generation += 1
             if time_into_generation % 10 == 0: 
@@ -900,12 +907,16 @@ while robot.step(timestep) != -1 and sim_complete != True:
                         if robot.getTime() - prev_time > time_allocated: # if unable to complete, not encouraged
                             done = True # don't add any reward since not accomplished 
                             curr_action = []
+                            msg = f'reward:{type_of_action}:{path_length_reward(path_length)}'
+                            emitter_individual.send(msg.encode('utf-8'))
                         else: 
                             # print('proceeding with original path')
                             chosen_direction = round(math.atan2(goal_posy-cd_y,goal_posx-cd_x),2) 
                 else: # request new action 
                     curr_action = []
                     done = True
+                    msg = f'reward:{type_of_action}:{path_length_reward(path_length)}'
+                    emitter_individual.send(msg.encode('utf-8'))
                     print(f'finished coord task')
 
         time_elapsed_since_robot +=1

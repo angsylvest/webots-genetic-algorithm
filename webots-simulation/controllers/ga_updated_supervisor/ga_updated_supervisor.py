@@ -88,6 +88,7 @@ prev_msg = ""
 seed_val = 11
 random.seed(seed_val)
 id_msg = ""
+id_ind = ""
 
 emitter_individual = robot.getDevice("emitter_processor")
 emitter_individual.setChannel(5)
@@ -120,6 +121,9 @@ def generate_robot_central(num_robots):
     global overall_fitness_scores
     global prev_msg 
     global id_msg
+    global id_ind
+    
+    global input_from_others
     
     initialize_genotypes(num_robots)
     curr_msg = str("size-" + str(num_robots))
@@ -139,12 +143,15 @@ def generate_robot_central(num_robots):
     collected_count = []
     pairs = []
     id_msg = "ids"
+    id_ind = "id_ind"
         
     for i in range(num_robots):
+        curr_key = f'agent-{i}'
         rootNode = robot.getRoot()
         rootChildrenField = rootNode.getField('children')
         rootChildrenField.importMFNode(-1, '../las_supervisor/robots/robot-ga-update.wbo') 
         rec_node = rootChildrenField.getMFNode(-1)
+        input_from_others[curr_key] = 0
         
     
         t_field = rec_node.getField('translation')
@@ -162,6 +169,7 @@ def generate_robot_central(num_robots):
         collected_count.append(0)
         population.append(rec_node)
         id_msg += " " + str(rec_node.getId()) 
+        id_ind += " " + curr_key
 
 # set up environments 
 def generate_robot_edge(num_robots, right = False):
@@ -670,6 +678,7 @@ def run_optimization():
     global prev_msg 
     global curr_trial 
     global phase_one_times
+    global id_ind
     
     for size in robot_population_sizes:
         curr_size = size  
@@ -701,6 +710,8 @@ def run_optimization():
             individual.getField('translation').setSFVec3f([0, 2, 0])
             
         emitter_individual.send(id_msg.encode('utf-8'))
+        emitter_individual.send(id_ind.encode('utf-8'))
+        
         total_elapsed = 600
             
         num_generations = total_elapsed // simulation_time
@@ -711,6 +722,7 @@ def run_optimization():
             
             # if (assessing and trial % 2) == 0 or not assessing: 
             emitter_individual.send(str(msg).encode('utf-8'))
+            emitter.send(str(msg).encode('utf-8'))
             
             
             for rec_node in population: 
