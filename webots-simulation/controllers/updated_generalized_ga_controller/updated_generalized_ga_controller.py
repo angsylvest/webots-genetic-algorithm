@@ -855,7 +855,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             prev_x, prev_y = cd_x, cd_y
         
         if robot.getTime() - prev_gen_check == 1: 
-            communicate_with_robot()
+            # communicate_with_robot()
             prev_gen_check = robot.getTime()
             time_into_generation += 1
             if time_into_generation % 10 == 0: 
