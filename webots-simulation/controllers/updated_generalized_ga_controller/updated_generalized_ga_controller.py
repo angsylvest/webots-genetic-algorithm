@@ -265,9 +265,9 @@ def process_action(current_pos):
 
 def path_length_reward(path_length, alpha=0.1):
     # print(f'path length: {path_length}')
-    neg_reward = math.exp(-alpha * path_length)
+    reward = math.exp(-alpha * path_length)
     # print(f'reward: {1-neg_reward}')
-    return 1 - neg_reward
+    return reward
 
 
 # calculates angle normal to current orientation 
