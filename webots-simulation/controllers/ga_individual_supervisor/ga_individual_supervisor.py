@@ -79,6 +79,7 @@ curr_robot_index = "" # should hopefully be overwritten if done correctly
 num_coordination_strat = 3 
 num_env_types = 1 # only used for high density areas?  
 dist_covered = [0 for i in range(num_coordination_strat)]
+using_coordination = globals.using_coordination
 
 if using_bayes:
     shared_map_complete = shared_map.CompleteMap(obstacle_locations=[], obstacle_size = 0.2, dims = 4, agent_size=0.2, x_bounds=(-2,2), y_bounds=(-2,2))
@@ -151,6 +152,7 @@ def message_listener(time_step):
     global time_elapsed
     global prev_time
     global restrict_crossover
+    global using_coordination
 
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -236,7 +238,7 @@ def message_listener(time_step):
             curr_orient = message_individual.split('[')[-1]
             agent_list = {}
 
-            if using_bayes: 
+            if using_coordination: 
                 # want to be able to determine if should do coordination
                 if globals.use_list_rep: 
                     for ind, rob in enumerate(population): 

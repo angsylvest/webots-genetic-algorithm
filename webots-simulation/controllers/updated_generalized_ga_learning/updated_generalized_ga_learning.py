@@ -482,7 +482,7 @@ while robot.step(timestep) != -1:
                             pass 
                         else: 
                             # print('proceeding with original path')
-                            chosen_direction = round(math.atan2(0-cd_y,0-cd_x),2) 
+                            chosen_direction = round(math.atan2(goal_posy-cd_y,goal_posx-cd_x),2) 
                 else: # request new action 
                     curr_action = []
                     done = True

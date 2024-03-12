@@ -19,6 +19,7 @@ sys.path.append('../../')
 import utils
 import utils.bayes as bayes 
 import utils.globals as globals
+import ast 
 
 # create the Robot instance.
 robot = Robot()
@@ -158,6 +159,12 @@ time_elapsed = 0 # on a per sec basis
 # prev message (limit overloading receiver/emitter system) 
 prev_msg = "" 
 trial_num = -1 
+prev_time = robot.getTime()
+time_allocated = 10 # worst case 
+curr_action = []
+type_of_action = []
+time_queued = robot.getTime()
+path_length = 0
 
 found_something = False 
 
@@ -166,6 +173,7 @@ strat_obs = {0: {"collisions": 0, "collected": 0}, 1: {"collisions": 0, "collect
 time_into_generation = 0 
 using_artificial_field = False
 using_bayes = globals.using_bayes
+using_coordination = globals.use_coordination
 remove_orientations = []
 
 if using_bayes:
@@ -207,6 +215,57 @@ def reward(curr_strat):
     goal_reward = strat_obs[curr_strat]["collected"] * 1.5
 
     return obs_penalty + goal_reward
+
+def process_action(current_pos):
+    global curr_action 
+    global type_of_action 
+    global time_queued
+    global given_id
+    global coord_status
+    
+    x,y = current_pos
+    
+    if type_of_action == 0: # flock
+        # just continue moving to spot
+        # print(f'flocking')
+        
+        if curr_action == 'leader':
+            curr_action = []
+            coord_status = True # just proceed with original movement 
+        else:  
+            goalx, goaly = curr_action 
+            if (math.dist([x, y], [goalx,goaly]) > 0.05): 
+                coord_status = False 
+            else: 
+                coord_status = True
+        
+    elif type_of_action == 1: # queue
+        # print(f'queuing')
+        if robot.getTime() - time_queued >= curr_action: 
+            coord_status = True 
+            curr_action = [] 
+            # wait
+        else: 
+            # can do action
+            # time_queued = robot.getTime()
+            coord_status = False        
+    
+    elif type_of_action == 2: # disperse
+        print(f'dispersing')
+        goalx, goaly = curr_action 
+        if (math.dist([x, y], [goalx,goaly]) > 0.05): 
+            coord_status = False 
+        else: 
+            coord_status = True 
+    
+    else: 
+        print('action doesnt exist')
+        
+    return coord_status 
+
+def path_length_reward(path_length, alpha=0.1):
+    neg_reward = math.exp(-alpha * path_length)
+    return 1 - neg_reward
 
 
 # calculates angle normal to current orientation 
@@ -480,6 +539,13 @@ def interpret(timestep):
     global curr_index 
     global remove_orientations
     global strat_obs
+    global multi_arm
+
+    global type_of_action
+    global path_length 
+    global curr_action
+    global time_queued
+    global prev_time
 
     
     if receiver.getQueueLength()>0:
@@ -573,6 +639,14 @@ def interpret(timestep):
             obj_found_so_far = []
             curr_index = 0 
             remove_orientations = []
+
+            curr_action = [] # set to nothing initially
+            type_of_action = 0
+            msg = f"assigned-{given_id}"
+            emitter_individual.send(msg.encode('utf-8'))
+
+            if using_bayes:
+                multi_arm.reset_prior()
             
             receiver.nextPacket()
             
@@ -645,6 +719,33 @@ def interpret(timestep):
             
             found_something = False 
             gens_elapsed = 0 
+            
+            receiver.nextPacket()
+
+        elif 'final' in message: 
+            if curr_action == []: # if able to take on new task 
+                prev_time = robot.getTime()
+                msg = f'reward:{type_of_action}:{path_length_reward(path_length)}'
+                emitter_individual.send(msg.encode('utf-8'))
+                
+                path_length = 0 # path length reset
+            
+                dict_version = ast.literal_eval(message[12:])
+                agent_id = int(f'{given_id}')
+                
+                curr_strategy_proposed = {}
+            
+                for key in dict_version: 
+                #    print(f'key {key}')
+                   cluster_dict = (dict_version[key][0])
+                   strat = cluster_dict['strat_to_use']
+                   if agent_id in strat:
+                       curr_action = (strat[agent_id])
+                       type_of_action = cluster_dict['most_common_strat']
+                       time_queued = robot.getTime()
+                
+            else: 
+                print('ignoring, other action still in progress')
             
             receiver.nextPacket()
             
@@ -731,10 +832,21 @@ moving_forward = False
 cleaning = False
 prev_gen_check = robot.getTime()
 
+cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
+
 while robot.step(timestep) != -1 and sim_complete != True:
     
     if not cleaning: 
         interpret(str(robot.step(timestep)))
+        cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
+
+        if curr_action == []:
+            prev_x, prev_y = cd_x, cd_y
+
+        if curr_action != []:
+            distance = math.sqrt((cd_x - prev_x)**2 + (cd_y - prev_y)**2)
+            path_length += distance
+            prev_x, prev_y = cd_x, cd_y
         
         if robot.getTime() - prev_gen_check == 1: 
             prev_gen_check = robot.getTime()
@@ -745,8 +857,8 @@ while robot.step(timestep) != -1 and sim_complete != True:
             # print('given id', given_id, 'updated time into generation + here dictionary', agent_observation['num_interactions'] , 'num collisions', agent_observation['num_collisions']) 
         
         # homing mechanism 
-        if holding_something == True and not reversing and not moving_forward: # move towards nest (constant vector towards home) 
-            cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
+        if holding_something == True and not reversing and not moving_forward and curr_action == []: # move towards nest (constant vector towards home) 
+            
             if math.dist([cd_x, cd_y], [0,0]) > 0.05:  
                 chosen_direction = round(math.atan2(-cd_y,-cd_x),2)
                 
@@ -758,7 +870,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                 time_elapsed = 0 # on a per sec basis 
                 # print('successfully dropped off object', given_id)
             
-        if curr_index >= len(strategy) and not holding_something and not reversing and not moving_forward: # maintain strategy for initial
+        if curr_index >= len(strategy) and not holding_something and not reversing and not moving_forward and curr_action == []: # maintain strategy for initial
             curr_index = 0 
             # used to determine when to update strategy 
             print('completed strategy --', strategy, 'energy expenditure --', energy_expenditure(), 'for agent: ', given_id)
@@ -773,6 +885,29 @@ while robot.step(timestep) != -1 and sim_complete != True:
                 strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, w, update = False)
                 # time_elapsed = 0 
     
+
+        if not reversing and not moving_forward and curr_action != []:
+            done = process_action((cd_x, cd_y))
+            
+            if not done: 
+                if type_of_action != 1:
+                    goal_posx, goal_posy = curr_action[0] + cd_x, curr_action[0] + cd_y # TODO: not correct, but logic is there 
+                    
+                else: # queued behavior 
+                    goal_posx, goal_posy = cd_x, cd_y
+                    
+                if math.dist([cd_x, cd_y], [0,0]) > 0.05:  
+                        if robot.getTime() - prev_time > time_allocated: # if unable to complete, not encouraged
+                            done = True # don't add any reward since not accomplished 
+                            curr_action = []
+                        else: 
+                            # print('proceeding with original path')
+                            chosen_direction = round(math.atan2(goal_posy-cd_y,goal_posx-cd_x),2) 
+                else: # request new action 
+                    curr_action = []
+                    done = True
+                    print(f'finished coord task')
+
         time_elapsed_since_robot +=1
         # biased random walk movement (each time step, cert prob of turning that direction) 
         roll, pitch, yaw = inertia.getRollPitchYaw()
@@ -885,50 +1020,3 @@ while robot.step(timestep) != -1 and sim_complete != True:
 # Enter here exit cleanup code.
 
        
-        # image = camera.getImageArray()
-        # if image:
-            # display the components of top left pixel 
-            # red   = image[len(image)//2][len(image[0])//2][0]
-            # green = image[len(image)//2][len(image[0])//2][1]
-            # blue  = image[len(image)//2][len(image[0])//2][2]
-            
-            # print('gen terrain',red, green, blue)
-               
-            
-            # identify_terrain(red, green, blue)
-            
-        
-        # if current_terrain != terrains[0] and prev_terrain != current_terrain:
-            # figure out level of fear 
-            # print('dangerous terrain',red, green, blue)
-            # print('id',  given_id)
-            # reactions = ['avoid', 'proceed']
-            # choice_react = random.choices(reactions, [0.7, 0.3])
-            # if choice_react == reactions[0]:
-                # chosen_direction = calc_normal(yaw)
-                # orientation_found = False 
-                # moving_forward = True 
-                     
-        
-        # # too long return back and reset prob distrib
-        # if gens_elapsed > 5: # consistent trials spent with no productive behavior 
-        #     gens_elapsed = 0 
-        #     curr_index = 0 
-            
-        #     max_index = weights.index(max(weights))
-            
-        #     if max_index == 0 or max_index == 3: 
-        #         # want more conservative movement 
-        #         weights[1] = weights[current_strat_index] + 0.05
-        #         weights[2] = weights[current_strat_index] + 0.05  
-        #     else: 
-        #         # want more dauntless movement 
-        #         weights[1] = weights[current_strat_index] - 0.05
-        #         weights[2] = weights[current_strat_index] - 0.05  
-                
-        #     time_elapsed = 0 
-        #     weights = [float(i)/sum(weights) for i in weights] 
-        #     strategy = choose_strategy(chosen_direction, time_elapsed_since_block, time_elapsed_since_robot, weights, update = False)
-            
-        #     # make circular movements less likely 
-        #     t_elapsed_constant = t_elapsed_constant // 2 # more likely to interact with other robots
