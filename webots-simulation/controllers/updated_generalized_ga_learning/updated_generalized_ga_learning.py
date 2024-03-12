@@ -249,7 +249,7 @@ def process_action(current_pos):
         
     return coord_status 
 
-def path_length_reward(path_length, alpha):
+def path_length_reward(path_length, alpha=0.1):
     neg_reward = math.exp(-alpha * path_length)
     return 1 - neg_reward
 

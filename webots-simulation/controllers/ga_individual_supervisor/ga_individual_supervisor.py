@@ -308,8 +308,8 @@ def message_listener(time_step):
 
         elif 'reward' in message_individual:
             re_info = message_individual.split(':')
-            strat = re_info[1]
-            reward = re_info[1]
+            strat = int(re_info[1])
+            reward = float(re_info[1])
 
             multi_arm.advance(strat, reward)
 
