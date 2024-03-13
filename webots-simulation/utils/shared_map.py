@@ -94,13 +94,14 @@ class LocalMap():
         for ind, item in enumerate(self.agent_pos): 
             if ind == 0: 
                 leader = item # self.agent_pos[ind] # just random 
-                assignments[item] = "leader"
+                assignments[item] = "leader" # agent id -> assignment
             
             else: 
+                # print(f'set info leader: {leader} in {self.agent_pos}')
                 curr_agent_pose = self.agent_pos[item]
                 leader_goal = self.agent_pos[leader]
                 assignments[item] = self.get_updated_goal(curr_agent_pose, leader_goal, 0.2)
-                leader = ind # self.agent_pos[ind] # just random 
+                leader = item # ind # self.agent_pos[ind] # just random 
 
 
         return assignments
@@ -112,7 +113,7 @@ class LocalMap():
         center = self.calculate_center(self.agent_pos)
 
         for ind, item in enumerate(self.agent_pos): 
-            print(f'ind {ind} with item {item} in generate_dispersion')
+            # print(f'ind {ind} with item {item} in generate_dispersion')
             pos = self.agent_pos[item]
             orient = self.calculate_orientation(pos, center)
             agent_vectors[item] = orient

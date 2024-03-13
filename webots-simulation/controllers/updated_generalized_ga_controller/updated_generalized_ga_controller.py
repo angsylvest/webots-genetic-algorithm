@@ -548,6 +548,9 @@ def interpret(timestep):
     global curr_action
     global time_queued
     global prev_time
+    global cd_x
+    global cd_y
+    global forward_speed
 
     
     if receiver.getQueueLength()>0:
@@ -731,7 +734,7 @@ def interpret(timestep):
             receiver.nextPacket()
 
         elif 'final' in message: 
-            if curr_action == []: # if able to take on new task 
+            if True: # curr_action == []: # if able to take on new task 
                 prev_time = robot.getTime()
                 
                 path_length = 0 # path length reset
@@ -745,10 +748,23 @@ def interpret(timestep):
                 #    print(f'key {key}')
                    cluster_dict = (dict_version[key][0])
                    strat = cluster_dict['strat_to_use']
-                   if agent_id in strat:
-                       curr_action = (strat[agent_id])
-                       type_of_action = cluster_dict['most_common_strat']
-                       time_queued = robot.getTime()
+                if agent_id in strat:
+                    curr_action = strat[agent_id]
+                    type_of_action = cluster_dict['most_common_strat']
+
+                    if type_of_action == 2: 
+                        ratio = 0.12
+                        base = 0.180
+                        norm = forward_speed - 5
+                        forward_per_sec = ratio * norm + base 
+                        
+                        dx = forward_per_sec * math.cos(curr_action)
+                        dy = forward_per_sec * math.sin(curr_action)
+                        
+                        goal_position = (cd_x + dx, cd_x + dy)
+                        curr_action = goal_position
+                    
+                    time_queued = robot.getTime()
                 
             else: 
                 print('ignoring, other action still in progress')
@@ -855,7 +871,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             prev_x, prev_y = cd_x, cd_y
         
         if robot.getTime() - prev_gen_check == 1: 
-            # communicate_with_robot()
+            communicate_with_robot()
             prev_gen_check = robot.getTime()
             time_into_generation += 1
             if time_into_generation % 10 == 0: 

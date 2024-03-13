@@ -257,7 +257,7 @@ def message_listener(time_step):
                 shared_map_complete.update_agent_positions(agent_list)
                 # curr_pose = round((float(population[curr_robot_index].getPosition()[0])),2), round(float(population[curr_robot_index].getPosition()[1]),2)
 
-                map_subset_obs, map_subset_ag = shared_map_complete.subset(dim_size=1.0, central_loc=curr_pose, convert = True)
+                map_subset_obs, map_subset_ag = shared_map_complete.subset(dim_size=0.5, central_loc=curr_pose, convert = True)
 
                 # find subset 
                 local_map = shared_map.LocalMap(obstacle_pos=map_subset_obs, obstacle_size=shared_map_complete.obstacle_size, agent_pos=map_subset_ag, agent_size= 0.5, local_dim=1.0, x_bounds=shared_map_complete.x_bounds, y_bounds=shared_map_complete.y_bounds, central_loc=curr_pose) 

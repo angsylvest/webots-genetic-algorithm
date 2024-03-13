@@ -208,6 +208,7 @@ def process_action(current_pos):
     global time_queued
     global given_id
     global coord_status
+    global forward_speed 
     
     x,y = current_pos
     
@@ -220,7 +221,7 @@ def process_action(current_pos):
             coord_status = True # just proceed with original movement 
         else:  
             goalx, goaly = curr_action 
-            if (math.dist([x, y], [goalx,goaly])): 
+            if (math.dist([x, y], [goalx,goaly]) < 0.05): 
                 coord_status = False 
             else: 
                 coord_status = True
@@ -237,9 +238,8 @@ def process_action(current_pos):
             coord_status = False        
     
     elif type_of_action == 2: # disperse
-        print(f'dispersing')
         goalx, goaly = curr_action 
-        if (math.dist([x, y], [goalx,goaly])): 
+        if (math.dist([x, y], [goalx,goaly]) < 0.05): 
             coord_status = False 
         else: 
             coord_status = True 
@@ -283,6 +283,10 @@ def interpret(timestep):
     global prev_act
     global iteration
     global path_length
+    global forward_speed
+    global cd_x
+    global cd_y
+    global time_allocated
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -310,7 +314,7 @@ def interpret(timestep):
             receiver.nextPacket()
             
         elif 'final' in message: 
-            if curr_action == []: # if able to take on new task 
+            if True: # curr_action == []: # if able to take on new task 
                 msg = f'reward:{type_of_action}:{path_length_reward(path_length)}'
                 emitter_individual.send(msg.encode('utf-8'))
                 
@@ -320,6 +324,10 @@ def interpret(timestep):
                 agent_id = int(f'{given_id}')
                 
                 curr_strategy_proposed = {}
+                
+                orientation = curr_action 
+                time_allocated = robot.getTime()
+                
             
                 for key in dict_version: 
                 #    print(f'key {key}')
@@ -328,6 +336,21 @@ def interpret(timestep):
                    if agent_id in strat:
                        curr_action = (strat[agent_id])
                        type_of_action = cluster_dict['most_common_strat']
+                       
+                       if type_of_action == 2: 
+                            ratio = 0.12
+                            base = 0.180
+                            norm = forward_speed - 5
+                            forward_per_sec = (ratio*norm + base)*0.25  
+                            
+                            dx = forward_per_sec * math.cos(curr_action)
+                            dy = forward_per_sec * math.sin(curr_action)
+                            
+                            goal_position = (cd_x + dx, cd_x + dy)
+                            curr_action = goal_position
+                            
+                            print(f'dispersing to goal {curr_action} from {cd_x,cd_y}')
+                           
                        time_queued = robot.getTime()
                 
                 # print(f'dict version {dict_version}: {agent_id} agent id {agent_id} with next_action: {curr_action} for strat {type_of_action}')
@@ -418,7 +441,8 @@ time_elapsed_since_robot = 0
 time_elapsed = 0 
 prev_msg = ""
 path_length = 0 
-
+cd_x = 0
+cd_y = 0
 
 
 while robot.step(timestep) != -1:
@@ -440,7 +464,7 @@ while robot.step(timestep) != -1:
             prev_x, prev_y = cd_x, cd_y
             
         if robot.getTime() - prev_gen_check == 1: 
-            # communicate_with_robot() # temporarily added here for debugging 
+            communicate_with_robot() # temporarily added here for debugging 
             prev_gen_check = robot.getTime()
             time_into_exploration += 1
 
@@ -472,17 +496,21 @@ while robot.step(timestep) != -1:
             
             if not done: 
                 if type_of_action != 1:
-                    goal_posx, goal_posy = curr_action[0] + cd_x, curr_action[0] + cd_y # TODO: not correct, but logic is there 
+                    #goal_posx, goal_posy = curr_action[0] + cd_x, curr_action[0] + cd_y # TODO: not correct, but logic is there 
+                    pass 
                     
                 else: 
                     goal_posx, goal_posy = cd_x, cd_y
                     
                 if math.dist([cd_x, cd_y], [0,0]) > 0.05:  
                         if robot.getTime() - prev_time > time_allocated: # if unable to complete, not encouraged
-                            pass 
+                            print(f'time elapsed')
+                            curr_action = []
+                            done = True
+                             
                         else: 
-                            # print('proceeding with original path')
-                            chosen_direction = round(math.atan2(goal_posy-cd_y,goal_posx-cd_x),2) 
+                            chosen_direction = round(math.atan2(round(goal_posy,2)-cd_y,goal_posx-cd_x),2) 
+                            print(f'proceeding with original path with chosen direction {chosen_direction}')
                 else: # request new action 
                     curr_action = []
                     done = True
