@@ -925,31 +925,42 @@ while robot.step(timestep) != -1 and sim_complete != True:
                 # time_elapsed = 0 
     
 
-        if not reversing and not moving_forward and curr_action != []:
-            done = process_action((cd_x, cd_y))
-            
-            if not done: 
-                if type_of_action != 1:
-                    goal_posx, goal_posy = curr_action[0] + cd_x, curr_action[0] + cd_y # TODO: not correct, but logic is there 
+        if not reversing and not moving_forward:
+            if curr_action != []: 
+                done = process_action((cd_x, cd_y))
+                
+                if not done: 
+                    if type_of_action != 1:
+                        goal_posx, goal_posy = curr_action[0] + cd_x, curr_action[0] + cd_y # TODO: not correct, but logic is there 
+                        
+                    else: # queued behavior 
+                        goal_posx, goal_posy = cd_x, cd_y
+                        
+                    if math.dist([cd_x, cd_y], [0,0]) > 0.05:  
+                            if robot.getTime() - prev_time > time_allocated: # if unable to complete, not encouraged
+                                done = True # don't add any reward since not accomplished 
+                                curr_action = []
+                                is_leader = False
+                                msg = f'reward:{type_of_action}:{path_length_reward(path_length)}'
+                                emitter_individual.send(msg.encode('utf-8'))
+                            else: 
+                                # print('proceeding with original path')
+                                chosen_direction = round(math.atan2(goal_posy-cd_y,goal_posx-cd_x),2) 
+                    else: # request new action 
+                        curr_action = []
+                        is_leader = False
+                        done = True
+                        msg = f'reward:{type_of_action}:{path_length_reward(path_length*0.5)}'
+                        emitter_individual.send(msg.encode('utf-8'))
+                        print(f'finished coord task')
                     
-                else: # queued behavior 
-                    goal_posx, goal_posy = cd_x, cd_y
-                    
-                if math.dist([cd_x, cd_y], [0,0]) > 0.05:  
-                        if robot.getTime() - prev_time > time_allocated: # if unable to complete, not encouraged
-                            done = True # don't add any reward since not accomplished 
-                            curr_action = []
-                            msg = f'reward:{type_of_action}:{path_length_reward(path_length)}'
-                            emitter_individual.send(msg.encode('utf-8'))
-                        else: 
-                            # print('proceeding with original path')
-                            chosen_direction = round(math.atan2(goal_posy-cd_y,goal_posx-cd_x),2) 
-                else: # request new action 
+            if is_leader: 
+                if robot.getTime() - time_as_leader > time_allocated: # if unable to complete, not encouraged
+                    done = True # don't add any reward since not accomplished 
                     curr_action = []
-                    done = True
-                    msg = f'reward:{type_of_action}:{path_length_reward(path_length*0.5)}'
+                    is_leader = False
+                    msg = f'reward:{type_of_action}:{path_length_reward(path_length * 0.5)}'
                     emitter_individual.send(msg.encode('utf-8'))
-                    print(f'finished coord task')
 
         time_elapsed_since_robot +=1
         # biased random walk movement (each time step, cert prob of turning that direction) 

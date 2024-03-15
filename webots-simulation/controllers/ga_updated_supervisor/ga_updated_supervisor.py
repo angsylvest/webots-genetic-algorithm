@@ -398,6 +398,7 @@ def message_listener(time_step):
         if 'agent' in message:
             # print(f'agent message: {message}')
             agent_dict = {}
+            info_garnered = []
             message_parsed = message.split('~')[0].split('-')
             # print(f'parsed msg: {message_parsed}')
             agent_info = message_parsed[0].split(':')[1]
