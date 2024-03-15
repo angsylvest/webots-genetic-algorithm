@@ -983,13 +983,14 @@ while robot.step(timestep) != -1 and sim_complete != True:
             if not holding_something: 
                 if curr_index >= len(strategy):
                     curr_index = 0
+                    
                 chosen_direction = strategy[curr_index]
                 # curr_index += 1
             
-        elif (i - prev_i >= time_switch and object_encountered != True and orientation_found == True and not reversing and curr_action != []):
+        elif (i - prev_i >= time_switch and object_encountered != True and orientation_found == True and not reversing):
             orientation_found = False 
             remove_orientations = [] 
-            if not holding_something: 
+            if not holding_something and (not is_leader or curr_action == []): 
                 chosen_direction = strategy[curr_index]
                 curr_index += 1
         
