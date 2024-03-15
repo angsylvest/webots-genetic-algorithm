@@ -103,6 +103,10 @@ fitness = 0
 curr_action = []
 type_of_action = 0
 time_queued = robot.getTime()
+time_leading = robot.getTime()
+is_leader = False
+
+goal_posx, goal_posy = (0,0)
 
 def determine_env_type(): # maybe eventually 
     pass
@@ -207,16 +211,25 @@ def process_action(current_pos):
     global type_of_action 
     global time_queued
     global given_id
-    global coord_status
+    # global coord_status
     global forward_speed 
     
+    global goal_posy
+    global goal_posx
+    global is_leader
+    global time_leading
+    
     x,y = current_pos
+    
+    coord_status = False
     
     if type_of_action == 0: # flock
         # just continue moving to spot
         # print(f'flocking')
         
         if curr_action == 'leader':
+            if robot.getTime() - time_leading <= 1: 
+                is_leader = True
             curr_action = []
             coord_status = True # just proceed with original movement 
         else:  
@@ -239,10 +252,21 @@ def process_action(current_pos):
     
     elif type_of_action == 2: # disperse
         goalx, goaly = curr_action 
-        if (math.dist([x, y], [goalx,goaly]) < 0.05): 
-            coord_status = False 
+        
+        distance_threshold = 0.05  # Define the threshold for considering positions "very close"
+        distance = math.dist([x, y], [goalx, goaly])  # Calculate the distance between current and goal positions
+        if distance > distance_threshold: 
+            coord_status = False  # Positions are very close, so set coord_status to False 
         else: 
-            coord_status = True 
+            
+            coord_status = True  # Positions are not very close, so set coord_status to True
+            print(f'were here {distance} vs {distance_threshold} and {distance < distance_threshold}')
+        # if (math.dist([x, y], [goalx,goaly]) < 0.05): 
+            # coord_status = False 
+        # else: 
+            # coord_status = True 
+            
+        print(f'coord status: {coord_status} given current pos {[x, y]} and goal pos {[goalx,goaly]} with dist {math.dist([x, y], [goalx,goaly])}')
     
     else: 
         print('action doesnt exist')
@@ -287,6 +311,9 @@ def interpret(timestep):
     global cd_x
     global cd_y
     global time_allocated
+    
+    global time_leading
+    global is_leader
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -337,11 +364,18 @@ def interpret(timestep):
                        curr_action = (strat[agent_id])
                        type_of_action = cluster_dict['most_common_strat']
                        
+                       if time_of_action == 0: 
+                           if curr_action == 'leader': 
+                               time_leading = robot.getTime()
+                               is_leader = True
+                       
                        if type_of_action == 2: 
                             ratio = 0.12
                             base = 0.180
                             norm = forward_speed - 5
-                            forward_per_sec = (ratio*norm + base)*0.25  
+                            forward_per_sec = (ratio*norm + base)*6
+                            
+                            print(f'curr orientation: {curr_action}')
                             
                             dx = forward_per_sec * math.cos(curr_action)
                             dy = forward_per_sec * math.sin(curr_action)
@@ -398,6 +432,17 @@ def communicate_with_robot():
     global given_id 
     global prev_msg
     global chosen_direction 
+    global curr_action 
+    
+    global time_leading
+    global is_leader
+    
+    complete = False
+    
+    if (curr_action == [] and not is_leader) or (is_leader and (robot.getTime() - time_leading >= 6):
+        is_leader = False 
+        complete = True
+        
     # find closest robot to exchange info with 
     response = str(given_id) + "-encounter-[" + str(chosen_direction)
     if prev_msg != response: 
@@ -435,7 +480,7 @@ prev_act = ""
 
 time_into_exploration = 0 
 just_begun = True 
-coord_status = False
+# coord_status = False
 t_elapsed_constant = 10
 time_elapsed_since_robot = 0
 time_elapsed = 0 
@@ -463,7 +508,7 @@ while robot.step(timestep) != -1:
             path_length += distance
             prev_x, prev_y = cd_x, cd_y
             
-        if robot.getTime() - prev_gen_check == 1: 
+        if robot.getTime() - prev_gen_check == 10: 
             communicate_with_robot() # temporarily added here for debugging 
             prev_gen_check = robot.getTime()
             time_into_exploration += 1
@@ -490,9 +535,12 @@ while robot.step(timestep) != -1:
             else: # request new action 
                 pass
            
-                
+        roll, pitch, yaw = inertia.getRollPitchYaw()
+        yaw = round(yaw, 2)  
+           
         if not holding_something and not reversing and not moving_forward and curr_action != []:
             done = process_action((cd_x, cd_y))
+            # print(f'done {done} vs chosen_direction {chosen_direction} vs {yaw}')
             
             if not done: 
                 if type_of_action != 1:
@@ -502,23 +550,21 @@ while robot.step(timestep) != -1:
                 else: 
                     goal_posx, goal_posy = cd_x, cd_y
                     
-                if math.dist([cd_x, cd_y], [0,0]) > 0.05:  
-                        if robot.getTime() - prev_time > time_allocated: # if unable to complete, not encouraged
-                            print(f'time elapsed')
-                            curr_action = []
-                            done = True
+                if math.dist([cd_x, cd_y], [goal_posx,goal_posy]) > 0.05 and type_of_action != 1:  
+                        # if robot.getTime() - prev_time > time_allocated: # if unable to complete, not encouraged
+                            # print(f'time elapsed')
+                            # curr_action = []
+                            # done = True
                              
-                        else: 
-                            chosen_direction = round(math.atan2(round(goal_posy,2)-cd_y,goal_posx-cd_x),2) 
-                            print(f'proceeding with original path with chosen direction {chosen_direction}')
+                        # else: 
+                        chosen_direction = round(math.atan2(round(goal_posy-cd_y,2)-cd_y,goal_posx-cd_x),2) 
+                        print(f'proceeding with original path with chosen direction {chosen_direction}')
                 else: # request new action 
                     curr_action = []
                     done = True
                     print(f'finished coord task')
             
            
-        roll, pitch, yaw = inertia.getRollPitchYaw()
-        yaw = round(yaw, 2)
     
         if yaw != chosen_direction and orientation_found != True and object_encountered != True and not reversing: 
             begin_rotating()

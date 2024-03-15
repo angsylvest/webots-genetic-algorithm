@@ -235,12 +235,13 @@ def message_listener(time_step):
         if 'encounter' in message_individual: 
             robo_index = int(message_individual.split('-')[0])
             # reproduce_list.append(robo_index) 
-            # print('robot found -- checking genotype', robo_index) 
+            print('robot found -- checking genotype', message_individual) 
             curr_orient = message_individual.split('[')[-1]
             agent_list = {}
             curr_pose = ()
+            complete = True
 
-            if using_coordination: 
+            if using_coordination and complete: 
                 # want to be able to determine if should do coordination
                 if globals.use_list_rep: 
                     for ind, rob in enumerate(population): 

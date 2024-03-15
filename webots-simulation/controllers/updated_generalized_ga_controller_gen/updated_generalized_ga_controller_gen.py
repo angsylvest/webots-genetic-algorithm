@@ -176,6 +176,9 @@ using_bayes = globals.using_bayes
 using_coordination = globals.use_coordination
 remove_orientations = []
 
+time_as_leader = robot.getTime()
+is_leader = False
+
 if using_bayes:
     multi_arm = bayes.NArmedBanditDrift(len(observations_per_strategy))
 
@@ -224,15 +227,20 @@ def process_action(current_pos):
     global coord_status
     
     x,y = current_pos
+
+    global is_leader
+    global time_as_leader
     
     if type_of_action == 0: # flock
         # just continue moving to spot
         # print(f'flocking')
         
         if curr_action == 'leader':
+            is_leader = True
             curr_action = []
             coord_status = True # just proceed with original movement 
         else:  
+            is_leader = False
             goalx, goaly = curr_action 
             if (math.dist([x, y], [goalx,goaly]) > 0.05): 
                 coord_status = False 
@@ -241,6 +249,7 @@ def process_action(current_pos):
         
     elif type_of_action == 1: # queue
         # print(f'queuing')
+        is_leader = False
         if robot.getTime() - time_queued >= curr_action: 
             coord_status = True 
             curr_action = [] 
@@ -252,8 +261,9 @@ def process_action(current_pos):
     
     elif type_of_action == 2: # disperse
         print(f'dispersing')
+        is_leader = False
         goalx, goaly = curr_action 
-        if (math.dist([x, y], [goalx,goaly]) > 0.05): 
+        if (math.dist([x, y], [goalx,goaly]) < 0.05): 
             coord_status = False 
         else: 
             coord_status = True 
@@ -552,6 +562,9 @@ def interpret(timestep):
     global cd_y
     global forward_speed
 
+    global is_leader
+    global time_as_leader
+
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -734,7 +747,7 @@ def interpret(timestep):
             receiver.nextPacket()
 
         elif 'final' in message: 
-            if True: # curr_action == []: # if able to take on new task 
+            if not is_leader or (robot.getTime() - time_as_leader >= time_allocated and is_leader): # curr_action == []: # if able to take on new task 
                 prev_time = robot.getTime()
                 
                 path_length = 0 # path length reset
@@ -751,6 +764,9 @@ def interpret(timestep):
                 if agent_id in strat:
                     curr_action = strat[agent_id]
                     type_of_action = cluster_dict['most_common_strat']
+                    if type_of_action == 0:
+                        if curr_action == 'leader':
+                            time_as_leader = robot.getTime()
 
                     if type_of_action == 2: 
                         ratio = 0.12
@@ -871,7 +887,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             prev_x, prev_y = cd_x, cd_y
         
         if robot.getTime() - prev_gen_check == 1: 
-            communicate_with_robot()
+            # communicate_with_robot()
             prev_gen_check = robot.getTime()
             time_into_generation += 1
             if time_into_generation % 10 == 0: 
@@ -931,7 +947,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                 else: # request new action 
                     curr_action = []
                     done = True
-                    msg = f'reward:{type_of_action}:{path_length_reward(path_length)}'
+                    msg = f'reward:{type_of_action}:{path_length_reward(path_length*0.5)}'
                     emitter_individual.send(msg.encode('utf-8'))
                     print(f'finished coord task')
 

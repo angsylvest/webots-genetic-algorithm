@@ -167,8 +167,8 @@ def mediate_differences(msgs):
         # print(f'updated agent pos: {agent_pos}')
 
         localMap = shared_map.LocalMap(obstacle_pos=[], obstacle_size=0.2, agent_pos=agent_pos, agent_size= 0.5, local_dim=1.0, x_bounds=(-1,1), y_bounds=(-1,1), central_loc=()) # just used to generate strat
-        strat_plan = localMap.process_output(most_common_strat)
-        clustered_data[i] = [{'most_common_strat': most_common_strat, 'strat_to_use': strat_plan}]
+        strat_plan = localMap.process_output(2)# forced if 0: flock . 1: queue 2: disperse
+        clustered_data[i] = [{'most_common_strat':2, 'strat_to_use': strat_plan}]
 
         # print(f'generated strategy for cluster: {strat_plan}')
     # Example output: {0: [{'most_common_strat': 'most_common_strat1'}], ...}

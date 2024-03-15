@@ -218,9 +218,18 @@ class LocalMap():
 
     def calculate_orientation(self, position, center):
         # Calculate the vector from center to position
-        vec_to_position = (position[0] - center[0], position[1] - center[1])
+        print(f'current center: {center} vs pos {position}')
+        vec_to_position = ( position[0] - center[0], position[1] - center[1])
+        
         # Calculate the angle in radians
         angle_radians = round(math.atan2(vec_to_position[1], vec_to_position[0]),2)
+        
+        # Adjust the angle to make the robot face away from the center
+        if angle_radians < 0:
+            angle_radians += math.pi
+        else:
+            angle_radians -= math.pi
+        
         return angle_radians
     
     # communication-relevant functions 

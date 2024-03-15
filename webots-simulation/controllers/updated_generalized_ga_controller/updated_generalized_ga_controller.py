@@ -101,6 +101,9 @@ terrains = ['normal', 'road']
 current_terrain = terrains[0] # either normal or road 
 prev_terrain = terrains[0]
 
+time_as_leader = robot.getTime()
+is_leader = False
+
 # generalize id acquisition
 if robot.getName() == "k0":
     given_id = 0
@@ -175,6 +178,9 @@ using_artificial_field = False
 using_bayes = globals.using_bayes
 using_coordination = globals.use_coordination
 remove_orientations = []
+time_in_action = robot.getTime()
+is_leader = False 
+time_as_leader = robot.getTime()
 
 if using_bayes:
     multi_arm = bayes.NArmedBanditDrift(len(observations_per_strategy))
@@ -222,6 +228,9 @@ def process_action(current_pos):
     global time_queued
     global given_id
     global coord_status
+
+    global is_leader
+    global time_as_leader
     
     x,y = current_pos
     
@@ -230,9 +239,11 @@ def process_action(current_pos):
         # print(f'flocking')
         
         if curr_action == 'leader':
+            is_leader = True
             curr_action = []
             coord_status = True # just proceed with original movement 
-        else:  
+        else: 
+            is_leader = False 
             goalx, goaly = curr_action 
             if (math.dist([x, y], [goalx,goaly]) > 0.05): 
                 coord_status = False 
@@ -241,6 +252,7 @@ def process_action(current_pos):
         
     elif type_of_action == 1: # queue
         # print(f'queuing')
+        is_leader = False
         if robot.getTime() - time_queued >= curr_action: 
             coord_status = True 
             curr_action = [] 
@@ -252,6 +264,7 @@ def process_action(current_pos):
     
     elif type_of_action == 2: # disperse
         print(f'dispersing')
+        is_leader = False
         goalx, goaly = curr_action 
         if (math.dist([x, y], [goalx,goaly]) > 0.05): 
             coord_status = False 
@@ -551,6 +564,10 @@ def interpret(timestep):
     global cd_x
     global cd_y
     global forward_speed
+    global time_allocated
+
+    global is_leader
+    global time_as_leader
 
     
     if receiver.getQueueLength()>0:
@@ -734,7 +751,7 @@ def interpret(timestep):
             receiver.nextPacket()
 
         elif 'final' in message: 
-            if True: # curr_action == []: # if able to take on new task 
+            if not is_leader or (robot.getTime() - time_as_leader >= time_allocated and is_leader): # curr_action == []: # if able to take on new task 
                 prev_time = robot.getTime()
                 
                 path_length = 0 # path length reset
@@ -751,6 +768,9 @@ def interpret(timestep):
                 if agent_id in strat:
                     curr_action = strat[agent_id]
                     type_of_action = cluster_dict['most_common_strat']
+                    if type_of_action == 0:
+                        if curr_action == 'leader':
+                            time_as_leader = robot.getTime()
 
                     if type_of_action == 2: 
                         ratio = 0.12
@@ -923,7 +943,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                         if robot.getTime() - prev_time > time_allocated: # if unable to complete, not encouraged
                             done = True # don't add any reward since not accomplished 
                             curr_action = []
-                            msg = f'reward:{type_of_action}:{path_length_reward(path_length)}'
+                            msg = f'reward:{type_of_action}:{path_length_reward(path_length * 0.5)}'
                             emitter_individual.send(msg.encode('utf-8'))
                         else: 
                             # print('proceeding with original path')
