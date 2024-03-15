@@ -6,7 +6,7 @@ minimizedPerspectives: 000000ff00000000fd000000030000000000000087000002ecfc01000
 maximizedDockId: -1
 centralWidgetVisible: 1
 orthographicViewHeight: 1
-textFiles: 2 "controllers/updated_generalized_ga_controller/updated_generalized_ga_controller.py" "controllers/ga_updated_supervisor/ga_updated_supervisor.py" "controllers/updated_generalized_ga_controller_gen/updated_generalized_ga_controller_gen.py" "controllers/pso_rdpso/pso_rdpso.py" "controllers/ga_individual_supervisor/ga_individual_supervisor.py" "controllers/ga_updated_supervisor_gen/ga_updated_supervisor_gen.py" "controllers/ga_individual_supervisor/robot_pop.py" "utils/bayes.py"
+textFiles: 5 "controllers/updated_generalized_ga_controller/updated_generalized_ga_controller.py" "controllers/ga_updated_supervisor/ga_updated_supervisor.py" "controllers/updated_generalized_ga_controller_gen/updated_generalized_ga_controller_gen.py" "controllers/pso_rdpso/pso_rdpso.py" "controllers/ga_individual_supervisor/ga_individual_supervisor.py" "controllers/ga_updated_supervisor_gen/ga_updated_supervisor_gen.py"
 globalOptionalRendering: LightSensorRays
 consoles: Console:All:All
 renderingDevicePerspectives: k0(1):camera;1;1;0;0

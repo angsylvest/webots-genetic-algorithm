@@ -263,7 +263,7 @@ def process_action(current_pos):
             coord_status = False        
     
     elif type_of_action == 2: # disperse
-        print(f'dispersing')
+        # print(f'dispersing')
         is_leader = False
         goalx, goaly = curr_action 
         if (math.dist([x, y], [goalx,goaly]) > 0.05): 
@@ -891,7 +891,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             prev_x, prev_y = cd_x, cd_y
         
         if robot.getTime() - prev_gen_check == 1: 
-            communicate_with_robot()
+            # communicate_with_robot()
             prev_gen_check = robot.getTime()
             time_into_generation += 1
             if time_into_generation % 10 == 0: 
@@ -913,7 +913,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                 time_elapsed = 0 # on a per sec basis 
                 # print('successfully dropped off object', given_id)
             
-        if curr_index >= len(strategy) and not holding_something and not reversing and not moving_forward and curr_action == []: # maintain strategy for initial
+        if curr_index >= len(strategy) and not holding_something and not reversing and not moving_forward: # maintain strategy for initial
             curr_index = 0 
             # used to determine when to update strategy 
             print('completed strategy --', strategy, 'energy expenditure --', energy_expenditure(), 'for agent: ', given_id)
@@ -981,10 +981,12 @@ while robot.step(timestep) != -1 and sim_complete != True:
             # proceeds with previous strategy 
             orientation_found = False 
             if not holding_something: 
+                if curr_index >= len(strategy):
+                    curr_index = 0
                 chosen_direction = strategy[curr_index]
                 # curr_index += 1
             
-        elif (i - prev_i >= time_switch and object_encountered != True and orientation_found == True and not reversing):
+        elif (i - prev_i >= time_switch and object_encountered != True and orientation_found == True and not reversing and curr_action != []):
             orientation_found = False 
             remove_orientations = [] 
             if not holding_something: 
