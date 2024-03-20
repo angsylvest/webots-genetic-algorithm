@@ -568,6 +568,7 @@ def interpret(timestep):
 
     global is_leader
     global time_as_leader
+    global holding_something
 
     
     if receiver.getQueueLength()>0:
@@ -751,7 +752,7 @@ def interpret(timestep):
             receiver.nextPacket()
 
         elif 'final' in message: 
-            if not is_leader or (robot.getTime() - time_as_leader >= time_allocated and is_leader): # curr_action == []: # if able to take on new task 
+            if (not is_leader or (robot.getTime() - time_as_leader >= time_allocated and is_leader)) and not holding_something: # curr_action == []: # if able to take on new task 
                 prev_time = robot.getTime()
                 
                 path_length = 0 # path length reset
@@ -873,6 +874,7 @@ reversing = False
 moving_forward = False  
 cleaning = False
 prev_gen_check = robot.getTime()
+
 
 cd_x, cd_y = float(gps.getValues()[0]), float(gps.getValues()[1])
 
