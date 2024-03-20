@@ -900,7 +900,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             # print('given id', given_id, 'updated time into generation + here dictionary', agent_observation['num_interactions'] , 'num collisions', agent_observation['num_collisions']) 
         
         # homing mechanism 
-        if holding_something == True and not reversing and not moving_forward and curr_action == []: # move towards nest (constant vector towards home) 
+        if holding_something == True and not reversing and not moving_forward: # move towards nest (constant vector towards home) 
             
             if math.dist([cd_x, cd_y], [0,0]) > 0.05:  
                 chosen_direction = round(math.atan2(-cd_y,-cd_x),2)
@@ -929,7 +929,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                 # time_elapsed = 0 
     
 
-        if not reversing and not moving_forward and (curr_action != [] or is_leader):
+        if not reversing and not moving_forward and not holding_something:
             
             if curr_action != []: 
                 done = process_action((cd_x, cd_y))
