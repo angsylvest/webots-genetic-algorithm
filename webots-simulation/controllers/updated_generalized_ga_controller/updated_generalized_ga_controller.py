@@ -97,6 +97,7 @@ communication = globals.communication # False
 using_high_dens = globals.using_high_dens # True 
 decentralized = globals.decentralized
 num_coordination = 3 
+curr_node = ""
 
 if decentralized:
     # create tree for each type of coord 
@@ -628,6 +629,7 @@ def interpret(timestep):
     global holding_something
     global trees
     global curr_others
+    global curr_node 
 
     
     if receiver.getQueueLength()>0:
@@ -870,17 +872,19 @@ def interpret(timestep):
                                     is_leader = True
 
                             action, node = mcdt.iterate(trees[0])
+                            curr_node = node
                             process_decentralized(type_of_action, action, node, neighbors, center)
 
                         elif type_of_action == 1:  # queue 
                             action, node = mcdt.iterate(trees[1])
+                            curr_node = node
                             process_decentralized(type_of_action, action, node, neighbors, center)
 
                         elif type_of_action == 2: # disperse 
                             action, node = mcdt.iterate(trees[0])
+                            curr_node = node
                             process_decentralized(type_of_action, action, node, neighbors, center)
 
-                
             else: 
                 print('ignoring, other action still in progress')
             
@@ -1081,6 +1085,9 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     decent_behaviors = []
                     curr_action = []
                     is_leader = False
+
+                    # update reward (based on path length )
+                    trees[decent_index].update_tree(node, path_length) # TODO: make node defined
 
                 else: 
                     if (time_allocated - robot.getTime()) % 1 == 0: 
