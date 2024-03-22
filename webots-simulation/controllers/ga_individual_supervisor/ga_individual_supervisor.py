@@ -272,7 +272,7 @@ def message_listener(time_step):
                         # print(f'proposed strat: {msg}')
                         # msg = "" # temporarily empty
                         # curr_pos = [round(population[curr_robot_index].getPosition()[0],2), round(population[curr_robot_index].getPosition()[1],2)]
-                        msg_for_supervisor = f'agent:{given_id}-strat:{current_strat_index}-curr_pos:{curr_pose}~prop:{map_subset_ag}'
+                        msg_for_supervisor = f'agent:{given_id}-strat:{current_strat_index}-curr_pos:{curr_pose}~prop:{map_subset_ag}!other:{agent_list[ind]}'
                         # print(f'outputted info to be sent for coordination: {msg}')
                         prev_time = robot.getTime()
                         emitter.send(msg_for_supervisor.encode('utf-8')) 
@@ -320,7 +320,16 @@ def message_listener(time_step):
             multi_arm.advance(strat, reward)
 
             receiver_individual.nextPacket() 
-           
+
+        elif 'pos_update' in message_individual: 
+            for ind, rob in enumerate(population): 
+                agent_list[ind] = (round(rob.getPosition()[0],2), round(rob.getPosition()[1],2))
+
+            msg = f'neighbors:{agent_list}'
+            emitter_individual.send(msg.encode('utf-8'))
+            
+            receiver_individual.nextPacket() 
+
         else: 
             receiver_individual.nextPacket()
      

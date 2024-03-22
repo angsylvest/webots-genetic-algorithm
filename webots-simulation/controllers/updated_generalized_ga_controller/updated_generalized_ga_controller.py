@@ -96,6 +96,14 @@ sim_type = globals.sim_type #"random"
 communication = globals.communication # False 
 using_high_dens = globals.using_high_dens # True 
 decentralized = globals.decentralized
+num_coordination = 3 
+
+if decentralized:
+    # create tree for each type of coord 
+    trees = [mcdt.DecisionTree(num_actions=n) for n in [2, 2, 3]]
+    decent_index = 0
+    decent_behaviors = []
+    curr_others = {}
 
 gens_elapsed = 0 
 
@@ -228,6 +236,38 @@ def reward(curr_strat):
     goal_reward = strat_obs[curr_strat]["collected"] * 1.5
 
     return obs_penalty + goal_reward
+
+
+def process_decentralized(type, node=None, action=None, neighb=None):
+    global decent_index
+    global decent_behaviors
+    global type_of_action
+
+    global curr_others
+
+    goal_orientations = []
+    neighbors = neighb
+    length_of_action = len(action)
+
+    # TODO: different set up depending on if initlally called or called afterewards
+
+    # set as curr_action here 
+    if type == 0: # flock 
+        # id type of flocking / send msg to individual supervisor to track
+        # id partner 
+
+        pass 
+
+    elif type == 1: # queue 
+        # wait will be sampled 
+
+        pass 
+
+    elif type == 2: # disperse 
+        # distance/time based on sampled action 
+
+        pass
+
 
 def process_action(current_pos):
     global curr_action 
@@ -581,6 +621,8 @@ def interpret(timestep):
     global is_leader
     global time_as_leader
     global holding_something
+    global trees
+    global curr_others
 
     
     if receiver.getQueueLength()>0:
@@ -676,6 +718,11 @@ def interpret(timestep):
             curr_index = 0 
             remove_orientations = []
 
+            decent_index = 0
+            decent_behaviors = []
+            curr_action = []
+            curr_others = []
+
             curr_action = [] # set to nothing initially
             type_of_action = 0
             msg = f"assigned-{given_id}"
@@ -767,7 +814,7 @@ def interpret(timestep):
             receiver.nextPacket()
 
         elif 'final' in message: 
-            if (not is_leader or (robot.getTime() - time_as_leader >= time_allocated and is_leader)) and not holding_something: # curr_action == []: # if able to take on new task 
+            if (not is_leader or (robot.getTime() - time_as_leader >= time_allocated and is_leader and not decentralized) or (decentralized and curr_action == [])) and not holding_something: # curr_action == []: # if able to take on new task 
                 prev_time = robot.getTime()
                 
                 path_length = 0 # path length reset
@@ -777,13 +824,17 @@ def interpret(timestep):
                 
                 curr_strategy_proposed = {}
             
-                for key in dict_version: 
+                for key in dict_version: # it's a list for some dumb reason 
                 #    print(f'key {key}')
                    cluster_dict = (dict_version[key][0])
                    strat = cluster_dict['strat_to_use']
+
+
                 if agent_id in strat:
                     curr_action = strat[agent_id]
                     type_of_action = cluster_dict['most_common_strat']
+                    neighbors = cluster_dict['neighbors']
+                    center = cluster_dict['center']
 
                     if not globals.decentralized:
 
@@ -806,8 +857,19 @@ def interpret(timestep):
                         time_queued = robot.getTime()
 
                     else: 
-                        # maybe get help from ind supervisor and curr obs
-                        pass 
+                        # doing decentralized behavior with mcdt
+                        if type_of_action == 0: # flock 
+                            action, node = mcdt.iterate(trees[0])
+                            process_decentralized(type_of_action, action, node, neighbors, center)
+
+                        elif type_of_action == 1:  # queue 
+                            action, node = mcdt.iterate(trees[1])
+                            process_decentralized(type_of_action, action, node, neighbors, center)
+
+                        elif type_of_action == 2: # disperse 
+                            action, node = mcdt.iterate(trees[0])
+                            process_decentralized(type_of_action, action, node, neighbors, center)
+
                 
             else: 
                 print('ignoring, other action still in progress')
@@ -841,6 +903,17 @@ def interpret(timestep):
         if 'child' in message and communication: 
             next_child = message[5:].split("*")
             num_better += 1
+            receiver_individual.nextPacket()
+
+        elif 'neighbors' in message and curr_action != [] and type_of_action == 0: 
+            curr_others = ast.literal_eval(message[10:])
+
+            # TODO: update so that it is assigned to correct "leader"
+            goal_position = (cd_x + dx, cd_x + dy)
+
+            # update goal: 
+
+
             receiver_individual.nextPacket()
             
         elif 'comm' in message and str(message.split('-')[1]) == str(given_id) and not 'comm_response' in message:
@@ -955,7 +1028,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
 
         if not reversing and not moving_forward and not holding_something:
             
-            if curr_action != []: 
+            if curr_action != [] and not decentralized: 
                 done = process_action((cd_x, cd_y))
                 
                 if not done: 
@@ -989,6 +1062,25 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     is_leader = False
                     msg = f'reward:{type_of_action}:{path_length_reward(path_length * 0.5)}'
                     emitter_individual.send(msg.encode('utf-8'))
+
+            if decentralized: 
+
+                if robot.getTime() - prev_time > time_allocated:
+                    # continue setting chosen_direction here 
+                    decent_index = 0
+                    decent_behaviors = []
+                    curr_action = []
+
+                else: 
+                    if (time_allocated - robot.getTime()) % 1 == 0: 
+                        # request update from individual supervisor 
+                        msg = 'pos_update'
+                        emitter_individual.send(msg.encode('utf-8'))
+                        
+                        # update goal based on pos 
+                        process_decentralized(type_of_action)
+
+                    curr_action = '!'
 
         time_elapsed_since_robot +=1
         # biased random walk movement (each time step, cert prob of turning that direction) 

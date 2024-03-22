@@ -409,6 +409,7 @@ def message_listener(time_step):
             # print(f'parsed strat: {message.split("~")[1][5:]}')
             strat_parsed = ast.literal_eval(str(message.split('~')[1][5:]))
             
+            
             poses = ast.literal_eval(message.split('~')[0].split(':')[3])
             posx = poses[0]
             posy = poses[1]
@@ -545,7 +546,8 @@ def mediate_differences(msgs):
 
         localMap = shared_map.LocalMap(obstacle_pos=[], obstacle_size=0.2, agent_pos=agent_pos, agent_size= 0.5, local_dim=1.0, x_bounds=(-1,1), y_bounds=(-1,1), central_loc=()) # just used to generate strat
         strat_plan = localMap.process_output(most_common_strat)
-        clustered_data[i] = [{'most_common_strat': most_common_strat, 'strat_to_use': strat_plan}]
+        center = self.calculate_center(self.agent_pos)
+        clustered_data[i] = [{'most_common_strat': most_common_strat, 'strat_to_use': strat_plan, 'neighbors': agent_pos, 'center': localMap.calculate_center(agent_pos)}]
 
         # print(f'generated strategy for cluster: {strat_plan}')
     # Example output: {0: [{'most_common_strat': 'most_common_strat1'}], ...}
