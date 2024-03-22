@@ -254,7 +254,12 @@ def process_decentralized(type, node=None, action=None, neighb=None):
     # set as curr_action here 
     if type == 0: # flock 
         # id type of flocking / send msg to individual supervisor to track
-        # id partner 
+        if is_leader: 
+            pass 
+
+        else: 
+            # set goal position based on where leader is
+            pass 
 
         pass 
 
@@ -859,6 +864,11 @@ def interpret(timestep):
                     else: 
                         # doing decentralized behavior with mcdt
                         if type_of_action == 0: # flock 
+                            if type_of_action == 0:
+                                if curr_action == 'leader':
+                                    time_as_leader = robot.getTime()
+                                    is_leader = True
+
                             action, node = mcdt.iterate(trees[0])
                             process_decentralized(type_of_action, action, node, neighbors, center)
 
@@ -1070,6 +1080,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     decent_index = 0
                     decent_behaviors = []
                     curr_action = []
+                    is_leader = False
 
                 else: 
                     if (time_allocated - robot.getTime()) % 1 == 0: 
