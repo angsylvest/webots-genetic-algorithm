@@ -19,6 +19,7 @@ sys.path.append('../../')
 import utils
 import utils.bayes as bayes 
 import utils.globals as globals
+import utils.mcdt as mcdt
 import ast 
 
 # create the Robot instance.
@@ -94,6 +95,7 @@ num_better = 0
 sim_type = globals.sim_type #"random" 
 communication = globals.communication # False 
 using_high_dens = globals.using_high_dens # True 
+decentralized = globals.decentralized
 
 gens_elapsed = 0 
 
@@ -182,8 +184,13 @@ time_in_action = robot.getTime()
 is_leader = False 
 time_as_leader = robot.getTime()
 
+
+
 if using_bayes:
     multi_arm = bayes.NArmedBanditDrift(len(observations_per_strategy))
+
+elif globals.using_ucb:
+    multi_arm = mcdt.MonteCarloSingleDecisionTree(len(observations_per_strategy))
 
 def identify_terrain(r,g,b):
     global terrains
@@ -402,7 +409,7 @@ def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False
     
     # want to update weights based off effectiveness of current strategy 
     if update: 
-        if not using_bayes: 
+        if not using_bayes and not globals.using_ucb: 
             new_weights = create_new_weights(t_block, t_robot, original_weights)
             weights = new_weights 
             strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], new_weights)[0]
@@ -412,20 +419,25 @@ def choose_strategy(curr_dir, t_block, t_robot, original_weights, update = False
             # strategy_f.close()
             # strategy_f = open("../../graph-generation/collision-data/ga-info.csv", 'a')
         else: # bayes weight updating 
-            re = reward(current_strat_index)
-            multi_arm.advance(current_strat_index, re) # action, reward_accum
-            current_strat_index = multi_arm.sample_action()
-            strat = ['straight','alternating-left','alternating-right', 'true random'][current_strat_index]
-
+            if using_bayes: 
+                re = reward(current_strat_index)
+                multi_arm.advance(current_strat_index, re) # action, reward_accum
+                current_strat_index = multi_arm.sample_action()
+                strat = ['straight','alternating-left','alternating-right', 'true random'][current_strat_index]
+            elif globals.using_ucb:
+                pass
 
     if not update: 
-        if not using_bayes: 
+        if not using_bayes and not globals.using_ucb: 
             strat = random.choices(['straight','alternating-left','alternating-right', 'true random'], original_weights)[0]
             current_strat_index = ['straight','alternating-left','alternating-right', 'true random'].index(strat)
         else: 
-            current_strat_index = multi_arm.sample_action()
-            strat = ['straight','alternating-left','alternating-right', 'true random'][current_strat_index]
-    
+            if using_bayes: 
+                current_strat_index = multi_arm.sample_action()
+                strat = ['straight','alternating-left','alternating-right', 'true random'][current_strat_index]
+            elif globals.using_ucb:
+                pass
+
     if strat == 'straight':
         return [curr_dir, curr_dir, curr_dir, curr_dir]
     elif strat == 'alternating-right':
@@ -671,6 +683,9 @@ def interpret(timestep):
 
             if using_bayes:
                 multi_arm.reset_prior()
+
+            if globals.using_ucb:
+                multi_arm.reset()
             
             receiver.nextPacket()
             
@@ -769,23 +784,30 @@ def interpret(timestep):
                 if agent_id in strat:
                     curr_action = strat[agent_id]
                     type_of_action = cluster_dict['most_common_strat']
-                    if type_of_action == 0:
-                        if curr_action == 'leader':
-                            time_as_leader = robot.getTime()
 
-                    if type_of_action == 2: 
-                        ratio = 0.12
-                        base = 0.180
-                        norm = forward_speed - 5
-                        forward_per_sec = ratio * norm + base 
+                    if not globals.decentralized:
+
+                        if type_of_action == 0:
+                            if curr_action == 'leader':
+                                time_as_leader = robot.getTime()
+
+                        if type_of_action == 2: 
+                            ratio = 0.12
+                            base = 0.180
+                            norm = forward_speed - 5
+                            forward_per_sec = ratio * norm + base 
+                            
+                            dx = forward_per_sec * math.cos(curr_action)
+                            dy = forward_per_sec * math.sin(curr_action)
+                            
+                            goal_position = (cd_x + dx, cd_x + dy)
+                            curr_action = goal_position
                         
-                        dx = forward_per_sec * math.cos(curr_action)
-                        dy = forward_per_sec * math.sin(curr_action)
-                        
-                        goal_position = (cd_x + dx, cd_x + dy)
-                        curr_action = goal_position
-                    
-                    time_queued = robot.getTime()
+                        time_queued = robot.getTime()
+
+                    else: 
+                        # maybe get help from ind supervisor and curr obs
+                        pass 
                 
             else: 
                 print('ignoring, other action still in progress')

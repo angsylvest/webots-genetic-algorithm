@@ -39,6 +39,8 @@ communication = globals.communication # True
 high_dense = globals.using_high_dens #True
 using_bayes = globals.using_bayes
 
+assigned_teams = {}
+
 # collected counts csv generation 
 overall_f = open(f'../../graph-generation/collection-data/overall-df-{sim_type}-{curr_size}-comm_{communication}-dense_{high_dense}.csv', 'w')
 overall_columns = 'trial' + ',time' + ',objects retrieved' + ',size' + ',type' + ',potential time' + ',total elapsed'
