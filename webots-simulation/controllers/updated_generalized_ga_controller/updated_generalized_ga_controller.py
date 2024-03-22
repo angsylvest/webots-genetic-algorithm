@@ -239,7 +239,7 @@ def reward(curr_strat):
     return obs_penalty + goal_reward
 
 
-def process_decentralized(type, node=None, action=None, neighb=None):
+def process_decentralized(type, node=None, action=None, neighb=None, center=None):
     global decent_index
     global decent_behaviors
     global type_of_action
@@ -271,9 +271,26 @@ def process_decentralized(type, node=None, action=None, neighb=None):
 
     elif type == 2: # disperse 
         # distance/time based on sampled action 
+        # use filtered_random function once get pos from center
 
         pass
 
+
+def closest_reference_angle(agent_x, agent_y, pos_x, pos_y): # center pos_x, pos_y
+    angle = math.atan2(pos_y - agent_y, pos_x - agent_x) 
+    reference_angles = [0, math.pi/2, math.pi, -math.pi/2]
+    closest_angle = min(reference_angles, key=lambda x: abs(x - angle))
+    
+    if closest_angle == 0:
+        return "Closest to 0"
+    elif closest_angle == math.pi/2:
+        return "Closest to π/2"
+    elif closest_angle == math.pi:
+        return "Closest to π"
+    elif closest_angle == -math.pi/2:
+        return "Closest to -π/2"
+    else:
+        return "Invalid angle"
 
 def process_action(current_pos):
     global curr_action 
@@ -1092,6 +1109,8 @@ while robot.step(timestep) != -1 and sim_complete != True:
                 else: 
                     if (time_allocated - robot.getTime()) % 1 == 0: 
                         # request update from individual supervisor 
+
+                        # TODO: if already complete, ask for another, otherwise just continue moving towards original goal 
                         msg = 'pos_update'
                         emitter_individual.send(msg.encode('utf-8'))
                         
