@@ -105,6 +105,7 @@ curr_env = env_mod.Environment(env_type=env_type, seed = seed_val)
 input_from_others = {}
 info_garnered = []
 prev_time = robot.getTime()
+msg = ""
 
 def message_sender(msg, individual = False):
     if not individual: 
@@ -361,7 +362,7 @@ def message_listener(time_step):
 
     if receiver.getQueueLength()>0 and (robot.getTime() - start < simulation_time):
         message = receiver.getData().decode('utf-8')
-        # print('supervisor msgs --', message) 
+        print('supervisor msgs --', message) 
         
         if message[0] == "$": # handles deletion of objects when grabbed
             obj_node = robot.getFromId(int(message.split("-")[1]))
@@ -398,7 +399,7 @@ def message_listener(time_step):
 
 
         if 'agent' in message:
-            # print(f'agent message: {message}')
+            print(f'agent message: {message}')
             agent_dict = {}
             info_garnered = []
             message_parsed = message.split('~')[0].split('-')
@@ -481,7 +482,9 @@ def get_key_by_value(dictionary, value):
 def mediate_differences(msgs):
     # assuming msgs is a list of suggestions
     # ex format: [{agent_id: (strat, curr_pose)} ..] 
-    # print(f'messages: {msgs}')
+    print(f'messages: {msgs}')
+    global prev_msg
+    global msg 
     
     cluster_list = []
     ids = []
@@ -553,8 +556,12 @@ def mediate_differences(msgs):
     # Example output: {0: [{'most_common_strat': 'most_common_strat1'}], ...}
     final_deliberation = clustered_data
     print(f'final deliberation: {final_deliberation}')
-    msg = f'final-delib:{final_deliberation}'
-    message_sender(msg, individual=False)
+    
+    if prev_msg != msg:
+        msg = f'final-delib:{final_deliberation}'
+        message_sender(msg, individual=False)
+    
+    prev_msg = msg
      
 # runs simulation for designated amount of time 
 def run_seconds(t,waiting=False):

@@ -83,8 +83,3 @@ def get_best_action(tree):
     best_action = max(root_node.children, key=lambda a: root_node.children[a].total_reward / (root_node.children[a].visits + 1e-6))
     return best_action
 
-# Example usage
-decision_tree = DecisionTree()
-for i in range(10):
-    action, node = iterate(decision_tree)
-    print(f'From the decision tree: action: {action} and the node {node}')

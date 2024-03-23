@@ -249,6 +249,7 @@ def process_decentralized(type, node=None, action=None, neighb=None, center=None
 
     global curr_others
     global assigned_leader
+    global given_id
 
     goal_orientations = []
     neighbors = neighb if neighb is not None else curr_others
@@ -290,6 +291,8 @@ def process_decentralized(type, node=None, action=None, neighb=None, center=None
             decent_behaviors[i] = list_of_dir[act]
         
         curr_action = '!'
+        
+    print(f'updated action for {given_id}: {curr_action} with type {type}')
 
 
 def closest_reference_angle(agent_x, agent_y, pos_x, pos_y): # center pos_x, pos_y
@@ -668,7 +671,7 @@ def interpret(timestep):
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
-        # print('incoming messages: ', given_id, message) 
+        # print('incoming messages (controller): ', given_id, message) 
     
         # intertrial changes 
         if message[0:2] == "#" + str(given_id):
@@ -854,9 +857,11 @@ def interpret(timestep):
             gens_elapsed = 0 
             
             receiver.nextPacket()
+            
 
         elif 'final' in message: 
             if (not is_leader or (robot.getTime() - time_as_leader >= time_allocated and is_leader and not decentralized) or (decentralized and curr_action == [])) and not holding_something: # curr_action == []: # if able to take on new task 
+                print('were in actual chunk')
                 prev_time = robot.getTime()
                 
                 path_length = 0 # path length reset
@@ -911,18 +916,19 @@ def interpret(timestep):
 
                             action, node = mcdt.iterate(trees[0])
                             curr_node = node
-                            process_decentralized(type_of_action, action, node, neighbors, center)
+                            process_decentralized(type_of_action, node, action, neighbors, center)
 
                         elif type_of_action == 1:  # queue 
                             action, node = mcdt.iterate(trees[1])
                             curr_node = node
-                            process_decentralized(type_of_action, action, node, neighbors, center)
+                            process_decentralized(type_of_action, node, action, neighbors, center)
 
                         elif type_of_action == 2: # disperse 
                             action, node = mcdt.iterate(trees[0])
                             curr_node = node
-                            process_decentralized(type_of_action, action, node, neighbors, center)
+                            process_decentralized(type_of_action, node, action, neighbors, center)
 
+  
             else: 
                 print('ignoring, other action still in progress')
             
@@ -956,8 +962,16 @@ def interpret(timestep):
             next_child = message[5:].split("*")
             num_better += 1
             receiver_individual.nextPacket()
+            
+            
+        elif 'agent' in message and 'id_ind' not in message: 
+            msg = message 
+            print(f'received agent info: {msg}')
+            emitter.send(str(message).encode('utf-8'))
+            receiver_individual.nextPacket()
+            
 
-        elif 'neighbors' in message and curr_action != [] and type_of_action == 0: 
+        elif 'neighbors_update' in message and curr_action != [] and type_of_action == 0: 
             curr_others = ast.literal_eval(message[10:])
             assigned_index = assigned_leader
 
@@ -998,6 +1012,7 @@ def communicate_with_robot():
     global chosen_direction 
     # find closest robot to exchange info with 
     response = str(given_id) + "-encounter-[" + str(chosen_direction)
+    
     if prev_msg != response: 
         emitter_individual.send(response.encode('utf-8'))
         prev_msg = response 
@@ -1050,7 +1065,8 @@ while robot.step(timestep) != -1 and sim_complete != True:
             prev_x, prev_y = cd_x, cd_y
         
         if robot.getTime() - prev_gen_check == 1: 
-            # communicate_with_robot()
+            if curr_action == []: 
+                communicate_with_robot()
             prev_gen_check = robot.getTime()
             time_into_generation += 1
             if time_into_generation % 10 == 0: 
@@ -1136,7 +1152,10 @@ while robot.step(timestep) != -1 and sim_complete != True:
 
                     # update reward (based on path length )
                     
-                    reward = path_length_reward(path_info['path_length']) * (1/path_info['num_collisions'])
+                    if path_info['num_collisions'] == 0: 
+                        reward = path_length_reward(path_info['path_length'])
+                    else: 
+                        reward = path_length_reward(path_info['path_length']) * (1/path_info['num_collisions'])
                     trees[decent_index].update_tree(curr_node, reward) # TODO: make node defined
 
                 else: 
