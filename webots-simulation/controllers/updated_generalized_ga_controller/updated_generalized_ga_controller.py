@@ -273,7 +273,8 @@ def process_decentralized(type, node=None, action=None, neighb=None, center=None
     elif type == 1: # queue 
         # wait will be sampled 
         for i in range(length_of_action):
-            decent_behaviors[i] = (cd_x, cd_y) #  only able to stay in current pos 
+            decent_behaviors.append((cd_x, cd_y))
+            # decent_behaviors[i] = (cd_x, cd_y) #  only able to stay in current pos 
             curr_action = '!'
 
     elif type == 2: # disperse 
@@ -288,7 +289,8 @@ def process_decentralized(type, node=None, action=None, neighb=None, center=None
 
         for i in range(length_of_action):
             act = action[i]
-            decent_behaviors[i] = list_of_dir[act]
+            decent_behaviors.append(list_of_dir[act])
+            # decent_behaviors[i] = list_of_dir[act]
         
         curr_action = '!'
         
@@ -1065,8 +1067,8 @@ while robot.step(timestep) != -1 and sim_complete != True:
             prev_x, prev_y = cd_x, cd_y
         
         if robot.getTime() - prev_gen_check == 1: 
-            if curr_action == []: 
-                communicate_with_robot()
+            # if curr_action == []: 
+                # communicate_with_robot()
             prev_gen_check = robot.getTime()
             time_into_generation += 1
             if time_into_generation % 10 == 0: 
@@ -1153,10 +1155,10 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     # update reward (based on path length )
                     
                     if path_info['num_collisions'] == 0: 
-                        reward = path_length_reward(path_info['path_length'])
+                        re = path_length_reward(path_info['path_length'])
                     else: 
-                        reward = path_length_reward(path_info['path_length']) * (1/path_info['num_collisions'])
-                    trees[decent_index].update_tree(curr_node, reward) # TODO: make node defined
+                        re = path_length_reward(path_info['path_length']) * (1/path_info['num_collisions'])
+                    trees[decent_index].update_tree(curr_node, re) # TODO: make node defined
 
                 else: 
                     if (time_allocated - robot.getTime()) % 1 == 0: 

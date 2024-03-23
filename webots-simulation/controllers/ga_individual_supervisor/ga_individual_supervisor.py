@@ -45,7 +45,7 @@ timestep = int(robot.getBasicTimeStep())
 # generalize id acquisition (will be same as robot assigned to), might change to someting different  
 
 given_id = int(robot.getName()[11:-1]) - 1
-print(f'given id: {given_id}')
+# print(f'given id: {given_id}')
     
 #### allow personal supervisor to send important encounter info back to supervisor ## 
 emitter = robot.getDevice("emitter")
@@ -62,7 +62,7 @@ receiver_individual.enable(TIME_STEP)
 receiver_individual.setChannel(int(given_id * 10)) # will be updated to be robot_id * 10 
 emitter_individual = robot.getDevice("emitter")
 emitter_individual.setChannel((int(given_id) * 10) - 1)
-print('emitter info: {(int(given_id) * 10) - 1}')
+# print('emitter info: {(int(given_id) * 10) - 1}')
 
 updated = False
 fit_update = False 
@@ -271,15 +271,15 @@ def message_listener(time_step):
                         current_strat_index = multi_arm.sample_action()
                         # print(f'current strat index: {current_strat_index}')
                         msg = local_map.process_output(current_strat_index)
-                        print(f'proposed strat: {msg} with given_id {given_id}')
+                        # print(f'proposed strat: {msg} with given_id {given_id}')
                         # msg = "" # temporarily empty
                         # curr_pos = [round(population[curr_robot_index].getPosition()[0],2), round(population[curr_robot_index].getPosition()[1],2)]
                         msg_for_supervisor = f'agent:{given_id}-strat:{current_strat_index}-curr_pos:{curr_pose}~prop:{map_subset_ag}'
                         
-                        print(f'outputted info to be sent for coordination: {msg} vs {msg_for_supervisor}')
+                        # print(f'outputted info to be sent for coordination: {msg} vs {msg_for_supervisor}')
                         prev_time = robot.getTime()
-                        msg = f'what the hell is happening: {given_id}'
-                        emitter_individual.send(msg.encode('utf-8'))
+                        # msg = f'what the hell is happening: {given_id}'
+                        # emitter_individual.send(msg.encode('utf-8'))
                         emitter_individual.send(msg_for_supervisor.encode('utf-8')) 
 
             if not restrict_crossover: 

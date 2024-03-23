@@ -362,7 +362,7 @@ def message_listener(time_step):
 
     if receiver.getQueueLength()>0 and (robot.getTime() - start < simulation_time):
         message = receiver.getData().decode('utf-8')
-        print('supervisor msgs --', message) 
+        # print('supervisor msgs --', message) 
         
         if message[0] == "$": # handles deletion of objects when grabbed
             obj_node = robot.getFromId(int(message.split("-")[1]))
@@ -399,7 +399,7 @@ def message_listener(time_step):
 
 
         if 'agent' in message:
-            print(f'agent message: {message}')
+            # print(f'agent message: {message}')
             agent_dict = {}
             info_garnered = []
             message_parsed = message.split('~')[0].split('-')
@@ -444,7 +444,7 @@ def message_listener(time_step):
             receiver.nextPacket()
             
         elif 'comm' in message :
-            print('processing communication request', message) 
+            # print('processing communication request', message) 
             id_1 = message.split('-')[1]
             id_2 = message.split('-')[2]
             init_orient = float(message.split('[')[-1])
@@ -482,7 +482,7 @@ def get_key_by_value(dictionary, value):
 def mediate_differences(msgs):
     # assuming msgs is a list of suggestions
     # ex format: [{agent_id: (strat, curr_pose)} ..] 
-    print(f'messages: {msgs}')
+    # print(f'messages: {msgs}')
     global prev_msg
     global msg 
     

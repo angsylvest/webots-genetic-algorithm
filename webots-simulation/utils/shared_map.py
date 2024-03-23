@@ -89,7 +89,7 @@ class LocalMap():
     def assign_leaders(self):
         # can be updated each time to be slightly before where agent is
         assignments = {}
-        print(f'agent pos so far: {self.agent_pos}')
+        # print(f'agent pos so far: {self.agent_pos}')
         
         for ind, item in enumerate(self.agent_pos): 
             if ind == 0: 
