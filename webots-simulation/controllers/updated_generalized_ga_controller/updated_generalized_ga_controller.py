@@ -253,12 +253,13 @@ def process_decentralized(type, node=None, action=None, neighb=None, center=None
 
     goal_orientations = []
     neighbors = neighb if neighb is not None else curr_others
-    length_of_action = len(action)
+    length_of_action = len(action) # TODO: need to fix
 
     decent_behaviors = []
     decent_index = 0
 
     # TODO: different set up depending on if initlally called or called afterewards
+    
 
     # set as curr_action here 
     if type == 0: # flock 

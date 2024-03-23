@@ -63,7 +63,8 @@ def iterate(tree, max_depth=10):  # TODO: if queueing, max_depth should be based
             accumulated_actions.append(action)
 
             if not tree.use_preset:
-                return f'action: {accumulated_actions}', selected_node
+                # return f'action: {accumulated_actions}', selected_node
+                return accumulated_actions, selected_node
             else:
                 action = random.choice(range(tree.num_actions))
         else:
@@ -72,7 +73,8 @@ def iterate(tree, max_depth=10):  # TODO: if queueing, max_depth should be based
             accumulated_actions.append(action)
 
             if action == 1:
-                return f'action: {accumulated_actions}', selected_node
+                # return f'action: {accumulated_actions}', selected_node
+                return accumulated_actions, selected_node
             else:
                 curr_depth += 1
 
