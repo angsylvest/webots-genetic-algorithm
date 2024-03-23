@@ -546,7 +546,7 @@ def mediate_differences(msgs):
 
         localMap = shared_map.LocalMap(obstacle_pos=[], obstacle_size=0.2, agent_pos=agent_pos, agent_size= 0.5, local_dim=1.0, x_bounds=(-1,1), y_bounds=(-1,1), central_loc=()) # just used to generate strat
         strat_plan = localMap.process_output(most_common_strat)
-        center = self.calculate_center(self.agent_pos)
+        center = localMap.calculate_center(localMap.agent_pos)
         clustered_data[i] = [{'most_common_strat': most_common_strat, 'strat_to_use': strat_plan, 'neighbors': agent_pos, 'center': localMap.calculate_center(agent_pos)}]
 
         # print(f'generated strategy for cluster: {strat_plan}')

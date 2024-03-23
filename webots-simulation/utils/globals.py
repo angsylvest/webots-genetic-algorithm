@@ -10,4 +10,4 @@ restrict_crossover = True
 use_list_rep = True
 use_coordination = True
 using_ucb = False
-decentralized = False
+decentralized = True

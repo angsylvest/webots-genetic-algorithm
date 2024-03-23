@@ -273,7 +273,7 @@ def process_decentralized(type, node=None, action=None, neighb=None, center=None
         # wait will be sampled 
         for i in range(length_of_action):
             decent_behaviors[i] = (cd_x, cd_y) #  only able to stay in current pos 
- 
+            curr_action = '!'
 
     elif type == 2: # disperse 
         # distance/time based on sampled action 
@@ -288,6 +288,8 @@ def process_decentralized(type, node=None, action=None, neighb=None, center=None
         for i in range(length_of_action):
             act = action[i]
             decent_behaviors[i] = list_of_dir[act]
+        
+        curr_action = '!'
 
 
 def closest_reference_angle(agent_x, agent_y, pos_x, pos_y): # center pos_x, pos_y
@@ -761,6 +763,8 @@ def interpret(timestep):
             decent_behaviors = []
             curr_action = []
             curr_others = []
+            path_info = {'path_length': 0, 'num_collisions': 0}
+            is_leader = False
 
             type_of_action = 0
             msg = f"assigned-{given_id}"
@@ -860,8 +864,8 @@ def interpret(timestep):
             
                 dict_version = ast.literal_eval(message[12:])
                 agent_id = int(f'{given_id}')
+                is_leader = False
                 
-                curr_strategy_proposed = {}
             
                 for key in dict_version: # it's a list for some dumb reason 
                 #    print(f'key {key}')
@@ -881,6 +885,7 @@ def interpret(timestep):
                             assigned_leader = next((key for key, value in strat.items() if value == 'leader'), None)
                             if curr_action == 'leader':
                                 time_as_leader = robot.getTime()
+                                is_leader = True
 
                         if type_of_action == 2: 
                             ratio = 0.12
@@ -969,7 +974,6 @@ def interpret(timestep):
 
             goal_position = (cd_x + dx, cd_x + dy)
             curr_action = goal_position
-
 
             receiver_individual.nextPacket()
             
@@ -1113,7 +1117,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                         msg = f'reward:{type_of_action}:{path_length_reward(path_length)}'
                         emitter_individual.send(msg.encode('utf-8'))
                         print(f'finished coord task')
-            if is_leader: 
+            if is_leader and not decentralized: 
                 if robot.getTime() - time_as_leader > time_allocated: # if unable to complete, not encouraged
                     done = True # don't add any reward since not accomplished 
                     curr_action = []
@@ -1138,34 +1142,35 @@ while robot.step(timestep) != -1 and sim_complete != True:
                 else: 
                     if (time_allocated - robot.getTime()) % 1 == 0: 
 
-
                         # get index of decent
-                        if decent_index < len(decent_behaviors) and math.dist([cd_x, cd_y], [goal_posx, goal_posy]) < 0.05: 
+                        if decent_index < len(decent_behaviors): 
 
                             # TODO: update next goal 
-                            if type_of_action == 0: # if flocking, send msg
-                                # TODO: if already complete, ask for another, otherwise just continue moving towards original goal 
-                                msg = 'pos_update'
-                                emitter_individual.send(msg.encode('utf-8'))
+                            if type_of_action == 0 and not is_leader: # if flocking, send msg
+                                goalx, goaly = curr_action
+                                if math.dist([cd_x, cd_y], [goalx, goaly]) < 0.05: 
+                                    # TODO: if already complete, ask for another, otherwise just continue moving towards original goal 
+                                    msg = 'pos_update'
+                                    emitter_individual.send(msg.encode('utf-8'))
 
                             else: 
-                                goal_posx, goal_posy = decent_behaviors[decent_index]
-                                chosen_direction = round(math.atan2(goal_posy-cd_y,goal_posx-cd_x),2) 
+                                goalx, goaly = decent_behaviors[decent_index]
+                                chosen_direction = round(math.atan2(goaly-cd_y,goalx-cd_x),2) 
                                 curr_action = '!'
 
-                            decent_index += 1
+                                decent_index += 1
 
                         elif decent_index < len(decent_behaviors) and math.dist([cd_x, cd_y], [goal_posx, goal_posy]) > 0.05:
-                            if type_of_action == 0:
+                            if type_of_action == 0 and not is_leader:
                                 x, y = curr_action
                                 chosen_direction = round(math.atan2(y-cd_y,x-cd_x),2) 
 
                             else: 
-                                goal_posx, goal_posy = decent_behaviors[decent_index]
-                                chosen_direction = round(math.atan2(goal_posy-cd_y,goal_posx-cd_x),2) 
+                                goalx, goaly = decent_behaviors[decent_index]
+                                chosen_direction = round(math.atan2(goaly-cd_y,goalx-cd_x),2) 
                                 curr_action = '!'
 
-                        elif decent_index >= len(decent_behaviors):
+                        elif decent_index >= len(decent_behaviors) and (type_of_action != 0 or is_leader):
                             # just continue doing what you're doing 
                             chosen_direction = strategy[curr_index]
                             curr_index += 1 

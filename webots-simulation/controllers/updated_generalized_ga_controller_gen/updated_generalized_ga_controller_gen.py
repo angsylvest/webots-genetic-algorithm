@@ -750,11 +750,11 @@ def interpret(timestep):
         elif 'final' in message: 
             if (not is_leader or (robot.getTime() - time_as_leader >= time_allocated and is_leader)) and not holding_something: # curr_action == []: # if able to take on new task 
                 prev_time = robot.getTime()
-                
                 path_length = 0 # path length reset
-            
                 dict_version = ast.literal_eval(message[12:])
                 agent_id = int(f'{given_id}')
+
+                
                 
                 curr_strategy_proposed = {}
             

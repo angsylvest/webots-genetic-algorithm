@@ -272,7 +272,7 @@ def message_listener(time_step):
                         # print(f'proposed strat: {msg}')
                         # msg = "" # temporarily empty
                         # curr_pos = [round(population[curr_robot_index].getPosition()[0],2), round(population[curr_robot_index].getPosition()[1],2)]
-                        msg_for_supervisor = f'agent:{given_id}-strat:{current_strat_index}-curr_pos:{curr_pose}~prop:{map_subset_ag}!other:{agent_list[ind]}'
+                        msg_for_supervisor = f'agent:{given_id}-strat:{current_strat_index}-curr_pos:{curr_pose}~prop:{map_subset_ag}!other:{agent_list}'
                         # print(f'outputted info to be sent for coordination: {msg}')
                         prev_time = robot.getTime()
                         emitter.send(msg_for_supervisor.encode('utf-8')) 
