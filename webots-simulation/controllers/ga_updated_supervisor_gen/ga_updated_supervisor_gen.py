@@ -557,10 +557,10 @@ def mediate_differences(msgs):
     final_deliberation = clustered_data
     print(f'final deliberation: {final_deliberation}')
     
-    if prev_msg != msg:
-        msg = f'final-delib:{final_deliberation}'
-        message_sender(msg, individual=False)
-    
+    # if prev_msg != msg:
+    msg = f'final-delib:{final_deliberation}'
+    message_sender(msg, individual=False)
+
     prev_msg = msg
      
 # runs simulation for designated amount of time 

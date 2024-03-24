@@ -399,7 +399,7 @@ def message_listener(time_step):
 
 
         if 'agent' in message:
-            # print(f'agent message: {message}')
+            print(f'agent message: {message}')
             agent_dict = {}
             info_garnered = []
             message_parsed = message.split('~')[0].split('-')
@@ -557,11 +557,11 @@ def mediate_differences(msgs):
     final_deliberation = clustered_data
     print(f'final deliberation: {final_deliberation}')
     
-    if prev_msg != msg:
-        msg = f'final-delib:{final_deliberation}'
-        message_sender(msg, individual=False)
+    # if prev_msg != msg:
+    msg = f'final-delib:{final_deliberation}'
+    message_sender(msg, individual=False)
     
-    prev_msg = msg
+    # prev_msg = msg
      
 # runs simulation for designated amount of time 
 def run_seconds(t,waiting=False):

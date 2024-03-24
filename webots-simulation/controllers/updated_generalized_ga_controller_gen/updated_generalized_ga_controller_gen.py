@@ -265,6 +265,7 @@ def process_decentralized(type, node=None, action=None, neighb=None, center=None
         # id type of flocking / send msg to individual supervisor to track
         if is_leader: 
             curr_action = '!'
+            decent_index = -1
         else: 
             # set goal position based on where leader is
             curr_action = neighbors[assigned_leader]
@@ -863,7 +864,7 @@ def interpret(timestep):
 
         elif 'final' in message: 
             if (not is_leader or (robot.getTime() - time_as_leader >= time_allocated and is_leader and not decentralized) or (decentralized and curr_action == [])) and not holding_something: # curr_action == []: # if able to take on new task 
-                print('were in actual chunk')
+                # print('were in actual chunk')
                 prev_time = robot.getTime()
                 
                 path_length = 0 # path length reset
@@ -889,7 +890,8 @@ def interpret(timestep):
                     if not globals.decentralized:
 
                         if type_of_action == 0:
-                            assigned_leader = next((key for key, value in strat.items() if value == 'leader'), None)
+                            # assigned_leader = next((key for key, value in strat.items() if value == 'leader'), None)
+                            assigned_leader = next((key for key, value in strat.items() if value == 'leader' and key in neighbors), None)
                             if curr_action == 'leader':
                                 time_as_leader = robot.getTime()
                                 is_leader = True
@@ -968,7 +970,7 @@ def interpret(timestep):
             
         elif 'agent' in message and 'id_ind' not in message: 
             msg = message 
-            print(f'received agent info: {msg}')
+            # print(f'received agent info: {msg}')
             emitter.send(str(message).encode('utf-8'))
             receiver_individual.nextPacket()
             
@@ -1164,7 +1166,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     if (time_allocated - robot.getTime()) % 1 == 0: 
 
                         # get index of decent
-                        if decent_index < len(decent_behaviors): 
+                        if decent_index <= (len(decent_behaviors) - 1): 
 
                             # TODO: update next goal 
                             if type_of_action == 0 and not is_leader: # if flocking, send msg
@@ -1173,7 +1175,12 @@ while robot.step(timestep) != -1 and sim_complete != True:
                                     # TODO: if already complete, ask for another, otherwise just continue moving towards original goal 
                                     msg = 'pos_update'
                                     emitter_individual.send(msg.encode('utf-8'))
-
+                                    
+                            elif type_of_action == 0 and is_leader: 
+                                chosen_direction = strategy[curr_index]
+                                curr_index += 1 
+                                curr_action = '!'
+                                
                             else: 
                                 goalx, goaly = decent_behaviors[decent_index]
                                 chosen_direction = round(math.atan2(goaly-cd_y,goalx-cd_x),2) 
@@ -1181,7 +1188,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
 
                                 decent_index += 1
 
-                        elif decent_index < len(decent_behaviors) and math.dist([cd_x, cd_y], [goal_posx, goal_posy]) > 0.05:
+                        elif decent_index <= (len(decent_behaviors) - 1) and math.dist([cd_x, cd_y], [goal_posx, goal_posy]) > 0.05:
                             if type_of_action == 0 and not is_leader:
                                 x, y = curr_action
                                 chosen_direction = round(math.atan2(y-cd_y,x-cd_x),2) 
@@ -1191,7 +1198,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                                 chosen_direction = round(math.atan2(goaly-cd_y,goalx-cd_x),2) 
                                 curr_action = '!'
 
-                        elif decent_index >= len(decent_behaviors) and (type_of_action != 0 or is_leader):
+                        elif decent_index >= (len(decent_behaviors) - 1) and (type_of_action != 0 or is_leader):
                             # just continue doing what you're doing 
                             chosen_direction = strategy[curr_index]
                             curr_index += 1 

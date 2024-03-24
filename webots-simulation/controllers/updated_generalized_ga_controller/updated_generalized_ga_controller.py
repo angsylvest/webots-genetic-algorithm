@@ -98,7 +98,7 @@ using_high_dens = globals.using_high_dens # True
 decentralized = globals.decentralized
 num_coordination = 3 
 curr_node = ""
-assigned_leader = 0 
+assigned_leader = "!" 
 
 if decentralized:
     # create tree for each type of coord 
@@ -266,6 +266,7 @@ def process_decentralized(type, node=None, action=None, neighb=None, center=None
         # id type of flocking / send msg to individual supervisor to track
         if is_leader: 
             curr_action = '!'
+            decent_index = -1
         else: 
             # set goal position based on where leader is
             curr_action = neighbors[assigned_leader]
@@ -863,14 +864,15 @@ def interpret(timestep):
             
 
         elif 'final' in message: 
+            print(f'final msg received -- {message}')
             if (not is_leader or (robot.getTime() - time_as_leader >= time_allocated and is_leader and not decentralized) or (decentralized and curr_action == [])) and not holding_something: # curr_action == []: # if able to take on new task 
-                print('were in actual chunk')
                 prev_time = robot.getTime()
                 
                 path_length = 0 # path length reset
                 path_info = {'path_length': 0, 'num_collisions': 0}
             
                 dict_version = ast.literal_eval(message[12:])
+                # print(f'were in actual chunk dict version: {dict_version}')
                 agent_id = int(f'{given_id}')
                 is_leader = False
                 
@@ -881,16 +883,20 @@ def interpret(timestep):
                    strat = cluster_dict['strat_to_use']
 
 
+                # print(f'strat: {strat} vs agent_id {agent_id}')
                 if agent_id in strat:
                     curr_action = strat[agent_id]
                     type_of_action = cluster_dict['most_common_strat']
                     neighbors = cluster_dict['neighbors']
                     center = cluster_dict['center']
+                    assignments = cluster_dict['strat_to_use']
 
                     if not globals.decentralized:
 
                         if type_of_action == 0:
-                            assigned_leader = next((key for key, value in strat.items() if value == 'leader'), None)
+                            # assigned_leader = next((key for key, value in strat.items() if value == 'leader'), None)
+                            # assigned_leader = next((key for key, value in strat.items() if value == 'leader' and key in neighbors), None)
+                            # print(f'assigned leader: {assigned_leader}')
                             if curr_action == 'leader':
                                 time_as_leader = robot.getTime()
                                 is_leader = True
@@ -917,6 +923,8 @@ def interpret(timestep):
                                     time_as_leader = robot.getTime()
                                     is_leader = True
 
+                            assigned_leader = next(key for key, value in assignments.items() if value == 'leader')
+                            # print(f'assigned leader: {assigned_leader}')
                             action, node = mcdt.iterate(trees[0])
                             curr_node = node
                             process_decentralized(type_of_action, node, action, neighbors, center)
@@ -948,7 +956,7 @@ def interpret(timestep):
             
         elif 'comm_response' in message and str(message.split('-')[1]) == str(given_id) and communication: 
         
-            print('updating orientation for', given_id, 'to', message.split('[')[1], 'for given id', given_id)
+            # print('updating orientation for', given_id, 'to', message.split('[')[1], 'for given id', given_id)
             roll, pitch, yaw = inertia.getRollPitchYaw()
             yaw = round(yaw, 2)
             chosen_direction = float(message.split('[')[1])
@@ -969,7 +977,7 @@ def interpret(timestep):
             
         elif 'agent' in message and 'id_ind' not in message: 
             msg = message 
-            print(f'received agent info: {msg}')
+            # print(f'received agent info: {msg}')
             emitter.send(str(message).encode('utf-8'))
             receiver_individual.nextPacket()
             
@@ -1165,7 +1173,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     if (time_allocated - robot.getTime()) % 1 == 0: 
 
                         # get index of decent
-                        if decent_index < len(decent_behaviors): 
+                        if decent_index <= (len(decent_behaviors) - 1): 
 
                             # TODO: update next goal 
                             if type_of_action == 0 and not is_leader: # if flocking, send msg
@@ -1174,7 +1182,12 @@ while robot.step(timestep) != -1 and sim_complete != True:
                                     # TODO: if already complete, ask for another, otherwise just continue moving towards original goal 
                                     msg = 'pos_update'
                                     emitter_individual.send(msg.encode('utf-8'))
-
+                                    
+                            elif type_of_action == 0 and is_leader: 
+                                chosen_direction = strategy[curr_index]
+                                curr_index += 1 
+                                curr_action = '!'
+                                
                             else: 
                                 goalx, goaly = decent_behaviors[decent_index]
                                 chosen_direction = round(math.atan2(goaly-cd_y,goalx-cd_x),2) 
@@ -1182,7 +1195,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
 
                                 decent_index += 1
 
-                        elif decent_index < len(decent_behaviors) and math.dist([cd_x, cd_y], [goal_posx, goal_posy]) > 0.05:
+                        elif decent_index <= (len(decent_behaviors) - 1) and math.dist([cd_x, cd_y], [goal_posx, goal_posy]) > 0.05:
                             if type_of_action == 0 and not is_leader:
                                 x, y = curr_action
                                 chosen_direction = round(math.atan2(y-cd_y,x-cd_x),2) 
@@ -1192,7 +1205,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                                 chosen_direction = round(math.atan2(goaly-cd_y,goalx-cd_x),2) 
                                 curr_action = '!'
 
-                        elif decent_index >= len(decent_behaviors) and (type_of_action != 0 or is_leader):
+                        elif decent_index >= (len(decent_behaviors) - 1) and (type_of_action != 0 or is_leader):
                             # just continue doing what you're doing 
                             chosen_direction = strategy[curr_index]
                             curr_index += 1 
