@@ -78,7 +78,7 @@ def iterate(tree, max_depth=10):  # TODO: if queueing, max_depth should be based
             else:
                 curr_depth += 1
 
-    return f'action: {accumulated_actions}', selected_node  # action is a trajectory (sequence of behaviors agent should do)
+    return accumulated_actions, selected_node  # action is a trajectory (sequence of behaviors agent should do)
 
 def get_best_action(tree):
     root_node = tree.root
