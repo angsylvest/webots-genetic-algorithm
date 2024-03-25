@@ -251,6 +251,9 @@ def process_decentralized(type, node=None, action=None, neighb=None, center=None
     global assigned_leader
     global given_id
 
+    global cd_x
+    global cd_y
+
     goal_orientations = []
     neighbors = neighb if neighb is not None else curr_others
     length_of_action = len(action)
@@ -298,8 +301,8 @@ def process_decentralized(type, node=None, action=None, neighb=None, center=None
     print(f'updated action for {given_id}: {curr_action} with type {type}')
 
 
-def closest_reference_angle(agent_x, agent_y, pos_x, pos_y): # center pos_x, pos_y
-    angle = math.atan2(pos_y - agent_y, pos_x - agent_x) 
+def closest_reference_angle(dir): # center pos_x, pos_y
+    angle = dir # math.atan2(pos_y - agent_y, pos_x - agent_x) 
     reference_angles = [0, round(math.pi/2,2), round(math.pi,2), round(-math.pi/2,2)]
     closest_angle = min(reference_angles, key=lambda x: abs(x - angle))
 
@@ -670,6 +673,10 @@ def interpret(timestep):
     global curr_others
     global curr_node 
     global assigned_leader 
+
+    global decent_behaviors
+    global decent_index
+    global path_info
 
     
     if receiver.getQueueLength()>0:

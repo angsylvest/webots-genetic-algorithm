@@ -251,6 +251,9 @@ def process_decentralized(type, node=None, action=None, neighb=None, center=None
     global assigned_leader
     global given_id
 
+    global cd_x
+    global cd_y
+
     goal_orientations = []
     neighbors = neighb if neighb is not None else curr_others
     length_of_action = len(action) # TODO: need to fix
@@ -299,8 +302,8 @@ def process_decentralized(type, node=None, action=None, neighb=None, center=None
     print(f'updated action for {given_id}: {curr_action} with type {type}')
 
 
-def closest_reference_angle(agent_x, agent_y, pos_x, pos_y): # center pos_x, pos_y
-    angle = math.atan2(pos_y - agent_y, pos_x - agent_x) 
+def closest_reference_angle(dir): # center pos_x, pos_y
+    angle = dir # math.atan2(pos_y - agent_y, pos_x - agent_x) 
     reference_angles = [0, round(math.pi/2,2), round(math.pi,2), round(-math.pi/2,2)]
     closest_angle = min(reference_angles, key=lambda x: abs(x - angle))
 
@@ -324,6 +327,8 @@ def process_action(current_pos):
 
     global is_leader
     global time_as_leader
+    global cd_x
+    global cd_y
     
     x,y = current_pos
     
@@ -672,6 +677,10 @@ def interpret(timestep):
     global curr_node 
     global assigned_leader 
 
+    global decent_behaviors
+    global decent_index
+    global path_info
+
     
     if receiver.getQueueLength()>0:
         message = receiver.getData().decode('utf-8')
@@ -864,7 +873,7 @@ def interpret(timestep):
             
 
         elif 'final' in message: 
-            print(f'final msg received -- {message}')
+            # print(f'final msg received -- {message}')
             if (not is_leader or (robot.getTime() - time_as_leader >= time_allocated and is_leader and not decentralized) or (decentralized and curr_action == [])) and not holding_something: # curr_action == []: # if able to take on new task 
                 prev_time = robot.getTime()
                 
