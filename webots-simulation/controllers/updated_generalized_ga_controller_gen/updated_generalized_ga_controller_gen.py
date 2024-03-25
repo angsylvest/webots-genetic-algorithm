@@ -289,7 +289,7 @@ def process_decentralized(type, node=None, action=None, neighb=None, center=None
         filter_out = closest_reference_angle(dir)
         list_of_dir = [0.00, round(pi, 2), round(pi/2, 2), round(-pi/2, 2)]
         if filter_out in list_of_dir: # remove requesting same dir 
-            list_of_dir.remove(round(i,2))
+            list_of_dir.remove(round(filter_out,2))
 
         for i in range(length_of_action):
             act = action[i]
