@@ -246,6 +246,7 @@ def process_decentralized(type, node=None, action=None, neighb=None, center=None
     global decent_behaviors
     global type_of_action
     global curr_action
+    global forward_speed
 
     global curr_others
     global assigned_leader
@@ -256,12 +257,13 @@ def process_decentralized(type, node=None, action=None, neighb=None, center=None
 
     goal_orientations = []
     neighbors = neighb if neighb is not None else curr_others
-    length_of_action = len(action)
+    length_of_action = len(action) # TODO: need to fix
 
     decent_behaviors = []
     decent_index = 0
 
     # TODO: different set up depending on if initlally called or called afterewards
+    
 
     # set as curr_action here 
     if type == 0: # flock 
@@ -291,9 +293,21 @@ def process_decentralized(type, node=None, action=None, neighb=None, center=None
         if filter_out in list_of_dir: # remove requesting same dir 
             list_of_dir.remove(round(filter_out,2))
 
+        ratio = 0.12
+        base = 0.180
+        norm = forward_speed - 5
+        forward_per_sec = ratio * norm + base 
+        
         for i in range(length_of_action):
-            act = action[i]
-            decent_behaviors.append(list_of_dir[act])
+            act = list_of_dir[action[i]]
+
+            dx = forward_per_sec * math.cos(act)
+            dy = forward_per_sec * math.sin(act)
+        
+            goal_position = (cd_x + dx, cd_x + dy)
+            # curr_action = goal_position
+            
+            decent_behaviors.append(goal_position)
             # decent_behaviors[i] = list_of_dir[act]
         
         curr_action = '!'
