@@ -84,7 +84,7 @@ dist_covered = [0 for i in range(num_coordination_strat)]
 using_coordination = globals.use_coordination
 
 
-if using_bayes:
+if using_coordination:
     shared_map_complete = shared_map.CompleteMap(obstacle_locations=[], obstacle_size = 0.2, dims = 4, agent_size=0.2, x_bounds=(-2,2), y_bounds=(-2,2))
 
     if num_env_types > 1: 
