@@ -298,14 +298,20 @@ def process_decentralized(type, node=None, action=None, neighb=None, center=None
         norm = forward_speed - 5
         forward_per_sec = ratio * norm + base 
         
+        # TODO: must fix 
         for i in range(length_of_action):
             act = list_of_dir[action[i]]
 
             dx = forward_per_sec * math.cos(act)
             dy = forward_per_sec * math.sin(act)
         
-            goal_position = (cd_x + dx, cd_x + dy)
+            if i == 0: 
+                goal_position = (cd_x + dx, cd_x + dy)
             # curr_action = goal_position
+            else: 
+                x, y = goal_position
+                goal_position = (x + dx, y + dy)
+            
             
             decent_behaviors.append(goal_position)
             # decent_behaviors[i] = list_of_dir[act]

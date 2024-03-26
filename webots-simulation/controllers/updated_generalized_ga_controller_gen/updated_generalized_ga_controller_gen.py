@@ -304,7 +304,11 @@ def process_decentralized(type, node=None, action=None, neighb=None, center=None
             dx = forward_per_sec * math.cos(act)
             dy = forward_per_sec * math.sin(act)
         
-            goal_position = (cd_x + dx, cd_x + dy)
+            if i == 0: 
+                goal_position = (cd_x + dx, cd_x + dy)
+            else: 
+                x, y = goal_position
+                goal_position = (x + dx, y + dy)
             # curr_action = goal_position
             
             decent_behaviors.append(goal_position)
