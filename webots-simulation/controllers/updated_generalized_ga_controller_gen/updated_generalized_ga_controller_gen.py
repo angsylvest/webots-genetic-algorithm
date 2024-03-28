@@ -943,6 +943,7 @@ def interpret(timestep):
                                     time_as_leader = robot.getTime()
                                     is_leader = True
 
+                            assigned_leader = next(key for key, value in assignments.items() if value == 'leader')
                             action, node = mcdt.iterate(trees[0])
                             curr_node = node
                             process_decentralized(type_of_action, node, action, neighbors, center)
