@@ -269,8 +269,30 @@ def process_decentralized(type, node=None, action=None, neighb=None, center=None
     if type == 0: # flock 
         # id type of flocking / send msg to individual supervisor to track
         if is_leader: 
-            curr_action = '!'
+            centerx, centery = center
+            dir = round(math.atan2(centery-cd_y,centerx-cd_x),2) 
+            filter_out = closest_reference_angle(dir)
+            list_of_dir = [0.00, round(pi, 2), round(pi/2, 2), round(-pi/2, 2)]
+            if filter_out in list_of_dir: # remove requesting same dir 
+                list_of_dir.remove(round(filter_out,2))
+
+            random_index = random.randint(0,2)
+            act = list_of_dir[random_index]
+
+            ratio = 0.12
+            base = 0.180
+            norm = forward_speed - 5
+            forward_per_sec = ratio * norm + base 
+
+            dx = forward_per_sec*(time_allocated) * math.cos(act)
+            dy = forward_per_sec*(time_allocated) * math.sin(act)
+
+            goal_position = (cd_x + dx, cd_x + dy)
+
+            curr_action = goal_position # '!'
             decent_index = -1
+
+
         else: 
             # set goal position based on where leader is
             curr_action = neighbors[assigned_leader]
@@ -699,6 +721,7 @@ def interpret(timestep):
     global decent_behaviors
     global decent_index
     global path_info
+    global using_best 
 
     
     if receiver.getQueueLength()>0:
@@ -776,6 +799,7 @@ def interpret(timestep):
             observations_per_strategy_high_dens = [1, 1, 1, 1] # num successes using each (set to 1 so that there is still likelihood for gathering strategy) 
             
             current_strat_index = 0
+            using_best = False 
             
             t_elapsed_block_total = 0
             n_observations_block = 0
@@ -953,17 +977,28 @@ def interpret(timestep):
 
                             assigned_leader = next(key for key, value in assignments.items() if value == 'leader')
                             # print(f'assigned leader: {assigned_leader}')
-                            action, node = mcdt.iterate(trees[0])
+                            if using_best: 
+                                action, node = mcdt.iterate_strategically(trees[0]) 
+                            else: 
+                                action, node = mcdt.iterate(trees[0])
                             curr_node = node
                             process_decentralized(type_of_action, node, action, neighbors, center)
 
                         elif type_of_action == 1:  # queue 
-                            action, node = mcdt.iterate(trees[1])
+                            if using_best: 
+                                action, node = mcdt.iterate_strategically(trees[0])  
+                            else: 
+                                action, node = mcdt.iterate(trees[0])
+
                             curr_node = node
                             process_decentralized(type_of_action, node, action, neighbors, center)
 
                         elif type_of_action == 2: # disperse 
-                            action, node = mcdt.iterate(trees[0])
+                            if using_best: 
+                                action, node = mcdt.iterate_strategically(trees[0])  
+                            else: 
+                                action, node = mcdt.iterate(trees[0])
+
                             curr_node = node
                             process_decentralized(type_of_action, node, action, neighbors, center)
 
@@ -1083,6 +1118,7 @@ start_count = robot.getTime()
 reversing = False 
 moving_forward = False  
 cleaning = False
+using_best = False 
 prev_gen_check = robot.getTime()
 
 
@@ -1109,7 +1145,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
             prev_gen_check = robot.getTime()
             time_into_generation += 1
             if time_into_generation % 10 == 0: 
-                time_into_generation = 0
+                # time_into_generation = 0
                 agent_observation = {'num_interactions': 0, 'num_objects_observed': 0, 'num_collisions':0}
             # print('given id', given_id, 'updated time into generation + here dictionary', agent_observation['num_interactions'] , 'num collisions', agent_observation['num_collisions']) 
         
@@ -1212,9 +1248,11 @@ while robot.step(timestep) != -1 and sim_complete != True:
                                     emitter_individual.send(msg.encode('utf-8'))
                                     
                             elif type_of_action == 0 and is_leader: 
-                                chosen_direction = strategy[curr_index]
-                                curr_index += 1 
-                                curr_action = '!'
+                                # chosen_direction = strategy[curr_index]
+                                goalx, goaly = curr_action
+                                chosen_direction = round(math.atan2(goaly-cd_y,goalx-cd_x),2) 
+                                # curr_index += 1 
+                                # curr_action = '!'
                                 
                             else: 
                                 goalx, goaly = decent_behaviors[decent_index]
@@ -1228,12 +1266,12 @@ while robot.step(timestep) != -1 and sim_complete != True:
                                 x, y = curr_action
                                 chosen_direction = round(math.atan2(y-cd_y,x-cd_x),2) 
 
-                            else: 
+                            elif type_of_action != 0: 
                                 goalx, goaly = decent_behaviors[decent_index]
                                 chosen_direction = round(math.atan2(goaly-cd_y,goalx-cd_x),2) 
                                 curr_action = '!'
 
-                        elif decent_index >= (len(decent_behaviors) - 1) and (type_of_action != 0 or is_leader):
+                        elif decent_index >= (len(decent_behaviors) - 1) and (type_of_action != 0):
                             # just continue doing what you're doing 
                             chosen_direction = strategy[curr_index]
                             curr_index += 1 

@@ -20,6 +20,24 @@ class DecisionTree:
 
         selected_action = max(ucb_values, key=ucb_values.get)
         return node.children[selected_action]
+        
+
+    # def select(self, node, exploration_weight=1.0):
+    #     """Select a child node based on UCB1 exploration-exploitation strategy."""
+    #     if not node.children:
+    #         return node
+
+    #     ucb_values = {}
+    #     for child_action, child in node.children.items():
+    #         if child.visits == 0:
+    #             ucb_values[child_action] = float('inf')  # Assign a high value for unvisited nodes
+    #         else:
+    #             exploration_term = exploration_weight * math.sqrt(math.log(node.visits) / child.visits)
+    #             ucb_values[child_action] = child.total_reward / child.visits + exploration_term
+
+    #     selected_action = max(ucb_values, key=ucb_values.get)
+    #     return node.children[selected_action]
+
 
     def expand(self, node, action):
         """Expand the tree by adding a new child node."""
@@ -80,8 +98,49 @@ def iterate(tree, max_depth=10):  # TODO: if queueing, max_depth should be based
 
     return accumulated_actions, selected_node  # action is a trajectory (sequence of behaviors agent should do)
 
+def iterate_strategically(tree, max_depth=10, exploration_weight=1.0):
+    selected_node = tree.root
+
+    depth_exists = True
+    curr_depth = 0
+    accumulated_actions = []
+
+    while depth_exists and curr_depth < max_depth:
+        selected_node = tree.select(selected_node, exploration_weight)
+        action = max(selected_node.children, key=lambda a: selected_node.children[a].total_reward / (selected_node.children[a].visits + 1e-6))
+        
+        if action not in selected_node.children:
+            selected_node = tree.expand(selected_node, action)
+            accumulated_actions.append(action)
+
+            if not tree.use_preset:
+                return accumulated_actions, selected_node
+        else:
+            selected_node = selected_node.children[action]
+            accumulated_actions.append(action)
+
+            if action == 1:
+                return accumulated_actions, selected_node
+            else:
+                curr_depth += 1
+
+    return accumulated_actions, selected_node
+
 def get_best_action(tree):
     root_node = tree.root
     best_action = max(root_node.children, key=lambda a: root_node.children[a].total_reward / (root_node.children[a].visits + 1e-6))
     return best_action
 
+# def main():
+#     tree = DecisionTree()
+
+#     for i in range(5):
+#         act, node = iterate(tree)
+#         print(f'random action selected: {act} for node {node}')
+
+#     for i in range(5): 
+#         act, node = iterate_strategically(tree)
+#         print(f'strategic action selected: {act} for node {node}')
+
+
+# main() 

@@ -71,7 +71,10 @@ class LocalMap():
     def is_dense_enough(self):
         # TODO: always returns True, may want to use more selective way 
         
-        return True
+        if len(self.agent_pos) >= 3: 
+            return True
+        else: 
+            return False 
     
     def process_output(self, curr_strat_index):
         if curr_strat_index == 0:
@@ -83,21 +86,42 @@ class LocalMap():
         else: 
             print('whoops does not exist')
 
+    def euclidean_distance(self, pos1, pos2):
+        """Calculate the Euclidean distance between two positions."""
+        return math.sqrt((pos1[0] - pos2[0])**2 + (pos1[1] - pos2[1])**2)
 
+    def find_furthest_agent(self):
+        furthest_agent = None
+        max_distance = float('-inf')
+
+        for agent_id, position in self.agent_pos.items():
+            min_distance = float('inf')
+            for other_agent_id, other_position in self.agent_pos.items():
+                if agent_id != other_agent_id:
+                    distance = self.euclidean_distance(position, other_position)
+                    min_distance = min(min_distance, distance)
+
+            if min_distance > max_distance:
+                max_distance = min_distance
+                furthest_agent = agent_id
+
+        return furthest_agent
+    
 
     # for flocking strategy 
     def assign_leaders(self):
         # can be updated each time to be slightly before where agent is
         assignments = {}
+        furthest_agent = self.find_furthest_agent()
         # print(f'agent pos so far: {self.agent_pos}')
         
         for ind, item in enumerate(self.agent_pos): 
-            if ind == 0: 
+            if ind == furthest_agent: 
                 leader = item # self.agent_pos[ind] # just random 
                 assignments[item] = "leader" # agent id -> assignment
             
-            else: 
-                # print(f'set info leader: {leader} in {self.agent_pos}')
+        for ind, item in enumerate(self.agent_pos): 
+            if ind != furthest_agent: 
                 curr_agent_pose = self.agent_pos[item]
                 leader_goal = self.agent_pos[leader]
                 assignments[item] = self.get_updated_goal(curr_agent_pose, leader_goal, 0.2)
