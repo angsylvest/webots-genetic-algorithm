@@ -115,17 +115,17 @@ class LocalMap():
         furthest_agent = self.find_furthest_agent()
         # print(f'agent pos so far: {self.agent_pos}')
         
-        for ind, item in enumerate(self.agent_pos): 
+        for ind, item in self.agent_pos.items(): # key, val
             if ind == furthest_agent: 
-                leader = item # self.agent_pos[ind] # just random 
-                assignments[item] = "leader" # agent id -> assignment
+                leader = ind # self.agent_pos[ind] # just random 
+                assignments[ind] = "leader" # agent id -> assignment
             
-        for ind, item in enumerate(self.agent_pos): 
+        for ind, item in self.agent_pos.items(): 
             if ind != furthest_agent: 
-                curr_agent_pose = self.agent_pos[item]
+                curr_agent_pose = self.agent_pos[ind]
                 leader_goal = self.agent_pos[leader]
-                assignments[item] = self.get_updated_goal(curr_agent_pose, leader_goal, 0.2)
-                leader = item # ind # self.agent_pos[ind] # just random 
+                assignments[ind] = self.get_updated_goal(curr_agent_pose, leader_goal, 0.2)
+                # leader = item # ind # self.agent_pos[ind] # just random 
 
 
         return assignments
