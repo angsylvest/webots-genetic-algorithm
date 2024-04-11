@@ -110,9 +110,12 @@ class LocalMap():
     def edge_agent(self):
         furthest_agent = None
         max_distance = float('-inf')
+        center = self.calculate_center(self.agent_pos)
 
         for agent_id, position in self.agent_pos.items():
-            distance_to_center = self.euclidean_distance(position, self.central_loc)
+
+            print(f'calc distance to center for pos {position} and central loc {center}')
+            distance_to_center = self.euclidean_distance(position, center)
             if distance_to_center > max_distance:
                 max_distance = distance_to_center
                 furthest_agent = agent_id
@@ -136,7 +139,7 @@ class LocalMap():
             if ind != furthest_agent: 
                 curr_agent_pose = self.agent_pos[ind]
                 leader_goal = self.agent_pos[leader]
-                assignments[ind] = self.get_updated_goal(curr_agent_pose, leader_goal, 0.2)
+                assignments[ind] = self.get_updated_goal(curr_agent_pose, leader_goal, 0.05)
                 # leader = item # ind # self.agent_pos[ind] # just random 
 
 
@@ -163,9 +166,11 @@ class LocalMap():
         # print(f'updating goal for : {current_pos} and {goal_pos}')
         direction = (goal_pos[0] - current_pos[0], goal_pos[1] - current_pos[1])
         distance_to_goal = math.sqrt(direction[0]**2 + direction[1]**2)
-        if distance_to_goal > 0:
+        if distance_to_goal > distance:
             direction = (direction[0] / distance_to_goal, direction[1] / distance_to_goal)
-        new_pos = (round(current_pos[0] - direction[0] * distance,2), round(current_pos[1] - direction[1] * distance,2))
+            new_pos = (round(current_pos[0] - direction[0] * distance,2), round(current_pos[1] - direction[1] * distance,2))
+        else: 
+            new_pos = goal_pos
         return new_pos
 
 

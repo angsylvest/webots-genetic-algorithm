@@ -78,7 +78,7 @@ child = ""
 coordination_type = ""
 curr_robot_index = "" # should hopefully be overwritten if done correctly 
 
-num_coordination_strat = 3 
+num_coordination_strat = 2 
 num_env_types = 1 # only used for high density areas?  
 dist_covered = [0 for i in range(num_coordination_strat)]
 using_coordination = globals.use_coordination
@@ -245,20 +245,26 @@ def message_listener(time_step):
 
             if using_coordination and complete: 
                 # want to be able to determine if should do coordination
+                reached = False 
                 if globals.use_list_rep: 
                     for ind, rob in enumerate(population): 
                         agent_list[ind] = [round(rob.getPosition()[0],2), round(rob.getPosition()[1],2)]
+                        print(f'cur indx {ind} compared to given robot index {curr_robot_index}')
                         if curr_robot_index == ind: 
+                            reached = True 
                             curr_pose = agent_list[ind] # round(((population[curr_robot_index].getPosition()[0])),2), round((population[curr_robot_index].getPosition()[1]),2)
+                    if not reached:
+                        print(f'unable to find inx for agent {curr_robot_index} in population {population}')
                 else: 
 
                     for ind, rob in enumerate(population): 
                         agent_list[ind] = (round(rob.getPosition()[0],2), round(rob.getPosition()[1],2))
+                        print(f'cur indx {ind} compared to given robot index {curr_robot_index}')
                         if curr_robot_index == ind: 
                             curr_pose = agent_list[ind] # round((float(population[curr_robot_index].getPosition()[0])),2), round(float(population[curr_robot_index].getPosition()[1]),2)
-                # print(f'current agent_list {agent_list} vs {curr_pose}')
+                print(f'current agent_list {agent_list} vs {curr_pose}')
                 shared_map_complete.update_agent_positions(agent_list)
-                # curr_pose = round((float(population[curr_robot_index].getPosition()[0])),2), round(float(population[curr_robot_index].getPosition()[1]),2)
+                curr_pose = round((float(population[curr_robot_index].getPosition()[0])),2), round(float(population[curr_robot_index].getPosition()[1]),2)
 
                 map_subset_obs, map_subset_ag = shared_map_complete.subset(dim_size=0.5, central_loc=curr_pose, convert = True)
 
