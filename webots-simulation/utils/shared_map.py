@@ -79,9 +79,9 @@ class LocalMap():
     def process_output(self, curr_strat_index):
         if curr_strat_index == 0:
             return self.assign_leaders()
+        # elif curr_strat_index == 1: 
+        #     return self.queue_times()
         elif curr_strat_index == 1: 
-            return self.queue_times()
-        elif curr_strat_index == 2: 
             return self.generate_dispersion_vectors()
         else: 
             print('whoops does not exist')
@@ -107,12 +107,24 @@ class LocalMap():
 
         return furthest_agent
     
+    def edge_agent(self):
+        furthest_agent = None
+        max_distance = float('-inf')
 
+        for agent_id, position in self.agent_pos.items():
+            distance_to_center = self.euclidean_distance(position, self.central_loc)
+            if distance_to_center > max_distance:
+                max_distance = distance_to_center
+                furthest_agent = agent_id
+
+        return furthest_agent
+    
     # for flocking strategy 
     def assign_leaders(self):
         # can be updated each time to be slightly before where agent is
         assignments = {}
-        furthest_agent = self.find_furthest_agent()
+        # furthest_agent = self.find_furthest_agent()
+        furthest_agent = self.edge_agent()
         # print(f'agent pos so far: {self.agent_pos}')
         
         for ind, item in self.agent_pos.items(): # key, val

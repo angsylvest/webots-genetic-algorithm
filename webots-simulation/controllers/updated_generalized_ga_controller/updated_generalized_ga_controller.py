@@ -102,7 +102,7 @@ assigned_leader = "!"
 
 if decentralized:
     # create tree for each type of coord 
-    trees = [mcdt.DecisionTree(num_actions=n) for n in [2, 2, 3]]
+    trees = [mcdt.DecisionTree(num_actions=n) for n in [2, 3]]
     decent_index = 0
     decent_behaviors = []
     curr_others = {}
@@ -298,14 +298,14 @@ def process_decentralized(type, node=None, action=None, neighb=None, center=None
             curr_action = neighbors[assigned_leader]
  
 
-    elif type == 1: # queue 
-        # wait will be sampled 
-        for i in range(length_of_action):
-            decent_behaviors.append((cd_x, cd_y))
-            # decent_behaviors[i] = (cd_x, cd_y) #  only able to stay in current pos 
-            curr_action = '!'
+    # elif type == 1: # queue 
+    #     # wait will be sampled 
+    #     for i in range(length_of_action):
+    #         decent_behaviors.append((cd_x, cd_y))
+    #         # decent_behaviors[i] = (cd_x, cd_y) #  only able to stay in current pos 
+    #         curr_action = '!'
 
-    elif type == 2: # disperse 
+    elif type == 1: # disperse 
         # distance/time based on sampled action 
         # use filtered_random function once get pos from center
         centerx, centery = center
@@ -984,16 +984,16 @@ def interpret(timestep):
                             curr_node = node
                             process_decentralized(type_of_action, node, action, neighbors, center)
 
-                        elif type_of_action == 1:  # queue 
-                            if using_best: 
-                                action, node = mcdt.iterate_strategically(trees[0])  
-                            else: 
-                                action, node = mcdt.iterate(trees[0])
+                        # elif type_of_action == 1:  # queue 
+                        #     if using_best: 
+                        #         action, node = mcdt.iterate_strategically(trees[0])  
+                        #     else: 
+                        #         action, node = mcdt.iterate(trees[0])
 
-                            curr_node = node
-                            process_decentralized(type_of_action, node, action, neighbors, center)
+                        #     curr_node = node
+                        #     process_decentralized(type_of_action, node, action, neighbors, center)
 
-                        elif type_of_action == 2: # disperse 
+                        elif type_of_action == 1: # disperse 
                             if using_best: 
                                 action, node = mcdt.iterate_strategically(trees[0])  
                             else: 
@@ -1297,6 +1297,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                     curr_index = 0
                     
                 chosen_direction = strategy[curr_index]
+                curr_action = []
                 # curr_index += 1
             
         elif (i - prev_i >= time_switch and object_encountered != True and orientation_found == True and not reversing):
