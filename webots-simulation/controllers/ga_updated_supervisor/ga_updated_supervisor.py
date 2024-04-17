@@ -541,6 +541,7 @@ def mediate_differences(msgs):
                         # print('here')
                         proposals.append(p)
                         strats.append(strat)
+
                         break  # Stop iterating if we found the strategy for this position
         # print(f'strats at the moment: {strats}')
         # Find the most frequently chosen strategy in the cluster
@@ -550,6 +551,12 @@ def mediate_differences(msgs):
         localMap = shared_map.LocalMap(obstacle_pos=[], obstacle_size=0.2, agent_pos=agent_pos, agent_size= 0.5, local_dim=1.0, x_bounds=(-1,1), y_bounds=(-1,1), central_loc=()) # just used to generate strat
         strat_plan = localMap.process_output(most_common_strat)
         center = localMap.calculate_center(localMap.agent_pos)
+
+        if most_common_strat == 0: 
+            # id leader 
+            assigned_leader = next(key for key, value in strat_plan.items() if value == 'leader')
+            # predictable movement: given curr_pos, will move directly away from center
+
         clustered_data[i] = [{'most_common_strat': most_common_strat, 'strat_to_use': strat_plan, 'neighbors': agent_pos, 'center': localMap.calculate_center(agent_pos)}]
 
         # print(f'generated strategy for cluster: {strat_plan}')

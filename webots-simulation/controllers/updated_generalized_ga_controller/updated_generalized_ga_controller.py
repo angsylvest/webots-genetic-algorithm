@@ -20,6 +20,7 @@ import utils
 import utils.bayes as bayes 
 import utils.globals as globals
 import utils.mcdt as mcdt
+import utils.vector_fields as vec
 import ast 
 
 # create the Robot instance.
@@ -194,6 +195,7 @@ remove_orientations = []
 time_in_action = robot.getTime()
 is_leader = False 
 time_as_leader = robot.getTime()
+using_vec = globals.using_vector
 
 
 
@@ -239,6 +241,67 @@ def reward(curr_strat):
     goal_reward = strat_obs[curr_strat]["collected"] * 1.5
 
     return obs_penalty + goal_reward
+
+def process_vect(cmd, act_type, center):
+    global given_id
+
+    global decent_index
+    global decent_behaviors
+    global type_of_action
+    global curr_action
+    global forward_speed
+
+    global curr_others
+    global assigned_leader
+    global given_id
+
+    global cd_x
+    global cd_y
+
+    # for flocking, need to be designated leader
+    if act_type == 0:
+        if is_leader: 
+            centerx, centery = center
+            currx, curry = cd_x, cd_y
+
+            ratio = 0.12
+            base = 0.180
+            norm = forward_speed - 5
+            forward_per_sec = ratio * norm + base 
+            magnitude = 1.0
+
+            # Calculate the direction vector from the center to the particle
+            direction_vector = [currx- centerx, curry - centery]
+            
+            # Calculate the magnitude of the direction vector
+            direction_magnitude = math.sqrt(direction_vector[0]**2 + direction_vector[1]**2)
+            
+            # Scale the direction vector to the desired magnitude
+            scaled_vector = [magnitude * direction_vector[0] / (direction_magnitude + 1e-6), magnitude * direction_vector[1] / (direction_magnitude + 1e-6)]
+
+            angle_rad = math.atan2(scaled_vector[1], scaled_vector[0])
+    
+            # Ensure the angle is within [0, 2*pi) range
+            if angle_rad < 0:
+                angle_rad += 2 * math.pi
+
+            dx = forward_per_sec*(time_allocated) * math.cos(angle_rad)
+            dy = forward_per_sec*(time_allocated) * math.sin(angle_rad)
+
+            goal_position = (cd_x + dx, cd_x + dy)
+            curr_action = goal_position # '!'
+            decent_index = -1
+
+        else: 
+            # use goal pos assigned based on output from vector field
+            curr_action = cmd[given_id]
+
+    elif act_type == 1: # disperse
+        goal_position = cmd[given_id]
+        decent_behaviors.append(goal_position)
+
+        curr_action = '!'
+
 
 
 def process_decentralized(type, node=None, action=None, neighb=None, center=None):
@@ -942,6 +1005,7 @@ def interpret(timestep):
                     neighbors = cluster_dict['neighbors']
                     center = cluster_dict['center']
                     assignments = cluster_dict['strat_to_use']
+                    vect_dict = cluster_dict['vec_dict']
 
                     if not globals.decentralized:
 
@@ -977,12 +1041,15 @@ def interpret(timestep):
 
                             assigned_leader = next(key for key, value in assignments.items() if value == 'leader')
                             # print(f'assigned leader: {assigned_leader}')
-                            if using_best: 
-                                action, node = mcdt.iterate_strategically(trees[0]) 
+                            if using_vec: 
+                                # update vector + goal here 
+                                vector_field = vector_field.VectorField(positions = neighbors, leader_key = assigned_leader, leader_info = vect_dict )
+                                attr, cmd = vector_field.calculate_attraction()
+                                process_vect(cmd, type_of_action, center)
                             else: 
                                 action, node = mcdt.iterate(trees[0])
-                            curr_node = node
-                            process_decentralized(type_of_action, node, action, neighbors, center)
+                                curr_node = node
+                                process_decentralized(type_of_action, node, action, neighbors, center)
 
                         # elif type_of_action == 1:  # queue 
                         #     if using_best: 
@@ -994,15 +1061,15 @@ def interpret(timestep):
                         #     process_decentralized(type_of_action, node, action, neighbors, center)
 
                         elif type_of_action == 1: # disperse 
-                            if using_best: 
-                                action, node = mcdt.iterate_strategically(trees[0])  
+                            if using_vec: 
+                                # update vector + goal here 
+                                vector_field = vector_field.VectorField(positions = neighbors, leader_key = assigned_leader, leader_info = vect_dict )
+                                attr, cmd = vector_field.generate_dispersal(center=center)
+                                process_vect(cmd, type_of_action, center)
                             else: 
                                 action, node = mcdt.iterate(trees[0])
-
-                            curr_node = node
-                            process_decentralized(type_of_action, node, action, neighbors, center)
-
-  
+                                curr_node = node
+                                process_decentralized(type_of_action, node, action, neighbors, center)
             else: 
                 print('ignoring, other action still in progress')
             
@@ -1242,7 +1309,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                             # TODO: update next goal 
                             if type_of_action == 0 and not is_leader: # if flocking, send msg
                                 goalx, goaly = curr_action
-                                if math.dist([cd_x, cd_y], [goalx, goaly]) < 0.05: 
+                                if math.dist([cd_x, cd_y], [goalx, goaly]) < 0.05 and not using_vec: 
                                     # TODO: if already complete, ask for another, otherwise just continue moving towards original goal 
                                     msg = 'pos_update'
                                     emitter_individual.send(msg.encode('utf-8'))

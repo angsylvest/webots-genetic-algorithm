@@ -6,7 +6,7 @@ import random
 # will be done an individual supervisor level (need to specify view range in ind supervisor)
 class VectorField():
     
-    def __init__(self, positions, leader_key, leader_info, collision_radius = 5.0):
+    def __init__(self, positions, leader_key = 0, leader_info = "", collision_radius = 5.0):
         self.positions_dict = positions # is dict ["agent-id": (posx, posy)]
         self.leader_key = leader_key # leader 
         self.posx, self.posy, self.velx, self.vely = leader_info

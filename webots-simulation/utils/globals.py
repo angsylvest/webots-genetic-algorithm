@@ -11,3 +11,4 @@ use_list_rep = True
 use_coordination = True
 using_ucb = False
 decentralized = True
+using_vector = True
