@@ -249,7 +249,7 @@ def message_listener(time_step):
                 if globals.use_list_rep: 
                     for ind, rob in enumerate(population): 
                         agent_list[ind] = [round(rob.getPosition()[0],2), round(rob.getPosition()[1],2)]
-                        print(f'cur indx {ind} compared to given robot index {curr_robot_index}')
+                        # print(f'cur indx {ind} compared to given robot index {curr_robot_index}')
                         if curr_robot_index == ind: 
                             reached = True 
                             curr_pose = agent_list[ind] # round(((population[curr_robot_index].getPosition()[0])),2), round((population[curr_robot_index].getPosition()[1]),2)

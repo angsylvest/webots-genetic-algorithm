@@ -242,7 +242,7 @@ def reward(curr_strat):
 
     return obs_penalty + goal_reward
 
-def process_vect(cmd, act_type, center):
+def process_vect(cmd, act_type, center, leader_info=""):
     global given_id
 
     global decent_index
@@ -250,6 +250,7 @@ def process_vect(cmd, act_type, center):
     global type_of_action
     global curr_action
     global forward_speed
+    global is_leader
 
     global curr_others
     global assigned_leader
@@ -257,6 +258,9 @@ def process_vect(cmd, act_type, center):
 
     global cd_x
     global cd_y
+
+    print(f'processing cmd: {cmd} for agent {given_id}' )
+    id = int(given_id)
 
     # for flocking, need to be designated leader
     if act_type == 0:
@@ -294,10 +298,10 @@ def process_vect(cmd, act_type, center):
 
         else: 
             # use goal pos assigned based on output from vector field
-            curr_action = cmd[given_id]
+            curr_action = cmd[id]
 
     elif act_type == 1: # disperse
-        goal_position = cmd[given_id]
+        goal_position = cmd[id]
         decent_behaviors.append(goal_position)
 
         curr_action = '!'
@@ -1005,7 +1009,7 @@ def interpret(timestep):
                     neighbors = cluster_dict['neighbors']
                     center = cluster_dict['center']
                     assignments = cluster_dict['strat_to_use']
-                    vect_dict = cluster_dict['vec_dict']
+                    vect = () # TODO: populate with curr_pose and expected dir
 
                     if not globals.decentralized:
 
@@ -1040,12 +1044,41 @@ def interpret(timestep):
                                     is_leader = True
 
                             assigned_leader = next(key for key, value in assignments.items() if value == 'leader')
+                            leader_posx, leader_posy = neighbors[assigned_leader]
+                            centerx, centery = center
                             # print(f'assigned leader: {assigned_leader}')
                             if using_vec: 
+                                ratio = 0.12
+                                base = 0.180
+                                norm = forward_speed - 5
+                                forward_per_sec = ratio * norm + base 
+                                magnitude = 1.0
+
+                                # Calculate the direction vector from the center to the particle
+                                direction_vector = [leader_posx- centerx, leader_posy - centery]
+                                
+                                # Calculate the magnitude of the direction vector
+                                direction_magnitude = math.sqrt(direction_vector[0]**2 + direction_vector[1]**2)
+                                
+                                # Scale the direction vector to the desired magnitude
+                                scaled_vector = [magnitude * direction_vector[0] / (direction_magnitude + 1e-6), magnitude * direction_vector[1] / (direction_magnitude + 1e-6)]
+
+                                angle_rad = math.atan2(scaled_vector[1], scaled_vector[0])
+                        
+                                # Ensure the angle is within [0, 2*pi) range
+                                if angle_rad < 0:
+                                    angle_rad += 2 * math.pi
+
+                                dx = forward_per_sec*(time_allocated) * math.cos(angle_rad)
+                                dy = forward_per_sec*(time_allocated) * math.sin(angle_rad)
+
+                                leader_info = leader_posx, leader_posy, dx, dy
+
                                 # update vector + goal here 
-                                vector_field = vector_field.VectorField(positions = neighbors, leader_key = assigned_leader, leader_info = vect_dict )
+                                # print(f'inputs to vec: {neighbors} with leader {assigned_leader} with leader info {leader_info}')
+                                vector_field = vec.VectorField(positions = neighbors, leader_key = assigned_leader, leader_info = leader_info )
                                 attr, cmd = vector_field.calculate_attraction()
-                                process_vect(cmd, type_of_action, center)
+                                process_vect(cmd, type_of_action, center, leader_info)
                             else: 
                                 action, node = mcdt.iterate(trees[0])
                                 curr_node = node
@@ -1063,7 +1096,8 @@ def interpret(timestep):
                         elif type_of_action == 1: # disperse 
                             if using_vec: 
                                 # update vector + goal here 
-                                vector_field = vector_field.VectorField(positions = neighbors, leader_key = assigned_leader, leader_info = vect_dict )
+                                print(f'inputs to vec: {neighbors} with leader with leader info ')
+                                vector_field = vec.VectorField(positions = neighbors, leader_key = "", leader_info = "")
                                 attr, cmd = vector_field.generate_dispersal(center=center)
                                 process_vect(cmd, type_of_action, center)
                             else: 
@@ -1275,6 +1309,7 @@ while robot.step(timestep) != -1 and sim_complete != True:
                         msg = f'reward:{type_of_action}:{path_length_reward(path_length)}'
                         emitter_individual.send(msg.encode('utf-8'))
                         print(f'finished coord task')
+
             if is_leader and not decentralized: 
                 if robot.getTime() - time_as_leader > time_allocated: # if unable to complete, not encouraged
                     done = True # don't add any reward since not accomplished 
@@ -1298,7 +1333,9 @@ while robot.step(timestep) != -1 and sim_complete != True:
                         re = path_length_reward(path_info['path_length'])
                     else: 
                         re = path_length_reward(path_info['path_length']) * (1/path_info['num_collisions'])
-                    trees[decent_index].update_tree(curr_node, re) # TODO: make node defined
+                    
+                    if not using_vec:
+                        trees[decent_index].update_tree(curr_node, re) # TODO: make node defined
 
                 else: 
                     if (time_allocated - robot.getTime()) % 1 == 0: 

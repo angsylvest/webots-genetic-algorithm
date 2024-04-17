@@ -114,7 +114,7 @@ class LocalMap():
 
         for agent_id, position in self.agent_pos.items():
 
-            print(f'calc distance to center for pos {position} and central loc {center}')
+            # print(f'calc distance to center for pos {position} and central loc {center}')
             distance_to_center = self.euclidean_distance(position, center)
             if distance_to_center > max_distance:
                 max_distance = distance_to_center

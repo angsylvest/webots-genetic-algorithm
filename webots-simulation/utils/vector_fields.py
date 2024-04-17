@@ -6,10 +6,12 @@ import random
 # will be done an individual supervisor level (need to specify view range in ind supervisor)
 class VectorField():
     
-    def __init__(self, positions, leader_key = 0, leader_info = "", collision_radius = 5.0):
+    def __init__(self, positions, leader_key = 0, leader_info = "", collision_radius = 10.0):
         self.positions_dict = positions # is dict ["agent-id": (posx, posy)]
         self.leader_key = leader_key # leader 
-        self.posx, self.posy, self.velx, self.vely = leader_info
+
+        if leader_info != "": 
+            self.posx, self.posy, self.velx, self.vely = leader_info
         self.positions = list(self.positions_dict.values())
         self.reversed_positions = {value: key for key, value in self.positions_dict.items()}
         self.collision_radius = collision_radius
@@ -49,59 +51,47 @@ class VectorField():
         return orientations
 
     def calculate_attraction(self):
-        # uses positions dict, designated spot, spot_vel, k1, k2, collision raidus 
-
         n_particles = len(self.positions)
         attractions = [[0.0, 0.0] for _ in range(n_particles)]
         positions = self.positions
-        goal_positions = [[0.0, 0.0] for _ in range(n_particles)]
+        goal_command = {}
 
-        # positions dict -> positions list for calculations 
-        designated_spot = [self.posx, self.posy, self.velx, self.vely]
+        designated_spot = [self.posx, self.posy]
         relative_positions = self.calculate_relative_position(positions)
         orientations = self.calculate_orientation(positions)
         spot_velocity = [self.velx, self.vely]
-    
-        goal_command = {}
 
         for i in range(n_particles):
             key_val = self.reversed_positions[positions[i]]
             distance_to_spot = math.sqrt((positions[i][0] - designated_spot[0])**2 + (positions[i][1] - designated_spot[1])**2)
             direction_to_spot = [designated_spot[0] - positions[i][0], designated_spot[1] - positions[i][1]]
-            spot_direction = spot_velocity  # Spot's vector direction
-            
-            # Calculate the angle between the particle's orientation and spot's vector direction
+            spot_direction = spot_velocity
+
             angle_cosine = (orientations[i][0] * spot_direction[0] + orientations[i][1] * spot_direction[1]) / ((math.sqrt(orientations[i][0]**2 + orientations[i][1]**2) * math.sqrt(spot_direction[0]**2 + spot_direction[1]**2)) + 1e-6)
             angle = math.acos(min(max(angle_cosine, -1.0), 1.0))
-            
-            # Check if particle is moving in the same general direction as the spot's vector
-            moving_same_direction = angle < math.radians(45)  # Within 45-degree range
-            
+
+            moving_same_direction = angle < math.radians(45)
+
             if not moving_same_direction:
-                # Repel the particle if not moving in the same general direction
                 repel_vector = [relative_positions[i][i][0] * self.k2, relative_positions[i][i][1] * self.k2]
                 attractions[i] = repel_vector
-                continue
             else:
-                # Calculate attraction vector towards the spot position
                 attraction_magnitude = self.k1 / (distance_to_spot + 1e-6)
                 attraction_vector = [attraction_magnitude * direction_to_spot[0] / (distance_to_spot + 1e-6), attraction_magnitude * direction_to_spot[1] / (distance_to_spot + 1e-6)]
-                # Update attractions[i] with attraction_vector
                 attractions[i] = attraction_vector
-                
-            # Avoid collisions with other particles
-            for j in range(n_particles):
-                if i != j:
-                    distance_to_other = math.sqrt((positions[i][0] - positions[j][0])**2 + (positions[i][1] - positions[j][1])**2)
-                    if distance_to_other < self.collision_radius:
-                        avoidance_vector = [relative_positions[i][j][0] * self.collision_radius, relative_positions[i][j][1] * self.collision_radius]
-                        attraction_vector[0] += self.k2 * avoidance_vector[0]
-                        attraction_vector[1] += self.k2 * avoidance_vector[1]
-            
-            attractions[i] = attraction_vector
-            goal_command[key_val] = [positions[i][0] + attraction_vector[0], positions[i][1] + attraction_vector[1]]
-    
+
+                for j in range(n_particles):
+                    if i != j:
+                        distance_to_other = math.sqrt((positions[i][0] - positions[j][0])**2 + (positions[i][1] - positions[j][1])**2)
+                        if distance_to_other < self.collision_radius:
+                            avoidance_vector = [relative_positions[i][j][0] * self.collision_radius, relative_positions[i][j][1] * self.collision_radius]
+                            attractions[i][0] += self.k2 * avoidance_vector[0]
+                            attractions[i][1] += self.k2 * avoidance_vector[1]
+
+            goal_command[key_val] = [positions[i][0] + attractions[i][0], positions[i][1] + attractions[i][1]]
+
         return attractions, goal_command
+
 
 
     def generate_dispersal(self, center=(0, 0), min_distance=0.1):
@@ -141,9 +131,9 @@ class VectorField():
 
 
 # # ex positions: 
-# positions = {"1": (1.0, 2.0), "2": (2,2)}
-# leader_key = "3"
-# leader_info = (4.0, 4.0, 0.5, 0.5) # posx, posy, velx, vely
+# positions = {0: (-0.04, -0.03), 1: (-0.07, -0.09), 2: (0.01, 0.04), 3: (-0.07, 0.1), 4: (-0.13, -0.01)}
+# leader_key = 3
+# leader_info = (-0.07, 0.1, -0.18272463842410983, 1.7907014565562787) # posx, posy, velx, vely
 # # Add leader's position to the positions dictionary
 # positions[leader_key] = (leader_info[0], leader_info[1])
 # ex_vector = VectorField(positions, leader_key, leader_info)
@@ -173,7 +163,7 @@ class VectorField():
 # positions[leader_key] = (leader_info[0], leader_info[1])
 
 # # Create VectorField instance
-# ex_vector = VectorField(positions, leader_key, leader_info)
+# ex_vector = VectorField(positions, "", "")
 
 # # Generate dispersal vectors
 # dispersal_vectors, cmd = ex_vector.generate_dispersal(center=(1.5, 2.0))
