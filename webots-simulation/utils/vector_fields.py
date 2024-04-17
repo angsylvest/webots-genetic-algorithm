@@ -1,6 +1,6 @@
 import math
 import random
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt # commented out so works on hpc
 
 # can be done independently, assuming others will behave similarly 
 # will be done an individual supervisor level (need to specify view range in ind supervisor)
@@ -54,6 +54,7 @@ class VectorField():
         n_particles = len(self.positions)
         attractions = [[0.0, 0.0] for _ in range(n_particles)]
         positions = self.positions
+        goal_positions = [[0.0, 0.0] for _ in range(n_particles)]
 
         # positions dict -> positions list for calculations 
         designated_spot = [self.posx, self.posy, self.velx, self.vely]
@@ -61,7 +62,8 @@ class VectorField():
         orientations = self.calculate_orientation(positions)
         spot_velocity = [self.velx, self.vely]
     
-        attract_command = {}
+        goal_command = {}
+
         for i in range(n_particles):
             key_val = self.reversed_positions[positions[i]]
             distance_to_spot = math.sqrt((positions[i][0] - designated_spot[0])**2 + (positions[i][1] - designated_spot[1])**2)
@@ -97,12 +99,12 @@ class VectorField():
                         attraction_vector[1] += self.k2 * avoidance_vector[1]
             
             attractions[i] = attraction_vector
-            attract_command[key_val] = attraction_vector
+            goal_command[key_val] = [positions[i][0] + attraction_vector[0], positions[i][1] + attraction_vector[1]]
     
-        return attractions, attract_command
+        return attractions, goal_command
 
 
-    def generate_dispersal(self, center=(0, 0), designated_point=(0, 0), min_distance=0.1):
+    def generate_dispersal(self, center=(0, 0), min_distance=0.1):
         dispersal_vectors = [[0.0, 0.0] for _ in range(len(self.positions))]
         positions = self.positions
         dispers_command = {}
@@ -132,9 +134,11 @@ class VectorField():
                         preliminary_dispersal_vector[1] += avoidance_vector[1]
 
             dispersal_vectors[i] = preliminary_dispersal_vector
-            dispers_command[key_val] = dispersal_vectors[i] 
+            dispers_command[key_val] = [positions[i][0] + preliminary_dispersal_vector[0], positions[i][1] + preliminary_dispersal_vector[1]]
 
         return dispersal_vectors, dispers_command
+    
+
 
 # # ex positions: 
 # positions = {"1": (1.0, 2.0), "2": (2,2)}
@@ -160,7 +164,7 @@ class VectorField():
 # plt.show()
 
 
-# Example positions and parameters
+# # Example positions and parameters
 # positions = {"1": (1.0, 2.0), "2": (2, 2)}
 # leader_key = "3"
 # leader_info = (4.0, 4.0, 0.5, 0.5)  # posx, posy, velx, vely
