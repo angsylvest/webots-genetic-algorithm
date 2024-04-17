@@ -102,7 +102,7 @@ class VectorField():
         return attractions, attract_command
 
 
-    def generate_dispersal(self, center=(0, 0), designated_point=(0, 0)):
+    def generate_dispersal(self, center=(0, 0), designated_point=(0, 0), min_distance=0.1):
         dispersal_vectors = [[0.0, 0.0] for _ in range(len(self.positions))]
         positions = self.positions
         dispers_command = {}
@@ -119,10 +119,19 @@ class VectorField():
             direction_magnitude = math.sqrt(direction_vector[0]**2 + direction_vector[1]**2)
             direction_vector = [direction_vector[0] / (direction_magnitude + 1e-6), direction_vector[1] / (direction_magnitude + 1e-6)]
 
-            # Apply the magnitude to the direction to get the final dispersal vector
-            repulsion_vector = [magnitude * direction_vector[0], magnitude * direction_vector[1]]
+            # Apply the magnitude to the direction to get the preliminary dispersal vector
+            preliminary_dispersal_vector = [magnitude * direction_vector[0], magnitude * direction_vector[1]]
 
-            dispersal_vectors[i] = repulsion_vector
+            # Check for collisions with other particles and adjust the dispersal vector accordingly
+            for j in range(len(positions)):
+                if i != j:
+                    distance_to_other = math.sqrt((positions[i][0] - positions[j][0])**2 + (positions[i][1] - positions[j][1])**2)
+                    if distance_to_other < min_distance:
+                        avoidance_vector = [(positions[i][0] - positions[j][0]) * self.k2, (positions[i][1] - positions[j][1]) * self.k2]
+                        preliminary_dispersal_vector[0] += avoidance_vector[0]
+                        preliminary_dispersal_vector[1] += avoidance_vector[1]
+
+            dispersal_vectors[i] = preliminary_dispersal_vector
             dispers_command[key_val] = dispersal_vectors[i] 
 
         return dispersal_vectors, dispers_command
@@ -151,7 +160,7 @@ class VectorField():
 # plt.show()
 
 
-# # Example positions and parameters
+# Example positions and parameters
 # positions = {"1": (1.0, 2.0), "2": (2, 2)}
 # leader_key = "3"
 # leader_info = (4.0, 4.0, 0.5, 0.5)  # posx, posy, velx, vely
